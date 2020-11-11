@@ -1,0 +1,472 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{11f233dc-9673-4378-8779-fc7ef09251c4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="APIWrappers">
+      <UniqueIdentifier>{5d8c5bd7-f72f-4518-b887-04a7a9682b14}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="APIWrappers\CommandList">
+      <UniqueIdentifier>{52f3628f-f7f3-4c61-8f34-61bd382ba607}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="APIWrappers\CommandQueue">
+      <UniqueIdentifier>{0f7428dc-140c-43f8-b61d-4710260dcfd8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="APIWrappers\CommandAllocator">
+      <UniqueIdentifier>{8a612f0a-6efe-4351-a07f-3346ced71787}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="APIWrappers\PipelineState">
+      <UniqueIdentifier>{69fe8bd9-751a-4f8b-b137-1aa4b3a2e7f2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ThreadContext">
+      <UniqueIdentifier>{a10d3add-1804-400a-b069-e33310bf1954}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="WindowManagement">
+      <UniqueIdentifier>{4ea99bc8-f384-4962-995e-b15672435e59}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="APIWrappers\Resources">
+      <UniqueIdentifier>{5ccedbfb-0591-4158-85ff-61eb6cb455a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="APIWrappers\Resources\Textures">
+      <UniqueIdentifier>{dfb1bce7-b2f3-450a-865f-caebf458bab7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="APIWrappers\Resources\Textures\Views">
+      <UniqueIdentifier>{0eb995f7-91a4-42da-8e4e-679cbd1f8008}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="APIWrappers\Resources\Buffers">
+      <UniqueIdentifier>{e2583100-a153-471f-8896-648cc2b8320b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="APIWrappers\Resources\Buffers\Views">
+      <UniqueIdentifier>{3c1f002c-6055-44d5-9684-5b06304b2640}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="RenderSchedule">
+      <UniqueIdentifier>{33859963-dbd5-4365-b113-310c32ffb517}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="RenderPasses">
+      <UniqueIdentifier>{defcdc11-4155-427b-8a7d-3374738ee582}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Contexts">
+      <UniqueIdentifier>{3d46b776-bbb3-439c-a455-0da48be526d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\DebugPass">
+      <UniqueIdentifier>{7051b716-cd60-440c-8194-c8efa0f4a6a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Debug3DPass">
+      <UniqueIdentifier>{341f5c74-d14b-4416-a6a2-81c2e433e1d2}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="WindowManagement\WindowManager.h">
+      <Filter>WindowManagement</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\Factory.h">
+      <Filter>APIWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\Device.h">
+      <Filter>APIWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowManagement\WindowState.h">
+      <Filter>WindowManagement</Filter>
+    </ClInclude>
+    <ClInclude Include="FeatureSupportHelper.h">
+      <Filter>APIWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\StateManager.h">
+      <Filter>APIWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\DescriptorHeap.h">
+      <Filter>APIWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\CommandList\CommandList.h">
+      <Filter>APIWrappers\CommandList</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\CommandList\CopyCommandList.h">
+      <Filter>APIWrappers\CommandList</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\CommandList\ComputeCommandList.h">
+      <Filter>APIWrappers\CommandList</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\CommandList\GraphicCommandList.h">
+      <Filter>APIWrappers\CommandList</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\CommandQueue\CommandQueue.h">
+      <Filter>APIWrappers\CommandQueue</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\CommandQueue\ComputeQueue.h">
+      <Filter>APIWrappers\CommandQueue</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\CommandQueue\CopyQueue.h">
+      <Filter>APIWrappers\CommandQueue</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\CommandQueue\GraphicQueue.h">
+      <Filter>APIWrappers\CommandQueue</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\CommandAllocator\CopyCommandAllocator.h">
+      <Filter>APIWrappers\CommandAllocator</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\CommandAllocator\GraphicCommandAllocator.h">
+      <Filter>APIWrappers\CommandAllocator</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\CommandAllocator\CommandAllocator.h">
+      <Filter>APIWrappers\CommandAllocator</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\CommandAllocator\ComputeCommandAllocator.h">
+      <Filter>APIWrappers\CommandAllocator</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadContext\CopyThreadContextImpl.h">
+      <Filter>ThreadContext</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadContext\ComputeThreadContext.h">
+      <Filter>ThreadContext</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadContext\CopyThreadContext.h">
+      <Filter>ThreadContext</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\CommandList\CopyCommandListImpl.h">
+      <Filter>APIWrappers\CommandList</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\CommandList\ComputeCommandListImpl.h">
+      <Filter>APIWrappers\CommandList</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\CommandList\GraphicCommandListImpl.h">
+      <Filter>APIWrappers\CommandList</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\RenderDebug.h">
+      <Filter>APIWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadContext\ThreadContext.h">
+      <Filter>ThreadContext</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadContext\ComputeThreadContextImpl.h">
+      <Filter>ThreadContext</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadContext\GraphicThreadContext.h">
+      <Filter>ThreadContext</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadContext\GraphicThreadContextImpl.h">
+      <Filter>ThreadContext</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\PipelineState\PipelineState.h">
+      <Filter>APIWrappers\PipelineState</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\PipelineState\ComputePipelineState.h">
+      <Filter>APIWrappers\PipelineState</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\PipelineState\GraphicPipelineState.h">
+      <Filter>APIWrappers\PipelineState</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\Swapchain.h">
+      <Filter>APIWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowManagement\DisplayController.h">
+      <Filter>WindowManagement</Filter>
+    </ClInclude>
+    <ClInclude Include="ProjectConfig.h" />
+    <ClInclude Include="ProjectHelpers.h" />
+    <ClInclude Include="RenderBackend.h" />
+    <ClInclude Include="RenderBackendImpl.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="RenderPass.h" />
+    <ClInclude Include="APIWrappers\Fence.h">
+      <Filter>APIWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\InputLayout.h">
+      <Filter>APIWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\RootSignature.h">
+      <Filter>APIWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\Resources\Textures\Texture.h">
+      <Filter>APIWrappers\Resources\Textures</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\Resources\Resource.h">
+      <Filter>APIWrappers\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\Resources\Textures\Texture2D.h">
+      <Filter>APIWrappers\Resources\Textures</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\Resources\Textures\Views\RenderTargetView.h">
+      <Filter>APIWrappers\Resources\Textures\Views</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\Resources\ResourceTransition.h">
+      <Filter>APIWrappers\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\Resources\Buffers\Buffer.h">
+      <Filter>APIWrappers\Resources\Buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\Resources\Buffers\VertexBuffer.h">
+      <Filter>APIWrappers\Resources\Buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\Resources\Buffers\Views\VertexBufferView.h">
+      <Filter>APIWrappers\Resources\Buffers\Views</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderSchedule\RenderSchedule.h">
+      <Filter>RenderSchedule</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderSchedule\ResourceTracker.h">
+      <Filter>RenderSchedule</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderPasses\DebugRenderPass.h">
+      <Filter>RenderPasses</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderPasses\PresentPass.h">
+      <Filter>RenderPasses</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\Resources\Buffers\ConstantBuffer.h">
+      <Filter>APIWrappers\Resources\Buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="Contexts\RenderThreadContext.h">
+      <Filter>Contexts</Filter>
+    </ClInclude>
+    <ClInclude Include="Contexts\RenderFrameContext.h">
+      <Filter>Contexts</Filter>
+    </ClInclude>
+    <ClInclude Include="Contexts\RenderEngineContext.h">
+      <Filter>Contexts</Filter>
+    </ClInclude>
+    <ClInclude Include="Contexts\RenderContext.h">
+      <Filter>Contexts</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\Resources\Buffers\Views\ConstantBufferView.h">
+      <Filter>APIWrappers\Resources\Buffers\Views</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\Resources\Buffers\UploadBuffer.h">
+      <Filter>APIWrappers\Resources\Buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\Resources\Buffers\IndexBuffer.h">
+      <Filter>APIWrappers\Resources\Buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\Resources\Buffers\Views\IndexBufferView.h">
+      <Filter>APIWrappers\Resources\Buffers\Views</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderPasses\Debug3DRenderPass.h">
+      <Filter>RenderPasses</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\Resources\Textures\Views\DepthStencilView.h" />
+    <ClInclude Include="Containers\Scene.h" />
+    <ClInclude Include="Containers\Streaming\SceneData.h" />
+    <ClInclude Include="RenderPasses\GBufferRenderPass.h" />
+    <ClInclude Include="APIWrappers\Resources\Textures\Views\ShaderResourceView.h" />
+    <ClInclude Include="Camera.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="WindowManagement\WindowManager.cpp">
+      <Filter>WindowManagement</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\Factory.cpp">
+      <Filter>APIWrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\Device.cpp">
+      <Filter>APIWrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowManagement\WindowState.cpp">
+      <Filter>WindowManagement</Filter>
+    </ClCompile>
+    <ClCompile Include="FeatureSupportHelper.cpp">
+      <Filter>APIWrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\StateManager.cpp">
+      <Filter>APIWrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\DescriptorHeap.cpp">
+      <Filter>APIWrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\CommandList\CommandList.cpp">
+      <Filter>APIWrappers\CommandList</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\CommandList\CopyCommandList.cpp">
+      <Filter>APIWrappers\CommandList</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\CommandList\ComputeCommandList.cpp">
+      <Filter>APIWrappers\CommandList</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\CommandList\GraphicCommandList.cpp">
+      <Filter>APIWrappers\CommandList</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\CommandQueue\CommandQueue.cpp">
+      <Filter>APIWrappers\CommandQueue</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\CommandQueue\ComputeQueue.cpp">
+      <Filter>APIWrappers\CommandQueue</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\CommandQueue\CopyQueue.cpp">
+      <Filter>APIWrappers\CommandQueue</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\CommandQueue\GraphicQueue.cpp">
+      <Filter>APIWrappers\CommandQueue</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\CommandAllocator\GraphicCommandAllocator.cpp">
+      <Filter>APIWrappers\CommandAllocator</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\CommandAllocator\CommandAllocator.cpp">
+      <Filter>APIWrappers\CommandAllocator</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\CommandAllocator\ComputeCommandAllocator.cpp">
+      <Filter>APIWrappers\CommandAllocator</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\CommandAllocator\CopyCommandAllocator.cpp">
+      <Filter>APIWrappers\CommandAllocator</Filter>
+    </ClCompile>
+    <ClCompile Include="ThreadContext\CopyThreadContextImpl.cpp">
+      <Filter>ThreadContext</Filter>
+    </ClCompile>
+    <ClCompile Include="ThreadContext\ComputeThreadContext.cpp">
+      <Filter>ThreadContext</Filter>
+    </ClCompile>
+    <ClCompile Include="ThreadContext\CopyThreadContext.cpp">
+      <Filter>ThreadContext</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\CommandList\CopyCommandListImpl.cpp">
+      <Filter>APIWrappers\CommandList</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\CommandList\ComputeCommandListImpl.cpp">
+      <Filter>APIWrappers\CommandList</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\CommandList\GraphicCommandListImpl.cpp">
+      <Filter>APIWrappers\CommandList</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\RenderDebug.cpp">
+      <Filter>APIWrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="ThreadContext\ThreadContext.cpp">
+      <Filter>ThreadContext</Filter>
+    </ClCompile>
+    <ClCompile Include="ThreadContext\ComputeThreadContextImpl.cpp">
+      <Filter>ThreadContext</Filter>
+    </ClCompile>
+    <ClCompile Include="ThreadContext\GraphicThreadContextImpl.cpp">
+      <Filter>ThreadContext</Filter>
+    </ClCompile>
+    <ClCompile Include="ThreadContext\GraphicThreadContext.cpp">
+      <Filter>ThreadContext</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\PipelineState\PipelineState.cpp">
+      <Filter>APIWrappers\PipelineState</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\PipelineState\ComputePipelineState.cpp">
+      <Filter>APIWrappers\PipelineState</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\PipelineState\GraphicPipelineState.cpp">
+      <Filter>APIWrappers\PipelineState</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\Swapchain.cpp">
+      <Filter>APIWrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowManagement\DisplayController.cpp">
+      <Filter>WindowManagement</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderBackendImpl.cpp" />
+    <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="APIWrappers\Fence.cpp">
+      <Filter>APIWrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\InputLayout.cpp">
+      <Filter>APIWrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\RootSignature.cpp">
+      <Filter>APIWrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\Resources\Textures\Texture.cpp">
+      <Filter>APIWrappers\Resources\Textures</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\Resources\Resource.cpp">
+      <Filter>APIWrappers\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\Resources\Textures\Texture2D.cpp">
+      <Filter>APIWrappers\Resources\Textures</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\Resources\Textures\Views\RenderTargetView.cpp">
+      <Filter>APIWrappers\Resources\Textures\Views</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\Resources\ResourceTransition.cpp">
+      <Filter>APIWrappers\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\Resources\Buffers\Buffer.cpp">
+      <Filter>APIWrappers\Resources\Buffers</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\Resources\Buffers\VertexBuffer.cpp">
+      <Filter>APIWrappers\Resources\Buffers</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\Resources\Buffers\Views\VertexBufferView.cpp">
+      <Filter>APIWrappers\Resources\Buffers\Views</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderSchedule\RenderSchedule.cpp">
+      <Filter>RenderSchedule</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderSchedule\ResourceTracker.cpp">
+      <Filter>RenderSchedule</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderPasses\DebugRenderPass.cpp">
+      <Filter>RenderPasses</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderPasses\PresentPass.cpp">
+      <Filter>RenderPasses</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\Resources\Buffers\ConstantBuffer.cpp">
+      <Filter>APIWrappers\Resources\Buffers</Filter>
+    </ClCompile>
+    <ClCompile Include="Contexts\RenderThreadContext.cpp">
+      <Filter>Contexts</Filter>
+    </ClCompile>
+    <ClCompile Include="Contexts\RenderFrameContext.cpp">
+      <Filter>Contexts</Filter>
+    </ClCompile>
+    <ClCompile Include="Contexts\RenderEngineContext.cpp">
+      <Filter>Contexts</Filter>
+    </ClCompile>
+    <ClCompile Include="Contexts\RenderContext.cpp">
+      <Filter>Contexts</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\Resources\Buffers\Views\ConstantBufferView.cpp">
+      <Filter>APIWrappers\Resources\Buffers\Views</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\Resources\Buffers\UploadBuffer.cpp">
+      <Filter>APIWrappers\Resources\Buffers</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\Resources\Buffers\IndexBuffer.cpp">
+      <Filter>APIWrappers\Resources\Buffers</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\Resources\Buffers\Views\IndexBufferView.cpp">
+      <Filter>APIWrappers\Resources\Buffers\Views</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderPasses\Debug3DRenderPass.cpp">
+      <Filter>RenderPasses</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\Resources\Textures\Views\DepthStencilView.cpp" />
+    <ClCompile Include="RenderBackend.cpp" />
+    <ClCompile Include="Containers\Scene.cpp" />
+    <ClCompile Include="Containers\Streaming\SceneData.cpp" />
+    <ClCompile Include="RenderPasses\GBufferRenderPass.cpp" />
+    <ClCompile Include="APIWrappers\Resources\Textures\Views\ShaderResourceView.cpp" />
+    <ClCompile Include="Camera.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shaders\RootSig.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\DebugPass\DebugPassVertexShader.hlsl">
+      <Filter>Shaders\DebugPass</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\DebugPass\DebugPassPixelShader.hlsl">
+      <Filter>Shaders\DebugPass</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Debug3DPass\Debug3DPassVertexShader.hlsl">
+      <Filter>Shaders\Debug3DPass</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Debug3DPass\Debug3DPassPixelShader.hlsl">
+      <Filter>Shaders\Debug3DPass</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\GBufferPass\GBufferPassVertexShader.hlsl" />
+    <FxCompile Include="Shaders\GBufferPass\GBufferPassPixelShader.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\DebugPass\DebugPassShadersCommon.hlsli">
+      <Filter>Shaders\DebugPass</Filter>
+    </None>
+    <None Include="Shaders\Debug3DPass\Debug3DPassShadersCommon.hlsli">
+      <Filter>Shaders\Debug3DPass</Filter>
+    </None>
+    <None Include="Shaders\GBufferPass\GBufferPassShadersCommon.hlsli" />
+  </ItemGroup>
+</Project>

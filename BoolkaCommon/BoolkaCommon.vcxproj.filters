@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="DebugHelpers">
+      <UniqueIdentifier>{d84d0ff2-dc77-456d-8766-3b575966a676}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Memory">
+      <UniqueIdentifier>{c0fd0ae1-76e1-4f1e-a4d6-91a323d99722}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Structures">
+      <UniqueIdentifier>{15a5f86e-cc39-49bf-87b6-616d2b1f5f63}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Structures\RingBuffer.h">
+      <Filter>Structures</Filter>
+    </ClInclude>
+    <ClInclude Include="Structures\MemoryBlock.h">
+      <Filter>Structures</Filter>
+    </ClInclude>
+    <ClInclude Include="SolutionConfig.h" />
+    <ClInclude Include="SolutionHelpers.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="Structures\Vector.h">
+      <Filter>Structures</Filter>
+    </ClInclude>
+    <ClInclude Include="Structures\Matrix.h">
+      <Filter>Structures</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugHelpers\DebugFileReader.h">
+      <Filter>DebugHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugHelpers\DebugFileWriter.h">
+      <Filter>DebugHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugHelpers\DebugTimer.h">
+      <Filter>DebugHelpers</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="Structures\Matrix.cpp">
+      <Filter>Structures</Filter>
+    </ClCompile>
+    <ClCompile Include="Structures\Vector.cpp">
+      <Filter>Structures</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugHelpers\DebugFileReader.cpp">
+      <Filter>DebugHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugHelpers\DebugFileWriter.cpp">
+      <Filter>DebugHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugHelpers\DebugTimer.cpp">
+      <Filter>DebugHelpers</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
