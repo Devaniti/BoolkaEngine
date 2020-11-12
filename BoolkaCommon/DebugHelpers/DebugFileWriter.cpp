@@ -9,6 +9,11 @@ namespace Boolka
     {
     }
 
+    DebugFileWriter::~DebugFileWriter()
+    {
+        BLK_ASSERT(!m_File.is_open());
+    }
+
     bool DebugFileWriter::OpenFile(const char* filename)
     {
         m_File.open(filename, std::ios::binary | std::ios::trunc);
@@ -22,9 +27,9 @@ namespace Boolka
         return Write(memoryBlock.m_Data, memoryBlock.m_Size);
     }
 
-    bool DebugFileWriter::Write(void* data, size_t size)
+    bool DebugFileWriter::Write(const void* data, size_t size)
     {
-        m_File.write(static_cast<char*>(data), size);
+        m_File.write(static_cast<const char*>(data), size);
         BLK_ASSERT(m_File);
 
         m_BytesWritten += size;

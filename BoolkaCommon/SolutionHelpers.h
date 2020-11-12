@@ -67,6 +67,17 @@ T1 ptr_static_cast(T2 value)
     return static_cast<T1>(static_cast<void*>(value));
 }
 
+inline void memcpy_strided(void* dst, size_t dstStride, const void* src, size_t srcStride, size_t rows)
+{
+    size_t copiedStride = min(dstStride, srcStride);
+    for (size_t i = 0; i < rows; ++i)
+    {
+        memcpy(dst, src, copiedStride);
+        dst = static_cast<void*>(static_cast<unsigned char*>(dst) + dstStride);
+        src = static_cast<const void*>(static_cast<const unsigned char*>(src) + srcStride);
+    }
+}
+
 // TODO move to platform specific header
 inline LARGE_INTEGER operator-(LARGE_INTEGER a, LARGE_INTEGER b)
 {

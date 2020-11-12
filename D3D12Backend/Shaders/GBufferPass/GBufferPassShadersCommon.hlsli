@@ -29,5 +29,5 @@ struct PSOut
 cbuffer PerFrame : register(b0)
 {
     float4x4 viewProjectionMatrix;
-    float4x4 viewMatrix;
+    //float4x4 viewMatrix;
 };

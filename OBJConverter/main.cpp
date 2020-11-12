@@ -47,30 +47,12 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    Boolka::OBJConverter converter;
-    bool success = converter.Load(objFile);
+    bool res = Boolka::OBJConverter::Convert(objFile, outFile);
 
-    if (success)
+    if (!res)
     {
-        std::cout << "Loaded " << objFile << " successfully\n";
-    } 
-    else
-    {
-        std::cout << "Failed to open " << objFile << "\n";
         return -1;
     }
-
-    success = converter.Save(outFile);
-
-    if (success)
-    {
-        std::cout << "Saved " << outFile << " successfully\n";
-    }
-    else
-    {
-        std::cout << "Failed to save to " << outFile << "\n";
-        return -1;
-    }
-
+    
     return 0;
 }

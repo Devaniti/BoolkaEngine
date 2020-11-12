@@ -14,6 +14,7 @@ int RealMain()
     Boolka::SceneData sceneData;
 
     Boolka::FileReader fileReader;
+    //if (!fileReader.OpenFile(L"C:\\Projects\\san-miguel\\san-miguel-low-poly.scene"))
     if (!fileReader.OpenFile(L"C:\\Projects\\Sponza\\sponza.scene"))
         return -1;
 

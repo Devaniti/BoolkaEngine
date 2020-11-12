@@ -106,7 +106,7 @@ namespace Boolka
 
     bool GBufferRenderPass::Initialize(Device& device, RenderContext& renderContext, ResourceTracker& resourceTracker)
     {
-        m_Camera.Initialize(0.0f, 0.0f, {0, 0, 100, 0});
+        m_Camera.Initialize(0.0f, 0.0f, {0, 0, 1, 0});
 
         MemoryBlock PS = DebugFileReader::ReadFile("GBufferPassPixelShader.cso");
         MemoryBlock VS = DebugFileReader::ReadFile("GBufferPassVertexShader.cso");

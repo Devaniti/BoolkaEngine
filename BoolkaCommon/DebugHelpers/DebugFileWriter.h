@@ -8,11 +8,11 @@ namespace Boolka
     {
     public:
         DebugFileWriter();
-        ~DebugFileWriter() = default;
+        ~DebugFileWriter();;
 
         bool OpenFile(const char* filename);
         bool Write(MemoryBlock memoryBlock);
-        bool Write(void* data, size_t size);
+        bool Write(const void* data, size_t size);
         bool AddPadding(size_t size);
         bool Close();
 

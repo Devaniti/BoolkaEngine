@@ -38,7 +38,7 @@ namespace Boolka
     {
         float speedMult = ::GetAsyncKeyState(VK_SHIFT) ? 5.0f : 1.0f;
 
-        float cameraMoveSpeed = 150.0f * deltaTime * speedMult;
+        float cameraMoveSpeed = 15.0f * deltaTime * speedMult;
         float cameraRotationSpeed = DEG_TO_RAD(60.0f) * deltaTime;
 
         static const Vector4 upDirection{ 0, 0, 1, 0 };
