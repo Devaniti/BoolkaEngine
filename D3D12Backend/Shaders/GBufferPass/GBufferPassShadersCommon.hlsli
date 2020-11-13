@@ -16,7 +16,7 @@ struct VSIn
 struct VSOut
 {
     float4 position : SV_Position;
-    int materialID : MATERIAL;
+    nointerpolation int materialID : MATERIAL;
     float3 normal : NORMAL;
     float2 texcoord : TEXCOORD;
 };
@@ -29,5 +29,6 @@ struct PSOut
 cbuffer PerFrame : register(b0)
 {
     float4x4 viewProjectionMatrix;
-    //float4x4 viewMatrix;
+    float4x4 viewMatrix;
+
 };

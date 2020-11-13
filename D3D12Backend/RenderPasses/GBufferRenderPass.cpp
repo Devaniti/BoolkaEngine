@@ -48,7 +48,7 @@ namespace Boolka
 
         Matrix4x4 viewMatrix;
         Matrix4x4 projectionMatrix;
-        bool res = m_Camera.Update(deltaTime, aspectRatio, viewMatrix, projectionMatrix);
+        bool res = m_Camera.Update(deltaTime, aspectRatio, 150.0f, 60.0f, viewMatrix, projectionMatrix);
         BLK_ASSERT(res);
 
         Matrix4x4 viewProjMatrix = viewMatrix * projectionMatrix;
@@ -106,7 +106,7 @@ namespace Boolka
 
     bool GBufferRenderPass::Initialize(Device& device, RenderContext& renderContext, ResourceTracker& resourceTracker)
     {
-        m_Camera.Initialize(0.0f, 0.0f, {0, 0, 1, 0});
+        m_Camera.Initialize(0.0f, 0.0f, {0, 0, 100, 0});
 
         MemoryBlock PS = DebugFileReader::ReadFile("GBufferPassPixelShader.cso");
         MemoryBlock VS = DebugFileReader::ReadFile("GBufferPassVertexShader.cso");

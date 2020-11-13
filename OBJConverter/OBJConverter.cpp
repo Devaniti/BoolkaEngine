@@ -254,7 +254,20 @@ namespace Boolka
             }
 
             vertexData.materialId = materialsMap[materials[uniqueVertex.materialIndex].diffuse_texname];
-            memcpy(vertexData.normal, uniqueVertex.normalIndex >= 0 ? &normals[3 * uniqueVertex.normalIndex] : empty, sizeof(vertexData.normal));
+
+
+            if (uniqueVertex.normalIndex >= 0)
+            {
+                // Swap y and z
+                // In OBJ y is up, and in Boolka Engine z is up
+                vertexData.normal[0] = normals[3 * uniqueVertex.normalIndex];
+                vertexData.normal[1] = normals[3 * uniqueVertex.normalIndex + 2];
+                vertexData.normal[2] = normals[3 * uniqueVertex.normalIndex + 1];
+            }
+            else
+            {
+                memcpy(vertexData.normal, empty, sizeof(vertexData.normal));
+            }
 
             if (uniqueVertex.texcoordIndex >= 0)
             {

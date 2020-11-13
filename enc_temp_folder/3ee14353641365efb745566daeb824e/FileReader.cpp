@@ -76,11 +76,6 @@ namespace Boolka
         return res == TRUE;
     }
 
-    bool FileReader::WaitData(size_t dataToWait)
-    {
-        throw std::logic_error("Unimplemented");
-    }
-
     void FileReader::FreeData(MemoryBlock& data)
     {
         BLK_ASSERT(data.m_Size != 0);

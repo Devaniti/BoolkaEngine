@@ -34,12 +34,12 @@ namespace Boolka
         m_CameraPos = {};
     }
 
-    bool Camera::Update(float deltaTime, float aspectRatio, Matrix4x4& outViewMatrix, Matrix4x4& outProjMatrix)
+    bool Camera::Update(float deltaTime, float aspectRatio, float moveSpeed, float rotationSpeed, Matrix4x4& outViewMatrix, Matrix4x4& outProjMatrix)
     {
         float speedMult = ::GetAsyncKeyState(VK_SHIFT) ? 5.0f : 1.0f;
 
-        float cameraMoveSpeed = 15.0f * deltaTime * speedMult;
-        float cameraRotationSpeed = DEG_TO_RAD(60.0f) * deltaTime;
+        float moveDelta = moveSpeed * deltaTime * speedMult;
+        float rotationDelta = DEG_TO_RAD(rotationSpeed) * deltaTime;
 
         static const Vector4 upDirection{ 0, 0, 1, 0 };
 
@@ -52,27 +52,27 @@ namespace Boolka
 
         if (::GetAsyncKeyState(VK_LEFT))
         {
-            m_RotationYaw -= cameraRotationSpeed;
+            m_RotationYaw -= rotationDelta;
             if (m_RotationYaw < DEG_TO_RAD(-180.0f))
                 m_RotationYaw += DEG_TO_RAD(360.0f);
         }
 
         if (::GetAsyncKeyState(VK_RIGHT))
         {
-            m_RotationYaw += cameraRotationSpeed;
+            m_RotationYaw += rotationDelta;
             if (m_RotationYaw > DEG_TO_RAD(180.0f))
                 m_RotationYaw -= DEG_TO_RAD(360.0f);
         }
 
         if (::GetAsyncKeyState(VK_UP))
         {
-            m_RotationPitch += cameraRotationSpeed;
+            m_RotationPitch += rotationDelta;
             m_RotationPitch = min(DEG_TO_RAD(90.0f), m_RotationPitch);
         }
 
         if (::GetAsyncKeyState(VK_DOWN))
         {
-            m_RotationPitch -= cameraRotationSpeed;
+            m_RotationPitch -= rotationDelta;
             m_RotationPitch = max(DEG_TO_RAD(-90.0f), m_RotationPitch);
         }
 
@@ -90,22 +90,22 @@ namespace Boolka
 
         if (::GetAsyncKeyState('D'))
         {
-            m_CameraPos += right * cameraMoveSpeed;
+            m_CameraPos += right * moveDelta;
         }
 
         if (::GetAsyncKeyState('A'))
         {
-            m_CameraPos -= right * cameraMoveSpeed;
+            m_CameraPos -= right * moveDelta;
         }
 
         if (::GetAsyncKeyState('W'))
         {
-            m_CameraPos += forward * cameraMoveSpeed;
+            m_CameraPos += forward * moveDelta;
         }
 
         if (::GetAsyncKeyState('S'))
         {
-            m_CameraPos -= forward * cameraMoveSpeed;
+            m_CameraPos -= forward * moveDelta;
         }
 
         float nearZ = 1.0f;

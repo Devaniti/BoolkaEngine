@@ -30,14 +30,21 @@ int RealMain()
 
     fileReader.CloseFile();
 
+    Boolka::DebugTimer sceneCreationTimer;
+    sceneCreationTimer.Start();
     if (!renderer->LoadScene(sceneData))
         return -1;
+    float sceneCreationTime = sceneCreationTimer.Stop() * 1000.0f;
+
+    char buffer[256];
+
+    snprintf(buffer, 256, "Scene creation time:%.3fms\n", sceneCreationTime);
+    OutputDebugStringA(buffer);
 
     fileReader.FreeData(sceneData.GetMemory());
 
     float loadTime = loadTimer.Stop() * 1000.0f;
 
-    char buffer[256];
     snprintf(buffer, 256, "Load time:%.3fms\n", loadTime);
     OutputDebugStringA(buffer);
 
