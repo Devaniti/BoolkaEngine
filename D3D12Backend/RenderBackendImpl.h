@@ -21,7 +21,7 @@ namespace Boolka
 		void Unload() final;
 		bool Present() final;
 		bool RenderFrame() final;
-		bool LoadScene(const SceneData& sceneData) final;
+		bool LoadScene(SceneData& sceneData) final;
         void UnloadScene() final;
 
 	private:

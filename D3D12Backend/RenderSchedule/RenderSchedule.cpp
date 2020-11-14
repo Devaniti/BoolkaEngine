@@ -52,7 +52,7 @@ namespace Boolka
         return true;
     }
 
-    bool RenderSchedule::LoadScene(Device& device, const SceneData& sceneData)
+    bool RenderSchedule::LoadScene(Device& device, SceneData& sceneData)
     {
         bool res = m_EngineContext.LoadScene(device, sceneData);
         BLK_ASSERT(res);

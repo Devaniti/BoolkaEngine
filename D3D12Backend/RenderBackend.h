@@ -17,7 +17,7 @@ namespace Boolka
 
         static RenderBackend* CreateRenderBackend();
         static void DeleteRenderBackend(RenderBackend* object);
-        virtual bool LoadScene(const SceneData& sceneData) = 0;
+        virtual bool LoadScene(SceneData& sceneData) = 0;
         virtual void UnloadScene() = 0;
     };
 

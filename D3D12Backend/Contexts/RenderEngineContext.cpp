@@ -81,7 +81,7 @@ namespace Boolka
         }
     }
 
-    bool RenderEngineContext::LoadScene(Device& device, const SceneData& sceneData)
+    bool RenderEngineContext::LoadScene(Device& device, SceneData& sceneData)
     {
         return m_Scene.Initialize(device, sceneData, *this);
     }

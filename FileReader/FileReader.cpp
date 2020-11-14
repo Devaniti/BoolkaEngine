@@ -64,7 +64,7 @@ namespace Boolka
     {
         DWORD bytesRead;
         BOOL res = ::GetOverlappedResult(m_file, &m_async, &bytesRead, FALSE);
-        BLK_ASSERT(res == TRUE || GetLastError() == ERROR_IO_INCOMPLETE)
+        BLK_ASSERT(res == TRUE || GetLastError() == ERROR_IO_INCOMPLETE);
         return res == TRUE;
     }
 
@@ -78,7 +78,17 @@ namespace Boolka
 
     bool FileReader::WaitData(size_t dataToWait)
     {
-        throw std::logic_error("Unimplemented");
+        // It seems that there's no better way to wait for part of data
+        while (true)
+        {
+            DWORD bytesRead;
+            BOOL res = ::GetOverlappedResult(m_file, &m_async, &bytesRead, FALSE);
+            BLK_ASSERT(res == TRUE || GetLastError() == ERROR_IO_INCOMPLETE);
+            if (bytesRead >= dataToWait || res == TRUE)
+                break;
+            ::Sleep(1);
+        }
+        return true;
     }
 
     void FileReader::FreeData(MemoryBlock& data)

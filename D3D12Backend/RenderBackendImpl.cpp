@@ -78,7 +78,7 @@ namespace Boolka
         return true;
     }
 
-    bool RenderBackendImpl::LoadScene(const SceneData& sceneData)
+    bool RenderBackendImpl::LoadScene(SceneData& sceneData)
     {
         bool res = m_RenderSchedule.Initialize(m_Device, m_DisplayController);
         BLK_CRITICAL_ASSERT(res);

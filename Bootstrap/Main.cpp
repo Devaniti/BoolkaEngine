@@ -11,12 +11,12 @@ int RealMain()
     Boolka::DebugTimer loadTimer;
     loadTimer.Start();
 
-    Boolka::SceneData sceneData;
-
     Boolka::FileReader fileReader;
     //if (!fileReader.OpenFile(L"C:\\Projects\\san-miguel\\san-miguel-low-poly.scene"))
     if (!fileReader.OpenFile(L"C:\\Projects\\Sponza\\sponza.scene"))
         return -1;
+
+    Boolka::SceneData sceneData(fileReader);
 
     if (!fileReader.StartStreaming(sceneData.GetMemory()))
         return -1;
@@ -25,16 +25,13 @@ int RealMain()
     bool res = renderer->Initialize();
     BLK_CRITICAL_ASSERT(res);
 
-    if (!fileReader.WaitData())
-        return -1;
-
-    fileReader.CloseFile();
-
     Boolka::DebugTimer sceneCreationTimer;
     sceneCreationTimer.Start();
     if (!renderer->LoadScene(sceneData))
         return -1;
     float sceneCreationTime = sceneCreationTimer.Stop() * 1000.0f;
+
+    fileReader.CloseFile();
 
     char buffer[256];
 

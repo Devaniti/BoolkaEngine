@@ -4,10 +4,12 @@
 namespace Boolka
 {
 
+    class FileReader;
+
     class SceneData
     {
     public:
-        SceneData();
+        SceneData(FileReader& fileReader);
         ~SceneData();
 
         struct TextureHeader
@@ -34,12 +36,15 @@ namespace Boolka
             void* baseTextureData;
         };
 
-        DataWrapper GetSceneWrapper() const;
+        DataWrapper GetSceneWrapper();
+        void PrepareTextureHeaders();
+        void PrepareTextures();
         MemoryBlock& GetMemory() { return m_MemoryBlock; };
         const MemoryBlock& GetMemory() const { return m_MemoryBlock; };
 
     private:
         MemoryBlock m_MemoryBlock;
+        FileReader& m_FileReader;
     };
 
 }

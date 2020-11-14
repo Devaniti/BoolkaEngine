@@ -24,7 +24,7 @@ namespace Boolka
         bool Initialize(Device& device, DisplayController& displayController);
         void Unload();
 
-        bool LoadScene(Device& device, const SceneData& sceneData);
+        bool LoadScene(Device& device, SceneData& sceneData);
         void UnloadScene();
         Scene& GetScene() { return m_Scene; };
 

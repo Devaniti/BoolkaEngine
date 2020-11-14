@@ -22,7 +22,7 @@ namespace Boolka
         BLK_ASSERT(m_IndexBufferSize == 0);
     }
 
-    bool Scene::Initialize(Device& device, const SceneData& sceneData, RenderEngineContext& engineContext)
+    bool Scene::Initialize(Device& device, SceneData& sceneData, RenderEngineContext& engineContext)
     {
         BLK_ASSERT(m_VertexBufferSize == 0);
         BLK_ASSERT(m_IndexBufferSize == 0);
@@ -49,6 +49,8 @@ namespace Boolka
         m_SRVs.resize(dataWrapper.textureCount);
 
         static const size_t bytesPerPixel = 4;
+
+        sceneData.PrepareTextureHeaders();
 
         for (int i = 0; i < dataWrapper.textureCount; ++i)
         {
@@ -80,6 +82,8 @@ namespace Boolka
 
         UploadBuffer uploadBuffer;
         uploadBuffer.Initialize(device, max(64, totalTextureSize));
+
+        sceneData.PrepareTextures();
 
         void* mappedBuffer = uploadBuffer.Map();
         memcpy(mappedBuffer, dataWrapper.baseTextureData, totalTextureSize);

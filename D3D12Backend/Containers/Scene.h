@@ -17,7 +17,7 @@ namespace Boolka
         Scene();
         virtual ~Scene();
 
-        bool Initialize(Device& device, const SceneData& sceneData, RenderEngineContext& engineContext);
+        bool Initialize(Device& device, SceneData& sceneData, RenderEngineContext& engineContext);
         void Unload();
 
         UINT GetVertexBufferSize() { return m_VertexBufferSize; };
