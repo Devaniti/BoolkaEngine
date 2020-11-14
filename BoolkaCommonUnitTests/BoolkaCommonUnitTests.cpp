@@ -159,7 +159,6 @@ namespace Boolka
                 const Matrix4x4 m3 = Matrix4x4::GetTranslation(2.0f, 2.0f, 0.0f);
 
                 Assert::IsTrue(ApproxEqual(m1 * m2, m3));
-
             }
 
             {
@@ -245,7 +244,6 @@ namespace Boolka
 
             Assert::IsTrue(ApproxEqual(m3, m4.Transpose()));
             Assert::IsTrue(ApproxEqual(m4, m3.Transpose()));
-
         }
     };
 }

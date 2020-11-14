@@ -75,8 +75,6 @@ namespace Boolka
         //    bool res = m_BackBuffers[i].Initialize(m_Swapchain.GetBuffer(i));
         //    BLK_CRITICAL_ASSERT(res);
         //}
-
-        return true;
     }
 
     bool DisplayController::SetWindowState(const WindowState& newWindowState)

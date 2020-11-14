@@ -11,8 +11,7 @@ namespace Boolka
 
     CommandAllocator::~CommandAllocator()
     {
-        if (m_CommandAllocator != nullptr)
-            Unload();
+        BLK_ASSERT(m_CommandAllocator == nullptr);
     }
 
     bool CommandAllocator::Reset()

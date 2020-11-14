@@ -6,14 +6,6 @@
 namespace Boolka
 {
 
-    Texture2D::Texture2D()
-    {
-    }
-
-    Texture2D::~Texture2D()
-    {
-    }
-
     bool Texture2D::Initialize(ID3D12Resource* resource)
     {
         BLK_ASSERT(m_Resource == nullptr);

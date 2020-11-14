@@ -52,6 +52,7 @@ namespace Boolka
 
     Matrix4x4 Matrix4x4::operator*(const Matrix4x4& other) const
     {
+        //Initialized with zeroes
         Matrix4x4 result;
 
         for (size_t i = 0; i < 4; i++)
@@ -60,6 +61,7 @@ namespace Boolka
             {
                 for (size_t k = 0; k < 4; k++)
                 {
+                    //Order is important for cache coherence
                     result[i][k] += (*this)[i][j] * other[j][k];
                 }
             }
@@ -180,14 +182,6 @@ namespace Boolka
     Matrix4x4 Matrix4x4::GetView(const Vector4& right, const Vector4& up, const Vector4& forward, const Vector4& position)
     {
         Vector4 negativePos = -position;
-
-        //Matrix4x4 view
-        //{
-        //                  right[0],            right[1],                 right[2], 0.0f,
-        //                     up[0],               up[1],                    up[2], 0.0f,
-        //                forward[0],          forward[1],               forward[2], 0.0f,
-        //    negativePos.Dot(right), negativePos.Dot(up), negativePos.Dot(forward), 1.0f,
-        //};
 
         Matrix4x4 view
         {

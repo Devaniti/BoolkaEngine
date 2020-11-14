@@ -22,8 +22,8 @@ namespace Boolka
         public RenderPass
     {
     public:
-        GBufferRenderPass();
-        ~GBufferRenderPass();
+        GBufferRenderPass() = default;
+        ~GBufferRenderPass() = default;
 
         bool Initialize(Device& device, RenderContext& renderContext, ResourceTracker& resourceTracker) override;
         void Unload() override;

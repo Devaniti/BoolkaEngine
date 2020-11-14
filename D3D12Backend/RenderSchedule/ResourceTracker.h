@@ -13,7 +13,7 @@ namespace Boolka
     class ResourceTracker
     {
     public:
-        ResourceTracker();
+        ResourceTracker() = default;
         ~ResourceTracker();
 
         bool Initialize(Device& device, size_t expectedResources);

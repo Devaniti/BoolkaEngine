@@ -12,8 +12,7 @@ namespace Boolka
 
     CommandQueue::~CommandQueue()
     {
-        if (m_Queue != nullptr)
-            Unload();
+        BLK_ASSERT(m_Queue == nullptr);
     }
 
     bool CommandQueue::Initialize(Device& device, ID3D12CommandQueue* queue)

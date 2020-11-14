@@ -76,7 +76,7 @@ namespace Boolka
     {
         ID3D12InfoQueue* debugInfoQueue = nullptr;
         HRESULT hr = m_Device->QueryInterface(IID_PPV_ARGS(&debugInfoQueue));
-        if (SUCCEEDED(hr) && debugInfoQueue != nullptr)
+        if (SUCCEEDED(hr))
         {
             for (int i = 0; i <= D3D12_MESSAGE_SEVERITY_MESSAGE; i++)
             {
@@ -92,7 +92,7 @@ namespace Boolka
     {
         ID3D12DebugDevice2* debugDevice = nullptr;
         HRESULT hr = m_Device->QueryInterface(IID_PPV_ARGS(&debugDevice));
-        if (SUCCEEDED(hr) && debugDevice)
+        if (SUCCEEDED(hr))
         {
             SetDebugBreakSeverity(D3D12_MESSAGE_SEVERITY_ERROR);
             // debugDevice->ReportLiveDeviceObjects always report reference to device, since debugDevice itself is reference to device

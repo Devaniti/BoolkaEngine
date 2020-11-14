@@ -111,21 +111,6 @@ namespace Boolka
         float nearZ = 1.0f;
         float farZ = 40000.0f;
 
-        //float viewHeight = 300;
-
-        //float w = 2.0f / viewHeight / aspectRatio;
-        //float h = 2.0f / viewHeight;
-        //float a = 1.0f / (farZ - nearZ);
-        //float b = -a * nearZ;
-
-        //static const Matrix4x4 ortProj =
-        //{
-        //    w, 0, 0, 0,
-        //    0, h, 0, 0,
-        //    0, 0, a, 0,
-        //    0, 0, b, 1,
-        //};
-
         // Perspective projection
         float fovY = DEG_TO_RAD(30.0f);
 

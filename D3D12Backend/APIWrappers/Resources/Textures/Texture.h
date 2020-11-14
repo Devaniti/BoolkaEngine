@@ -8,8 +8,8 @@ namespace Boolka
     class Texture : public Resource
     {
     protected:
-        Texture();
-        ~Texture();
+        Texture() = default;
+        ~Texture() = default;
     };
 
 }

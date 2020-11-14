@@ -25,7 +25,7 @@ namespace Boolka
         m_Header.m_NumEntries = numEntries;
 
         size_t size = numEntries * (sizeof(InputLayoutEntry) + sizeof(D3D12_INPUT_ELEMENT_DESC));
-        char* memoryBlock = new char[size];
+        unsigned char* memoryBlock = new unsigned char[size];
 
         m_Entries = reinterpret_cast<InputLayoutEntry*>(memoryBlock);
         m_NativeEntries = reinterpret_cast<D3D12_INPUT_ELEMENT_DESC*>(memoryBlock + numEntries * sizeof(InputLayoutEntry));

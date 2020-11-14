@@ -114,15 +114,6 @@
     <ClInclude Include="APIWrappers\CommandAllocator\ComputeCommandAllocator.h">
       <Filter>APIWrappers\CommandAllocator</Filter>
     </ClInclude>
-    <ClInclude Include="ThreadContext\CopyThreadContextImpl.h">
-      <Filter>ThreadContext</Filter>
-    </ClInclude>
-    <ClInclude Include="ThreadContext\ComputeThreadContext.h">
-      <Filter>ThreadContext</Filter>
-    </ClInclude>
-    <ClInclude Include="ThreadContext\CopyThreadContext.h">
-      <Filter>ThreadContext</Filter>
-    </ClInclude>
     <ClInclude Include="APIWrappers\CommandList\CopyCommandListImpl.h">
       <Filter>APIWrappers\CommandList</Filter>
     </ClInclude>
@@ -134,18 +125,6 @@
     </ClInclude>
     <ClInclude Include="APIWrappers\RenderDebug.h">
       <Filter>APIWrappers</Filter>
-    </ClInclude>
-    <ClInclude Include="ThreadContext\ThreadContext.h">
-      <Filter>ThreadContext</Filter>
-    </ClInclude>
-    <ClInclude Include="ThreadContext\ComputeThreadContextImpl.h">
-      <Filter>ThreadContext</Filter>
-    </ClInclude>
-    <ClInclude Include="ThreadContext\GraphicThreadContext.h">
-      <Filter>ThreadContext</Filter>
-    </ClInclude>
-    <ClInclude Include="ThreadContext\GraphicThreadContextImpl.h">
-      <Filter>ThreadContext</Filter>
     </ClInclude>
     <ClInclude Include="APIWrappers\PipelineState\PipelineState.h">
       <Filter>APIWrappers\PipelineState</Filter>
@@ -309,15 +288,6 @@
     <ClCompile Include="APIWrappers\CommandAllocator\CopyCommandAllocator.cpp">
       <Filter>APIWrappers\CommandAllocator</Filter>
     </ClCompile>
-    <ClCompile Include="ThreadContext\CopyThreadContextImpl.cpp">
-      <Filter>ThreadContext</Filter>
-    </ClCompile>
-    <ClCompile Include="ThreadContext\ComputeThreadContext.cpp">
-      <Filter>ThreadContext</Filter>
-    </ClCompile>
-    <ClCompile Include="ThreadContext\CopyThreadContext.cpp">
-      <Filter>ThreadContext</Filter>
-    </ClCompile>
     <ClCompile Include="APIWrappers\CommandList\CopyCommandListImpl.cpp">
       <Filter>APIWrappers\CommandList</Filter>
     </ClCompile>
@@ -329,18 +299,6 @@
     </ClCompile>
     <ClCompile Include="APIWrappers\RenderDebug.cpp">
       <Filter>APIWrappers</Filter>
-    </ClCompile>
-    <ClCompile Include="ThreadContext\ThreadContext.cpp">
-      <Filter>ThreadContext</Filter>
-    </ClCompile>
-    <ClCompile Include="ThreadContext\ComputeThreadContextImpl.cpp">
-      <Filter>ThreadContext</Filter>
-    </ClCompile>
-    <ClCompile Include="ThreadContext\GraphicThreadContextImpl.cpp">
-      <Filter>ThreadContext</Filter>
-    </ClCompile>
-    <ClCompile Include="ThreadContext\GraphicThreadContext.cpp">
-      <Filter>ThreadContext</Filter>
     </ClCompile>
     <ClCompile Include="APIWrappers\PipelineState\PipelineState.cpp">
       <Filter>APIWrappers\PipelineState</Filter>

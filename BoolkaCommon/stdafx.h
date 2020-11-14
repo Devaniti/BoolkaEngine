@@ -1,5 +1,7 @@
 #pragma once
 
+// Careful, this header will be included in all projects precompiled headers
+
 // STL
 #include <fstream>
 #include <string>

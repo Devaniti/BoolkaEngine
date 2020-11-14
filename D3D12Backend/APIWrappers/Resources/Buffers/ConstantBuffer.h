@@ -10,8 +10,8 @@ namespace Boolka
         public Buffer
     {
     public:
-        ConstantBuffer();
-        ~ConstantBuffer();
+        ConstantBuffer() = default;
+        ~ConstantBuffer() = default;
 
         bool Initialize(Device& device, UINT64 size);
         void Unload();

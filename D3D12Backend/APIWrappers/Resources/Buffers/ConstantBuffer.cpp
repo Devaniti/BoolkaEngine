@@ -4,14 +4,6 @@
 namespace Boolka
 {
 
-    ConstantBuffer::ConstantBuffer()
-    {
-    }
-
-    ConstantBuffer::~ConstantBuffer()
-    {
-    }
-
     bool ConstantBuffer::Initialize(Device& device, UINT64 size)
     {
         if (!InitializeCommitedResource(device, size, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_COPY_DEST))

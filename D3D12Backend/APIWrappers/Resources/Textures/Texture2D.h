@@ -10,8 +10,8 @@ namespace Boolka
     class Texture2D : public Texture
     {
     public:
-        Texture2D();
-        ~Texture2D();
+        Texture2D() = default;
+        ~Texture2D() = default;
 
         // Creates committed resource
         bool Initialize(Device& device, D3D12_HEAP_TYPE heapType, UINT64 width, UINT height, UINT16 mipCount, DXGI_FORMAT format, D3D12_RESOURCE_FLAGS resourceFlags, D3D12_CLEAR_VALUE* clearValue, D3D12_RESOURCE_STATES initialState);

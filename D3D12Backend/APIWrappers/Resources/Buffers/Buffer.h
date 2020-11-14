@@ -10,10 +10,10 @@ namespace Boolka
         public Resource
     {
     protected:
-        bool InitializeCommitedResource(Device& device, UINT64 size, D3D12_HEAP_TYPE heapType, D3D12_RESOURCE_STATES initialState);
+        Buffer() = default;
+        ~Buffer() = default;
 
-        Buffer();
-        ~Buffer();
+        bool InitializeCommitedResource(Device& device, UINT64 size, D3D12_HEAP_TYPE heapType, D3D12_RESOURCE_STATES initialState);
     };
 
 }

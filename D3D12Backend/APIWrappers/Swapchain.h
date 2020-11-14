@@ -2,6 +2,7 @@
 
 namespace Boolka
 {
+
     class Device;
     class Factory;
     struct WindowState;

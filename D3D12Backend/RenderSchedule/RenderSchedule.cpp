@@ -6,14 +6,6 @@
 namespace Boolka
 {
 
-    RenderSchedule::RenderSchedule()
-    {
-    }
-
-    RenderSchedule::~RenderSchedule()
-    {
-    }
-
     bool RenderSchedule::Initialize(Device& device, DisplayController& displayController)
     {
         m_ResourceTracker.Initialize(device, 10);

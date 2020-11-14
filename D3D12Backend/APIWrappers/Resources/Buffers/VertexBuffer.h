@@ -10,8 +10,8 @@ namespace Boolka
         public Buffer
     {
     public:
-        VertexBuffer();
-        ~VertexBuffer();
+        VertexBuffer() = default;
+        ~VertexBuffer() = default;
 
         bool Initialize(Device& device, UINT64 size, void* initialData);
         void Unload();

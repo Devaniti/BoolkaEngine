@@ -78,14 +78,18 @@ namespace Boolka
 
     bool FileReader::WaitData(size_t dataToWait)
     {
-        // It seems that there's no better way to wait for part of data
+        // It seems that there's no better way to wait for part of single IO operation
         while (true)
         {
             DWORD bytesRead;
             BOOL res = ::GetOverlappedResult(m_file, &m_async, &bytesRead, FALSE);
             BLK_ASSERT(res == TRUE || GetLastError() == ERROR_IO_INCOMPLETE);
             if (bytesRead >= dataToWait || res == TRUE)
+            {
+                // Catch case when IO operation is done, but there was less bytes read than requested
+                BLK_ASSERT(bytesRead >= dataToWait);
                 break;
+            }
             ::Sleep(1);
         }
         return true;

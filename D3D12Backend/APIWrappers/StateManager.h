@@ -8,8 +8,8 @@ namespace Boolka
     class StateManager
     {
     public:
-        StateManager();
-        ~StateManager();
+        StateManager() = default;
+        ~StateManager() = default;
 
         bool Initialize(Device& device);
         void Unload();

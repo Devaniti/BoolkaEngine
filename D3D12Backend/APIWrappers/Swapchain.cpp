@@ -38,7 +38,7 @@ namespace Boolka
         desc.Flags = DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
         IDXGISwapChain1* swapchain1 = nullptr;
         HRESULT hr = factory->CreateSwapChainForHwnd(graphicQueue, window, &desc, nullptr, nullptr, &swapchain1);
-        if (FAILED(hr) || swapchain1 == nullptr)
+        if (FAILED(hr))
         {
             return false;
         }
@@ -48,7 +48,7 @@ namespace Boolka
 
         m_Swapchain->SetMaximumFrameLatency(BLK_IN_FLIGHT_FRAMES - 1);
 
-        return SUCCEEDED(hr) && m_Swapchain;
+        return SUCCEEDED(hr);
     }
 
     void Swapchain::Unload()

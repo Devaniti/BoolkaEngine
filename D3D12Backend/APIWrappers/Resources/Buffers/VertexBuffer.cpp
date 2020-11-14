@@ -4,14 +4,6 @@
 namespace Boolka
 {
 
-    VertexBuffer::VertexBuffer()
-    {
-    }
-
-    VertexBuffer::~VertexBuffer()
-    {
-    }
-
     bool VertexBuffer::Initialize(Device& device, UINT64 size, void* initialData)
     {
         if (!InitializeCommitedResource(device, size, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_GENERIC_READ))
@@ -22,7 +14,7 @@ namespace Boolka
         void* mappedData = nullptr;
         HRESULT hr = m_Resource->Map(0, &readRange, &mappedData);
 
-        if (FAILED(hr) || mappedData == nullptr)
+        if (FAILED(hr))
             return false;
 
         memcpy(mappedData, initialData, size);

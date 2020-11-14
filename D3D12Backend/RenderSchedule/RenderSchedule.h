@@ -18,8 +18,8 @@ namespace Boolka
     class RenderSchedule
     {
     public:
-        RenderSchedule();
-        ~RenderSchedule();
+        RenderSchedule() = default;
+        ~RenderSchedule() = default;
 
         bool Initialize(Device& device, DisplayController& displayController);
         void Unload();

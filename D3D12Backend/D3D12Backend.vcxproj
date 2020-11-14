@@ -157,13 +157,6 @@
     <ClInclude Include="RenderSchedule\RenderSchedule.h" />
     <ClInclude Include="RenderSchedule\ResourceTracker.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="ThreadContext\ComputeThreadContext.h" />
-    <ClInclude Include="ThreadContext\ComputeThreadContextImpl.h" />
-    <ClInclude Include="ThreadContext\CopyThreadContext.h" />
-    <ClInclude Include="ThreadContext\CopyThreadContextImpl.h" />
-    <ClInclude Include="ThreadContext\GraphicThreadContext.h" />
-    <ClInclude Include="ThreadContext\GraphicThreadContextImpl.h" />
-    <ClInclude Include="ThreadContext\ThreadContext.h" />
     <ClInclude Include="WindowManagement\DisplayController.h" />
     <ClInclude Include="WindowManagement\WindowManager.h" />
     <ClInclude Include="WindowManagement\WindowState.h" />
@@ -232,13 +225,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="ThreadContext\ComputeThreadContext.cpp" />
-    <ClCompile Include="ThreadContext\ComputeThreadContextImpl.cpp" />
-    <ClCompile Include="ThreadContext\CopyThreadContext.cpp" />
-    <ClCompile Include="ThreadContext\CopyThreadContextImpl.cpp" />
-    <ClCompile Include="ThreadContext\GraphicThreadContext.cpp" />
-    <ClCompile Include="ThreadContext\GraphicThreadContextImpl.cpp" />
-    <ClCompile Include="ThreadContext\ThreadContext.cpp" />
     <ClCompile Include="WindowManagement\DisplayController.cpp" />
     <ClCompile Include="WindowManagement\WindowManager.cpp" />
     <ClCompile Include="WindowManagement\WindowState.cpp" />

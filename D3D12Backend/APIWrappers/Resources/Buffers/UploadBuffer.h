@@ -10,8 +10,8 @@ namespace Boolka
         public Buffer
     {
     public:
-        UploadBuffer();
-        ~UploadBuffer();
+        UploadBuffer() = default;
+        ~UploadBuffer() = default;
 
         bool Initialize(Device& device, UINT64 size);
         void Unload();

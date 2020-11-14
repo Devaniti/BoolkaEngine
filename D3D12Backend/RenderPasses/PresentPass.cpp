@@ -11,14 +11,6 @@
 namespace Boolka
 {
 
-    PresentPass::PresentPass()
-    {
-    }
-
-    PresentPass::~PresentPass()
-    {
-    }
-
     bool PresentPass::Initialize(Device& device, RenderContext& renderContext, ResourceTracker& resourceTracker)
     {
         for (UINT i = 0; i < BLK_IN_FLIGHT_FRAMES; ++i)

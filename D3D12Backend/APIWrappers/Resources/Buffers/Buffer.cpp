@@ -30,18 +30,10 @@ namespace Boolka
         HRESULT hr = device->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDesc,
             initialState, nullptr, IID_PPV_ARGS(&m_Resource));
 
-        if (FAILED(hr) || m_Resource == nullptr)
+        if (FAILED(hr))
             return false;
 
         return true;
-    }
-
-    Buffer::Buffer()
-    {
-    }
-
-    Buffer::~Buffer()
-    {
     }
 
 }

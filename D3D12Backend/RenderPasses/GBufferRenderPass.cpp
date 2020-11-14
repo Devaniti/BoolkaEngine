@@ -15,14 +15,6 @@
 namespace Boolka
 {
 
-    GBufferRenderPass::GBufferRenderPass()
-    {
-    }
-
-    GBufferRenderPass::~GBufferRenderPass()
-    {
-    }
-
     bool GBufferRenderPass::Render(RenderContext& renderContext, ResourceTracker& resourceTracker)
     {
         float deltaTime = renderContext.GetRenderFrameContext().GetDeltaTime();

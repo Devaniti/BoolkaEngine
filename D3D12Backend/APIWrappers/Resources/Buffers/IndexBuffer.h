@@ -10,8 +10,8 @@ namespace Boolka
         public Buffer
     {
     public:
-        IndexBuffer();
-        ~IndexBuffer();
+        IndexBuffer() = default;
+        ~IndexBuffer() = default;
 
         bool Initialize(Device& device, UINT64 size, void* initialData);
         void Unload();

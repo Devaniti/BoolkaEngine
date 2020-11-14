@@ -11,8 +11,7 @@ namespace Boolka
 
     CommandList::~CommandList()
     {
-        if (m_CommandList != nullptr)
-            Unload();
+        BLK_ASSERT(m_CommandList == nullptr);
     }
 
     bool CommandList::Initialize(ID3D12GraphicsCommandList5* commandList)

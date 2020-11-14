@@ -7,8 +7,8 @@ namespace Boolka
     class RenderDebug
     {
     public:
-        RenderDebug();
-        ~RenderDebug();
+        RenderDebug() = default;
+        ~RenderDebug() = default;
 
         bool Initialize();
         void Unload();

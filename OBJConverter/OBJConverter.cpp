@@ -119,7 +119,7 @@ namespace Boolka
         WriteIndexBuffer(fileWriter, indexDataVector);
         
         WriteTextures(fileWriter, remappedMaterials);
-        res = fileWriter.Close();
+        res = fileWriter.Close(BLK_FILE_BLOCK_SIZE);
         BLK_ASSERT(res);
 
         if (!res)

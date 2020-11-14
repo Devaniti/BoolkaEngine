@@ -7,8 +7,8 @@ namespace Boolka
         public RenderPass
     {
     public:
-        PresentPass();
-        ~PresentPass();
+        PresentPass() = default;
+        ~PresentPass() = default;
 
         bool Initialize(Device& device, RenderContext& renderContext, ResourceTracker& resourceTracker) override;
         void Unload() override;

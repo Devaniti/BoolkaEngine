@@ -8,7 +8,6 @@
 namespace Boolka
 {
 
-
     RootSignature::RootSignature()
         : m_RootSignature(nullptr)
     {

@@ -4,12 +4,4 @@
 namespace Boolka
 {
 
-    Texture::Texture()
-    {
-    }
-
-    Texture::~Texture()
-    {
-    }
-
 }

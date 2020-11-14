@@ -5,10 +5,6 @@
 namespace Boolka
 {
 
-    ResourceTracker::ResourceTracker()
-    {
-    }
-
     ResourceTracker::~ResourceTracker()
     {
         BLK_ASSERT(m_TrackedResources.empty());
