@@ -327,7 +327,7 @@ namespace Boolka
         BLK_ASSERT(remappedMaterials.size() > 0);
         BLK_ASSERT(remappedMaterials[0].empty());
 
-        SceneData::TextureHeader firstHeader{};
+        SceneData::TextureHeader firstHeader{ 1,1,1 };
         fileWriter.Write(&firstHeader, sizeof(firstHeader));
 
         for (size_t i = 1; i < remappedMaterials.size(); ++i)
@@ -340,10 +340,19 @@ namespace Boolka
 
             int result = stbi_info(material.c_str(), &width, &height, &dummy);
 
+            UINT mipCount = 0;
+            int dimension = min(width, height);
+            while (dimension)
+            {
+                mipCount++;
+                dimension >>= 1;
+            }
+
             SceneData::TextureHeader textureHeader
             {
                 checked_narrowing_cast<UINT>(width),
-                checked_narrowing_cast<UINT>(height)
+                checked_narrowing_cast<UINT>(height),
+                mipCount
             };
 
             BLK_ASSERT(result != 0);
@@ -377,6 +386,10 @@ namespace Boolka
         // First element is always empty texture
         BLK_ASSERT(remappedMaterials.size() > 0);
         BLK_ASSERT(remappedMaterials[0].empty());
+
+        // First empty texture
+        unsigned char pixel[4] = {};
+        WriteMIPChain(fileWriter, pixel, 1, 1);
 
         for (size_t i = 1; i < remappedMaterials.size(); ++i)
         {

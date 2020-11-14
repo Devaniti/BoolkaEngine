@@ -43,8 +43,6 @@ namespace Boolka
         res = m_SRVDescriptorHeap.Initialize(device, dataWrapper.textureCount, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
         BLK_ASSERT(res);
 
-        size_t totalTextureSize = 0;
-
         m_Textures.resize(dataWrapper.textureCount);
         m_SRVs.resize(dataWrapper.textureCount);
 
@@ -52,41 +50,59 @@ namespace Boolka
 
         sceneData.PrepareTextureHeaders();
 
+        size_t uploadSize = 0;
+        std::vector<size_t> textureOffsets;
+        textureOffsets.reserve(dataWrapper.textureCount);
+
+        size_t lastOffset = 0;
+        for (int i = 0; i < dataWrapper.textureCount; ++i)
+        {
+            const auto& textureHeader = dataWrapper.textureHeaders[i];
+            UINT width = textureHeader.width;
+            UINT height = textureHeader.height;
+            UINT mipCount = textureHeader.mipCount;
+            BLK_ASSERT(width != 0);
+            BLK_ASSERT(height != 0);
+
+            UINT currentWidth = width;
+            UINT currentHeight = height;
+            UINT16 currentMip = 0;
+            for (; currentWidth > 0 && currentHeight > 0; ++currentMip)
+            {
+                size_t rowPitch = CEIL_TO_POWER_OF_TWO(currentWidth * bytesPerPixel, 256);
+                size_t textureSize = CEIL_TO_POWER_OF_TWO(rowPitch * currentHeight, 512);
+                uploadSize += textureSize;
+                currentWidth >>= 1;
+                currentHeight >>= 1;
+            }
+            BLK_ASSERT(mipCount == currentMip);
+            size_t alignment;
+            size_t size;
+            Texture2D::GetRequiredSize(device, textureHeader.width, textureHeader.height, mipCount, DXGI_FORMAT_B8G8R8A8_UNORM, D3D12_RESOURCE_FLAG_NONE, alignment, size);
+
+            lastOffset = CEIL_TO_POWER_OF_TWO(lastOffset, alignment);
+            textureOffsets.push_back(lastOffset);
+            lastOffset += size;
+        }
+        size_t heapSize = lastOffset;
+
+        m_ResourceHeap.Initialize(device, heapSize, D3D12_HEAP_TYPE_DEFAULT, D3D12_HEAP_FLAG_ALLOW_ONLY_NON_RT_DS_TEXTURES);
+
         for (int i = 0; i < dataWrapper.textureCount; ++i)
         {
             auto& texture = m_Textures[i];
             const auto& textureHeader = dataWrapper.textureHeaders[i];
 
-            if (textureHeader.width == 0)
-            {
-                unsigned char dummy[4] = {};
-                texture.Initialize(device, D3D12_HEAP_TYPE_DEFAULT, 1, 1, 1, DXGI_FORMAT_B8G8R8A8_UNORM, D3D12_RESOURCE_FLAG_NONE, nullptr, D3D12_RESOURCE_STATE_COMMON);
-            }
-            else
-            {
-                UINT width = textureHeader.width;
-                UINT height = textureHeader.height;
-                UINT16 mipCount = 0;
-                for (; width > 0 && height > 0; ++mipCount)
-                {
-                    size_t rowPitch = CEIL_TO_POWER_OF_TWO(width * bytesPerPixel, 256);
-                    size_t textureSize = CEIL_TO_POWER_OF_TWO(rowPitch * height, 512);
-                    totalTextureSize += textureSize;
-                    width >>= 1;
-                    height >>= 1;
-                }
-
-                texture.Initialize(device, D3D12_HEAP_TYPE_DEFAULT, textureHeader.width, textureHeader.height, mipCount, DXGI_FORMAT_B8G8R8A8_UNORM, D3D12_RESOURCE_FLAG_NONE, nullptr, D3D12_RESOURCE_STATE_COMMON);
-            }
+            texture.Initialize(device, m_ResourceHeap, textureOffsets[i], textureHeader.width, textureHeader.height, textureHeader.mipCount, DXGI_FORMAT_B8G8R8A8_UNORM, D3D12_RESOURCE_FLAG_NONE, nullptr, D3D12_RESOURCE_STATE_COMMON);
         }
 
         UploadBuffer uploadBuffer;
-        uploadBuffer.Initialize(device, max(64, totalTextureSize));
+        uploadBuffer.Initialize(device, max(64, uploadSize));
 
         sceneData.PrepareTextures();
 
         void* mappedBuffer = uploadBuffer.Map();
-        memcpy(mappedBuffer, dataWrapper.baseTextureData, totalTextureSize);
+        memcpy(mappedBuffer, dataWrapper.baseTextureData, uploadSize);
         uploadBuffer.Unmap();
 
         auto& initCommandList = engineContext.GetInitializationCommandList();
@@ -153,6 +169,8 @@ namespace Boolka
             texture.Unload();
         }
         m_Textures.clear();
+
+        m_ResourceHeap.Unload();
 
         for (auto& srv : m_SRVs)
         {

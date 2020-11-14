@@ -249,6 +249,7 @@
     <ClInclude Include="RenderPasses\GBufferRenderPass.h" />
     <ClInclude Include="APIWrappers\Resources\Textures\Views\ShaderResourceView.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="APIWrappers\ResourceHeap.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WindowManagement\WindowManager.cpp">
@@ -440,6 +441,7 @@
     <ClCompile Include="RenderPasses\GBufferRenderPass.cpp" />
     <ClCompile Include="APIWrappers\Resources\Textures\Views\ShaderResourceView.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="APIWrappers\ResourceHeap.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\RootSig.hlsl">

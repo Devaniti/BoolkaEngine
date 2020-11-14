@@ -4,6 +4,7 @@
 #include "APIWrappers/DescriptorHeap.h"
 #include "APIWrappers/Resources/Textures/Texture2D.h"
 #include "APIWrappers/Resources/Textures/Views/ShaderResourceView.h"
+#include "APIWrappers/ResourceHeap.h"
 
 namespace Boolka
 {
@@ -32,6 +33,7 @@ namespace Boolka
         VertexBuffer m_VertexBuffer;
         IndexBuffer m_IndexBuffer;
         DescriptorHeap m_SRVDescriptorHeap;
+        ResourceHeap m_ResourceHeap;
         std::vector<Texture2D> m_Textures;
         std::vector<ShaderResourceView> m_SRVs;
     };

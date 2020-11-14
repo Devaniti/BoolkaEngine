@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Texture2D.h"
 #include "APIWrappers/Device.h"
+#include "APIWrappers/ResourceHeap.h"
 
 namespace Boolka
 {
@@ -36,6 +37,41 @@ namespace Boolka
         heapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
         heapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
 
+        D3D12_RESOURCE_DESC resourceDesc = FillDesc(width, height, mipCount, format, resourceFlags);
+
+        HRESULT hr = device->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDesc, initialState, clearValue, IID_PPV_ARGS(&m_Resource));
+        BLK_ASSERT(SUCCEEDED(hr));
+        return SUCCEEDED(hr);
+    }
+
+    bool Texture2D::Initialize(Device& device, ResourceHeap& resourceHeap, size_t heapOffset, UINT64 width, UINT height, UINT16 mipCount, DXGI_FORMAT format, D3D12_RESOURCE_FLAGS resourceFlags, D3D12_CLEAR_VALUE* clearValue, D3D12_RESOURCE_STATES initialState)
+    {
+        D3D12_RESOURCE_DESC resourceDesc = FillDesc(width, height, mipCount, format, resourceFlags);
+
+        HRESULT hr = device->CreatePlacedResource(resourceHeap.Get(), heapOffset, &resourceDesc, initialState, clearValue, IID_PPV_ARGS(&m_Resource));
+        BLK_ASSERT(SUCCEEDED(hr));
+        return SUCCEEDED(hr);
+    }
+
+    void Texture2D::GetRequiredSize(Device& device, UINT64 width, UINT height, UINT16 mipCount, DXGI_FORMAT format, D3D12_RESOURCE_FLAGS resourceFlags, size_t& outAlignment, size_t& outSize)
+    {
+        D3D12_RESOURCE_DESC resourceDesc = FillDesc(width, height, mipCount, format, resourceFlags);
+
+        D3D12_RESOURCE_ALLOCATION_INFO allocationInfo = device->GetResourceAllocationInfo(0, 1, &resourceDesc);
+        outAlignment = allocationInfo.Alignment;
+        outSize = allocationInfo.SizeInBytes;
+    }
+
+    void Texture2D::Unload()
+    {
+        BLK_ASSERT(m_Resource);
+
+        m_Resource->Release();
+        m_Resource = nullptr;
+    }
+
+    D3D12_RESOURCE_DESC Texture2D::FillDesc(UINT64 width, UINT height, UINT16 mipCount, DXGI_FORMAT format, D3D12_RESOURCE_FLAGS resourceFlags)
+    {
         D3D12_RESOURCE_DESC resourceDesc = {};
         resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
         resourceDesc.Alignment = 0;
@@ -49,16 +85,7 @@ namespace Boolka
         resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
         resourceDesc.Flags = resourceFlags;
 
-        HRESULT hr = device->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDesc, initialState, clearValue, IID_PPV_ARGS(&m_Resource));
-        return SUCCEEDED(hr) && (m_Resource != nullptr);
-    }
-
-    void Texture2D::Unload()
-    {
-        BLK_ASSERT(m_Resource);
-
-        m_Resource->Release();
-        m_Resource = nullptr;
+        return resourceDesc;
     }
 
 }

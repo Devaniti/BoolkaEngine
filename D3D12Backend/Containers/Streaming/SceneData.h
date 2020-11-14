@@ -16,6 +16,7 @@ namespace Boolka
         {
             UINT width;
             UINT height;
+            UINT mipCount;
         };
 
         struct SceneHeader

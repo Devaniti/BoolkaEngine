@@ -118,6 +118,7 @@
     <ClInclude Include="APIWrappers\DescriptorHeap.h" />
     <ClInclude Include="APIWrappers\Device.h" />
     <ClInclude Include="APIWrappers\Factory.h" />
+    <ClInclude Include="APIWrappers\ResourceHeap.h" />
     <ClInclude Include="APIWrappers\Resources\Buffers\Buffer.h" />
     <ClInclude Include="APIWrappers\Resources\Buffers\ConstantBuffer.h" />
     <ClInclude Include="APIWrappers\Resources\Buffers\IndexBuffer.h" />
@@ -192,6 +193,7 @@
     <ClCompile Include="APIWrappers\DescriptorHeap.cpp" />
     <ClCompile Include="APIWrappers\Device.cpp" />
     <ClCompile Include="APIWrappers\Factory.cpp" />
+    <ClCompile Include="APIWrappers\ResourceHeap.cpp" />
     <ClCompile Include="APIWrappers\Resources\Buffers\Buffer.cpp" />
     <ClCompile Include="APIWrappers\Resources\Buffers\ConstantBuffer.cpp" />
     <ClCompile Include="APIWrappers\Resources\Buffers\IndexBuffer.cpp" />
