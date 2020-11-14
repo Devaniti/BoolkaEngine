@@ -6,14 +6,15 @@
 
 #include <iostream>
 
-int RealMain()
+int RealMain(int argc, wchar_t* argv[])
 {
+    BLK_CRITICAL_ASSERT(argc == 1);
+
     Boolka::DebugTimer loadTimer;
     loadTimer.Start();
 
     Boolka::FileReader fileReader;
-    //if (!fileReader.OpenFile(L"C:\\Projects\\san-miguel\\san-miguel-low-poly.scene"))
-    if (!fileReader.OpenFile(L"C:\\Projects\\Sponza\\sponza.scene"))
+    if (!fileReader.OpenFile(argv[0]))
         return -1;
 
     Boolka::SceneData sceneData(fileReader);
@@ -62,12 +63,14 @@ int RealMain()
     return 0;
 }
 
-int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
+int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR pCmdLine, int nCmdShow)
 {
-    return RealMain();
+    int argc;
+    LPWSTR* argv = ::CommandLineToArgvW(pCmdLine, &argc);
+    return RealMain(argc, argv);
 }
 
-int main()
+int main(int argc, wchar_t* argv[])
 {
-    return RealMain();
+    return RealMain(argc, argv);
 }
