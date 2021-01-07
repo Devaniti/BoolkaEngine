@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "RenderFrameContext.h"
 
+#include "BoolkaCommon/DebugHelpers/DebugOutputStream.h"
+#include "Contexts/RenderEngineContext.h"
 
 namespace Boolka
 {
@@ -39,7 +41,7 @@ namespace Boolka
         m_Frequency = {};
     }
 
-    void RenderFrameContext::FlipFrame(UINT frameIndex)
+    void RenderFrameContext::FlipFrame(RenderEngineContext& engineContext, UINT frameIndex)
     {
         m_FrameIndex = frameIndex;
 
@@ -53,9 +55,14 @@ namespace Boolka
 
         m_DeltaTime = timestampDifference / m_Frequency;
 
-        char buffer[256];
-        snprintf(buffer, 256, "Frame %d time:%.3fms\n", frameIndex, m_DeltaTime * 1000.0f);
-        OutputDebugStringA(buffer);
+        UINT width = engineContext.GetBackbufferWidth();
+        UINT height = engineContext.GetBackbufferHeight();
+
+        float aspectRatio = static_cast<float>(width) / height;
+
+        engineContext.GetCamera().Update(m_DeltaTime, aspectRatio, 150.0f, 60.0f, m_ViewMatrix, m_ProjMatrix);
+
+        g_WDebugOutput << L"Frame " << frameIndex << L" time:" << m_DeltaTime * 1000.0f << std::endl;
     }
 
 }

@@ -8,16 +8,19 @@
 #include "APIWrappers/Resources/Buffers/Views/IndexBufferView.h"
 #include "APIWrappers/Resources/Buffers/UploadBuffer.h"
 #include "APIWrappers/Resources/Buffers/Views/ConstantBufferView.h"
+#include "APIWrappers/Resources/Textures/Texture2D.h"
+#include "APIWrappers/Resources/Textures/Views/DepthStencilView.h"
+#include "Camera.h"
 
 namespace Boolka
 {
 
-    class DebugRenderPass :
+    class ZRenderPass :
         public RenderPass
     {
     public:
-        DebugRenderPass();
-        ~DebugRenderPass();
+        ZRenderPass() = default;
+        ~ZRenderPass() = default;
 
         bool Initialize(Device& device, RenderContext& renderContext, ResourceTracker& resourceTracker) override;
         void Unload() override;
@@ -27,15 +30,6 @@ namespace Boolka
 
     private:
         GraphicPipelineState m_PSO;
-        UploadBuffer m_VertexBuffer;
-        VertexBufferView m_VertexBufferView;
-        UploadBuffer m_IndexBuffer;
-        IndexBufferView m_IndexBufferView;
-        Buffer m_ConstantBuffers[BLK_IN_FLIGHT_FRAMES];
-        UploadBuffer m_UploadBuffers[BLK_IN_FLIGHT_FRAMES];
-        ConstantBufferView m_ConstantBufferViews[BLK_IN_FLIGHT_FRAMES];
-
-        float m_CurrentAngle;
     };
 
 }

@@ -5,7 +5,6 @@
 #include "APIWrappers/RenderDebug.h"
 #include "APIWrappers/Device.h"
 #include "WindowManagement/DisplayController.h"
-#include "APIWrappers/Resources/Buffers/VertexBuffer.h"
 #include "RenderSchedule/RenderSchedule.h"
 
 namespace Boolka

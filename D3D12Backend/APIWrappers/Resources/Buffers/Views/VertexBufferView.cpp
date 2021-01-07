@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "VertexBufferView.h"
-#include "APIWrappers/Resources/Buffers/VertexBuffer.h"
 
 namespace Boolka
 {
@@ -15,7 +14,7 @@ namespace Boolka
         BLK_ASSERT(m_View.BufferLocation == 0);
     }
 
-    bool VertexBufferView::Initialize(VertexBuffer& vertexBuffer, UINT size, UINT stride)
+    bool VertexBufferView::Initialize(Buffer& vertexBuffer, UINT size, UINT stride)
     {
         BLK_ASSERT(m_View.BufferLocation == 0);
 

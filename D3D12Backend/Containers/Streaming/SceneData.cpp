@@ -28,7 +28,10 @@ namespace Boolka
 
         result.vertexBufferSize = sceneHeader->vertexSize;
         result.indexBufferSize = sceneHeader->indexSize;
+        result.cullingBufferSize = sceneHeader->cullingSize;
+        result.indexCount = sceneHeader->indexCount;
         result.textureCount = sceneHeader->textureCount;
+        result.objectCount = sceneHeader->objectCount;
 
         data += sizeof(SceneHeader);
 
@@ -36,15 +39,7 @@ namespace Boolka
 
         data += sizeof(TextureHeader) * result.textureCount;
 
-        result.vertexData = data;
-
-        data += result.vertexBufferSize;
-
-        result.indexData = data;
-
-        data += result.indexBufferSize;
-
-        result.baseTextureData = data;
+        result.binaryData = data;
 
         return result;
     }
@@ -62,7 +57,7 @@ namespace Boolka
         BLK_ASSERT(res);
     }
 
-    void SceneData::PrepareTextures()
+    void SceneData::PrepareBinaryData()
     {
         bool res = m_FileReader.WaitData();
         BLK_ASSERT(res);

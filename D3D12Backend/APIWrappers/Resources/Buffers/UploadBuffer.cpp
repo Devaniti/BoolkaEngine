@@ -6,7 +6,7 @@ namespace Boolka
 
     bool UploadBuffer::Initialize(Device& device, UINT64 size)
     {
-        if (!InitializeCommitedResource(device, size, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_GENERIC_READ))
+        if (!Buffer::Initialize(device, size, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_FLAG_NONE, D3D12_RESOURCE_STATE_GENERIC_READ))
             return false;
 
         return true;
@@ -23,13 +23,21 @@ namespace Boolka
     {
         D3D12_RANGE readRange = {}; // empty read range = no reading
         void* result = nullptr;
-        m_Resource->Map(0, &readRange, &result);
+        HRESULT hr = m_Resource->Map(0, &readRange, &result);
+        BLK_ASSERT(SUCCEEDED(hr));
         return result;
     }
 
     void UploadBuffer::Unmap()
     {
         m_Resource->Unmap(0, nullptr);
+    }
+
+    void UploadBuffer::Upload(void* data, UINT64 size)
+    {
+        void* dst = Map();
+        memcpy(dst, data, size);
+        Unmap();
     }
 
 }

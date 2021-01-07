@@ -42,7 +42,7 @@ namespace Boolka
         UINT width = renderContext.GetRenderEngineContext().GetBackbufferWidth();
         float aspectRatioCompensation = static_cast<float>(height) / width;
 
-        ConstantBuffer& currentConstantBuffer = m_ConstantBuffers[frameIndex];
+        Buffer& currentConstantBuffer = m_ConstantBuffers[frameIndex];
         UploadBuffer& currentUploadBuffer = m_UploadBuffers[frameIndex];
 
         static const float rotationSpeed = FLOAT_PI / 8.0f;
@@ -68,11 +68,7 @@ namespace Boolka
         Matrix4x4 viewProj = view;
         viewProj[0] *= aspectRatioCompensation;
 
-        float* upload = static_cast<float*>(currentUploadBuffer.Map());
-
-        memcpy(upload, viewProj.GetBuffer(), sizeof(viewProj));
-
-        currentUploadBuffer.Unmap();
+        currentUploadBuffer.Upload(viewProj.GetBuffer(), sizeof(viewProj));
 
         commandList->CopyResource(currentConstantBuffer.Get(), currentUploadBuffer.Get());
 
@@ -168,8 +164,9 @@ namespace Boolka
         static const UINT64 vertexSize = sizeof(Vertex);
         static const UINT64 vertexBufferSize = vertexSize * vertexCount;
 
-        bool res = m_VertexBuffer.Initialize(device, vertexBufferSize, vertexData);
+        bool res = m_VertexBuffer.Initialize(device, vertexBufferSize);
         BLK_ASSERT(res);
+        m_VertexBuffer.Upload(vertexData, vertexBufferSize);
 
         res = m_VertexBufferView.Initialize(m_VertexBuffer, vertexBufferSize, vertexSize);
         BLK_ASSERT(res);
@@ -188,8 +185,9 @@ namespace Boolka
         static const UINT64 instanceSize = sizeof(Matrix4x4);
         static const UINT64 instanceBufferSize = instanceSize * instanceCount;
 
-        res = m_VertexInstanceBuffer.Initialize(device, instanceBufferSize, instanceData);
+        res = m_VertexInstanceBuffer.Initialize(device, instanceBufferSize);
         BLK_ASSERT(res);
+        m_VertexInstanceBuffer.Upload(instanceData, instanceBufferSize);
 
         res = m_VertexInstanceBufferView.Initialize(m_VertexInstanceBuffer, instanceBufferSize, instanceSize);
         BLK_ASSERT(res);
@@ -209,13 +207,14 @@ namespace Boolka
         static const UINT64 indexSize = sizeof(uint16_t);
         static const UINT64 indexBufferSize = indexSize * indexCount;
 
-        res = m_IndexBuffer.Initialize(device, indexBufferSize, indexData);
+        res = m_IndexBuffer.Initialize(device, indexBufferSize);
         BLK_ASSERT(res);
+        m_IndexBuffer.Upload(indexData, indexBufferSize);
 
         res = m_IndexBufferView.Initialize(m_IndexBuffer, indexBufferSize, DXGI_FORMAT_R16_UINT);
         BLK_ASSERT(res);
 
-        res = m_PSO.Initialize(device, renderContext.GetRenderEngineContext().GetDefaultRootSig(), inputLayout, VS, PS, true);
+        res = m_PSO.Initialize(device, renderContext.GetRenderEngineContext().GetDefaultRootSig(), inputLayout, VS, PS, 1, true);
         BLK_ASSERT(res);
 
         inputLayout.Unload();
@@ -223,7 +222,7 @@ namespace Boolka
         static const UINT64 floatSize = 4;
         static const UINT64 cbSize = CEIL_TO_POWER_OF_TWO(4 * 4 * floatSize, 256);
 
-        INITIALIZE_ARRAY(m_ConstantBuffers, device, cbSize);
+        INITIALIZE_ARRAY(m_ConstantBuffers, device, cbSize, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_FLAG_NONE, D3D12_RESOURCE_STATE_COPY_DEST);
         INITIALIZE_ARRAY(m_UploadBuffers, device, cbSize);
 
         for (UINT i = 0; i < BLK_IN_FLIGHT_FRAMES; ++i)

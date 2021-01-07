@@ -12,7 +12,7 @@ namespace Boolka
         ConstantBufferView();
         ~ConstantBufferView();
 
-        bool Initialize(Device& device, ConstantBuffer& constantBuffer, D3D12_CPU_DESCRIPTOR_HANDLE destinationDescriptorHandle, UINT size);
+        bool Initialize(Device& device, Buffer& constantBuffer, D3D12_CPU_DESCRIPTOR_HANDLE destinationDescriptorHandle, UINT size);
         void Unload();
 
         D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptor() { BLK_ASSERT(m_CPUDescriptorHandle.ptr != 0); return m_CPUDescriptorHandle; };

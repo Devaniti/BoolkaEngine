@@ -40,6 +40,12 @@
     <ClInclude Include="DebugHelpers\DebugTimer.h">
       <Filter>DebugHelpers</Filter>
     </ClInclude>
+    <ClInclude Include="DebugHelpers\DebugOutputStream.h">
+      <Filter>DebugHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugHelpers\DebugProfileTimer.h">
+      <Filter>DebugHelpers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -56,6 +62,12 @@
       <Filter>DebugHelpers</Filter>
     </ClCompile>
     <ClCompile Include="DebugHelpers\DebugTimer.cpp">
+      <Filter>DebugHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugHelpers\DebugOutputStream.cpp">
+      <Filter>DebugHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugHelpers\DebugProfileTimer.cpp">
       <Filter>DebugHelpers</Filter>
     </ClCompile>
   </ItemGroup>

@@ -9,11 +9,12 @@ namespace Boolka
     class Buffer :
         public Resource
     {
-    protected:
+    public:
         Buffer() = default;
-        ~Buffer() = default;
+        ~Buffer();
 
-        bool InitializeCommitedResource(Device& device, UINT64 size, D3D12_HEAP_TYPE heapType, D3D12_RESOURCE_STATES initialState);
+        bool Initialize(Device& device, UINT64 size, D3D12_HEAP_TYPE heapType, D3D12_RESOURCE_FLAGS resourceFlags, D3D12_RESOURCE_STATES initialState);
+        void Unload();
     };
 
 }

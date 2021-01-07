@@ -13,7 +13,10 @@ namespace Boolka
         InputLayout& inputLayout,
         const MemoryBlock& vertexShaderBytecode,
         const MemoryBlock& pixelShaderBytecode,
-        bool useDepthTest /*= false*/)
+        UINT renderTargetCount,
+        bool useDepthTest /*= false*/,
+        bool writeDepth /*= true*/,
+        D3D12_COMPARISON_FUNC depthFunc /*= D3D12_COMPARISON_FUNC_LESS*/)
     {
         ID3D12PipelineState* state = nullptr;
         D3D12_GRAPHICS_PIPELINE_STATE_DESC desc;
@@ -22,10 +25,14 @@ namespace Boolka
 
         if (useDepthTest)
         {
-            desc.DepthStencilState.DepthEnable = TRUE;
-            desc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
-            desc.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+            desc.DepthStencilState.DepthEnable = true;
+            desc.DepthStencilState.DepthFunc = depthFunc;
+            desc.DepthStencilState.DepthWriteMask = writeDepth ? D3D12_DEPTH_WRITE_MASK_ALL : D3D12_DEPTH_WRITE_MASK_ZERO;
             desc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
+        }
+        else
+        {
+            desc.DepthStencilState.DepthEnable = false;
         }
 
         desc.pRootSignature = rootSig.Get();
@@ -34,16 +41,19 @@ namespace Boolka
         inputLayout.FillInputLayoutDesc(desc.InputLayout);
 
         desc.SampleMask = UINT32_MAX;
-        desc.NumRenderTargets = 1;
-        desc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
-        desc.BlendState.RenderTarget[0].SrcBlend = D3D12_BLEND_ONE;
-        desc.BlendState.RenderTarget[0].DestBlend = D3D12_BLEND_ZERO;
-        desc.BlendState.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
-        desc.BlendState.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
-        desc.BlendState.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
-        desc.BlendState.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
-        desc.BlendState.RenderTarget[0].LogicOp = D3D12_LOGIC_OP_NOOP;
-        desc.BlendState.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+        desc.NumRenderTargets = renderTargetCount;
+        for (UINT i = 0; i < renderTargetCount; ++i)
+        {
+            desc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+            desc.BlendState.RenderTarget[0].SrcBlend = D3D12_BLEND_ONE;
+            desc.BlendState.RenderTarget[0].DestBlend = D3D12_BLEND_ZERO;
+            desc.BlendState.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+            desc.BlendState.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
+            desc.BlendState.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
+            desc.BlendState.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+            desc.BlendState.RenderTarget[0].LogicOp = D3D12_LOGIC_OP_NOOP;
+            desc.BlendState.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+        }
 
         HRESULT hr = device->CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(&state));
         if (FAILED(hr)) return false;

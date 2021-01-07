@@ -2,7 +2,7 @@
 #include "D3D12Backend/RenderBackend.h"
 #include "D3D12Backend/Containers/Streaming/SceneData.h"
 #include "FileReader/FileReader.h"
-#include "BoolkaCommon/DebugHelpers/DebugTimer.h"
+#include "BoolkaCommon/DebugHelpers/DebugProfileTimer.h"
 
 #include <iostream>
 
@@ -10,7 +10,7 @@ int RealMain(int argc, wchar_t* argv[])
 {
     BLK_CRITICAL_ASSERT(argc == 1);
 
-    Boolka::DebugTimer loadTimer;
+    Boolka::DebugProfileTimer loadTimer;
     loadTimer.Start();
 
     Boolka::FileReader fileReader;
@@ -22,29 +22,23 @@ int RealMain(int argc, wchar_t* argv[])
     if (!fileReader.StartStreaming(sceneData.GetMemory()))
         return -1;
 
+    Boolka::DebugProfileTimer renderInitTimer;
+    renderInitTimer.Start();
     Boolka::RenderBackend* renderer = Boolka::RenderBackend::CreateRenderBackend();
     bool res = renderer->Initialize();
     BLK_CRITICAL_ASSERT(res);
+    renderInitTimer.Stop(L"Render initialization");
 
-    Boolka::DebugTimer sceneCreationTimer;
+    Boolka::DebugProfileTimer sceneCreationTimer;
     sceneCreationTimer.Start();
     if (!renderer->LoadScene(sceneData))
         return -1;
-    float sceneCreationTime = sceneCreationTimer.Stop() * 1000.0f;
+    sceneCreationTimer.Stop(L"Scene creation");
 
     fileReader.CloseFile();
-
-    char buffer[256];
-
-    snprintf(buffer, 256, "Scene creation time:%.3fms\n", sceneCreationTime);
-    OutputDebugStringA(buffer);
-
     fileReader.FreeData(sceneData.GetMemory());
 
-    float loadTime = loadTimer.Stop() * 1000.0f;
-
-    snprintf(buffer, 256, "Load time:%.3fms\n", loadTime);
-    OutputDebugStringA(buffer);
+    loadTimer.Stop(L"Load");
 
     ::GetAsyncKeyState(VK_ESCAPE);
     while (true)

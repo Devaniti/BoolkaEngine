@@ -91,7 +91,6 @@ namespace Boolka
     void RenderBackendImpl::UnloadScene()
     {
         m_Device.Flush();
-        m_RenderSchedule.UnloadScene();
     }
 
 }

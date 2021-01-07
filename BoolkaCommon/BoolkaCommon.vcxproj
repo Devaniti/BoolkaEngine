@@ -79,6 +79,8 @@
   <ItemGroup>
     <ClInclude Include="DebugHelpers\DebugFileReader.h" />
     <ClInclude Include="DebugHelpers\DebugFileWriter.h" />
+    <ClInclude Include="DebugHelpers\DebugOutputStream.h" />
+    <ClInclude Include="DebugHelpers\DebugProfileTimer.h" />
     <ClInclude Include="DebugHelpers\DebugTimer.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="SolutionConfig.h" />
@@ -91,6 +93,8 @@
   <ItemGroup>
     <ClCompile Include="DebugHelpers\DebugFileReader.cpp" />
     <ClCompile Include="DebugHelpers\DebugFileWriter.cpp" />
+    <ClCompile Include="DebugHelpers\DebugOutputStream.cpp" />
+    <ClCompile Include="DebugHelpers\DebugProfileTimer.cpp" />
     <ClCompile Include="DebugHelpers\DebugTimer.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

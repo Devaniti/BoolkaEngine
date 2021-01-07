@@ -22,7 +22,10 @@ namespace Boolka
             InputLayout& inputLayout,
             const MemoryBlock& vertexShaderBytecode, 
             const MemoryBlock& pixelShaderBytecode,
-            bool useDepthTest = false);
+            UINT renderTargetCount,
+            bool useDepthTest = false,
+            bool writeDepth = true,
+            D3D12_COMPARISON_FUNC depthFunc = D3D12_COMPARISON_FUNC_LESS);
     private:
         static void SetDefaultPipelineStateDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& desc);
         static void SetDefaultRasterizerDesc(D3D12_RASTERIZER_DESC& desc);

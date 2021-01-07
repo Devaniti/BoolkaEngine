@@ -6,6 +6,7 @@ namespace Boolka
 {
 
     class Device;
+    class RenderEngineContext;
 
     class RenderFrameContext
     {
@@ -19,8 +20,14 @@ namespace Boolka
         float GetDeltaTime() { return m_DeltaTime; };
         UINT GetFrameIndex() { return m_FrameIndex; };
 
-        void FlipFrame(UINT frameIndex);
+        Matrix4x4& GetViewMatrix() { return m_ViewMatrix; };
+        Matrix4x4& GetProjMatrix() { return m_ProjMatrix; };
+
+        void FlipFrame(RenderEngineContext& engineContext, UINT frameIndex);
     private:
+        Matrix4x4 m_ViewMatrix;
+        Matrix4x4 m_ProjMatrix;
+
         float m_DeltaTime;
         UINT m_FrameIndex;
 

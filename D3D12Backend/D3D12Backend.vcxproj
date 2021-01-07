@@ -87,7 +87,7 @@
     </Link>
     <FxCompile>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <ShaderModel>5.1</ShaderModel>
+      <ShaderModel>6.0</ShaderModel>
     </FxCompile>
     <Lib>
       <AdditionalDependencies>D3D12.lib;DXGI.lib;D3DCompiler.lib;</AdditionalDependencies>
@@ -120,10 +120,8 @@
     <ClInclude Include="APIWrappers\Factory.h" />
     <ClInclude Include="APIWrappers\ResourceHeap.h" />
     <ClInclude Include="APIWrappers\Resources\Buffers\Buffer.h" />
-    <ClInclude Include="APIWrappers\Resources\Buffers\ConstantBuffer.h" />
-    <ClInclude Include="APIWrappers\Resources\Buffers\IndexBuffer.h" />
+    <ClInclude Include="APIWrappers\Resources\Buffers\CommandSignature.h" />
     <ClInclude Include="APIWrappers\Resources\Buffers\UploadBuffer.h" />
-    <ClInclude Include="APIWrappers\Resources\Buffers\VertexBuffer.h" />
     <ClInclude Include="APIWrappers\Resources\Buffers\Views\ConstantBufferView.h" />
     <ClInclude Include="APIWrappers\Resources\Buffers\Views\IndexBufferView.h" />
     <ClInclude Include="APIWrappers\Resources\Buffers\Views\VertexBufferView.h" />
@@ -154,6 +152,8 @@
     <ClInclude Include="RenderPasses\DebugRenderPass.h" />
     <ClInclude Include="RenderPasses\GBufferRenderPass.h" />
     <ClInclude Include="RenderPasses\PresentPass.h" />
+    <ClInclude Include="RenderPasses\UpdateRenderPass.h" />
+    <ClInclude Include="RenderPasses\ZRenderPass.h" />
     <ClInclude Include="RenderSchedule\RenderSchedule.h" />
     <ClInclude Include="RenderSchedule\ResourceTracker.h" />
     <ClInclude Include="stdafx.h" />
@@ -188,10 +188,8 @@
     <ClCompile Include="APIWrappers\Factory.cpp" />
     <ClCompile Include="APIWrappers\ResourceHeap.cpp" />
     <ClCompile Include="APIWrappers\Resources\Buffers\Buffer.cpp" />
-    <ClCompile Include="APIWrappers\Resources\Buffers\ConstantBuffer.cpp" />
-    <ClCompile Include="APIWrappers\Resources\Buffers\IndexBuffer.cpp" />
+    <ClCompile Include="APIWrappers\Resources\Buffers\CommandSignature.cpp" />
     <ClCompile Include="APIWrappers\Resources\Buffers\UploadBuffer.cpp" />
-    <ClCompile Include="APIWrappers\Resources\Buffers\VertexBuffer.cpp" />
     <ClCompile Include="APIWrappers\Resources\Buffers\Views\ConstantBufferView.cpp" />
     <ClCompile Include="APIWrappers\Resources\Buffers\Views\IndexBufferView.cpp" />
     <ClCompile Include="APIWrappers\Resources\Buffers\Views\VertexBufferView.cpp" />
@@ -219,6 +217,8 @@
     <ClCompile Include="RenderPasses\DebugRenderPass.cpp" />
     <ClCompile Include="RenderPasses\GBufferRenderPass.cpp" />
     <ClCompile Include="RenderPasses\PresentPass.cpp" />
+    <ClCompile Include="RenderPasses\UpdateRenderPass.cpp" />
+    <ClCompile Include="RenderPasses\ZRenderPass.cpp" />
     <ClCompile Include="RenderSchedule\RenderSchedule.cpp" />
     <ClCompile Include="RenderSchedule\ResourceTracker.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -264,6 +264,10 @@
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </AdditionalOptions>
     </FxCompile>
+    <FxCompile Include="Shaders\ZPass\ZPassVertexShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BoolkaCommon\BoolkaCommon.vcxproj">
@@ -274,6 +278,7 @@
     <None Include="Shaders\Debug3DPass\Debug3DPassShadersCommon.hlsli" />
     <None Include="Shaders\DebugPass\DebugPassShadersCommon.hlsli" />
     <None Include="Shaders\GBufferPass\GBufferPassShadersCommon.hlsli" />
+    <None Include="Shaders\ZPass\ZPassShadersCommon.hlsli" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

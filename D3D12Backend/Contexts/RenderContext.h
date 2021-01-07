@@ -20,6 +20,8 @@ namespace Boolka
         RenderFrameContext& GetRenderFrameContext() { BLK_ASSERT(m_frameContext != nullptr); return *m_frameContext; };
         RenderThreadContext& GetRenderThreadContext() { BLK_ASSERT(m_threadContext != nullptr); return *m_threadContext; };
 
+        std::tuple<RenderEngineContext&, RenderFrameContext&, RenderThreadContext&> GetContexts() { return {GetRenderEngineContext(), GetRenderFrameContext(), GetRenderThreadContext()}; };
+
     private:
         RenderEngineContext* m_engineContext;
         RenderFrameContext* m_frameContext;

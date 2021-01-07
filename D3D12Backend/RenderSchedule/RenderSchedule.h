@@ -7,6 +7,8 @@
 #include "Contexts/RenderThreadContext.h"
 #include "Contexts/RenderFrameContext.h"
 #include "Contexts/RenderEngineContext.h"
+#include "RenderPasses/ZRenderPass.h"
+#include "RenderPasses/UpdateRenderPass.h"
 
 namespace Boolka
 {
@@ -25,13 +27,14 @@ namespace Boolka
         void Unload();
 
         bool LoadScene(Device& device, SceneData& sceneData);
-        void UnloadScene();
 
         bool Render(Device& device, UINT frameIndex);
 
         ResourceTracker& GetResourceTracker() { return m_ResourceTracker; };
 
     private:
+        bool InitializeRenderPasses(Device& device);
+
         bool PrepareFrame();
         bool RenderFrame(Device& device);
 
@@ -43,7 +46,9 @@ namespace Boolka
         RenderThreadContext m_ThreadContext;
         RenderContext m_RenderContext;
         ResourceTracker m_ResourceTracker;
-        GBufferRenderPass m_DebugPass;
+        UpdateRenderPass m_UpdatePass;
+        ZRenderPass m_ZPass;
+        GBufferRenderPass m_GbufferPass;
         PresentPass m_PresentPass;
     public:
     };

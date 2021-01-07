@@ -5,7 +5,12 @@
 namespace Boolka
 {
 
-    bool Buffer::InitializeCommitedResource(Device& device, UINT64 size, D3D12_HEAP_TYPE heapType, D3D12_RESOURCE_STATES initialState)
+    Buffer::~Buffer()
+    {
+        BLK_ASSERT(m_Resource == nullptr);
+    }
+
+    bool Buffer::Initialize(Device& device, UINT64 size, D3D12_HEAP_TYPE heapType, D3D12_RESOURCE_FLAGS resourceFlags, D3D12_RESOURCE_STATES initialState)
     {
         BLK_ASSERT(m_Resource == nullptr);
 
@@ -25,7 +30,7 @@ namespace Boolka
         resourceDesc.SampleDesc.Count = 1;
         resourceDesc.SampleDesc.Quality = 0;
         resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-        resourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+        resourceDesc.Flags = resourceFlags;
 
         HRESULT hr = device->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDesc,
             initialState, nullptr, IID_PPV_ARGS(&m_Resource));
@@ -34,6 +39,13 @@ namespace Boolka
             return false;
 
         return true;
+    }
+
+    void Buffer::Unload()
+    {
+        BLK_ASSERT(m_Resource != nullptr);
+        m_Resource->Release();
+        m_Resource = nullptr;
     }
 
 }

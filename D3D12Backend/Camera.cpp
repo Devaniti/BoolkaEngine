@@ -37,9 +37,10 @@ namespace Boolka
     bool Camera::Update(float deltaTime, float aspectRatio, float moveSpeed, float rotationSpeed, Matrix4x4& outViewMatrix, Matrix4x4& outProjMatrix)
     {
         float speedMult = ::GetAsyncKeyState(VK_SHIFT) ? 5.0f : 1.0f;
+        float angleSpeedMult = ::GetAsyncKeyState(VK_SHIFT) ? 2.0f : 1.0f;
 
         float moveDelta = moveSpeed * deltaTime * speedMult;
-        float rotationDelta = DEG_TO_RAD(rotationSpeed) * deltaTime;
+        float rotationDelta = DEG_TO_RAD(rotationSpeed) * deltaTime * angleSpeedMult;
 
         static const Vector4 upDirection{ 0, 0, 1, 0 };
 

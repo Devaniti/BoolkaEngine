@@ -174,9 +174,6 @@
     <ClInclude Include="APIWrappers\Resources\Buffers\Buffer.h">
       <Filter>APIWrappers\Resources\Buffers</Filter>
     </ClInclude>
-    <ClInclude Include="APIWrappers\Resources\Buffers\VertexBuffer.h">
-      <Filter>APIWrappers\Resources\Buffers</Filter>
-    </ClInclude>
     <ClInclude Include="APIWrappers\Resources\Buffers\Views\VertexBufferView.h">
       <Filter>APIWrappers\Resources\Buffers\Views</Filter>
     </ClInclude>
@@ -191,9 +188,6 @@
     </ClInclude>
     <ClInclude Include="RenderPasses\PresentPass.h">
       <Filter>RenderPasses</Filter>
-    </ClInclude>
-    <ClInclude Include="APIWrappers\Resources\Buffers\ConstantBuffer.h">
-      <Filter>APIWrappers\Resources\Buffers</Filter>
     </ClInclude>
     <ClInclude Include="Contexts\RenderThreadContext.h">
       <Filter>Contexts</Filter>
@@ -210,12 +204,6 @@
     <ClInclude Include="APIWrappers\Resources\Buffers\Views\ConstantBufferView.h">
       <Filter>APIWrappers\Resources\Buffers\Views</Filter>
     </ClInclude>
-    <ClInclude Include="APIWrappers\Resources\Buffers\UploadBuffer.h">
-      <Filter>APIWrappers\Resources\Buffers</Filter>
-    </ClInclude>
-    <ClInclude Include="APIWrappers\Resources\Buffers\IndexBuffer.h">
-      <Filter>APIWrappers\Resources\Buffers</Filter>
-    </ClInclude>
     <ClInclude Include="APIWrappers\Resources\Buffers\Views\IndexBufferView.h">
       <Filter>APIWrappers\Resources\Buffers\Views</Filter>
     </ClInclude>
@@ -229,6 +217,10 @@
     <ClInclude Include="APIWrappers\Resources\Textures\Views\ShaderResourceView.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="APIWrappers\ResourceHeap.h" />
+    <ClInclude Include="APIWrappers\Resources\Buffers\CommandSignature.h" />
+    <ClInclude Include="APIWrappers\Resources\Buffers\UploadBuffer.h" />
+    <ClInclude Include="RenderPasses\ZRenderPass.h" />
+    <ClInclude Include="RenderPasses\UpdateRenderPass.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WindowManagement\WindowManager.cpp">
@@ -344,9 +336,6 @@
     <ClCompile Include="APIWrappers\Resources\Buffers\Buffer.cpp">
       <Filter>APIWrappers\Resources\Buffers</Filter>
     </ClCompile>
-    <ClCompile Include="APIWrappers\Resources\Buffers\VertexBuffer.cpp">
-      <Filter>APIWrappers\Resources\Buffers</Filter>
-    </ClCompile>
     <ClCompile Include="APIWrappers\Resources\Buffers\Views\VertexBufferView.cpp">
       <Filter>APIWrappers\Resources\Buffers\Views</Filter>
     </ClCompile>
@@ -361,9 +350,6 @@
     </ClCompile>
     <ClCompile Include="RenderPasses\PresentPass.cpp">
       <Filter>RenderPasses</Filter>
-    </ClCompile>
-    <ClCompile Include="APIWrappers\Resources\Buffers\ConstantBuffer.cpp">
-      <Filter>APIWrappers\Resources\Buffers</Filter>
     </ClCompile>
     <ClCompile Include="Contexts\RenderThreadContext.cpp">
       <Filter>Contexts</Filter>
@@ -380,12 +366,6 @@
     <ClCompile Include="APIWrappers\Resources\Buffers\Views\ConstantBufferView.cpp">
       <Filter>APIWrappers\Resources\Buffers\Views</Filter>
     </ClCompile>
-    <ClCompile Include="APIWrappers\Resources\Buffers\UploadBuffer.cpp">
-      <Filter>APIWrappers\Resources\Buffers</Filter>
-    </ClCompile>
-    <ClCompile Include="APIWrappers\Resources\Buffers\IndexBuffer.cpp">
-      <Filter>APIWrappers\Resources\Buffers</Filter>
-    </ClCompile>
     <ClCompile Include="APIWrappers\Resources\Buffers\Views\IndexBufferView.cpp">
       <Filter>APIWrappers\Resources\Buffers\Views</Filter>
     </ClCompile>
@@ -400,6 +380,10 @@
     <ClCompile Include="APIWrappers\Resources\Textures\Views\ShaderResourceView.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="APIWrappers\ResourceHeap.cpp" />
+    <ClCompile Include="APIWrappers\Resources\Buffers\CommandSignature.cpp" />
+    <ClCompile Include="APIWrappers\Resources\Buffers\UploadBuffer.cpp" />
+    <ClCompile Include="RenderPasses\ZRenderPass.cpp" />
+    <ClCompile Include="RenderPasses\UpdateRenderPass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\RootSig.hlsl">
@@ -419,6 +403,7 @@
     </FxCompile>
     <FxCompile Include="Shaders\GBufferPass\GBufferPassVertexShader.hlsl" />
     <FxCompile Include="Shaders\GBufferPass\GBufferPassPixelShader.hlsl" />
+    <FxCompile Include="Shaders\ZPass\ZPassVertexShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\DebugPass\DebugPassShadersCommon.hlsli">
@@ -428,5 +413,6 @@
       <Filter>Shaders\Debug3DPass</Filter>
     </None>
     <None Include="Shaders\GBufferPass\GBufferPassShadersCommon.hlsli" />
+    <None Include="Shaders\ZPass\ZPassShadersCommon.hlsli" />
   </ItemGroup>
 </Project>

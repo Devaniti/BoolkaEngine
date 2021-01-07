@@ -19,6 +19,8 @@ namespace Boolka
 
         m_RenderContext.Initialize(m_EngineContext, m_FrameContext, m_ThreadContext);
 
+        InitializeRenderPasses(device);
+
         return true;
     }
 
@@ -29,12 +31,17 @@ namespace Boolka
         m_FrameContext.Unload();
         m_ThreadContext.Unload();
 
+        m_UpdatePass.Unload();
+        m_ZPass.Unload();
+        m_GbufferPass.Unload();
+        m_PresentPass.Unload();
+
         m_ResourceTracker.Unload();
     }
 
     bool RenderSchedule::Render(Device& device, UINT frameIndex)
     {
-        m_FrameContext.FlipFrame(frameIndex);
+        m_FrameContext.FlipFrame(m_EngineContext, frameIndex);
         m_ThreadContext.FlipFrame(frameIndex);
 
         //PrepareFrame();
@@ -48,18 +55,22 @@ namespace Boolka
     {
         bool res = m_EngineContext.LoadScene(device, sceneData);
         BLK_ASSERT(res);
-        res = m_DebugPass.Initialize(device, m_RenderContext, m_ResourceTracker);
+
+        return true;
+    }
+
+    bool RenderSchedule::InitializeRenderPasses(Device& device)
+    {
+        bool res = m_UpdatePass.Initialize(device, m_RenderContext, m_ResourceTracker);
+        BLK_ASSERT(res);
+        res = m_ZPass.Initialize(device, m_RenderContext, m_ResourceTracker);
+        BLK_ASSERT(res);
+        res = m_GbufferPass.Initialize(device, m_RenderContext, m_ResourceTracker);
         BLK_ASSERT(res);
         res = m_PresentPass.Initialize(device, m_RenderContext, m_ResourceTracker);
         BLK_ASSERT(res);
 
         return true;
-    }
-
-    void RenderSchedule::UnloadScene()
-    {
-        m_DebugPass.Unload();
-        m_PresentPass.Unload();
     }
 
     bool RenderSchedule::PrepareFrame()
@@ -73,7 +84,11 @@ namespace Boolka
 
         PrepareCommandList(currentCommandList);
 
-        bool res = m_DebugPass.Render(m_RenderContext, m_ResourceTracker);
+        bool res = m_UpdatePass.Render(m_RenderContext, m_ResourceTracker);
+        BLK_ASSERT(res);
+        res = m_ZPass.Render(m_RenderContext, m_ResourceTracker);
+        BLK_ASSERT(res);
+        res = m_GbufferPass.Render(m_RenderContext, m_ResourceTracker);
         BLK_ASSERT(res);
         res = m_PresentPass.Render(m_RenderContext, m_ResourceTracker);
         BLK_ASSERT(res);

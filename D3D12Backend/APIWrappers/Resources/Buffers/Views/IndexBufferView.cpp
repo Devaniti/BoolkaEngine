@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "IndexBufferView.h"
-#include "APIWrappers/Resources/Buffers/IndexBuffer.h"
 
 namespace Boolka
 {
@@ -15,7 +14,7 @@ namespace Boolka
         BLK_ASSERT(m_View.BufferLocation == 0);
     }
 
-    bool IndexBufferView::Initialize(IndexBuffer& indexBuffer, UINT size, DXGI_FORMAT format)
+    bool IndexBufferView::Initialize(Buffer& indexBuffer, UINT size, DXGI_FORMAT format)
     {
         BLK_ASSERT(m_View.BufferLocation == 0);
         BLK_ASSERT(format == DXGI_FORMAT_R16_UINT || format == DXGI_FORMAT_R32_UINT);

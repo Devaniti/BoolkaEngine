@@ -23,23 +23,27 @@ namespace Boolka
         {
             UINT vertexSize;
             UINT indexSize;
-            int textureCount;
+            UINT cullingSize;
+            UINT indexCount;
+            UINT objectCount;
+            UINT textureCount;
         };
 
         struct DataWrapper
         {
             UINT vertexBufferSize;
             UINT indexBufferSize;
-            int textureCount;
-            void* vertexData;
-            void* indexData;
+            UINT cullingBufferSize;
+            UINT indexCount;
+            UINT objectCount;
+            UINT textureCount;
             TextureHeader* textureHeaders;
-            void* baseTextureData;
+            void* binaryData;
         };
 
         DataWrapper GetSceneWrapper();
         void PrepareTextureHeaders();
-        void PrepareTextures();
+        void PrepareBinaryData();
         MemoryBlock& GetMemory() { return m_MemoryBlock; };
         const MemoryBlock& GetMemory() const { return m_MemoryBlock; };
 
