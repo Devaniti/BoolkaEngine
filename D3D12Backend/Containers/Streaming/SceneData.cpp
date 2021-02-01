@@ -28,7 +28,7 @@ namespace Boolka
 
         result.vertexBufferSize = sceneHeader->vertexSize;
         result.indexBufferSize = sceneHeader->indexSize;
-        result.cullingBufferSize = sceneHeader->cullingSize;
+        result.cullingBufferSize = sceneHeader->objectsSize;
         result.indexCount = sceneHeader->indexCount;
         result.textureCount = sceneHeader->textureCount;
         result.objectCount = sceneHeader->objectCount;
@@ -38,6 +38,10 @@ namespace Boolka
         result.textureHeaders = ptr_static_cast<TextureHeader*>(data);
 
         data += sizeof(TextureHeader) * result.textureCount;
+
+        result.objectData = ptr_static_cast<ObjectHeader*>(data);
+
+        data += sceneHeader->objectsSize;
 
         result.binaryData = data;
 

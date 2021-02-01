@@ -142,6 +142,7 @@
     <ClInclude Include="Contexts\RenderEngineContext.h" />
     <ClInclude Include="Contexts\RenderFrameContext.h" />
     <ClInclude Include="Contexts\RenderThreadContext.h" />
+    <ClInclude Include="CullingManager.h" />
     <ClInclude Include="FeatureSupportHelper.h" />
     <ClInclude Include="ProjectConfig.h" />
     <ClInclude Include="ProjectHelpers.h" />
@@ -210,6 +211,7 @@
     <ClCompile Include="Contexts\RenderEngineContext.cpp" />
     <ClCompile Include="Contexts\RenderFrameContext.cpp" />
     <ClCompile Include="Contexts\RenderThreadContext.cpp" />
+    <ClCompile Include="CullingManager.cpp" />
     <ClCompile Include="FeatureSupportHelper.cpp" />
     <ClCompile Include="RenderBackend.cpp" />
     <ClCompile Include="RenderBackendImpl.cpp" />

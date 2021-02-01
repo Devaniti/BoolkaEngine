@@ -9,6 +9,8 @@ namespace Boolka
         std::ifstream file(filename, std::ios::binary | std::ios::ate);
         BLK_ASSERT(file);
         std::streamsize size = file.tellg();
+        BLK_ASSERT(file);
+        BLK_ASSERT(size >= 0);
         file.seekg(0, std::ios::beg);
         BLK_ASSERT(file);
 

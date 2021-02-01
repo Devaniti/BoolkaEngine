@@ -18,6 +18,16 @@ namespace Boolka
         }
     }
 
+    Matrix4x4 Matrix4x4::operator-()
+    {
+        Matrix4x4 result;
+        for (size_t i = 0; i < 4; i++)
+        {
+            result[i] = -m_data[i];
+        }
+        return result;
+    }
+
     Matrix4x4& Matrix4x4::operator*=(float other)
     {
         for (auto& element : m_data)

@@ -85,6 +85,8 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="SolutionConfig.h" />
     <ClInclude Include="SolutionHelpers.h" />
+    <ClInclude Include="Structures\AABB.h" />
+    <ClInclude Include="Structures\Frustum.h" />
     <ClInclude Include="Structures\Matrix.h" />
     <ClInclude Include="Structures\MemoryBlock.h" />
     <ClInclude Include="Structures\RingBuffer.h" />
@@ -100,8 +102,9 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Structures\AABB.cpp" />
+    <ClCompile Include="Structures\Frustum.cpp" />
     <ClCompile Include="Structures\Matrix.cpp" />
-    <ClCompile Include="Structures\Vector.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

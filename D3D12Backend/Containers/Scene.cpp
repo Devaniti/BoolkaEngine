@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "Scene.h"
 
-#include "Containers/Streaming/SceneData.h"
 #include "Contexts/RenderEngineContext.h"
 #include "APIWrappers/Resources/ResourceTransition.h"
 #include "APIWrappers/Resources/Buffers/UploadBuffer.h"
@@ -50,11 +49,6 @@ namespace Boolka
         m_IndexCount = dataWrapper.indexCount;
         BLK_ASSERT(m_IndexCount);
 
-        m_CullingBufferSize = dataWrapper.cullingBufferSize;
-        BLK_ASSERT(m_CullingBufferSize != 0);
-        res = m_CullingBuffer.Initialize(device, m_CullingBufferSize, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_FLAG_NONE, D3D12_RESOURCE_STATE_COMMON);
-        BLK_ASSERT(res);
-
         m_ObjectCount = dataWrapper.objectCount;
         BLK_ASSERT(m_ObjectCount != 0);
 
@@ -69,12 +63,13 @@ namespace Boolka
 
         m_Textures.resize(dataWrapper.textureCount);
         m_SRVs.resize(dataWrapper.textureCount);
+        m_Objects.resize(dataWrapper.objectCount);
 
         static const size_t bytesPerPixel = 4;
 
         sceneData.PrepareTextureHeaders();
 
-        size_t uploadSize = static_cast<size_t>(m_VertexBufferSize) + m_IndexBufferSize + m_CullingBufferSize;
+        size_t uploadSize = static_cast<size_t>(m_VertexBufferSize) + m_IndexBufferSize;
         std::vector<size_t> textureOffsets;
         textureOffsets.reserve(dataWrapper.textureCount);
 
@@ -147,9 +142,6 @@ namespace Boolka
         initCommandList->CopyBufferRegion(m_IndexBuffer.Get(), 0, uploadBuffer.Get(), uploadBufferOffset, m_IndexBufferSize);
         uploadBufferOffset += m_IndexBufferSize;
 
-        initCommandList->CopyBufferRegion(m_CullingBuffer.Get(), 0, uploadBuffer.Get(), uploadBufferOffset, m_CullingBufferSize);
-        uploadBufferOffset += m_CullingBufferSize;
-
         for (UINT i = 0; i < dataWrapper.textureCount; ++i)
         {
             auto& texture = m_Textures[i];
@@ -193,6 +185,10 @@ namespace Boolka
 
         uploadBuffer.Unload();
 
+        memcpy(m_Objects.data(), dataWrapper.objectData, dataWrapper.objectCount * sizeof(SceneData::ObjectHeader));
+
+        m_CullingManager.Initialize(m_ObjectCount);
+
         return true;
     }
 
@@ -222,13 +218,16 @@ namespace Boolka
 
         m_VertexBuffer.Unload();
         m_IndexBuffer.Unload();
-        m_CullingBuffer.Unload();
         m_DrawIndirectBuffer.Unload();
 
         m_CommandSignature.Unload();
 
         m_VertexBufferSize = 0;
         m_IndexBufferSize = 0;
+
+        m_ObjectCount = 0;
+        m_Objects.clear();
+        m_CullingManager.Unload();
     }
 
 }

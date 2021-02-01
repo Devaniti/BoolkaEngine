@@ -13,6 +13,8 @@
 #include <map>
 #include <unordered_map>
 #include <initializer_list>
+#include <functional>
+#include <type_traits>
 
 // Windows
 #define WIN32_LEAN_AND_MEAN

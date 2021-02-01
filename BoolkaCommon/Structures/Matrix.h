@@ -31,6 +31,8 @@ namespace Boolka
         const Vector4* begin() const { return m_data; }
         const Vector4* end() const { return m_data + 4; }
 
+        Matrix4x4 operator-();
+
         Matrix4x4& operator*=(float other);
         Matrix4x4& operator/=(float other);
         Matrix4x4 operator*(float other) const;

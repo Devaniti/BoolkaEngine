@@ -3,63 +3,329 @@
 namespace Boolka
 {
 
-    class Vector4
+    template<size_t componentCount = 4, typename elementType = float>
+    class Vector
     {
     public:
-        Vector4() : m_data{} {};
-        ~Vector4() {};
+        using thisType = Vector<componentCount, elementType>;
 
-        Vector4(const Vector4&) = default;
-        Vector4(Vector4&&) = default;
-        Vector4& operator=(const Vector4&) = default;
-        Vector4& operator=(Vector4&&) = default;
+        Vector() : m_data{} {};
+        ~Vector() = default;
 
-        Vector4(float x, float y, float z, float w) : m_data{ x,y,z,w } {};
+        Vector(const Vector&) = default;
+        Vector(Vector&&) = default;
+        Vector& operator=(const Vector&) = default;
+        Vector& operator=(Vector&&) = default;
 
-        float x() const { return m_data[0]; };
-        float y() const { return m_data[1]; };
-        float z() const { return m_data[2]; };
-        float w() const { return m_data[3]; };
+        Vector(std::initializer_list<elementType> data)
+            : m_data{}
+        {
+            BLK_ASSERT(data.size() <= componentCount);
+            std::copy(data.begin(), data.end(), m_data);
+        };
 
-        float& operator[](size_t i) { BLK_ASSERT(i < 4); return m_data[i]; };
-        const float& operator[](size_t i) const { BLK_ASSERT(i < 4); return m_data[i]; };
+        elementType x() const { static_assert(componentCount > 0); return m_data[0]; };
+        elementType y() const { static_assert(componentCount > 1); return m_data[1]; };
+        elementType z() const { static_assert(componentCount > 2); return m_data[2]; };
+        elementType w() const { static_assert(componentCount > 3); return m_data[3]; };
 
-        float* GetBuffer() { return m_data; }
-        const float* GetBuffer() const { return m_data; }
+        elementType& x() { static_assert(componentCount > 0); return m_data[0]; };
+        elementType& y() { static_assert(componentCount > 1); return m_data[1]; };
+        elementType& z() { static_assert(componentCount > 2); return m_data[2]; };
+        elementType& w() { static_assert(componentCount > 3); return m_data[3]; };
 
-        float* begin() { return m_data; }
-        float* end() { return m_data + 4; }
-        const float* begin() const { return m_data; }
-        const float* end() const { return m_data + 4; }
+        elementType r() const { static_assert(componentCount > 0); return m_data[0]; };
+        elementType g() const { static_assert(componentCount > 1); return m_data[1]; };
+        elementType b() const { static_assert(componentCount > 2); return m_data[2]; };
+        elementType a() const { static_assert(componentCount > 3); return m_data[3]; };
 
-        float Dot(const Vector4& other) const;
-        Vector4 Cross3(const Vector4& other) const;
-        float Length() const;
-        float LengthSqr() const;
+        elementType& r() { static_assert(componentCount > 0); return m_data[0]; };
+        elementType& g() { static_assert(componentCount > 1); return m_data[1]; };
+        elementType& b() { static_assert(componentCount > 2); return m_data[2]; };
+        elementType& a() { static_assert(componentCount > 3); return m_data[3]; };
 
-        Vector4 Normalize() const;
+        elementType& operator[](size_t i) { BLK_ASSERT(i < componentCount); return m_data[i]; };
+        const elementType& operator[](size_t i) const { BLK_ASSERT(i < componentCount); return m_data[i]; };
 
-        Vector4 operator-() const;
+        elementType* GetBuffer() { return m_data; }
+        const elementType* GetBuffer() const { return m_data; }
 
-        Vector4& operator*=(float other);
-        Vector4& operator/=(float other);
-        Vector4 operator*(float other) const;
-        Vector4 operator/(float other) const;
+        elementType* begin() { return m_data; }
+        elementType* end() { return m_data + componentCount; }
+        const elementType* begin() const { return m_data; }
+        const elementType* end() const { return m_data + componentCount; }
 
-        Vector4& operator*=(const Vector4& other);
-        Vector4& operator/=(const Vector4& other);
-        Vector4& operator+=(const Vector4& other);
-        Vector4& operator-=(const Vector4& other);
-        Vector4 operator*(const Vector4& other) const;
-        Vector4 operator/(const Vector4& other) const;
-        Vector4 operator+(const Vector4& other) const;
-        Vector4 operator-(const Vector4& other) const;
+        size_t size() const { return componentCount; }
 
-        bool operator==(const Vector4& other) const;
-        bool operator!=(const Vector4& other) const;
+        elementType Dot(const thisType& other) const;
+        thisType Cross(const thisType& other) const;
+        elementType Length() const;
+        elementType LengthSqr() const;
 
-    private:
-        float m_data[4];
+        thisType Normalize() const;
+
+        elementType Length3() const;
+        elementType LengthSqr3() const;
+        thisType Normalize3() const;
+
+        thisType operator-() const;
+
+        thisType& operator*=(elementType other);
+        thisType& operator/=(elementType other);
+        thisType operator*(elementType other) const;
+        thisType operator/(elementType other) const;
+
+        thisType& operator*=(const thisType& other);
+        thisType& operator/=(const thisType& other);
+        thisType& operator+=(const thisType& other);
+        thisType& operator-=(const thisType& other);
+        thisType operator*(const thisType& other) const;
+        thisType operator/(const thisType& other) const;
+        thisType operator+(const thisType& other) const;
+        thisType operator-(const thisType& other) const;
+
+        bool operator==(const thisType& other) const;
+        bool operator!=(const thisType& other) const;
+
+
+    protected:
+        elementType m_data[componentCount];
     };
+
+    template<size_t componentCount, typename elementType>
+    elementType Vector<componentCount, elementType>::Dot(const thisType& other) const
+    {
+        elementType result = 0;
+        for (size_t i = 0; i < componentCount; i++)
+        {
+            result += (*this)[i] * other[i];
+        }
+
+        return result;
+    }
+
+    template<size_t componentCount, typename elementType>
+    Vector<componentCount, elementType> Vector<componentCount, elementType>::Cross(const thisType& other) const
+    {
+        static_assert(componentCount >= 3);
+
+        return thisType
+        {
+            (*this)[1] * other[2] - (*this)[2] * other[1],
+            (*this)[2] * other[0] - (*this)[0] * other[2],
+            (*this)[0] * other[1] - (*this)[1] * other[0]
+        };
+    }
+
+    template<size_t componentCount, typename elementType>
+    elementType Vector<componentCount, elementType>::Length() const
+    {
+        return ::sqrt(LengthSqr());
+    }
+
+    template<size_t componentCount, typename elementType>
+    elementType Vector<componentCount, elementType>::LengthSqr() const
+    {
+        elementType result = 0;
+        for (auto& value : m_data)
+        {
+            result += value * value;
+        }
+
+        return result;
+    }
+
+    template<size_t componentCount, typename elementType>
+    Vector<componentCount, elementType> Vector<componentCount, elementType>::Normalize() const
+    {
+        return (*this) / Length();
+    }
+
+    template<size_t componentCount, typename elementType>
+    elementType Boolka::Vector<componentCount, elementType>::Length3() const
+    {
+        static_assert(componentCount >= 3);
+        return ::sqrt(LengthSqr3());
+    }
+
+    template<size_t componentCount, typename elementType>
+    elementType Boolka::Vector<componentCount, elementType>::LengthSqr3() const
+    {
+        static_assert(componentCount >= 3);
+        elementType result = 0;
+        for (size_t i = 0; i < 3; ++i)
+        {
+            result += m_data[i] * m_data[i];
+        }
+
+        return result;
+    }
+
+    template<size_t componentCount, typename elementType>
+    Vector<componentCount, elementType> Boolka::Vector<componentCount, elementType>::Normalize3() const
+    {
+        static_assert(componentCount >= 3);
+        return (*this) / Length3();
+    }
+
+    template<size_t componentCount, typename elementType>
+    Vector<componentCount, elementType> Vector<componentCount, elementType>::operator-() const
+    {
+        thisType result;
+        for (size_t i = 0; i < componentCount; i++)
+        {
+            result[i] = -(*this)[i];
+        }
+
+        return result;
+    }
+
+    template<size_t componentCount, typename elementType>
+    Vector<componentCount, elementType>& Vector<componentCount, elementType>::operator*=(elementType other)
+    {
+        for (elementType& element : m_data)
+        {
+            element *= other;
+        }
+
+        return *this;
+    }
+
+    template<size_t componentCount, typename elementType>
+    Vector<componentCount, elementType>& Vector<componentCount, elementType>::operator/=(elementType other)
+    {
+        for (float& element : m_data)
+        {
+            element /= other;
+        }
+
+        return *this;
+    }
+
+    template<size_t componentCount, typename elementType>
+    Vector<componentCount, elementType> Vector<componentCount, elementType>::operator*(elementType other) const
+    {
+        thisType result = *this;
+        result *= other;
+        return result;
+    }
+
+    template<size_t componentCount, typename elementType>
+    Vector<componentCount, elementType> Vector<componentCount, elementType>::operator/(elementType other) const
+    {
+        thisType result = *this;
+        result /= other;
+        return result;
+    }
+
+    template<size_t componentCount, typename elementType>
+    Vector<componentCount, elementType>& Vector<componentCount, elementType>::operator*=(const thisType& other)
+    {
+        for (size_t i = 0; i < 4; ++i)
+        {
+            (*this)[i] *= other[i];
+        }
+        return *this;
+    }
+
+    template<size_t componentCount, typename elementType>
+    Vector<componentCount, elementType>& Vector<componentCount, elementType>::operator/=(const thisType& other)
+    {
+        for (size_t i = 0; i < 4; ++i)
+        {
+            (*this)[i] /= other[i];
+        }
+        return *this;
+    }
+
+    template<size_t componentCount, typename elementType>
+    Vector<componentCount, elementType>& Vector<componentCount, elementType>::operator+=(const thisType& other)
+    {
+        for (size_t i = 0; i < 4; ++i)
+        {
+            (*this)[i] += other[i];
+        }
+        return *this;
+    }
+
+    template<size_t componentCount, typename elementType>
+    Vector<componentCount, elementType>& Vector<componentCount, elementType>::operator-=(const thisType& other)
+    {
+        for (size_t i = 0; i < 4; ++i)
+        {
+            (*this)[i] -= other[i];
+        }
+        return *this;
+    }
+
+    template<size_t componentCount, typename elementType>
+    Vector<componentCount, elementType> Vector<componentCount, elementType>::operator*(const thisType& other) const
+    {
+        thisType result = *this;
+        result *= other;
+        return result;
+    }
+
+    template<size_t componentCount, typename elementType>
+    Vector<componentCount, elementType> Vector<componentCount, elementType>::operator/(const thisType& other) const
+    {
+        thisType result = *this;
+        result /= other;
+        return result;
+    }
+
+    template<size_t componentCount, typename elementType>
+    Vector<componentCount, elementType> Vector<componentCount, elementType>::operator+(const thisType& other) const
+    {
+        thisType result = *this;
+        result += other;
+        return result;
+    }
+
+    template<size_t componentCount, typename elementType>
+    Vector<componentCount, elementType> Vector<componentCount, elementType>::operator-(const thisType& other) const
+    {
+        thisType result = *this;
+        result -= other;
+        return result;
+    }
+
+    template<size_t componentCount, typename elementType>
+    bool Vector<componentCount, elementType>::operator!=(const thisType& other) const
+    {
+        return !operator==(other);
+    }
+
+    template<size_t componentCount, typename elementType>
+    bool Vector<componentCount, elementType>::operator==(const thisType& other) const
+    {
+        return std::equal(std::begin(m_data), std::end(m_data), std::begin(other.m_data));
+    }
+
+    template<size_t componentCount, typename elementType>
+    Vector<componentCount, elementType> Min(const Vector<componentCount, elementType>& first, const Vector<componentCount, elementType>& second)
+    {
+        Vector<componentCount, elementType> result;
+        for (size_t i = 0; i < componentCount; ++i)
+        {
+            result[i] = min(first[i], second[i]);
+        }
+        return result;
+    }
+
+    template<size_t componentCount, typename elementType>
+    Vector<componentCount, elementType> Max(const Vector<componentCount, elementType>& first, const Vector<componentCount, elementType>& second)
+    {
+        Vector<componentCount, elementType> result;
+        for (size_t i = 0; i < componentCount; ++i)
+        {
+            result[i] = max(first[i], second[i]);
+        }
+        return result;
+    }
+
+    using Vector2 = Vector<2>;
+    using Vector3 = Vector<3>;
+    using Vector4 = Vector<4>;
 
 }

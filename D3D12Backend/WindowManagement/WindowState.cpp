@@ -6,7 +6,7 @@ namespace Boolka
 
     WindowState WindowState::GetDefault()
     {
-        WindowState result;
+        WindowState result{};
         result.x = result.y = 0;
         result.width = ::GetSystemMetrics(SM_CXSCREEN);
         result.height = ::GetSystemMetrics(SM_CYSCREEN);

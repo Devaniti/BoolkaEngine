@@ -85,8 +85,8 @@ namespace Boolka
             0.0f
         };
 
-        Vector4 right = upDirection.Cross3(forward).Normalize();
-        Vector4 up = forward.Cross3(right).Normalize();
+        Vector4 right = upDirection.Cross(forward).Normalize();
+        Vector4 up = forward.Cross(right).Normalize();
 
 
         if (::GetAsyncKeyState('D'))

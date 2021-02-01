@@ -8,8 +8,8 @@
 
 namespace Boolka
 {
-    static const size_t g_ResourceAlignment = 512;
-    static const size_t g_PitchAlignment = 256;
+    static const size_t gs_ResourceAlignment = 512;
+    static const size_t gs_PitchAlignment = 256;
 
     class ObjConverterImpl
     {
@@ -23,14 +23,6 @@ namespace Boolka
             int materialId;
             float normal[3];
             float textureCoords[2];
-        };
-
-        struct CullingData
-        {
-            float minCoords[3];
-            float maxCoords[3];
-            int startIndex;
-            int IndexCount;
         };
 
         struct UniqueVertexKey
@@ -53,11 +45,8 @@ namespace Boolka
             const std::vector<tinyobj::material_t>& materials,
             std::vector<VertexData>& vertexDataVector,
             std::vector<uint32_t>& indexDataVector,
-            std::vector<std::string>& remappedMaterials);
-
-        static void ProcessCullingBuffer(const tinyobj::attrib_t& attrib, 
-                                         const std::vector<tinyobj::shape_t>& shapes, 
-                                         std::vector<CullingData>& cullingDataVector);
+            std::vector<std::string>& remappedMaterials,
+            std::vector<SceneData::ObjectHeader>& objects);
 
         static void RemapMaterials(const std::vector<tinyobj::material_t>& materials,
             std::unordered_map<std::string, int>& materialsMap,
@@ -68,24 +57,28 @@ namespace Boolka
             const std::vector<tinyobj::material_t>& materials,
             std::unordered_map<std::string, int>& materialsMap,
             std::vector<VertexData>& vertexDataVector,
-            std::vector<uint32_t>& indexDataVector);
+            std::vector<uint32_t>& indexDataVector,
+            std::vector<SceneData::ObjectHeader>& objects);
 
         static void RemapVertices(const tinyobj::attrib_t& attrib,
-            const std::vector<tinyobj::shape_t>& shapes,
+            const tinyobj::shape_t& shape,
             const std::vector<tinyobj::material_t>& materials,
             std::unordered_map<std::string, int>& materialsMap,
             std::map<UniqueVertexKey, uint32_t>& verticesMap,
+            uint32_t& currentIndex,
             std::vector<VertexData>& vertexDataVector);
 
-        static void BuildIndices(const std::vector<tinyobj::shape_t>& shapes,
+        static void BuildIndices(const tinyobj::shape_t& shape,
             std::map<UniqueVertexKey, uint32_t>& verticesMap,
-            std::vector<uint32_t>& indexDataVector);
+            std::vector<uint32_t>& indexDataVector,
+            const tinyobj::attrib_t& attrib,
+            SceneData::ObjectHeader& object);
 
         static void WriteHeader(DebugFileWriter& fileWriter,
             const std::vector<VertexData>& vertexDataVector,
             const std::vector<uint32_t>& indexDataVector,
             const std::vector<std::string>& remappedMaterials,
-            const std::vector<CullingData>& cullingData);
+            const std::vector<SceneData::ObjectHeader>& cullingData);
 
         template <typename T>
         static void WriteVector(DebugFileWriter& fileWriter, const std::vector<T>& vertexDataVector, size_t alignment);
@@ -116,12 +109,9 @@ namespace Boolka
         std::vector<VertexData> vertexDataVector;
         std::vector<uint32_t> indexDataVector;
         std::vector<std::string> remappedMaterials;
+        std::vector<SceneData::ObjectHeader> objectsVector;
 
-        ProcessGeometry(attrib, shapes, materials, vertexDataVector, indexDataVector, remappedMaterials);
-
-        std::vector<CullingData> cullingDataVector;
-
-        ProcessCullingBuffer(attrib, shapes, cullingDataVector);
+        ProcessGeometry(attrib, shapes, materials, vertexDataVector, indexDataVector, remappedMaterials, objectsVector);
 
         DebugFileWriter fileWriter;
         bool res = fileWriter.OpenFile(outFile.c_str());
@@ -131,20 +121,22 @@ namespace Boolka
             return false;
         }
 
-        WriteHeader(fileWriter, vertexDataVector, indexDataVector, remappedMaterials, cullingDataVector);
+        WriteHeader(fileWriter, vertexDataVector, indexDataVector, remappedMaterials, objectsVector);
 
         WriteTextureHeaders(fileWriter, remappedMaterials);
 
-        WriteVector(fileWriter, vertexDataVector, g_ResourceAlignment);
+        WriteVector(fileWriter, objectsVector, 0);
+        std::cout << "Written objects buffer" << std::endl;
+
+        WriteVector(fileWriter, vertexDataVector, gs_ResourceAlignment);
         std::cout << "Written vertex buffer" << std::endl;
 
-        WriteVector(fileWriter, indexDataVector, g_ResourceAlignment);
+        WriteVector(fileWriter, indexDataVector, gs_ResourceAlignment);
         std::cout << "Written index buffer" << std::endl;
-
-        WriteVector(fileWriter, cullingDataVector, g_ResourceAlignment);
-        std::cout << "Written culling buffer" << std::endl;
         
         WriteTextures(fileWriter, remappedMaterials);
+        std::cout << "Written textures" << std::endl;
+
         res = fileWriter.Close(BLK_FILE_BLOCK_SIZE);
         BLK_ASSERT(res);
 
@@ -180,62 +172,17 @@ namespace Boolka
     }
 
     void ObjConverterImpl::ProcessGeometry(const tinyobj::attrib_t& attrib,
-                                       const std::vector<tinyobj::shape_t>& shapes, 
-                                       const std::vector<tinyobj::material_t>& materials,
-                                       std::vector<VertexData>& vertexDataVector,
-                                       std::vector<uint32_t>& indexDataVector, 
-                                       std::vector<std::string>& remappedMaterials)
+                                           const std::vector<tinyobj::shape_t>& shapes, 
+                                           const std::vector<tinyobj::material_t>& materials,
+                                           std::vector<VertexData>& vertexDataVector,
+                                           std::vector<uint32_t>& indexDataVector, 
+                                           std::vector<std::string>& remappedMaterials, 
+                                           std::vector<SceneData::ObjectHeader>& objects)
     {
         std::unordered_map<std::string, int> materialsMap;
         RemapMaterials(materials, materialsMap, remappedMaterials);
-        ProcessVerticesIndices(attrib, shapes, materials, materialsMap, vertexDataVector, indexDataVector);
+        ProcessVerticesIndices(attrib, shapes, materials, materialsMap, vertexDataVector, indexDataVector, objects);
     }
-
-    void ObjConverterImpl::ProcessCullingBuffer(const tinyobj::attrib_t& attrib, const std::vector<tinyobj::shape_t>& shapes, std::vector<CullingData>& cullingDataVector)
-    {
-        auto& positions = attrib.vertices;
-
-        int indexOffset = 0;
-        cullingDataVector.reserve(shapes.size());
-
-        for (auto& shape : shapes)
-        {
-            CullingData data;
-            data.IndexCount = checked_narrowing_cast<int>(shape.mesh.indices.size());
-            data.startIndex = indexOffset;
-            indexOffset += data.IndexCount;
-
-            std::fill_n(data.minCoords, 3, FLT_MAX);
-            std::fill_n(data.maxCoords, 3, -FLT_MAX);
-
-            auto& indices = shape.mesh.indices;
-
-            BLK_ASSERT(!indices.empty());
-
-            for (auto& index : indices)
-            {
-                size_t positionIndex = index.vertex_index;
-
-                float position[3];
-
-                // TODO fix this swap repeating 3 times in this file
-                // Swap y and z
-                // In OBJ y is up, and in Boolka Engine z is up
-                position[0] = positions[3 * positionIndex];
-                position[1] = positions[3 * positionIndex + 2];
-                position[2] = positions[3 * positionIndex + 1];
-
-                for (int i = 0; i < 3; ++i)
-                {
-                    data.maxCoords[i] = max(data.maxCoords[i], position[i]);
-                    data.minCoords[i] = min(data.minCoords[i], position[i]);
-                }
-            }
-
-            cullingDataVector.push_back(data);
-        }
-    }
-
     void ObjConverterImpl::RemapMaterials(const std::vector<tinyobj::material_t>& materials,
                                       std::unordered_map<std::string, int>& materialsMap, 
                                       std::vector<std::string>& remappedMaterials)
@@ -265,40 +212,49 @@ namespace Boolka
                                      const std::vector<tinyobj::material_t>& materials,
                                      std::unordered_map<std::string, int>& materialsMap, 
                                      std::vector<VertexData>& vertexDataVector, 
-                                     std::vector<uint32_t>& indexDataVector)
+                                     std::vector<uint32_t>& indexDataVector, 
+                                     std::vector<SceneData::ObjectHeader>& objects)
     {
-        std::map<UniqueVertexKey, uint32_t> verticesMap;
+        uint32_t currentIndex = 0;
 
-        RemapVertices(attrib, shapes, materials, materialsMap, verticesMap, vertexDataVector);
-        BuildIndices(shapes, verticesMap, indexDataVector);
+        objects.reserve(shapes.size());
+
+        for (auto& shape : shapes)
+        {
+            SceneData::ObjectHeader object{};
+
+            std::map<UniqueVertexKey, uint32_t> verticesMap;
+
+            RemapVertices(attrib, shape, materials, materialsMap, verticesMap, currentIndex, vertexDataVector);
+            BuildIndices(shape, verticesMap, indexDataVector, attrib, object);
+
+            objects.push_back(object);
+        }
     }
 
     void ObjConverterImpl::RemapVertices(const tinyobj::attrib_t& attrib, 
-        const std::vector<tinyobj::shape_t>& shapes, 
+        const tinyobj::shape_t& shape, 
         const std::vector<tinyobj::material_t>& materials, 
         std::unordered_map<std::string, int>& materialsMap, 
         std::map<UniqueVertexKey, uint32_t>& verticesMap,
+        uint32_t& currentIndex,
         std::vector<VertexData>& vertexDataVector)
     {
-        for (auto& shape : shapes)
+        for (unsigned char vertexesPerFace : shape.mesh.num_face_vertices)
         {
-            for (unsigned char vertexesPerFace : shape.mesh.num_face_vertices)
-            {
-                // Further code assume that there are only triangles
-                BLK_ASSERT(vertexesPerFace == 3);
-            }
-
-            auto& mesh = shape.mesh;
-            auto& indices = mesh.indices;
-            for (size_t i = 0; i < indices.size(); i++)
-            {
-                auto& index = indices[i];
-                size_t triangleIndex = i / 3;
-                int materialIndex = mesh.material_ids[triangleIndex];
-                verticesMap.insert(std::pair(UniqueVertexKey{ materialIndex, index.vertex_index, index.normal_index, index.texcoord_index }, 0));
-            }
+            // Further code assume that there are only triangles
+            BLK_ASSERT(vertexesPerFace == 3);
         }
-        std::cout << "Built vertices map" << std::endl;
+
+        auto& mesh = shape.mesh;
+        auto& indices = mesh.indices;
+        for (size_t i = 0; i < indices.size(); i++)
+        {
+            auto& index = indices[i];
+            size_t triangleIndex = i / 3;
+            int materialIndex = mesh.material_ids[triangleIndex];
+            verticesMap.insert(std::pair(UniqueVertexKey{ materialIndex, index.vertex_index, index.normal_index, index.texcoord_index }, 0));
+        }
 
         auto& positions = attrib.vertices;
         auto& normals = attrib.normals;
@@ -353,39 +309,53 @@ namespace Boolka
             }
 
             vertexDataVector.push_back(vertexData);
-            arrayIndex = i++;
+            arrayIndex = currentIndex++;
         }
 
-        std::cout << "Processed vertices" << std::endl;
+        std::cout << "Processed vertices for shape " << shape.name << std::endl;
     }
 
-    void ObjConverterImpl::BuildIndices(const std::vector<tinyobj::shape_t>& shapes, std::map<UniqueVertexKey, uint32_t>& verticesMap, std::vector<uint32_t>& indexDataVector)
+    void ObjConverterImpl::BuildIndices(const tinyobj::shape_t& shape, std::map<UniqueVertexKey, uint32_t>& verticesMap, std::vector<uint32_t>& indexDataVector, const tinyobj::attrib_t& attrib, SceneData::ObjectHeader& object)
     {
-        for (auto& shape : shapes)
+        auto& mesh = shape.mesh;
+        auto& indices = mesh.indices;
+
+        object.indexCount = checked_narrowing_cast<UINT>(indices.size());
+        object.startIndex = checked_narrowing_cast<UINT>(indexDataVector.size());
+        object.boundingBox.GetMax() = { -FLT_MAX, -FLT_MAX, -FLT_MAX };
+        object.boundingBox.GetMin() = { FLT_MAX, FLT_MAX, FLT_MAX };
+
+        auto& positions = attrib.vertices;
+
+        for (size_t i = 0; i < indices.size(); i++)
         {
-            auto& mesh = shape.mesh;
-            auto& indices = mesh.indices;
-            for (size_t i = 0; i < indices.size(); i++)
-            {
-                auto& index = indices[i];
-                size_t triangleIndex = i / 3;
-                int materialIndex = mesh.material_ids[triangleIndex];
-                indexDataVector.push_back(verticesMap[UniqueVertexKey{ materialIndex, index.vertex_index, index.normal_index, index.texcoord_index }]);
-            }
+            auto& index = indices[i];
+            size_t triangleIndex = i / 3;
+            int materialIndex = mesh.material_ids[triangleIndex];
+            indexDataVector.push_back(verticesMap[UniqueVertexKey{ materialIndex, index.vertex_index, index.normal_index, index.texcoord_index }]);
+
+            int vertexIndex = index.vertex_index;
+            Vector3 xyz = { positions[3 * vertexIndex], positions[3 * vertexIndex + 2], positions[3 * vertexIndex + 1] };
+            object.boundingBox.GetMax() = Max(object.boundingBox.GetMax(), xyz);
+            object.boundingBox.GetMin() = Min(object.boundingBox.GetMin(), xyz);
         }
 
-        std::cout << "Processed indices" << std::endl;
+        std::cout << "Processed indices for shape " << shape.name << std::endl;
     }
 
-    void ObjConverterImpl::WriteHeader(DebugFileWriter& fileWriter, const std::vector<VertexData>& vertexDataVector, const std::vector<uint32_t>& indexDataVector, const std::vector<std::string>& remappedMaterials, const std::vector<CullingData>& cullingData)
+    void ObjConverterImpl::WriteHeader(DebugFileWriter& fileWriter, 
+                                       const std::vector<VertexData>& vertexDataVector, 
+                                       const std::vector<uint32_t>& indexDataVector, 
+                                       const std::vector<std::string>& remappedMaterials, 
+                                       const std::vector<SceneData::ObjectHeader>& objects)
     {
         SceneData::SceneHeader header
         {
-            checked_narrowing_cast<UINT>(CEIL_TO_POWER_OF_TWO(vertexDataVector.size() * sizeof(VertexData), g_ResourceAlignment)),
-            checked_narrowing_cast<UINT>(CEIL_TO_POWER_OF_TWO(indexDataVector.size() * sizeof(uint32_t), g_ResourceAlignment)),
-            checked_narrowing_cast<UINT>(CEIL_TO_POWER_OF_TWO(cullingData.size() * sizeof(CullingData), g_ResourceAlignment)),
+            checked_narrowing_cast<UINT>(CEIL_TO_POWER_OF_TWO(vertexDataVector.size() * sizeof(VertexData), gs_ResourceAlignment)),
+            checked_narrowing_cast<UINT>(CEIL_TO_POWER_OF_TWO(indexDataVector.size() * sizeof(uint32_t), gs_ResourceAlignment)),
+            checked_narrowing_cast<UINT>(objects.size() * sizeof(SceneData::ObjectHeader)),
             checked_narrowing_cast<UINT>(indexDataVector.size()),
-            checked_narrowing_cast<UINT>(cullingData.size()),
+            checked_narrowing_cast<UINT>(objects.size()),
             checked_narrowing_cast<UINT>(remappedMaterials.size())
         };
 
@@ -500,8 +470,8 @@ namespace Boolka
         BLK_ASSERT(height > 0);
 
         size_t srcRowPitch = bytesPerPixel * width;
-        size_t mip0RowPitch = CEIL_TO_POWER_OF_TWO(bytesPerPixel * width, g_PitchAlignment);
-        size_t mip0Size = CEIL_TO_POWER_OF_TWO(mip0RowPitch * height, g_ResourceAlignment);
+        size_t mip0RowPitch = CEIL_TO_POWER_OF_TWO(bytesPerPixel * width, gs_PitchAlignment);
+        size_t mip0Size = CEIL_TO_POWER_OF_TWO(mip0RowPitch * height, gs_ResourceAlignment);
 
         unsigned char* mip0Data = new unsigned char[mip0Size];
 
@@ -518,8 +488,8 @@ namespace Boolka
             mipWidth /= 2, mipHeight /= 2
             )
         {
-            size_t rowPitch = CEIL_TO_POWER_OF_TWO(bytesPerPixel * mipWidth, g_PitchAlignment);
-            size_t mipSize = CEIL_TO_POWER_OF_TWO(rowPitch * mipHeight, g_ResourceAlignment);
+            size_t rowPitch = CEIL_TO_POWER_OF_TWO(bytesPerPixel * mipWidth, gs_PitchAlignment);
+            size_t mipSize = CEIL_TO_POWER_OF_TWO(rowPitch * mipHeight, gs_ResourceAlignment);
             unsigned char* mipData = new unsigned char[mipSize];
 
             for (size_t y = 0; y < mipHeight; ++y)

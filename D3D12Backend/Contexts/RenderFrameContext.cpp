@@ -55,12 +55,15 @@ namespace Boolka
 
         m_DeltaTime = timestampDifference / m_Frequency;
 
+        // Clamp max delta time to 30 fps equivalent
+        m_DeltaTime = min(33.3f, m_DeltaTime);
+
         UINT width = engineContext.GetBackbufferWidth();
         UINT height = engineContext.GetBackbufferHeight();
 
         float aspectRatio = static_cast<float>(width) / height;
 
-        engineContext.GetCamera().Update(m_DeltaTime, aspectRatio, 150.0f, 60.0f, m_ViewMatrix, m_ProjMatrix);
+        engineContext.GetCamera().Update(m_DeltaTime, aspectRatio, 15.0f, 60.0f, m_ViewMatrix, m_ProjMatrix);
 
         g_WDebugOutput << L"Frame " << frameIndex << L" time:" << m_DeltaTime * 1000.0f << std::endl;
     }

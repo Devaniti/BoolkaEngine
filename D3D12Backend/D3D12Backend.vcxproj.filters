@@ -221,6 +221,7 @@
     <ClInclude Include="APIWrappers\Resources\Buffers\UploadBuffer.h" />
     <ClInclude Include="RenderPasses\ZRenderPass.h" />
     <ClInclude Include="RenderPasses\UpdateRenderPass.h" />
+    <ClInclude Include="CullingManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WindowManagement\WindowManager.cpp">
@@ -384,6 +385,7 @@
     <ClCompile Include="APIWrappers\Resources\Buffers\UploadBuffer.cpp" />
     <ClCompile Include="RenderPasses\ZRenderPass.cpp" />
     <ClCompile Include="RenderPasses\UpdateRenderPass.cpp" />
+    <ClCompile Include="CullingManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\RootSig.hlsl">

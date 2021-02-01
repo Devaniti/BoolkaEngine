@@ -7,8 +7,8 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace Boolka
 {
-
-    bool ApproxEqual(const Vector4& a, const Vector4& b)
+    template <class VectorType>
+    bool ApproxEqual(const VectorType& a, const VectorType& b)
     {
         for (size_t i = 0; i < 4; i++)
         {
@@ -31,21 +31,124 @@ namespace Boolka
         return true;
     }
 
-    TEST_CLASS(TestVector)
+    TEST_CLASS(TestVector2)
     {
     public:
         TEST_METHOD(OperatorEqual)
         {
-            const Vector4 v1;
-            const Vector4 v2(0.0f, 0.0f, 0.0f, 0.0f);
-            Assert::IsTrue(v1 == v2);
+            {
+                const Vector2 v1;
+                const Vector2 v2{ 0.0f, 0.0f };
+                Assert::IsTrue(v1 == v2);
+            }
+
+            {
+                const Vector2 v1{ 1.0f, 1.0f };
+                const Vector2 v2{ 1.0f, 1.0f };
+                Assert::IsTrue(v1 == v2);
+            }
+
+            {
+                const Vector2 v1{ 1.0f, 1.0f };
+                const Vector2 v2{ 0.0f, 1.0f };
+                Assert::IsFalse(v1 == v2);
+            }
         }
 
         TEST_METHOD(OperatorNotEqual)
         {
-            const Vector4 v1;
-            const Vector4 v2(1.0f, 0.0f, 0.0f, 0.0f);
-            Assert::IsTrue(v1 != v2);
+            {
+                const Vector2 v1;
+                const Vector2 v2{ 1.0f, 0.0f };
+                Assert::IsTrue(v1 != v2);
+            }
+
+            {
+                const Vector2 v1{ 0.0f, 1.0f };
+                const Vector2 v2{ 1.0f, 0.0f };
+                Assert::IsTrue(v1 != v2);
+            }
+
+            {
+                const Vector2 v1{ 0.0f, 1.0f };
+                const Vector2 v2{ 0.0f, 1.0f };
+                Assert::IsFalse(v1 != v2);
+            }
+        }
+
+        TEST_METHOD(Length)
+        {
+            const Vector2 v1{ 1.0f, 0.0f };
+            Assert::AreEqual(v1.Length(), 1.0f, TEST_EPSILON);
+            Assert::AreEqual(v1.LengthSqr(), 1.0f, TEST_EPSILON);
+
+            const Vector2 v2{ 1.0f, 1.0f };
+            Assert::AreEqual(v2.Length(), sqrt(2.0f), TEST_EPSILON);
+            Assert::AreEqual(v2.LengthSqr(), 2.0f, TEST_EPSILON);
+        }
+
+        TEST_METHOD(Dot)
+        {
+            const Vector2 zero;
+
+            const Vector2 v1{ 1.0f, 0.0f };
+            const Vector2 v2{ 0.0f, 1.0f };
+            const Vector2 v3{ 0.0f, 1.0f };
+
+            Assert::AreEqual(v1.Dot(v2), 0.0f, TEST_EPSILON);
+            Assert::AreEqual(v1.Dot(v1), 1.0f, TEST_EPSILON);
+            Assert::AreEqual(v2.Dot(v3), 1.0f, TEST_EPSILON);
+
+            const Vector2 v4{ 0.88255f, 0.42268f };
+            const Vector2 v5{ 0.36429f, 0.31932f };
+
+            Assert::AreEqual(v4.Dot(v5), 0.456474f, TEST_EPSILON);
+        }
+    };
+
+    TEST_CLASS(TestVector4)
+    {
+    public:
+        TEST_METHOD(OperatorEqual)
+        {
+            {
+                const Vector4 v1;
+                const Vector4 v2{ 0.0f, 0.0f, 0.0f, 0.0f };
+                Assert::IsTrue(v1 == v2);
+            }
+
+            {
+                const Vector4 v1{ 1.0f, 0.0f, 1.0f, 0.0f };
+                const Vector4 v2{ 1.0f, 0.0f, 1.0f, 0.0f };
+                Assert::IsTrue(v1 == v2);
+            }
+
+            {
+                const Vector4 v1{ 1.0f, 1.0f, 1.0f, 0.0f };
+                const Vector4 v2{ 1.0f, 0.0f, 1.0f, 0.0f };
+                Assert::IsFalse(v1 == v2);
+            }
+        }
+
+        TEST_METHOD(OperatorNotEqual)
+        {
+            {
+                const Vector4 v1;
+                const Vector4 v2{ 1.0f, 0.0f, 0.0f, 0.0f };
+                Assert::IsTrue(v1 != v2);
+            }
+
+            {
+                const Vector4 v1{ 0.0f, 1.0f, 0.0f, 1.0f };
+                const Vector4 v2{ 1.0f, 0.0f, 0.0f, 0.0f };
+                Assert::IsTrue(v1 != v2);
+            }
+
+            {
+                const Vector4 v1{ 1.0f, 0.0f, 1.0f, 0.0f };
+                const Vector4 v2{ 1.0f, 0.0f, 1.0f, 0.0f };
+                Assert::IsFalse(v1 != v2);
+            }
         }
 
         TEST_METHOD(Length)

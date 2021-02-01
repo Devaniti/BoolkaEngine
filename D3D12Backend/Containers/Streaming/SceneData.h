@@ -1,5 +1,6 @@
 #pragma once
 #include "BoolkaCommon/Structures/MemoryBlock.h"
+#include "BoolkaCommon/Structures/AABB.h"
 
 namespace Boolka
 {
@@ -19,11 +20,18 @@ namespace Boolka
             UINT mipCount;
         };
 
+        struct ObjectHeader
+        {
+            AABB boundingBox;
+            UINT startIndex;
+            UINT indexCount;
+        };
+
         struct SceneHeader
         {
             UINT vertexSize;
             UINT indexSize;
-            UINT cullingSize;
+            UINT objectsSize;
             UINT indexCount;
             UINT objectCount;
             UINT textureCount;
@@ -39,6 +47,7 @@ namespace Boolka
             UINT textureCount;
             TextureHeader* textureHeaders;
             void* binaryData;
+            ObjectHeader* objectData;
         };
 
         DataWrapper GetSceneWrapper();

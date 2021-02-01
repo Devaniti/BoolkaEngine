@@ -11,6 +11,7 @@
 #include "Contexts/RenderFrameContext.h"
 #include "Contexts/RenderEngineContext.h"
 #include "Contexts/RenderThreadContext.h"
+#include "CullingManager.h"
 
 namespace Boolka
 {
@@ -61,8 +62,8 @@ namespace Boolka
         commandList->SetPipelineState(m_PSO.Get());
 
         Scene& scene = engineContext.GetScene();
-        UINT indexes = scene.GetIndexBufferSize() / sizeof(uint32_t);
-        commandList->DrawIndexedInstanced(indexes, 1, 0, 0, 0);
+        CullingManager& cullingManager = scene.GetCullingManager();
+        cullingManager.Render(scene, commandList);
 
         return true;
     }
