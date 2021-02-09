@@ -22,6 +22,6 @@ namespace Boolka
         static WindowState GetDefault();
     };
 
-    IS_PLAIN_DATA_ASSERT(WindowState);
+    BLK_IS_PLAIN_DATA_ASSERT(WindowState);
 
 }

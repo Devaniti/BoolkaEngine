@@ -13,6 +13,7 @@ namespace Boolka
     Scene::Scene()
         : m_VertexBufferSize(0)
         , m_IndexBufferSize(0)
+        , m_OpaqueObjectCount(0)
     {
     }
 
@@ -20,12 +21,14 @@ namespace Boolka
     {
         BLK_ASSERT(m_VertexBufferSize == 0);
         BLK_ASSERT(m_IndexBufferSize == 0);
+        BLK_ASSERT(m_OpaqueObjectCount == 0);
     }
 
     bool Scene::Initialize(Device& device, SceneData& sceneData, RenderEngineContext& engineContext)
     {
         BLK_ASSERT(m_VertexBufferSize == 0);
         BLK_ASSERT(m_IndexBufferSize == 0);
+        BLK_ASSERT(m_OpaqueObjectCount == 0);
 
         const auto dataWrapper = sceneData.GetSceneWrapper();
         bool res;
@@ -88,8 +91,8 @@ namespace Boolka
             UINT16 currentMip = 0;
             for (; currentWidth > 0 && currentHeight > 0; ++currentMip)
             {
-                size_t rowPitch = CEIL_TO_POWER_OF_TWO(currentWidth * bytesPerPixel, 256);
-                size_t textureSize = CEIL_TO_POWER_OF_TWO(rowPitch * currentHeight, 512);
+                size_t rowPitch = BLK_CEIL_TO_POWER_OF_TWO(currentWidth * bytesPerPixel, 256);
+                size_t textureSize = BLK_CEIL_TO_POWER_OF_TWO(rowPitch * currentHeight, 512);
                 uploadSize += textureSize;
                 currentWidth >>= 1;
                 currentHeight >>= 1;
@@ -99,7 +102,7 @@ namespace Boolka
             size_t size;
             Texture2D::GetRequiredSize(device, textureHeader.width, textureHeader.height, mipCount, DXGI_FORMAT_B8G8R8A8_UNORM, D3D12_RESOURCE_FLAG_NONE, alignment, size);
 
-            lastOffset = CEIL_TO_POWER_OF_TWO(lastOffset, alignment);
+            lastOffset = BLK_CEIL_TO_POWER_OF_TWO(lastOffset, alignment);
             textureOffsets.push_back(lastOffset);
             lastOffset += size;
         }
@@ -155,8 +158,8 @@ namespace Boolka
             UINT16 mipNumber = 0;
             for (; width > 0 && height > 0; ++mipNumber)
             {
-                size_t rowPitch = CEIL_TO_POWER_OF_TWO(width * bytesPerPixel, 256);
-                size_t textureSize = CEIL_TO_POWER_OF_TWO(rowPitch * height, 512);
+                size_t rowPitch = BLK_CEIL_TO_POWER_OF_TWO(width * bytesPerPixel, 256);
+                size_t textureSize = BLK_CEIL_TO_POWER_OF_TWO(rowPitch * height, 512);
             
                 D3D12_TEXTURE_COPY_LOCATION copyDest;
                 copyDest.pResource = texture.Get();
@@ -186,8 +189,10 @@ namespace Boolka
         uploadBuffer.Unload();
 
         memcpy(m_Objects.data(), dataWrapper.objectData, dataWrapper.objectCount * sizeof(SceneData::ObjectHeader));
+        m_OpaqueObjectCount = dataWrapper.opaqueCount;
 
-        m_CullingManager.Initialize(m_ObjectCount);
+        m_CullingManager.Initialize(*this);
+        m_BatchManager.Initialize(*this);
 
         return true;
     }
@@ -226,8 +231,10 @@ namespace Boolka
         m_IndexBufferSize = 0;
 
         m_ObjectCount = 0;
+        m_OpaqueObjectCount = 0;
         m_Objects.clear();
         m_CullingManager.Unload();
+        m_BatchManager.Unload();
     }
 
 }

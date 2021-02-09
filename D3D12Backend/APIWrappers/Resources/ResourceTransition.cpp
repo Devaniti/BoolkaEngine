@@ -34,7 +34,7 @@ namespace Boolka
         static const D3D12_RESOURCE_STATES nonPromotableStates = D3D12_RESOURCE_STATE_DEPTH_WRITE | D3D12_RESOURCE_STATE_DEPTH_READ | D3D12_RESOURCE_STATE_RENDER_TARGET;
 
         bool isCommonState = srcState == D3D12_RESOURCE_STATE_COMMON;
-        bool onlyOneBit = IS_POWER_OF_TWO(dstState);
+        bool onlyOneBit = BLK_IS_POWER_OF_TWO(dstState);
         bool isPromotableState = (dstState & nonPromotableStates) == 0;
 
         return isCommonState && onlyOneBit && isPromotableState;

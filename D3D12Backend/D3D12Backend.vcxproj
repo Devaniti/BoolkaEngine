@@ -135,6 +135,7 @@
     <ClInclude Include="APIWrappers\RootSignature.h" />
     <ClInclude Include="APIWrappers\StateManager.h" />
     <ClInclude Include="APIWrappers\Swapchain.h" />
+    <ClInclude Include="BatchManager.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Containers\Scene.h" />
     <ClInclude Include="Containers\Streaming\SceneData.h" />
@@ -143,6 +144,7 @@
     <ClInclude Include="Contexts\RenderFrameContext.h" />
     <ClInclude Include="Contexts\RenderThreadContext.h" />
     <ClInclude Include="CullingManager.h" />
+    <ClInclude Include="DebugHelpers\DebugRenderScope.h" />
     <ClInclude Include="FeatureSupportHelper.h" />
     <ClInclude Include="ProjectConfig.h" />
     <ClInclude Include="ProjectHelpers.h" />
@@ -153,6 +155,7 @@
     <ClInclude Include="RenderPasses\DebugRenderPass.h" />
     <ClInclude Include="RenderPasses\GBufferRenderPass.h" />
     <ClInclude Include="RenderPasses\PresentPass.h" />
+    <ClInclude Include="RenderPasses\TransparentRenderPass.h" />
     <ClInclude Include="RenderPasses\UpdateRenderPass.h" />
     <ClInclude Include="RenderPasses\ZRenderPass.h" />
     <ClInclude Include="RenderSchedule\RenderSchedule.h" />
@@ -204,6 +207,7 @@
     <ClCompile Include="APIWrappers\RootSignature.cpp" />
     <ClCompile Include="APIWrappers\StateManager.cpp" />
     <ClCompile Include="APIWrappers\Swapchain.cpp" />
+    <ClCompile Include="BatchManager.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Containers\Scene.cpp" />
     <ClCompile Include="Containers\Streaming\SceneData.cpp" />
@@ -212,6 +216,7 @@
     <ClCompile Include="Contexts\RenderFrameContext.cpp" />
     <ClCompile Include="Contexts\RenderThreadContext.cpp" />
     <ClCompile Include="CullingManager.cpp" />
+    <ClCompile Include="DebugHelpers\DebugRenderScope.cpp" />
     <ClCompile Include="FeatureSupportHelper.cpp" />
     <ClCompile Include="RenderBackend.cpp" />
     <ClCompile Include="RenderBackendImpl.cpp" />
@@ -219,6 +224,7 @@
     <ClCompile Include="RenderPasses\DebugRenderPass.cpp" />
     <ClCompile Include="RenderPasses\GBufferRenderPass.cpp" />
     <ClCompile Include="RenderPasses\PresentPass.cpp" />
+    <ClCompile Include="RenderPasses\TransparentRenderPass.cpp" />
     <ClCompile Include="RenderPasses\UpdateRenderPass.cpp" />
     <ClCompile Include="RenderPasses\ZRenderPass.cpp" />
     <ClCompile Include="RenderSchedule\RenderSchedule.cpp" />
@@ -266,6 +272,14 @@
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </AdditionalOptions>
     </FxCompile>
+    <FxCompile Include="Shaders\TransparentPass\TransparentPassPixelShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\TransparentPass\TransparentPassVertexShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
     <FxCompile Include="Shaders\ZPass\ZPassVertexShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
@@ -277,12 +291,21 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
     <None Include="Shaders\Debug3DPass\Debug3DPassShadersCommon.hlsli" />
     <None Include="Shaders\DebugPass\DebugPassShadersCommon.hlsli" />
     <None Include="Shaders\GBufferPass\GBufferPassShadersCommon.hlsli" />
+    <None Include="Shaders\TransparentPass\TransparentPassShadersCommon.hlsli" />
     <None Include="Shaders\ZPass\ZPassShadersCommon.hlsli" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="..\packages\WinPixEventRuntime.1.0.200127001\build\WinPixEventRuntime.targets" Condition="Exists('..\packages\WinPixEventRuntime.1.0.200127001\build\WinPixEventRuntime.targets')" />
   </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\WinPixEventRuntime.1.0.200127001\build\WinPixEventRuntime.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\WinPixEventRuntime.1.0.200127001\build\WinPixEventRuntime.targets'))" />
+  </Target>
 </Project>

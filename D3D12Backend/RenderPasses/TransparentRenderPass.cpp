@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "GBufferRenderPass.h"
+#include "TransparentRenderPass.h"
 
 #include "BoolkaCommon/DebugHelpers/DebugFileReader.h"
 #include "APIWrappers/InputLayout.h"
@@ -14,7 +14,7 @@
 namespace Boolka
 {
 
-    bool GBufferRenderPass::Render(RenderContext& renderContext, ResourceTracker& resourceTracker)
+    bool TransparentRenderPass::Render(RenderContext& renderContext, ResourceTracker& resourceTracker)
     {
         auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
 
@@ -24,7 +24,7 @@ namespace Boolka
 
         GraphicCommandListImpl& commandList = threadContext.GetGraphicCommandList();
 
-        BLK_GPU_SCOPE(commandList.Get(), "GBufferRenderPass");
+        BLK_GPU_SCOPE(commandList.Get(), "TransparentRenderPass");
 
         resourceTracker.Transition(backbuffer, commandList, D3D12_RESOURCE_STATE_RENDER_TARGET);
         commandList->OMSetRenderTargets(1, backbufferRTV.GetCPUDescriptor(), FALSE, engineContext.GetDepthStencilView().GetCPUDescriptor());
@@ -50,9 +50,6 @@ namespace Boolka
 
         commandList->RSSetScissorRects(1, &scissorRect);
 
-        const float clearColor[] = { 0.0f, 0.2f, 0.4f, 1.0f };
-        commandList->ClearRenderTargetView(*backbufferRTV.GetCPUDescriptor(), clearColor, 0, nullptr);
-
         commandList->SetGraphicsRootConstantBufferView(0, currentConstantBuffer->GetGPUVirtualAddress());
 
         commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -61,22 +58,22 @@ namespace Boolka
         commandList->IASetVertexBuffers(0, 1, engineContext.GetScene().GetVertexBufferView().GetView());
         commandList->SetPipelineState(m_PSO.Get());
 
-        engineContext.GetScene().GetBatchManager().Render(commandList, BatchManager::BatchType::Opaque);
+        engineContext.GetScene().GetBatchManager().Render(commandList, BatchManager::BatchType::Transparent);
 
         return true;
     }
 
-    bool GBufferRenderPass::PrepareRendering()
+    bool TransparentRenderPass::PrepareRendering()
     {
         throw std::logic_error("The method or operation is not implemented.");
     }
 
-    bool GBufferRenderPass::Initialize(Device& device, RenderContext& renderContext, ResourceTracker& resourceTracker)
+    bool TransparentRenderPass::Initialize(Device& device, RenderContext& renderContext, ResourceTracker& resourceTracker)
     {
         auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
 
-        MemoryBlock PS = DebugFileReader::ReadFile("GBufferPassPixelShader.cso");
-        MemoryBlock VS = DebugFileReader::ReadFile("GBufferPassVertexShader.cso");
+        MemoryBlock PS = DebugFileReader::ReadFile("TransparentPassPixelShader.cso");
+        MemoryBlock VS = DebugFileReader::ReadFile("TransparentPassVertexShader.cso");
         InputLayout inputLayout;
         inputLayout.Initialize(4);
         inputLayout.SetEntry(0, { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 });
@@ -86,7 +83,7 @@ namespace Boolka
 
         Scene& scene = engineContext.GetScene();
 
-        bool res = m_PSO.Initialize(device, engineContext.GetDefaultRootSig(), inputLayout, VS, PS, 1, true, false, D3D12_COMPARISON_FUNC_EQUAL);
+        bool res = m_PSO.Initialize(device, engineContext.GetDefaultRootSig(), inputLayout, VS, PS, 1, true, true, D3D12_COMPARISON_FUNC_LESS, true);
         BLK_ASSERT(res);
 
         inputLayout.Unload();
@@ -94,7 +91,7 @@ namespace Boolka
         return true;
     }
 
-    void GBufferRenderPass::Unload()
+    void TransparentRenderPass::Unload()
     {
         m_PSO.Unload();
     }

@@ -35,6 +35,8 @@ namespace Boolka
 
         GraphicCommandListImpl& commandList = renderContext.GetRenderThreadContext().GetGraphicCommandList();
 
+        BLK_GPU_SCOPE(commandList.Get(), "Debug3DRenderPass");
+
         resourceTracker.Transition(backbuffer, commandList, D3D12_RESOURCE_STATE_RENDER_TARGET);
         commandList->OMSetRenderTargets(1, backbufferRTV.GetCPUDescriptor(), FALSE, m_DSV.GetCPUDescriptor());
 
@@ -220,10 +222,10 @@ namespace Boolka
         inputLayout.Unload();
 
         static const UINT64 floatSize = 4;
-        static const UINT64 cbSize = CEIL_TO_POWER_OF_TWO(4 * 4 * floatSize, 256);
+        static const UINT64 cbSize = BLK_CEIL_TO_POWER_OF_TWO(4 * 4 * floatSize, 256);
 
-        INITIALIZE_ARRAY(m_ConstantBuffers, device, cbSize, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_FLAG_NONE, D3D12_RESOURCE_STATE_COPY_DEST);
-        INITIALIZE_ARRAY(m_UploadBuffers, device, cbSize);
+        BLK_INITIALIZE_ARRAY(m_ConstantBuffers, device, cbSize, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_FLAG_NONE, D3D12_RESOURCE_STATE_COPY_DEST);
+        BLK_INITIALIZE_ARRAY(m_UploadBuffers, device, cbSize);
 
         for (UINT i = 0; i < BLK_IN_FLIGHT_FRAMES; ++i)
         {
@@ -251,9 +253,9 @@ namespace Boolka
 
     void Debug3DRenderPass::Unload()
     {
-        UNLOAD_ARRAY(m_ConstantBuffers);
-        UNLOAD_ARRAY(m_UploadBuffers);
-        UNLOAD_ARRAY(m_ConstantBufferViews);
+        BLK_UNLOAD_ARRAY(m_ConstantBuffers);
+        BLK_UNLOAD_ARRAY(m_UploadBuffers);
+        BLK_UNLOAD_ARRAY(m_ConstantBufferViews);
 
         m_DSV.Unload();
         m_DepthBuffer.Unload();

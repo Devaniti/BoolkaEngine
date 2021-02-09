@@ -15,11 +15,11 @@ namespace Boolka
         CullingManager() = default;
         ~CullingManager();
 
-        bool Initialize(UINT objectCount);
+        bool Initialize(const Scene& scene);
         void Unload();
 
-        bool Cull(RenderFrameContext& frameContext, Scene& scene);
-        bool Render(Scene& scene, CommandList& commandList);
+        bool Cull(const RenderFrameContext& frameContext, Scene& scene);
+        const std::vector<bool>& GetVisibility() const { return m_visibility; };
 
     private:
         std::vector<bool> m_visibility;

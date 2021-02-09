@@ -222,6 +222,9 @@
     <ClInclude Include="RenderPasses\ZRenderPass.h" />
     <ClInclude Include="RenderPasses\UpdateRenderPass.h" />
     <ClInclude Include="CullingManager.h" />
+    <ClInclude Include="RenderPasses\TransparentRenderPass.h" />
+    <ClInclude Include="DebugHelpers\DebugRenderScope.h" />
+    <ClInclude Include="BatchManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WindowManagement\WindowManager.cpp">
@@ -386,6 +389,9 @@
     <ClCompile Include="RenderPasses\ZRenderPass.cpp" />
     <ClCompile Include="RenderPasses\UpdateRenderPass.cpp" />
     <ClCompile Include="CullingManager.cpp" />
+    <ClCompile Include="RenderPasses\TransparentRenderPass.cpp" />
+    <ClCompile Include="DebugHelpers\DebugRenderScope.cpp" />
+    <ClCompile Include="BatchManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\RootSig.hlsl">
@@ -406,6 +412,8 @@
     <FxCompile Include="Shaders\GBufferPass\GBufferPassVertexShader.hlsl" />
     <FxCompile Include="Shaders\GBufferPass\GBufferPassPixelShader.hlsl" />
     <FxCompile Include="Shaders\ZPass\ZPassVertexShader.hlsl" />
+    <FxCompile Include="Shaders\TransparentPass\TransparentPassPixelShader.hlsl" />
+    <FxCompile Include="Shaders\TransparentPass\TransparentPassVertexShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\DebugPass\DebugPassShadersCommon.hlsli">
@@ -416,5 +424,7 @@
     </None>
     <None Include="Shaders\GBufferPass\GBufferPassShadersCommon.hlsli" />
     <None Include="Shaders\ZPass\ZPassShadersCommon.hlsli" />
+    <None Include="Shaders\TransparentPass\TransparentPassShadersCommon.hlsli" />
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

@@ -9,6 +9,7 @@
 #include "Contexts/RenderEngineContext.h"
 #include "RenderPasses/ZRenderPass.h"
 #include "RenderPasses/UpdateRenderPass.h"
+#include "RenderPasses/TransparentRenderPass.h"
 
 namespace Boolka
 {
@@ -34,6 +35,7 @@ namespace Boolka
 
     private:
         bool InitializeRenderPasses(Device& device);
+        void UnloadRenderPasses();
 
         bool PrepareFrame();
         bool RenderFrame(Device& device);
@@ -49,6 +51,7 @@ namespace Boolka
         UpdateRenderPass m_UpdatePass;
         ZRenderPass m_ZPass;
         GBufferRenderPass m_GbufferPass;
+        TransparentRenderPass m_TransparentPass;
         PresentPass m_PresentPass;
     public:
     };

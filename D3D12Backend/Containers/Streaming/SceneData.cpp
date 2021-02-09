@@ -32,6 +32,7 @@ namespace Boolka
         result.indexCount = sceneHeader->indexCount;
         result.textureCount = sceneHeader->textureCount;
         result.objectCount = sceneHeader->objectCount;
+        result.opaqueCount = sceneHeader->opaqueCount;
 
         data += sizeof(SceneHeader);
 

@@ -32,9 +32,10 @@ namespace Boolka
         bool LoadScene(Device& device, SceneData& sceneData);
         void UnloadScene();
         Scene& GetScene() { return m_Scene; };
+        const Scene& GetScene() const { return m_Scene; };
 
-        UINT GetBackbufferWidth() { return m_backbufferWidth; };
-        UINT GetBackbufferHeight() { return m_backbufferHeight; };
+        UINT GetBackbufferWidth() const { return m_backbufferWidth; };
+        UINT GetBackbufferHeight() const { return m_backbufferHeight; };
 
         Texture2D& GetSwapchainBackBuffer(UINT index);
         RenderTargetView& GetSwapchainRenderTargetView(UINT index);

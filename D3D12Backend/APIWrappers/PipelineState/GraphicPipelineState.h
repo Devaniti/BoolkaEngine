@@ -25,13 +25,14 @@ namespace Boolka
             UINT renderTargetCount,
             bool useDepthTest = false,
             bool writeDepth = true,
-            D3D12_COMPARISON_FUNC depthFunc = D3D12_COMPARISON_FUNC_LESS);
+            D3D12_COMPARISON_FUNC depthFunc = D3D12_COMPARISON_FUNC_LESS,
+            bool useAlphaBlend = false);
     private:
         static void SetDefaultPipelineStateDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& desc);
         static void SetDefaultRasterizerDesc(D3D12_RASTERIZER_DESC& desc);
         static void SetDefaultDepthStencilDesc(D3D12_DEPTH_STENCIL_DESC& desc);
     };
 
-    IS_PLAIN_DATA_ASSERT(D3D12_GRAPHICS_PIPELINE_STATE_DESC);
+    BLK_IS_PLAIN_DATA_ASSERT(D3D12_GRAPHICS_PIPELINE_STATE_DESC);
 
 }

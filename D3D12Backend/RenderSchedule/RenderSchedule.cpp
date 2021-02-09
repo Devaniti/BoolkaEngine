@@ -31,10 +31,7 @@ namespace Boolka
         m_FrameContext.Unload();
         m_ThreadContext.Unload();
 
-        m_UpdatePass.Unload();
-        m_ZPass.Unload();
-        m_GbufferPass.Unload();
-        m_PresentPass.Unload();
+        UnloadRenderPasses();
 
         m_ResourceTracker.Unload();
     }
@@ -44,7 +41,7 @@ namespace Boolka
         m_FrameContext.FlipFrame(m_EngineContext, frameIndex);
         m_ThreadContext.FlipFrame(frameIndex);
 
-        //PrepareFrame();
+        PrepareFrame();
         bool res = RenderFrame(device);
         BLK_ASSERT(res);
 
@@ -67,15 +64,28 @@ namespace Boolka
         BLK_ASSERT(res);
         res = m_GbufferPass.Initialize(device, m_RenderContext, m_ResourceTracker);
         BLK_ASSERT(res);
+        res = m_TransparentPass.Initialize(device, m_RenderContext, m_ResourceTracker);
+        BLK_ASSERT(res);
         res = m_PresentPass.Initialize(device, m_RenderContext, m_ResourceTracker);
         BLK_ASSERT(res);
 
         return true;
     }
 
+    void RenderSchedule::UnloadRenderPasses()
+    {
+        m_UpdatePass.Unload();
+        m_ZPass.Unload();
+        m_GbufferPass.Unload();
+        m_TransparentPass.Unload();
+        m_PresentPass.Unload();
+    }
+
     bool RenderSchedule::PrepareFrame()
     {
-        throw std::logic_error("Unimplemented");
+        Scene& scene = m_RenderContext.GetRenderEngineContext().GetScene();
+        scene.GetBatchManager().PrepareBatches(m_FrameContext, scene);
+        return true;
     }
 
     bool RenderSchedule::RenderFrame(Device& device)
@@ -89,6 +99,8 @@ namespace Boolka
         res = m_ZPass.Render(m_RenderContext, m_ResourceTracker);
         BLK_ASSERT(res);
         res = m_GbufferPass.Render(m_RenderContext, m_ResourceTracker);
+        BLK_ASSERT(res);
+        res = m_TransparentPass.Render(m_RenderContext, m_ResourceTracker);
         BLK_ASSERT(res);
         res = m_PresentPass.Render(m_RenderContext, m_ResourceTracker);
         BLK_ASSERT(res);

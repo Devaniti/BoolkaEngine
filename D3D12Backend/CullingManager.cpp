@@ -16,9 +16,9 @@ namespace Boolka
         BLK_ASSERT(m_visibility.empty());
     }
 
-    bool CullingManager::Initialize(UINT objectCount)
+    bool CullingManager::Initialize(const Scene& scene)
     {
-        m_visibility.resize(objectCount);
+        m_visibility.resize(scene.GetObjectCount());
         return true;
     }
 
@@ -27,7 +27,7 @@ namespace Boolka
         m_visibility.clear();
     }
 
-    bool CullingManager::Cull(RenderFrameContext& frameContext, Scene& scene)
+    bool CullingManager::Cull(const RenderFrameContext& frameContext, Scene& scene)
     {
         Matrix4x4 viewProjMatrix = frameContext.GetViewMatrix() * frameContext.GetProjMatrix();
 
@@ -45,23 +45,6 @@ namespace Boolka
         }
 
         g_WDebugOutput << L"Visible " << visibleCount << std::endl;
-
-        return true;
-    }
-
-    bool CullingManager::Render(Scene& scene, CommandList& commandList)
-    {
-        const auto& objects = scene.GetObjects();
-        BLK_ASSERT(objects.size() == m_visibility.size());
-
-        for (size_t i = 0; i < objects.size(); ++i)
-        {
-            if (m_visibility[i])
-            {
-                const auto& object = objects[i];
-                commandList->DrawIndexedInstanced(object.indexCount, 1, object.startIndex, 0, 0);
-            }
-        }
 
         return true;
     }

@@ -16,7 +16,8 @@ namespace Boolka
         UINT renderTargetCount,
         bool useDepthTest /*= false*/,
         bool writeDepth /*= true*/,
-        D3D12_COMPARISON_FUNC depthFunc /*= D3D12_COMPARISON_FUNC_LESS*/)
+        D3D12_COMPARISON_FUNC depthFunc /*= D3D12_COMPARISON_FUNC_LESS*/,
+        bool useAlphaBlend /*= false*/)
     {
         ID3D12PipelineState* state = nullptr;
         D3D12_GRAPHICS_PIPELINE_STATE_DESC desc;
@@ -45,14 +46,25 @@ namespace Boolka
         for (UINT i = 0; i < renderTargetCount; ++i)
         {
             desc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
-            desc.BlendState.RenderTarget[0].SrcBlend = D3D12_BLEND_ONE;
-            desc.BlendState.RenderTarget[0].DestBlend = D3D12_BLEND_ZERO;
-            desc.BlendState.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
-            desc.BlendState.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
+            desc.BlendState.RenderTarget[0].LogicOp = D3D12_LOGIC_OP_NOOP;
+            desc.BlendState.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_RED | D3D12_COLOR_WRITE_ENABLE_GREEN | D3D12_COLOR_WRITE_ENABLE_BLUE;
+            if (useAlphaBlend)
+            {
+                desc.BlendState.RenderTarget[0].BlendEnable = TRUE;
+                desc.BlendState.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+                desc.BlendState.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+                desc.BlendState.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+            }
+            else
+            {
+                desc.BlendState.RenderTarget[0].BlendEnable = FALSE;
+                desc.BlendState.RenderTarget[0].SrcBlend = D3D12_BLEND_ONE;
+                desc.BlendState.RenderTarget[0].DestBlend = D3D12_BLEND_ZERO;
+                desc.BlendState.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+            }
+            desc.BlendState.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ZERO;
             desc.BlendState.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
             desc.BlendState.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
-            desc.BlendState.RenderTarget[0].LogicOp = D3D12_LOGIC_OP_NOOP;
-            desc.BlendState.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
         }
 
         HRESULT hr = device->CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(&state));

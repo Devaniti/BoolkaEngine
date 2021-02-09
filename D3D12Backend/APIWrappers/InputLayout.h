@@ -19,15 +19,15 @@ namespace Boolka
             UINT m_NumEntries;
         };
 
-        IS_PLAIN_DATA_ASSERT(InputLayoutHeader);
+        BLK_IS_PLAIN_DATA_ASSERT(InputLayoutHeader);
 
         struct InputLayoutEntry
         {
             char SemanticName[BLK_D3D12_SEMANTIC_MAX_LENGTH];
         };
 
-        IS_PLAIN_DATA_ASSERT(InputLayoutEntry);
-        IS_PLAIN_DATA_ASSERT(D3D12_INPUT_ELEMENT_DESC);
+        BLK_IS_PLAIN_DATA_ASSERT(InputLayoutEntry);
+        BLK_IS_PLAIN_DATA_ASSERT(D3D12_INPUT_ELEMENT_DESC);
 
         void FillInputLayoutDesc(D3D12_INPUT_LAYOUT_DESC& desc);
 

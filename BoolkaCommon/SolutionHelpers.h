@@ -30,7 +30,14 @@
 
 // If you want to stringify the result of expansion of a macro argument, you have to use two levels of macros.
 // https://gcc.gnu.org/onlinedocs/gcc-4.8.5/cpp/Stringification.html
-#define STRINGIFY(str) #str
+#define BLK_STRINGIFY(str) #str
+
+#define BLK_INTERNAL_CONCAT(a,b) a##b
+#define BLK_CONCAT(a,b) BLK_INTERNAL_CONCAT(a,b)
+
+// Only unique in scope of single file
+#define BLK_UNIQUE_NAME(baseName) BLK_CONCAT(baseName, __LINE__)
+
 
 #define IS_PLAIN_DATA(type) (std::is_trivially_default_constructible<type>::value \
                           && std::is_trivially_copy_constructible<type>::value \
@@ -39,14 +46,14 @@
                           && std::is_trivially_move_assignable<type>::value \
                           && std::is_trivially_destructible<type>::value)
 
-#define IS_PLAIN_DATA_ASSERT(type) static_assert(IS_PLAIN_DATA(type), STRINGIFY(type) " is not plain data")
+#define BLK_IS_PLAIN_DATA_ASSERT(type) static_assert(IS_PLAIN_DATA(type), BLK_STRINGIFY(type) " is not plain data")
 
-#define IS_POWER_OF_TWO(intValue) ((intValue & (intValue - 1)) == 0)
-#define CEIL_TO_POWER_OF_TWO(intValue, powerOfTwo) ((intValue + (powerOfTwo - 1)) & (~(powerOfTwo - 1)))
-#define FLOOR_TO_POWER_OF_TWO(intValue, powerOfTwo) (intValue & (~(powerOfTwo - 1)))
+#define BLK_IS_POWER_OF_TWO(intValue) ((intValue & (intValue - 1)) == 0)
+#define BLK_CEIL_TO_POWER_OF_TWO(intValue, powerOfTwo) ((intValue + (powerOfTwo - 1)) & (~(powerOfTwo - 1)))
+#define BLK_FLOOR_TO_POWER_OF_TWO(intValue, powerOfTwo) (intValue & (~(powerOfTwo - 1)))
 
-#define INITIALIZE_ARRAY(arr, ...) { for(auto& elem : arr) { bool res = elem.Initialize(__VA_ARGS__); BLK_ASSERT(res); } }
-#define UNLOAD_ARRAY(arr) { for(auto& elem : arr) elem.Unload(); }
+#define BLK_INITIALIZE_ARRAY(arr, ...) { for(auto& elem : arr) { bool res = elem.Initialize(__VA_ARGS__); BLK_ASSERT(res); } }
+#define BLK_UNLOAD_ARRAY(arr) { for(auto& elem : arr) elem.Unload(); }
 
 #define FLOAT_PI 3.141592f
 

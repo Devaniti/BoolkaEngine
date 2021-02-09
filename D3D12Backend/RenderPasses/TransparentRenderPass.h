@@ -1,15 +1,17 @@
 #pragma once
 #include "RenderPass.h"
 
+#include "APIWrappers/PipelineState/GraphicPipelineState.h"
+
 namespace Boolka
 {
 
-    class UpdateRenderPass :
+    class TransparentRenderPass :
         public RenderPass
     {
     public:
-        UpdateRenderPass() = default;
-        ~UpdateRenderPass() = default;
+        TransparentRenderPass() = default;
+        ~TransparentRenderPass() = default;
 
         bool Initialize(Device& device, RenderContext& renderContext, ResourceTracker& resourceTracker) override;
         void Unload() override;
@@ -18,6 +20,7 @@ namespace Boolka
         bool PrepareRendering() override;
 
     private:
+        GraphicPipelineState m_PSO;
     };
 
 }

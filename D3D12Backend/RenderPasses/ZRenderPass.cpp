@@ -6,12 +6,10 @@
 #include "RenderSchedule/ResourceTracker.h"
 #include "APIWrappers/CommandList/GraphicCommandListImpl.h"
 #include "APIWrappers/Resources/Textures/Texture2D.h"
-#include "APIWrappers/Resources/ResourceTransition.h"
 #include "Contexts/RenderContext.h"
 #include "Contexts/RenderFrameContext.h"
 #include "Contexts/RenderEngineContext.h"
 #include "Contexts/RenderThreadContext.h"
-#include "CullingManager.h"
 
 namespace Boolka
 {
@@ -22,6 +20,8 @@ namespace Boolka
 
         UINT frameIndex = frameContext.GetFrameIndex();
         GraphicCommandListImpl& commandList = threadContext.GetGraphicCommandList();
+
+        BLK_GPU_SCOPE(commandList.Get(), "ZRenderPass");
 
         UINT height = engineContext.GetBackbufferHeight();
         UINT width = engineContext.GetBackbufferWidth();
@@ -52,10 +52,7 @@ namespace Boolka
         commandList->IASetVertexBuffers(0, 1, engineContext.GetScene().GetVertexBufferView().GetView());
         commandList->SetPipelineState(m_PSO.Get());
 
-        Scene& scene = engineContext.GetScene();
-        CullingManager& cullingManager = scene.GetCullingManager();
-        cullingManager.Cull(frameContext, scene);
-        cullingManager.Render(scene, commandList);
+        engineContext.GetScene().GetBatchManager().Render(commandList, BatchManager::BatchType::Opaque);
 
         return true;
     }

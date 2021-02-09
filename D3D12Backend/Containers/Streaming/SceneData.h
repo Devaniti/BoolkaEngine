@@ -34,6 +34,7 @@ namespace Boolka
             UINT objectsSize;
             UINT indexCount;
             UINT objectCount;
+            UINT opaqueCount;
             UINT textureCount;
         };
 
@@ -44,6 +45,7 @@ namespace Boolka
             UINT cullingBufferSize;
             UINT indexCount;
             UINT objectCount;
+            UINT opaqueCount;
             UINT textureCount;
             TextureHeader* textureHeaders;
             void* binaryData;

@@ -2,6 +2,7 @@
 
 #ifdef BLK_DEBUG
 #define BLK_RENDER_DEBUG
+#define USE_PIX
 #endif
 
 // Concatenates BLK_ENGINE_NAME which is a string with " Window Class"

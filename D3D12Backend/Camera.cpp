@@ -34,7 +34,7 @@ namespace Boolka
         m_CameraPos = {};
     }
 
-    bool Camera::Update(float deltaTime, float aspectRatio, float moveSpeed, float rotationSpeed, Matrix4x4& outViewMatrix, Matrix4x4& outProjMatrix)
+    bool Camera::Update(float deltaTime, float aspectRatio, float moveSpeed, float rotationSpeed, Matrix4x4& outViewMatrix, Matrix4x4& outProjMatrix, Vector4& outCameraPos)
     {
         float speedMult = ::GetAsyncKeyState(VK_SHIFT) ? 5.0f : 1.0f;
         float angleSpeedMult = ::GetAsyncKeyState(VK_SHIFT) ? 2.0f : 1.0f;
@@ -134,6 +134,8 @@ namespace Boolka
             forward,
             m_CameraPos
         );
+
+        outCameraPos = m_CameraPos;
 
         return true;
     }

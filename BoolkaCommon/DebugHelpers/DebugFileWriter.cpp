@@ -47,7 +47,7 @@ namespace Boolka
 
     bool DebugFileWriter::Close(size_t alignment /*= 0*/)
     {
-        BLK_ASSERT(IS_POWER_OF_TWO(alignment));
+        BLK_ASSERT(BLK_IS_POWER_OF_TWO(alignment));
 
         if (alignment != 0)
         {

@@ -21,8 +21,22 @@ namespace Boolka
             : m_data{}
         {
             BLK_ASSERT(data.size() <= componentCount);
-            std::copy(data.begin(), data.end(), m_data);
+            std::copy(data.begin(), data.end(), begin());
         };
+
+        template<size_t otherComponentCount>
+        Vector(const Vector<otherComponentCount, elementType>& other)
+            : m_data{}
+        {
+            if constexpr (otherComponentCount > componentCount)
+            {
+                std::copy(other.begin(), other.begin() + componentCount, begin());
+            }
+            else
+            {
+                std::copy(other.begin(), other.end(), begin());
+            }
+        }
 
         elementType x() const { static_assert(componentCount > 0); return m_data[0]; };
         elementType y() const { static_assert(componentCount > 1); return m_data[1]; };
@@ -59,12 +73,12 @@ namespace Boolka
 
         elementType Dot(const thisType& other) const;
         thisType Cross(const thisType& other) const;
-        elementType Length() const;
+        elementType LengthSlow() const;
         elementType LengthSqr() const;
 
         thisType Normalize() const;
 
-        elementType Length3() const;
+        elementType Length3Slow() const;
         elementType LengthSqr3() const;
         thisType Normalize3() const;
 
@@ -118,7 +132,7 @@ namespace Boolka
     }
 
     template<size_t componentCount, typename elementType>
-    elementType Vector<componentCount, elementType>::Length() const
+    elementType Vector<componentCount, elementType>::LengthSlow() const
     {
         return ::sqrt(LengthSqr());
     }
@@ -138,11 +152,11 @@ namespace Boolka
     template<size_t componentCount, typename elementType>
     Vector<componentCount, elementType> Vector<componentCount, elementType>::Normalize() const
     {
-        return (*this) / Length();
+        return (*this) / LengthSlow();
     }
 
     template<size_t componentCount, typename elementType>
-    elementType Boolka::Vector<componentCount, elementType>::Length3() const
+    elementType Boolka::Vector<componentCount, elementType>::Length3Slow() const
     {
         static_assert(componentCount >= 3);
         return ::sqrt(LengthSqr3());
@@ -165,7 +179,7 @@ namespace Boolka
     Vector<componentCount, elementType> Boolka::Vector<componentCount, elementType>::Normalize3() const
     {
         static_assert(componentCount >= 3);
-        return (*this) / Length3();
+        return (*this) / Length3Slow();
     }
 
     template<size_t componentCount, typename elementType>
@@ -221,7 +235,7 @@ namespace Boolka
     template<size_t componentCount, typename elementType>
     Vector<componentCount, elementType>& Vector<componentCount, elementType>::operator*=(const thisType& other)
     {
-        for (size_t i = 0; i < 4; ++i)
+        for (size_t i = 0; i < componentCount; ++i)
         {
             (*this)[i] *= other[i];
         }
@@ -231,7 +245,7 @@ namespace Boolka
     template<size_t componentCount, typename elementType>
     Vector<componentCount, elementType>& Vector<componentCount, elementType>::operator/=(const thisType& other)
     {
-        for (size_t i = 0; i < 4; ++i)
+        for (size_t i = 0; i < componentCount; ++i)
         {
             (*this)[i] /= other[i];
         }
@@ -241,7 +255,7 @@ namespace Boolka
     template<size_t componentCount, typename elementType>
     Vector<componentCount, elementType>& Vector<componentCount, elementType>::operator+=(const thisType& other)
     {
-        for (size_t i = 0; i < 4; ++i)
+        for (size_t i = 0; i < componentCount; ++i)
         {
             (*this)[i] += other[i];
         }
@@ -251,7 +265,7 @@ namespace Boolka
     template<size_t componentCount, typename elementType>
     Vector<componentCount, elementType>& Vector<componentCount, elementType>::operator-=(const thisType& other)
     {
-        for (size_t i = 0; i < 4; ++i)
+        for (size_t i = 0; i < componentCount; ++i)
         {
             (*this)[i] -= other[i];
         }
