@@ -14,9 +14,15 @@ namespace Boolka
     class ObjConverterImpl
     {
     public:
-        static bool Convert(std::string inFile, std::string outFile);
+        ObjConverterImpl();
+        ~ObjConverterImpl() = default;
+
+        bool Convert(std::string inFile, std::string outFile);
 
     private:
+
+        void Reset();
+
         struct VertexData
         {
             float position[3];
@@ -35,89 +41,81 @@ namespace Boolka
             bool operator<(const UniqueVertexKey& other) const;
         };
 
-        static bool Load(std::string inFile,
-            tinyobj::attrib_t& attrib,
-            std::vector<tinyobj::shape_t>& shapes,
-            std::vector<tinyobj::material_t>& materials);
+        bool Load(std::string inFile);
 
-        static void ProcessGeometry(const tinyobj::attrib_t& attrib,
-            const std::vector<tinyobj::shape_t>& shapes,
-            const std::vector<tinyobj::material_t>& materials,
-            std::vector<VertexData>& vertexDataVector,
-            std::vector<uint32_t>& indexDataVector,
-            std::vector<std::string>& remappedMaterials,
-            std::vector<SceneData::ObjectHeader>& objects,
-            size_t& opaqueObjects);
+        void ProcessGeometry();
 
-        static void RemapMaterials(const std::vector<tinyobj::material_t>& materials,
-            std::unordered_map<std::string, int>& materialsMap,
-            std::vector<std::string>& remappedMaterials);
+        void RemapMaterials();
 
-        static bool IsTransparent(const tinyobj::material_t& material);
+        bool IsTransparent(const tinyobj::material_t& material);
 
-        static void ProcessVerticesIndices(const tinyobj::attrib_t& attrib,
-            const std::vector<tinyobj::shape_t>& shapes,
-            const std::vector<tinyobj::material_t>& materials,
-            std::unordered_map<std::string, int>& materialsMap,
-            std::vector<VertexData>& vertexDataVector,
-            std::vector<uint32_t>& indexDataVector,
-            std::vector<SceneData::ObjectHeader>& objects,
-            size_t& opaqueObjects);
+        void ProcessVerticesIndices();
 
-        static void RemapVertices(const tinyobj::attrib_t& attrib,
-            const tinyobj::shape_t& shape,
-            const std::vector<tinyobj::material_t>& materials,
-            std::unordered_map<std::string, int>& materialsMap,
+        void RemapVertices(const tinyobj::shape_t& shape,
             std::map<UniqueVertexKey, uint32_t>& verticesMap,
-            uint32_t& currentIndex,
-            std::vector<VertexData>& vertexDataVector);
+            uint32_t& currentIndex);
 
-        static void BuildIndices(const tinyobj::shape_t& shape,
+        void BuildIndices(const tinyobj::shape_t& shape,
             std::map<UniqueVertexKey, uint32_t>& verticesMap,
-            std::vector<uint32_t>& indexDataVector,
-            const tinyobj::attrib_t& attrib,
             SceneData::ObjectHeader& object);
 
-        static void WriteHeader(DebugFileWriter& fileWriter,
-            const std::vector<VertexData>& vertexDataVector,
-            const std::vector<uint32_t>& indexDataVector,
-            const std::vector<std::string>& remappedMaterials,
-            const std::vector<SceneData::ObjectHeader>& cullingData,
-            size_t& opaqueObjects);
+        void WriteHeader(DebugFileWriter& fileWriter);
 
         template <typename T>
-        static void WriteVector(DebugFileWriter& fileWriter, const std::vector<T>& vertexDataVector, size_t alignment);
-        static void WriteTextureHeaders(DebugFileWriter& fileWriter, std::vector<std::string>& remappedMaterials);
-        static void WriteTextures(DebugFileWriter& fileWriter, std::vector<std::string>& remappedMaterials);
-        static void WriteMIPChain(DebugFileWriter& fileWriter, const unsigned char* textureData, int width, int height);
+        void WriteVector(DebugFileWriter& fileWriter, const std::vector<T>& vertexDataVector, size_t alignment);
+        void WriteTextureHeaders(DebugFileWriter& fileWriter);
+        void WriteTextures(DebugFileWriter& fileWriter);
+        void WriteMIPChain(DebugFileWriter& fileWriter, const unsigned char* textureData, int width, int height);
 
-        static const size_t bytesPerPixel = 4;
+        static const size_t ms_bytesPerPixel = 4;
 
+        tinyobj::attrib_t m_attrib;
+        std::vector<tinyobj::shape_t> m_shapes;
+        std::vector<tinyobj::material_t> m_materials;
+
+        std::vector<VertexData> m_vertexDataVector;
+        std::vector<uint32_t> m_indexDataVector;
+        std::vector<std::string> m_remappedMaterials;
+        std::vector<SceneData::ObjectHeader> m_objects;
+        size_t m_opaqueObjectCount;
+
+        std::unordered_map<std::string, int> m_materialsMap;
     };
+
+    ObjConverterImpl::ObjConverterImpl()
+    {
+        Reset();
+    }
+
+    void ObjConverterImpl::Reset()
+    {
+        m_opaqueObjectCount = 0;
+
+        m_shapes.clear();
+        m_materials.clear();
+
+        m_vertexDataVector.clear();
+        m_indexDataVector.clear();
+        m_remappedMaterials.clear();
+        m_objects.clear();
+
+        m_materialsMap.clear();
+    }
 
     bool ObjConverterImpl::Convert(std::string inFile, std::string outFile)
     {
-        tinyobj::attrib_t attrib;
-        std::vector<tinyobj::shape_t> shapes;
-        std::vector<tinyobj::material_t> materials;
-
         std::cout << "Loading file:" << inFile << std::endl;
 
-        if (!Load(inFile, attrib, shapes, materials))
+        if (!Load(inFile))
         {
             std::cout << "Failed to load file:" << inFile << std::endl;
             return false;
         }
 
         std::cout << inFile << "Loaded successfully" << std::endl;
+        m_opaqueObjectCount = 0;
 
-        std::vector<VertexData> vertexDataVector;
-        std::vector<uint32_t> indexDataVector;
-        std::vector<std::string> remappedMaterials;
-        std::vector<SceneData::ObjectHeader> objectsVector;
-        size_t opaqueObjects = 0;
-
-        ProcessGeometry(attrib, shapes, materials, vertexDataVector, indexDataVector, remappedMaterials, objectsVector, opaqueObjects);
+        ProcessGeometry();
 
         DebugFileWriter fileWriter;
         bool res = fileWriter.OpenFile(outFile.c_str());
@@ -127,20 +125,20 @@ namespace Boolka
             return false;
         }
 
-        WriteHeader(fileWriter, vertexDataVector, indexDataVector, remappedMaterials, objectsVector, opaqueObjects);
+        WriteHeader(fileWriter);
 
-        WriteTextureHeaders(fileWriter, remappedMaterials);
+        WriteTextureHeaders(fileWriter);
 
-        WriteVector(fileWriter, objectsVector, 0);
+        WriteVector(fileWriter, m_objects, 0);
         std::cout << "Written objects buffer" << std::endl;
 
-        WriteVector(fileWriter, vertexDataVector, gs_ResourceAlignment);
+        WriteVector(fileWriter, m_vertexDataVector, gs_ResourceAlignment);
         std::cout << "Written vertex buffer" << std::endl;
 
-        WriteVector(fileWriter, indexDataVector, gs_ResourceAlignment);
+        WriteVector(fileWriter, m_indexDataVector, gs_ResourceAlignment);
         std::cout << "Written index buffer" << std::endl;
         
-        WriteTextures(fileWriter, remappedMaterials);
+        WriteTextures(fileWriter);
         std::cout << "Written textures" << std::endl;
 
         res = fileWriter.Close(BLK_FILE_BLOCK_SIZE);
@@ -155,14 +153,16 @@ namespace Boolka
         std::cout << "Successfully written " << outFile << std::endl;
 
         return true;
+
+        Reset();
     }
 
-    bool ObjConverterImpl::Load(std::string inFile, tinyobj::attrib_t& attrib, std::vector<tinyobj::shape_t>& shapes, std::vector<tinyobj::material_t>& materials)
+    bool ObjConverterImpl::Load(std::string inFile)
     {
         std::string warn;
         std::string err;
 
-        bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, inFile.c_str(), NULL, true);
+        bool ret = tinyobj::LoadObj(&m_attrib, &m_shapes, &m_materials, &warn, &err, inFile.c_str(), NULL, true);
 
         if (!warn.empty())
         {
@@ -177,38 +177,28 @@ namespace Boolka
         return ret;
     }
 
-    void ObjConverterImpl::ProcessGeometry(const tinyobj::attrib_t& attrib,
-                                           const std::vector<tinyobj::shape_t>& shapes, 
-                                           const std::vector<tinyobj::material_t>& materials,
-                                           std::vector<VertexData>& vertexDataVector,
-                                           std::vector<uint32_t>& indexDataVector, 
-                                           std::vector<std::string>& remappedMaterials, 
-                                           std::vector<SceneData::ObjectHeader>& objects,
-                                           size_t& opaqueObjects)
+    void ObjConverterImpl::ProcessGeometry()
     {
-        std::unordered_map<std::string, int> materialsMap;
-        RemapMaterials(materials, materialsMap, remappedMaterials);
-        ProcessVerticesIndices(attrib, shapes, materials, materialsMap, vertexDataVector, indexDataVector, objects, opaqueObjects);
+        RemapMaterials();
+        ProcessVerticesIndices();
     }
-    void ObjConverterImpl::RemapMaterials(const std::vector<tinyobj::material_t>& materials,
-                                      std::unordered_map<std::string, int>& materialsMap, 
-                                      std::vector<std::string>& remappedMaterials)
+    void ObjConverterImpl::RemapMaterials()
     {
-        materialsMap.insert(std::make_pair<std::string, int>("", 0));
+        m_materialsMap.insert(std::make_pair<std::string, int>("", 0));
         int currentMaterialIndex = 1;
 
-        for (auto& material : materials)
+        for (auto& material : m_materials)
         {
-            if (materialsMap.find(material.diffuse_texname) == materialsMap.end())
+            if (m_materialsMap.find(material.diffuse_texname) == m_materialsMap.end())
             {
-                materialsMap[material.diffuse_texname] = currentMaterialIndex++;
+                m_materialsMap[material.diffuse_texname] = currentMaterialIndex++;
             }
         }
 
-        remappedMaterials.resize(materialsMap.size());
-        for (auto& [textureName, materialIndex] : materialsMap)
+        m_remappedMaterials.resize(m_materialsMap.size());
+        for (auto& [textureName, materialIndex] : m_materialsMap)
         {
-            remappedMaterials[materialIndex] = textureName;
+            m_remappedMaterials[materialIndex] = textureName;
         }
 
         std::cout << "Remapped materials" << std::endl;
@@ -255,26 +245,19 @@ namespace Boolka
         return result;
     }
 
-    void ObjConverterImpl::ProcessVerticesIndices(const tinyobj::attrib_t& attrib,
-                                     const std::vector<tinyobj::shape_t>& shapes, 
-                                     const std::vector<tinyobj::material_t>& materials,
-                                     std::unordered_map<std::string, int>& materialsMap, 
-                                     std::vector<VertexData>& vertexDataVector, 
-                                     std::vector<uint32_t>& indexDataVector, 
-                                     std::vector<SceneData::ObjectHeader>& objects,
-                                     size_t& opaqueObjects)
+    void ObjConverterImpl::ProcessVerticesIndices()
     {
         uint32_t currentIndex = 0;
 
-        objects.reserve(shapes.size());
+        m_objects.reserve(m_shapes.size());
 
         for (size_t processTransparent = 0; processTransparent < 2; ++ processTransparent)
         {
-            for (auto& shape : shapes)
+            for (auto& shape : m_shapes)
             {
                 SceneData::ObjectHeader object{};
 
-                auto& material = materials[shape.mesh.material_ids[0]];
+                auto& material = m_materials[shape.mesh.material_ids[0]];
 
                 bool isCurrentTransparent = IsTransparent(material);
 
@@ -285,26 +268,22 @@ namespace Boolka
 
                 std::map<UniqueVertexKey, uint32_t> verticesMap;
 
-                RemapVertices(attrib, shape, materials, materialsMap, verticesMap, currentIndex, vertexDataVector);
-                BuildIndices(shape, verticesMap, indexDataVector, attrib, object);
+                RemapVertices(shape, verticesMap, currentIndex);
+                BuildIndices(shape, verticesMap, object);
 
-                objects.push_back(object);
+                m_objects.push_back(object);
             }
 
             if (processTransparent == 0)
             {
-                opaqueObjects = objects.size();
+                m_opaqueObjectCount = m_objects.size();
             }
         }
     }
 
-    void ObjConverterImpl::RemapVertices(const tinyobj::attrib_t& attrib, 
-        const tinyobj::shape_t& shape, 
-        const std::vector<tinyobj::material_t>& materials, 
-        std::unordered_map<std::string, int>& materialsMap, 
-        std::map<UniqueVertexKey, uint32_t>& verticesMap,
-        uint32_t& currentIndex,
-        std::vector<VertexData>& vertexDataVector)
+    void ObjConverterImpl::RemapVertices(const tinyobj::shape_t& shape,
+                                         std::map<UniqueVertexKey, uint32_t>& verticesMap,
+                                         uint32_t& currentIndex)
     {
         for (unsigned char vertexesPerFace : shape.mesh.num_face_vertices)
         {
@@ -322,9 +301,9 @@ namespace Boolka
             verticesMap.insert(std::pair(UniqueVertexKey{ materialIndex, index.vertex_index, index.normal_index, index.texcoord_index }, 0));
         }
 
-        auto& positions = attrib.vertices;
-        auto& normals = attrib.normals;
-        auto& texcoords = attrib.texcoords;
+        auto& positions = m_attrib.vertices;
+        auto& normals = m_attrib.normals;
+        auto& texcoords = m_attrib.texcoords;
         
         uint32_t i = 0;
         for (auto& [uniqueVertex, arrayIndex] : verticesMap)
@@ -346,7 +325,7 @@ namespace Boolka
                 memcpy(vertexData.position, empty, sizeof(vertexData.position));
             }
 
-            vertexData.materialId = materialsMap[materials[uniqueVertex.materialIndex].diffuse_texname];
+            vertexData.materialId = m_materialsMap[m_materials[uniqueVertex.materialIndex].diffuse_texname];
 
 
             if (uniqueVertex.normalIndex >= 0)
@@ -374,31 +353,33 @@ namespace Boolka
                 memcpy(vertexData.textureCoords, empty, sizeof(vertexData.textureCoords));
             }
 
-            vertexDataVector.push_back(vertexData);
+            m_vertexDataVector.push_back(vertexData);
             arrayIndex = currentIndex++;
         }
 
         std::cout << "Processed vertices for shape " << shape.name << std::endl;
     }
 
-    void ObjConverterImpl::BuildIndices(const tinyobj::shape_t& shape, std::map<UniqueVertexKey, uint32_t>& verticesMap, std::vector<uint32_t>& indexDataVector, const tinyobj::attrib_t& attrib, SceneData::ObjectHeader& object)
+    void ObjConverterImpl::BuildIndices(const tinyobj::shape_t& shape,
+                                        std::map<UniqueVertexKey, uint32_t>& verticesMap,
+                                        SceneData::ObjectHeader& object)
     {
         auto& mesh = shape.mesh;
         auto& indices = mesh.indices;
 
         object.indexCount = checked_narrowing_cast<UINT>(indices.size());
-        object.startIndex = checked_narrowing_cast<UINT>(indexDataVector.size());
+        object.startIndex = checked_narrowing_cast<UINT>(m_indexDataVector.size());
         object.boundingBox.GetMax() = { -FLT_MAX, -FLT_MAX, -FLT_MAX };
         object.boundingBox.GetMin() = { FLT_MAX, FLT_MAX, FLT_MAX };
 
-        auto& positions = attrib.vertices;
+        auto& positions = m_attrib.vertices;
 
         for (size_t i = 0; i < indices.size(); i++)
         {
             auto& index = indices[i];
             size_t triangleIndex = i / 3;
             int materialIndex = mesh.material_ids[triangleIndex];
-            indexDataVector.push_back(verticesMap[UniqueVertexKey{ materialIndex, index.vertex_index, index.normal_index, index.texcoord_index }]);
+            m_indexDataVector.push_back(verticesMap[UniqueVertexKey{ materialIndex, index.vertex_index, index.normal_index, index.texcoord_index }]);
 
             int vertexIndex = index.vertex_index;
             Vector3 xyz = { positions[3 * vertexIndex], positions[3 * vertexIndex + 2], positions[3 * vertexIndex + 1] };
@@ -409,22 +390,17 @@ namespace Boolka
         std::cout << "Processed indices for shape " << shape.name << std::endl;
     }
 
-    void ObjConverterImpl::WriteHeader(DebugFileWriter& fileWriter, 
-                                       const std::vector<VertexData>& vertexDataVector, 
-                                       const std::vector<uint32_t>& indexDataVector, 
-                                       const std::vector<std::string>& remappedMaterials, 
-                                       const std::vector<SceneData::ObjectHeader>& objects,
-                                       size_t& opaqueObjects)
+    void ObjConverterImpl::WriteHeader(DebugFileWriter& fileWriter)
     {
         SceneData::SceneHeader header
         {
-            checked_narrowing_cast<UINT>(BLK_CEIL_TO_POWER_OF_TWO(vertexDataVector.size() * sizeof(VertexData), gs_ResourceAlignment)),
-            checked_narrowing_cast<UINT>(BLK_CEIL_TO_POWER_OF_TWO(indexDataVector.size() * sizeof(uint32_t), gs_ResourceAlignment)),
-            checked_narrowing_cast<UINT>(objects.size() * sizeof(SceneData::ObjectHeader)),
-            checked_narrowing_cast<UINT>(indexDataVector.size()),
-            checked_narrowing_cast<UINT>(objects.size()),
-            checked_narrowing_cast<UINT>(opaqueObjects),
-            checked_narrowing_cast<UINT>(remappedMaterials.size())
+            checked_narrowing_cast<UINT>(BLK_CEIL_TO_POWER_OF_TWO(m_vertexDataVector.size() * sizeof(VertexData), gs_ResourceAlignment)),
+            checked_narrowing_cast<UINT>(BLK_CEIL_TO_POWER_OF_TWO(m_indexDataVector.size() * sizeof(uint32_t), gs_ResourceAlignment)),
+            checked_narrowing_cast<UINT>(m_objects.size() * sizeof(SceneData::ObjectHeader)),
+            checked_narrowing_cast<UINT>(m_indexDataVector.size()),
+            checked_narrowing_cast<UINT>(m_objects.size()),
+            checked_narrowing_cast<UINT>(m_opaqueObjectCount),
+            checked_narrowing_cast<UINT>(m_remappedMaterials.size())
         };
 
         bool res = fileWriter.Write(&header, sizeof(header));
@@ -433,18 +409,18 @@ namespace Boolka
         std::cout << "Written header" << std::endl;
     }
 
-    void ObjConverterImpl::WriteTextureHeaders(DebugFileWriter& fileWriter, std::vector<std::string>& remappedMaterials)
+    void ObjConverterImpl::WriteTextureHeaders(DebugFileWriter& fileWriter)
     {
         // First element is always empty texture
-        BLK_ASSERT(remappedMaterials.size() > 0);
-        BLK_ASSERT(remappedMaterials[0].empty());
+        BLK_ASSERT(m_remappedMaterials.size() > 0);
+        BLK_ASSERT(m_remappedMaterials[0].empty());
 
         SceneData::TextureHeader firstHeader{ 1,1,1 };
         fileWriter.Write(&firstHeader, sizeof(firstHeader));
 
-        for (size_t i = 1; i < remappedMaterials.size(); ++i)
+        for (size_t i = 1; i < m_remappedMaterials.size(); ++i)
         {
-            auto& material = remappedMaterials[i];
+            auto& material = m_remappedMaterials[i];
 
             BLK_ASSERT(!material.empty())
 
@@ -494,19 +470,19 @@ namespace Boolka
         BLK_ASSERT(res);
     }
 
-    void ObjConverterImpl::WriteTextures(DebugFileWriter& fileWriter, std::vector<std::string>& remappedMaterials)
+    void ObjConverterImpl::WriteTextures(DebugFileWriter& fileWriter)
     {
         // First element is always empty texture
-        BLK_ASSERT(remappedMaterials.size() > 0);
-        BLK_ASSERT(remappedMaterials[0].empty());
+        BLK_ASSERT(m_remappedMaterials.size() > 0);
+        BLK_ASSERT(m_remappedMaterials[0].empty());
 
         // First empty texture
         unsigned char pixel[4] = {};
         WriteMIPChain(fileWriter, pixel, 1, 1);
 
-        for (size_t i = 1; i < remappedMaterials.size(); ++i)
+        for (size_t i = 1; i < m_remappedMaterials.size(); ++i)
         {
-            auto& material = remappedMaterials[i];
+            auto& material = m_remappedMaterials[i];
 
             BLK_ASSERT(!material.empty())
 
@@ -537,8 +513,8 @@ namespace Boolka
         BLK_ASSERT(width > 0);
         BLK_ASSERT(height > 0);
 
-        size_t srcRowPitch = bytesPerPixel * width;
-        size_t mip0RowPitch = BLK_CEIL_TO_POWER_OF_TWO(bytesPerPixel * width, gs_PitchAlignment);
+        size_t srcRowPitch = ms_bytesPerPixel * width;
+        size_t mip0RowPitch = BLK_CEIL_TO_POWER_OF_TWO(ms_bytesPerPixel * width, gs_PitchAlignment);
         size_t mip0Size = BLK_CEIL_TO_POWER_OF_TWO(mip0RowPitch * height, gs_ResourceAlignment);
 
         unsigned char* mip0Data = new unsigned char[mip0Size];
@@ -556,7 +532,7 @@ namespace Boolka
             mipWidth /= 2, mipHeight /= 2
             )
         {
-            size_t rowPitch = BLK_CEIL_TO_POWER_OF_TWO(bytesPerPixel * mipWidth, gs_PitchAlignment);
+            size_t rowPitch = BLK_CEIL_TO_POWER_OF_TWO(ms_bytesPerPixel * mipWidth, gs_PitchAlignment);
             size_t mipSize = BLK_CEIL_TO_POWER_OF_TWO(rowPitch * mipHeight, gs_ResourceAlignment);
             unsigned char* mipData = new unsigned char[mipSize];
 
@@ -564,14 +540,14 @@ namespace Boolka
             {
                 for (size_t x = 0; x < mipWidth; ++x)
                 {
-                    unsigned char rgba[bytesPerPixel];
-                    unsigned char prevMipRGBA[4][bytesPerPixel];
+                    unsigned char rgba[ms_bytesPerPixel];
+                    unsigned char prevMipRGBA[4][ms_bytesPerPixel];
 
                     for (size_t i = 0; i < 2; ++i)
                     {
                         for (size_t j = 0; j < 2; ++j)
                         {
-                            memcpy(prevMipRGBA[2 * i + j], &prevMipData[prevMipRowPitch * (y * 2 + i) + bytesPerPixel * (x * 2 + j)], bytesPerPixel);
+                            memcpy(prevMipRGBA[2 * i + j], &prevMipData[prevMipRowPitch * (y * 2 + i) + ms_bytesPerPixel * (x * 2 + j)], ms_bytesPerPixel);
                         }
                     }
 
@@ -585,7 +561,7 @@ namespace Boolka
                         rgba[i] = sum / 4;
                     }
 
-                    memcpy(&mipData[rowPitch * y + bytesPerPixel * x], rgba, bytesPerPixel);
+                    memcpy(&mipData[rowPitch * y + ms_bytesPerPixel * x], rgba, ms_bytesPerPixel);
                 }
             }
 
@@ -620,7 +596,8 @@ namespace Boolka
 
     bool OBJConverter::Convert(std::string inFile, std::string outFile)
     {
-        return ObjConverterImpl::Convert(inFile, outFile);
+        ObjConverterImpl converter;
+        return converter.Convert(inFile, outFile);
     }
 
 }
