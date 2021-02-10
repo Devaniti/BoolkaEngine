@@ -22,10 +22,11 @@ namespace Boolka
 
         bool Initialize(Device& device, Factory& factory, HWND window, WindowState& windowState);
         void Unload();
+
+        bool Update(Device& device, WindowState windowState);
     private:
         IDXGISwapChain4* m_Swapchain;
-    public:
-        bool Update(Device& device, WindowState windowState);
+        bool m_IsFullscreen;
     };
 
 }

@@ -13,6 +13,7 @@ namespace Boolka
         , m_backbufferHeight(0)
         , m_BackBuffers{}
         , m_BackBufferRTVs{}
+        , m_HWND(0)
     {
     }
 
@@ -20,6 +21,7 @@ namespace Boolka
     {
         BLK_ASSERT(m_backbufferWidth == 0);
         BLK_ASSERT(m_backbufferHeight == 0);
+        BLK_ASSERT(m_HWND == 0);
         for (const auto& backbuffer : m_BackBuffers)
         {
             BLK_ASSERT(backbuffer == nullptr);
@@ -84,6 +86,8 @@ namespace Boolka
         res = m_Camera.Initialize(0.0f, 0.0f, { 0, 0, 0, 0 });
         BLK_ASSERT(res);
 
+        m_HWND = displayController.GetHWND();
+
         return true;
     }
 
@@ -116,6 +120,7 @@ namespace Boolka
         }
 
         m_Camera.Unload();
+        m_HWND = 0;
     }
 
     bool RenderEngineContext::LoadScene(Device& device, SceneData& sceneData)

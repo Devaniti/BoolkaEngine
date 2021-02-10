@@ -1,15 +1,16 @@
 #pragma once
 
 #include "RenderSchedule/ResourceTracker.h"
-#include "RenderPasses/GBufferRenderPass.h"
-#include "RenderPasses/PresentPass.h"
 #include "Contexts/RenderContext.h"
 #include "Contexts/RenderThreadContext.h"
 #include "Contexts/RenderFrameContext.h"
 #include "Contexts/RenderEngineContext.h"
+#include "RenderPasses/GBufferRenderPass.h"
+#include "RenderPasses/PresentPass.h"
 #include "RenderPasses/ZRenderPass.h"
 #include "RenderPasses/UpdateRenderPass.h"
 #include "RenderPasses/TransparentRenderPass.h"
+#include "RenderPasses/DebugOverlayPass.h"
 
 namespace Boolka
 {
@@ -53,6 +54,9 @@ namespace Boolka
         GBufferRenderPass m_GbufferPass;
         TransparentRenderPass m_TransparentPass;
         PresentPass m_PresentPass;
+#ifdef BLK_ENABLE_STATS
+        DebugOverlayPass m_DebugOverlayPass;
+#endif
     public:
     };
 

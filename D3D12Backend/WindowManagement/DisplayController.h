@@ -29,6 +29,7 @@ namespace Boolka
         UINT GetCurrentFrameIndex();
 
         const WindowState& GetWindowState() { return m_WindowState; };
+        HWND GetHWND() const { return m_Window.GetHWND(); };
 
     private:
         WindowManager m_Window;

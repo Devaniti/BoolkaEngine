@@ -1,6 +1,7 @@
 #pragma once
 
 #include "APIWrappers/CommandAllocator/GraphicCommandAllocator.h"
+#include "Contexts/FrameStats.h"
 
 namespace Boolka
 {
@@ -28,6 +29,11 @@ namespace Boolka
         const Matrix4x4& GetProjMatrix() const { return m_ProjMatrix; };
         const Vector4& GetCameraPos() const { return m_CameraPos; };
 
+#ifdef BLK_ENABLE_STATS
+        FrameStats& GetFrameStats() { return m_FraneStats; };
+        const FrameStats& GetFrameStats() const { return m_FraneStats; };
+#endif
+
         void FlipFrame(RenderEngineContext& engineContext, UINT frameIndex);
     private:
         Matrix4x4 m_ViewMatrix;
@@ -39,6 +45,10 @@ namespace Boolka
 
         LARGE_INTEGER m_LastTimestamp;
         LARGE_INTEGER m_Frequency;
+
+#ifdef BLK_ENABLE_STATS
+        FrameStats m_FraneStats;
+#endif
     };
 
 }

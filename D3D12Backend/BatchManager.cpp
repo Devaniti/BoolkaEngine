@@ -32,7 +32,7 @@ namespace Boolka
         }
     }
 
-    bool BatchManager::PrepareBatches(const RenderFrameContext& frameContext, Scene& scene)
+    bool BatchManager::PrepareBatches(RenderFrameContext& frameContext, Scene& scene)
     {
         auto& cullingManager = scene.GetCullingManager();
         const auto& objects = scene.GetObjects();

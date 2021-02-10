@@ -23,7 +23,7 @@ namespace Boolka
         bool Initialize(const Scene& scene);
         void Unload();
 
-        bool PrepareBatches(const RenderFrameContext& frameContext, Scene& scene);
+        bool PrepareBatches(RenderFrameContext& frameContext, Scene& scene);
         bool Render(CommandList& commandList, BatchType batch);
     private:
 

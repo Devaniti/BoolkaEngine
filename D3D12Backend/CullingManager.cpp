@@ -27,24 +27,44 @@ namespace Boolka
         m_visibility.clear();
     }
 
-    bool CullingManager::Cull(const RenderFrameContext& frameContext, Scene& scene)
+    bool CullingManager::Cull(RenderFrameContext& frameContext, Scene& scene)
     {
         Matrix4x4 viewProjMatrix = frameContext.GetViewMatrix() * frameContext.GetProjMatrix();
 
         Frustum calculatedFrustum(viewProjMatrix);
 
-        size_t visibleCount = 0;
+#ifdef BLK_ENABLE_STATS
+        size_t insideFrustum = 0;
+        size_t intersectFrustum = 0;
+#endif
 
         const auto& objects = scene.GetObjects();
         for (size_t i = 0; i < objects.size(); ++i)
         {
             const auto& object = objects[i];
-            m_visibility[i] = calculatedFrustum.CheckAABB(object.boundingBox) != Frustum::Outside;
-            if (m_visibility[i])
-                visibleCount++;
+            Frustum::TestResult testResult = calculatedFrustum.CheckAABB(object.boundingBox);
+            m_visibility[i] = testResult != Frustum::Outside;
+
+#ifdef BLK_ENABLE_STATS
+            switch (testResult)
+            {
+            case Frustum::Intersects:
+                ++insideFrustum;
+                break;
+            case Frustum::Inside:
+                ++intersectFrustum;
+                break;
+            }
+#endif
         }
 
-        g_WDebugOutput << L"Visible " << visibleCount << std::endl;
+
+#ifdef BLK_ENABLE_STATS
+        size_t outsideFrustum = objects.size() - insideFrustum - intersectFrustum;
+        frameContext.GetFrameStats().insideFrustum = insideFrustum;
+        frameContext.GetFrameStats().intersectFrustum = intersectFrustum;
+        frameContext.GetFrameStats().outsideFrustum = outsideFrustum;
+#endif
 
         return true;
     }

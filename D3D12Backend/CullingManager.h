@@ -18,7 +18,7 @@ namespace Boolka
         bool Initialize(const Scene& scene);
         void Unload();
 
-        bool Cull(const RenderFrameContext& frameContext, Scene& scene);
+        bool Cull(RenderFrameContext& frameContext, Scene& scene);
         const std::vector<bool>& GetVisibility() const { return m_visibility; };
 
     private:

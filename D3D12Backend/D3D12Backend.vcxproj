@@ -139,6 +139,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Containers\Scene.h" />
     <ClInclude Include="Containers\Streaming\SceneData.h" />
+    <ClInclude Include="Contexts\FrameStats.h" />
     <ClInclude Include="Contexts\RenderContext.h" />
     <ClInclude Include="Contexts\RenderEngineContext.h" />
     <ClInclude Include="Contexts\RenderFrameContext.h" />
@@ -152,6 +153,7 @@
     <ClInclude Include="RenderBackendImpl.h" />
     <ClInclude Include="RenderPass.h" />
     <ClInclude Include="RenderPasses\Debug3DRenderPass.h" />
+    <ClInclude Include="RenderPasses\DebugOverlayPass.h" />
     <ClInclude Include="RenderPasses\DebugRenderPass.h" />
     <ClInclude Include="RenderPasses\GBufferRenderPass.h" />
     <ClInclude Include="RenderPasses\PresentPass.h" />
@@ -211,6 +213,7 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Containers\Scene.cpp" />
     <ClCompile Include="Containers\Streaming\SceneData.cpp" />
+    <ClCompile Include="Contexts\FrameStats.cpp" />
     <ClCompile Include="Contexts\RenderContext.cpp" />
     <ClCompile Include="Contexts\RenderEngineContext.cpp" />
     <ClCompile Include="Contexts\RenderFrameContext.cpp" />
@@ -221,6 +224,7 @@
     <ClCompile Include="RenderBackend.cpp" />
     <ClCompile Include="RenderBackendImpl.cpp" />
     <ClCompile Include="RenderPasses\Debug3DRenderPass.cpp" />
+    <ClCompile Include="RenderPasses\DebugOverlayPass.cpp" />
     <ClCompile Include="RenderPasses\DebugRenderPass.cpp" />
     <ClCompile Include="RenderPasses\GBufferRenderPass.cpp" />
     <ClCompile Include="RenderPasses\PresentPass.cpp" />
@@ -288,6 +292,9 @@
   <ItemGroup>
     <ProjectReference Include="..\BoolkaCommon\BoolkaCommon.vcxproj">
       <Project>{697976e7-6ba1-41ae-8d09-7deaa73fb838}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\ThirdParty\imgui\imgui.vcxproj">
+      <Project>{b1e24752-26e8-49db-8604-62afb2866251}</Project>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

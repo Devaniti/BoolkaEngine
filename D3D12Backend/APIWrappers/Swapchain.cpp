@@ -10,12 +10,14 @@ namespace Boolka
 
     Swapchain::Swapchain()
         : m_Swapchain(nullptr)
+        , m_IsFullscreen(false)
     {
     }
 
     Swapchain::~Swapchain()
     {
         BLK_ASSERT(m_Swapchain == nullptr);
+        BLK_ASSERT(m_IsFullscreen == false);
     }
 
     bool Swapchain::Initialize(Device& device, Factory& factory, HWND window, WindowState& windowState)
@@ -46,7 +48,18 @@ namespace Boolka
         hr = swapchain1->QueryInterface(&m_Swapchain);
         swapchain1->Release();
 
+        if (FAILED(hr))
+        {
+            return false;
+        }
+
         m_Swapchain->SetMaximumFrameLatency(BLK_IN_FLIGHT_FRAMES - 1);
+        if (windowState.windowMode == WindowState::WindowMode::Borderless)
+        {
+            m_Swapchain->SetFullscreenState(TRUE, NULL);
+            m_Swapchain->ResizeBuffers(BLK_IN_FLIGHT_FRAMES, 0, 0, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT);
+            m_IsFullscreen = true;
+        }
 
         return SUCCEEDED(hr);
     }
@@ -54,6 +67,13 @@ namespace Boolka
     void Swapchain::Unload()
     {
         BLK_ASSERT(m_Swapchain != nullptr);
+
+        if (m_IsFullscreen)
+        {
+            m_Swapchain->SetFullscreenState(FALSE, NULL);
+            m_IsFullscreen = false;
+        }
+
         m_Swapchain->Release();
         m_Swapchain = nullptr;
     }

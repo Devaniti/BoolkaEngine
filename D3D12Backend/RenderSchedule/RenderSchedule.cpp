@@ -68,6 +68,10 @@ namespace Boolka
         BLK_ASSERT(res);
         res = m_PresentPass.Initialize(device, m_RenderContext, m_ResourceTracker);
         BLK_ASSERT(res);
+#ifdef BLK_ENABLE_STATS
+        res = m_DebugOverlayPass.Initialize(device, m_RenderContext, m_ResourceTracker);
+        BLK_ASSERT(res);
+#endif
 
         return true;
     }
@@ -79,6 +83,9 @@ namespace Boolka
         m_GbufferPass.Unload();
         m_TransparentPass.Unload();
         m_PresentPass.Unload();
+#ifdef BLK_ENABLE_STATS
+        m_DebugOverlayPass.Unload();
+#endif
     }
 
     bool RenderSchedule::PrepareFrame()
@@ -102,6 +109,10 @@ namespace Boolka
         BLK_ASSERT(res);
         res = m_TransparentPass.Render(m_RenderContext, m_ResourceTracker);
         BLK_ASSERT(res);
+#ifdef BLK_ENABLE_STATS
+        res = m_DebugOverlayPass.Render(m_RenderContext, m_ResourceTracker);
+        BLK_ASSERT(res);
+#endif
         res = m_PresentPass.Render(m_RenderContext, m_ResourceTracker);
         BLK_ASSERT(res);
 

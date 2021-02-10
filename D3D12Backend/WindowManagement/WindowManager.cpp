@@ -1,9 +1,14 @@
 #include "stdafx.h"
 #include "WindowManager.h"
 
+#include "ThirdParty/imgui/imgui.h"
+#include "ThirdParty/imgui/imgui_helper.h"
+
 // Private window messages
 #define WM_CUSTOM_FORCE_CLOSE (WM_APP + 1)
 #define WM_CUSTOM_SET_FOCUS (WM_CUSTOM_FORCE_CLOSE + 1)
+
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 namespace Boolka
 {
@@ -11,7 +16,7 @@ namespace Boolka
     ATOM WindowManager::ms_WindowClass = 0;
 
     WindowManager::WindowManager()
-        : m_Window(0)
+        : m_HWND(0)
         , m_WindowThread()
         , m_IsUpdated(false)
     {
@@ -19,12 +24,12 @@ namespace Boolka
 
     WindowManager::~WindowManager()
     {
-        BLK_ASSERT(m_Window == NULL);
+        BLK_ASSERT(m_HWND == NULL);
     }
 
     bool WindowManager::Initialize(const WindowState& windowState)
     {
-        BLK_ASSERT(m_Window == 0);
+        BLK_ASSERT(m_HWND == 0);
 
         if (ms_CurrentInstance == 0)
         {
@@ -50,13 +55,13 @@ namespace Boolka
         // TODO better wait
         while (!m_IsUpdated) {};
 
-        return m_Window != NULL;
+        return m_HWND != NULL;
     }
 
     void WindowManager::Unload()
     {
-        BLK_ASSERT(m_Window != 0);
-        BOOL res = ::PostMessage(m_Window, WM_CUSTOM_FORCE_CLOSE, NULL, NULL);
+        BLK_ASSERT(m_HWND != 0);
+        BOOL res = ::PostMessage(m_HWND, WM_CUSTOM_FORCE_CLOSE, NULL, NULL);
         BLK_ASSERT(res != 0);
         m_WindowThread.join();
     }
@@ -68,7 +73,7 @@ namespace Boolka
 
         // User can only update width/height
         RECT windowClientRect = {};
-        BOOL res = ::GetClientRect(m_Window, &windowClientRect);
+        BOOL res = ::GetClientRect(m_HWND, &windowClientRect);
         BLK_ASSERT(res);
 
         stateToUpdate.width = windowClientRect.right - windowClientRect.left;
@@ -79,14 +84,20 @@ namespace Boolka
 
     void WindowManager::ShowWindow(bool show)
     {
-        BLK_ASSERT(m_Window != 0);
-        ::ShowWindow(m_Window, show ? SW_SHOW : SW_HIDE);
+        BLK_ASSERT(m_HWND != 0);
+        ::ShowWindow(m_HWND, show ? SW_SHOW : SW_HIDE);
         if (show)
-            ::PostMessage(m_Window, WM_CUSTOM_SET_FOCUS, NULL, NULL);
+            ::PostMessage(m_HWND, WM_CUSTOM_SET_FOCUS, NULL, NULL);
     }
 
     LRESULT CALLBACK WindowManager::WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
+        {
+            const std::lock_guard<std::recursive_mutex> lock(g_imguiMutex);
+            if (ImGui_ImplWin32_WndProcHandler(hwnd, message, wParam, lParam))
+                return true;
+        }
+
         switch (message)
         {
         case WM_CUSTOM_FORCE_CLOSE:
@@ -137,7 +148,7 @@ namespace Boolka
         m_IsUpdated = true;
         MessageLoop();
         m_IsUpdated = false;
-        m_Window = NULL;
+        m_HWND = NULL;
     }
 
     void WindowManager::InitializeThread()
@@ -158,7 +169,7 @@ namespace Boolka
 
         ::AdjustWindowRect(&calculatedRect, windowStyle, FALSE);
 
-        m_Window = CreateWindowExW(
+        m_HWND = CreateWindowExW(
             NULL,
             BLK_WINDOW_CLASS_NAME,
             BLK_GAME_NAME,
@@ -172,7 +183,7 @@ namespace Boolka
             ms_CurrentInstance,
             this);
 
-        BLK_CRITICAL_ASSERT(m_Window != NULL);
+        BLK_CRITICAL_ASSERT(m_HWND != NULL);
     }
 
     void WindowManager::MessageLoop()
@@ -180,7 +191,7 @@ namespace Boolka
         MSG msg;
         BOOL bRet;
 
-        while ((bRet = ::GetMessage(&msg, m_Window, 0, 0)) != 0)
+        while ((bRet = ::GetMessage(&msg, m_HWND, 0, 0)) != 0)
         {
             if (bRet == -1)
             {

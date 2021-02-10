@@ -15,7 +15,7 @@ namespace Boolka
 
         bool Update(WindowState& stateToUpdate);
 
-        HWND GetNativeHandle() { return m_Window; };
+        HWND GetHWND() const { return m_HWND; };
 
         void ShowWindow(bool show);
     private:
@@ -31,7 +31,7 @@ namespace Boolka
         // Helper functions
         static DWORD CalculateWindowStyle(WindowState::WindowMode windowMode);
 
-        HWND m_Window;
+        HWND m_HWND;
         std::thread m_WindowThread;
         std::atomic<bool> m_IsUpdated;
 

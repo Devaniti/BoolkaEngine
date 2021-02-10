@@ -46,8 +46,12 @@
     <ClInclude Include="DebugHelpers\DebugProfileTimer.h">
       <Filter>DebugHelpers</Filter>
     </ClInclude>
-    <ClInclude Include="Structures\AABB.h" />
-    <ClInclude Include="Structures\Frustum.h" />
+    <ClInclude Include="Structures\AABB.h">
+      <Filter>Structures</Filter>
+    </ClInclude>
+    <ClInclude Include="Structures\Frustum.h">
+      <Filter>Structures</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -69,7 +73,11 @@
     <ClCompile Include="DebugHelpers\DebugProfileTimer.cpp">
       <Filter>DebugHelpers</Filter>
     </ClCompile>
-    <ClCompile Include="Structures\AABB.cpp" />
-    <ClCompile Include="Structures\Frustum.cpp" />
+    <ClCompile Include="Structures\AABB.cpp">
+      <Filter>Structures</Filter>
+    </ClCompile>
+    <ClCompile Include="Structures\Frustum.cpp">
+      <Filter>Structures</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

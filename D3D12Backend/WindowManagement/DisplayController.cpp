@@ -22,7 +22,7 @@ namespace Boolka
 
         bool res = m_Window.Initialize(m_WindowState);
         BLK_CRITICAL_ASSERT(res);
-        res = m_Swapchain.Initialize(device, factory, m_Window.GetNativeHandle(), m_WindowState);
+        res = m_Swapchain.Initialize(device, factory, m_Window.GetHWND(), m_WindowState);
         BLK_CRITICAL_ASSERT(res);
 
         for (UINT i = 0; i < BLK_IN_FLIGHT_FRAMES; ++i)

@@ -56,6 +56,8 @@ namespace Boolka
 
         Camera& GetCamera() { return m_Camera; };
 
+        HWND GetHWND() { return m_HWND; };
+
     private:
         UINT m_backbufferWidth;
         UINT m_backbufferHeight;
@@ -75,6 +77,7 @@ namespace Boolka
         Fence m_InitializationFence;
         Camera m_Camera;
         Scene m_Scene;
+        HWND m_HWND;
     };
 
 }
