@@ -21,7 +21,7 @@ namespace Boolka
         HRESULT hr = ::D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_12_0, IID_PPV_ARGS(&m_Device));
         if (FAILED(hr)) return false;
 
-        BLK_RENDER_DEBUG_ONLY(SetDebugBreakSeverity(D3D12_MESSAGE_SEVERITY_MESSAGE));
+        BLK_RENDER_DEBUG_ONLY(InitializeDebug());
 
         if (!m_FeatureSupportHelper.Initialize(*this)) return false;
 
@@ -72,34 +72,85 @@ namespace Boolka
     }
 
 #ifdef BLK_RENDER_DEBUG
+    void Device::InitializeDebug()
+    {
+        SetDebugBreakSeverity(D3D12_MESSAGE_SEVERITY_WARNING);
+    }
+
     void Device::SetDebugBreakSeverity(D3D12_MESSAGE_SEVERITY severity)
     {
         ID3D12InfoQueue* debugInfoQueue = nullptr;
         HRESULT hr = m_Device->QueryInterface(IID_PPV_ARGS(&debugInfoQueue));
-        if (SUCCEEDED(hr))
+        if (FAILED(hr))
         {
-            for (int i = 0; i <= D3D12_MESSAGE_SEVERITY_MESSAGE; i++)
-            {
-                // lower enum value corresponds to higher severity
-                bool needBreak = (i <= severity);
-                debugInfoQueue->SetBreakOnSeverity(static_cast<D3D12_MESSAGE_SEVERITY>(i), needBreak);
-            }
-            debugInfoQueue->Release();
+            return;
         }
+
+        for (int i = 0; i <= D3D12_MESSAGE_SEVERITY_MESSAGE; i++)
+        {
+            // lower enum value corresponds to higher severity
+            bool needBreak = (i <= severity);
+            debugInfoQueue->SetBreakOnSeverity(static_cast<D3D12_MESSAGE_SEVERITY>(i), needBreak);
+        }
+        debugInfoQueue->Release();
     }
 
     void Device::ReportObjectLeaks()
     {
         ID3D12DebugDevice2* debugDevice = nullptr;
         HRESULT hr = m_Device->QueryInterface(IID_PPV_ARGS(&debugDevice));
-        if (SUCCEEDED(hr))
+        if (FAILED(hr))
         {
-            SetDebugBreakSeverity(D3D12_MESSAGE_SEVERITY_ERROR);
-            // debugDevice->ReportLiveDeviceObjects always report reference to device, since debugDevice itself is reference to device
-            debugDevice->ReportLiveDeviceObjects(D3D12_RLDO_SUMMARY | D3D12_RLDO_DETAIL | D3D12_RLDO_IGNORE_INTERNAL);
-            debugDevice->Release();
+            return;
         }
+
+        D3D12_MESSAGE_ID filterList[] = { D3D12_MESSAGE_ID_LIVE_OBJECT_SUMMARY, D3D12_MESSAGE_ID_LIVE_DEVICE };
+        FilterMessage(filterList, ARRAYSIZE(filterList));
+        // debugDevice->ReportLiveDeviceObjects always report reference to device, since debugDevice itself is reference to device
+        debugDevice->ReportLiveDeviceObjects(D3D12_RLDO_SUMMARY | D3D12_RLDO_DETAIL | D3D12_RLDO_IGNORE_INTERNAL);
+        RemoveLastMessageFilter();
+        ULONG refCount = debugDevice->Release();
+        // Instead of relying on debug layer warnings we check ref count manually
+        // After releasing debugDevice there should only be single reference left that we'll release right after Device::ReportObjectLeaks call
+        BLK_ASSERT(refCount == 1);
     }
-#endif
+
+    void Device::FilterMessage(D3D12_MESSAGE_ID id)
+    {
+        FilterMessage(&id, 1);
+    }
+
+    void Device::FilterMessage(D3D12_MESSAGE_ID* idArray, UINT idCount)
+    {
+        ID3D12InfoQueue* debugInfoQueue = nullptr;
+        HRESULT hr = m_Device->QueryInterface(IID_PPV_ARGS(&debugInfoQueue));
+        if (FAILED(hr))
+        {
+            return;
+        }
+
+        D3D12_INFO_QUEUE_FILTER filter = {};
+        filter.DenyList.NumIDs = idCount;
+        filter.DenyList.pIDList = idArray;
+        hr = debugInfoQueue->PushStorageFilter(&filter);
+        BLK_ASSERT(SUCCEEDED(hr));
+
+        debugInfoQueue->Release();
+    }
+
+    void Device::RemoveLastMessageFilter()
+    {
+        ID3D12InfoQueue* debugInfoQueue = nullptr;
+        HRESULT hr = m_Device->QueryInterface(IID_PPV_ARGS(&debugInfoQueue));
+        if (FAILED(hr))
+        {
+            return;
+        }
+        debugInfoQueue->PopStorageFilter();
+
+        debugInfoQueue->Release();
+    }
+
+    #endif
 
 }

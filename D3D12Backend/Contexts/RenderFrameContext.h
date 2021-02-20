@@ -23,10 +23,18 @@ namespace Boolka
 
         Matrix4x4& GetViewMatrix() { return m_ViewMatrix; };
         Matrix4x4& GetProjMatrix() { return m_ProjMatrix; };
+        Matrix4x4& GetViewProjMatrix() { return m_ViewProjMatrix; };
+        Matrix4x4& GetInvViewMatrix() { return m_InvViewMatrix; };
+        Matrix4x4& GetInvProjMatrix() { return m_InvProjMatrix; };
+        Matrix4x4& GetInvViewProjMatrix() { return m_InvViewProjMatrix; };
         Vector4& GetCameraPos() { return m_CameraPos; };
 
         const Matrix4x4& GetViewMatrix() const { return m_ViewMatrix; };
         const Matrix4x4& GetProjMatrix() const { return m_ProjMatrix; };
+        const Matrix4x4& GetViewProjMatrix() const { return m_ViewProjMatrix; };
+        const Matrix4x4& GetInvViewMatrix() const { return m_InvViewMatrix; };
+        const Matrix4x4& GetInvProjMatrix() const { return m_InvProjMatrix; };
+        const Matrix4x4& GetInvViewProjMatrix() const { return m_InvViewProjMatrix; };
         const Vector4& GetCameraPos() const { return m_CameraPos; };
 
 #ifdef BLK_ENABLE_STATS
@@ -38,6 +46,10 @@ namespace Boolka
     private:
         Matrix4x4 m_ViewMatrix;
         Matrix4x4 m_ProjMatrix;
+        Matrix4x4 m_ViewProjMatrix;
+        Matrix4x4 m_InvViewMatrix;
+        Matrix4x4 m_InvProjMatrix;
+        Matrix4x4 m_InvViewProjMatrix;
         Vector4 m_CameraPos;
 
         float m_DeltaTime;

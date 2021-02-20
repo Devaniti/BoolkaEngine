@@ -36,20 +36,25 @@ namespace Boolka
 
     bool Camera::Update(float deltaTime, float aspectRatio, float moveSpeed, float rotationSpeed, Matrix4x4& outViewMatrix, Matrix4x4& outProjMatrix, Vector4& outCameraPos)
     {
-        float speedMult = ::GetAsyncKeyState(VK_SHIFT) ? 5.0f : 1.0f;
-        float angleSpeedMult = ::GetAsyncKeyState(VK_SHIFT) ? 2.0f : 1.0f;
+        float speedMult = 1.0f;
+        float angleSpeedMult = 1.0f;
+
+        if (::GetAsyncKeyState(VK_SHIFT))
+        {
+            speedMult *= 5.0f;
+            angleSpeedMult *= 2.5f;
+        }
+
+        if (::GetAsyncKeyState(VK_CONTROL))
+        {
+            speedMult /= 5.0f;
+            angleSpeedMult /= 2.5f;
+        }
 
         float moveDelta = moveSpeed * deltaTime * speedMult;
         float rotationDelta = DEG_TO_RAD(rotationSpeed) * deltaTime * angleSpeedMult;
 
         static const Vector4 upDirection{ 0, 0, 1, 0 };
-
-        if (::GetAsyncKeyState('R'))
-        {
-            m_RotationYaw = 0.0f;
-            m_RotationPitch = 0.0;
-            m_CameraPos = { 0, 0, 100, 0 };
-        }
 
         if (::GetAsyncKeyState(VK_LEFT))
         {
@@ -109,8 +114,8 @@ namespace Boolka
             m_CameraPos -= forward * moveDelta;
         }
 
-        float nearZ = 1.0f;
-        float farZ = 40000.0f;
+        float nearZ = 2.0f;
+        float farZ = 100.0f;
 
         // Perspective projection
         float fovY = DEG_TO_RAD(30.0f);

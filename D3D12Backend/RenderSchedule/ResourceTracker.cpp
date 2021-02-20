@@ -48,6 +48,26 @@ namespace Boolka
         return true;
     }
 
+#ifdef BLK_RENDER_DEBUG
+    void ResourceTracker::ValidateStates(CommandList& commandList)
+    {
+        ID3D12GraphicsCommandList5* nativeCommandList = commandList.Get();
+        ID3D12DebugCommandList1* debugCommandList = nullptr;
+        HRESULT hr = nativeCommandList->QueryInterface<ID3D12DebugCommandList1>(&debugCommandList);
+        if (FAILED(hr))
+        {
+            return;
+        }
+
+        for (auto& [resource, state] : m_TrackedResources)
+        {
+            debugCommandList->AssertResourceState(resource->Get(), 0, state);
+        }
+
+        debugCommandList->Release();
+    }
+#endif
+
     void ResourceTracker::Decay()
     {
         for (auto& [resource, state] : m_TrackedResources)

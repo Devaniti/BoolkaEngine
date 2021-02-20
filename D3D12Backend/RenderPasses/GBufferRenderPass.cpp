@@ -17,25 +17,34 @@ namespace Boolka
     bool GBufferRenderPass::Render(RenderContext& renderContext, ResourceTracker& resourceTracker)
     {
         auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
+        auto& resourceContainer = engineContext.GetResourceContainer();
 
         UINT frameIndex = frameContext.GetFrameIndex();
-        Texture2D& backbuffer = engineContext.GetSwapchainBackBuffer(frameIndex);
-        RenderTargetView& backbufferRTV = engineContext.GetSwapchainRenderTargetView(frameIndex);
+        Texture2D& albedo = resourceContainer.GetTexture(ResourceContainer::Tex::GBufferAlbedo);
+        Texture2D& normal = resourceContainer.GetTexture(ResourceContainer::Tex::GBufferNormal);
+        Texture2D& depth = resourceContainer.GetTexture(ResourceContainer::Tex::GbufferDepth);
+        RenderTargetView& albedoRTV = resourceContainer.GetRTV(ResourceContainer::RTV::GBufferAlbedo);
+        RenderTargetView& normalRTV = resourceContainer.GetRTV(ResourceContainer::RTV::GBufferNormal);
+        DepthStencilView& gbufferDSV = resourceContainer.GetDSV(ResourceContainer::DSV::GbufferDepth);
+        Buffer& frameConstantBuffer = resourceContainer.GetFlippableBuffer(frameIndex, ResourceContainer::FlipBuf::Frame);
 
         GraphicCommandListImpl& commandList = threadContext.GetGraphicCommandList();
 
         BLK_GPU_SCOPE(commandList.Get(), "GBufferRenderPass");
+        BLK_RENDER_DEBUG_ONLY(resourceTracker.ValidateStates(commandList));
 
-        resourceTracker.Transition(backbuffer, commandList, D3D12_RESOURCE_STATE_RENDER_TARGET);
-        commandList->OMSetRenderTargets(1, backbufferRTV.GetCPUDescriptor(), FALSE, engineContext.GetDepthStencilView().GetCPUDescriptor());
+        resourceTracker.Transition(albedo, commandList, D3D12_RESOURCE_STATE_RENDER_TARGET);
+        resourceTracker.Transition(normal, commandList, D3D12_RESOURCE_STATE_RENDER_TARGET);
+        resourceTracker.Transition(depth, commandList, D3D12_RESOURCE_STATE_DEPTH_READ);
+
+        D3D12_CPU_DESCRIPTOR_HANDLE renderTargets[] = { *albedoRTV.GetCPUDescriptor(), *normalRTV.GetCPUDescriptor() };
+        commandList->OMSetRenderTargets(2, renderTargets, FALSE, gbufferDSV.GetCPUDescriptor());
         ID3D12DescriptorHeap* descriptorHeaps[] = { engineContext.GetScene().GetSRVDescriptorHeap().Get() };
         commandList->SetDescriptorHeaps(ARRAYSIZE(descriptorHeaps), descriptorHeaps);
-        commandList->SetGraphicsRootDescriptorTable(6, engineContext.GetScene().GetSRVDescriptorHeap().GetGPUHandle(0));
+        commandList->SetGraphicsRootDescriptorTable(static_cast<UINT>(ResourceContainer::DefaultRootSigBindPoints::SceneSRV), engineContext.GetScene().GetSRVDescriptorHeap().GetGPUHandle(0));
 
         UINT height = engineContext.GetBackbufferHeight();
         UINT width = engineContext.GetBackbufferWidth();
-
-        Buffer& currentConstantBuffer = engineContext.GetConstantBuffer(frameIndex);
 
         D3D12_VIEWPORT viewportDesc = {};
         viewportDesc.Width = static_cast<float>(width);
@@ -50,10 +59,11 @@ namespace Boolka
 
         commandList->RSSetScissorRects(1, &scissorRect);
 
-        const float clearColor[] = { 0.0f, 0.2f, 0.4f, 1.0f };
-        commandList->ClearRenderTargetView(*backbufferRTV.GetCPUDescriptor(), clearColor, 0, nullptr);
+        const float clearColor[4] = {};
+        commandList->ClearRenderTargetView(*albedoRTV.GetCPUDescriptor(), clearColor, 0, nullptr);
+        commandList->ClearRenderTargetView(*normalRTV.GetCPUDescriptor(), clearColor, 0, nullptr);
 
-        commandList->SetGraphicsRootConstantBufferView(0, currentConstantBuffer->GetGPUVirtualAddress());
+        commandList->SetGraphicsRootConstantBufferView(static_cast<UINT>(ResourceContainer::DefaultRootSigBindPoints::FrameConstantBuffer), frameConstantBuffer->GetGPUVirtualAddress());
 
         commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
         commandList->IASetIndexBuffer(engineContext.GetScene().GetIndexBufferView().GetView());
@@ -71,9 +81,10 @@ namespace Boolka
         throw std::logic_error("The method or operation is not implemented.");
     }
 
-    bool GBufferRenderPass::Initialize(Device& device, RenderContext& renderContext, ResourceTracker& resourceTracker)
+    bool GBufferRenderPass::Initialize(Device& device, RenderContext& renderContext)
     {
         auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
+        auto& resourceContainer = engineContext.GetResourceContainer();
 
         MemoryBlock PS = DebugFileReader::ReadFile("GBufferPassPixelShader.cso");
         MemoryBlock VS = DebugFileReader::ReadFile("GBufferPassVertexShader.cso");
@@ -86,7 +97,7 @@ namespace Boolka
 
         Scene& scene = engineContext.GetScene();
 
-        bool res = m_PSO.Initialize(device, engineContext.GetDefaultRootSig(), inputLayout, VS, PS, 1, true, false, D3D12_COMPARISON_FUNC_EQUAL);
+        bool res = m_PSO.Initialize(device, resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default), inputLayout, VS, PS, 2, true, false, D3D12_COMPARISON_FUNC_EQUAL, false, DXGI_FORMAT_R16G16B16A16_FLOAT);
         BLK_ASSERT(res);
 
         inputLayout.Unload();

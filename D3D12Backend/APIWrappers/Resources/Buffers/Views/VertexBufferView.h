@@ -12,7 +12,7 @@ namespace Boolka
         VertexBufferView();
         ~VertexBufferView();
 
-        bool Initialize(Buffer& vertexBuffer, UINT size, UINT stride);
+        bool Initialize(Buffer& vertexBuffer, UINT size, UINT stride, UINT64 bufferOffset = 0);
         void Unload();
 
         const D3D12_VERTEX_BUFFER_VIEW* GetView() { BLK_ASSERT(m_View.BufferLocation != 0); return &m_View; };

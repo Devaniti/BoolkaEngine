@@ -81,6 +81,23 @@ namespace Boolka
                 Assert::IsTrue(v2 == v3);
             }
         }
+
+        TEST_METHOD(Vector4HLSLStyleConstructor)
+        {
+            {
+                const Vector3 v1{ 1.0f, 2.0f, 3.0f };
+                const Vector4 v2{ v1, 4.0f };
+                const Vector4 v3{ 1.0f, 2.0f, 3.0f, 4.0f };
+                Assert::IsTrue(v2 == v3);
+            }
+
+            {
+                const Vector3 v1{ 1.0f, 2.0f, 3.0f };
+                const Vector4 v2{ 0.0f, v1 };
+                const Vector4 v3{ 0.0f, 1.0f, 2.0f, 3.0f };
+                Assert::IsTrue(v2 == v3);
+            }
+        }
     };
 
     TEST_CLASS(TestVector2)
@@ -711,6 +728,67 @@ namespace Boolka
 
             Assert::IsTrue(ApproxEqual(m3, m4.Transpose()));
             Assert::IsTrue(ApproxEqual(m4, m3.Transpose()));
+        }
+
+        TEST_METHOD(Inverse)
+        {
+            {
+                bool isSuccessfull;
+                const Matrix4x4 m1{};
+                const Matrix4x4 m2 = m1.Inverse(isSuccessfull);
+                
+                // No inversed matrix for zero matrix
+                Assert::IsTrue(!isSuccessfull);
+            }
+
+            {
+                bool isSuccessfull;
+                const Matrix4x4 m1
+                {
+                    9, 5, 8, 4,
+                    7, 1, 9, 4,
+                    1, 0, 9, 2,
+                    0, 0, 0, 0,
+                };
+                const Matrix4x4 m2 = m1.Inverse(isSuccessfull);
+
+                // No inversed matrix for matrix with zero determinant
+                Assert::IsTrue(!isSuccessfull);
+            }
+
+            {
+                bool isSuccessfull;
+                const Matrix4x4 m1
+                {
+                    9, 5, 8, 4,
+                    7, 1, 9, 4,
+                    1, 0, 9, 2,
+                    2, 9, 0, 5,
+                };
+                const Matrix4x4 m2 = m1.Inverse(isSuccessfull);
+
+                const Matrix4x4 mult = m1 * m2;
+
+                Assert::IsTrue(isSuccessfull);
+                Assert::IsTrue(ApproxEqual(mult, Matrix4x4::GetIdentity()));
+            }
+
+            {
+                bool isSuccessfull;
+                const Matrix4x4 m1
+                {
+                    0, 1, 1, 0,
+                    3, 6, 7, 3,
+                    2, 2, 6, 3,
+                    8, 8, 8, 2,
+                };
+                const Matrix4x4 m2 = m1.Inverse(isSuccessfull);
+
+                const Matrix4x4 mult = m1 * m2;
+
+                Assert::IsTrue(isSuccessfull);
+                Assert::IsTrue(ApproxEqual(mult, Matrix4x4::GetIdentity()));
+            }
         }
     };
 }

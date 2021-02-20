@@ -19,7 +19,7 @@ namespace Boolka
         DebugRenderPass();
         ~DebugRenderPass();
 
-        bool Initialize(Device& device, RenderContext& renderContext, ResourceTracker& resourceTracker) override;
+        bool Initialize(Device& device, RenderContext& renderContext) override;
         void Unload() override;
 
         bool Render(RenderContext& renderContext, ResourceTracker& resourceTracker) override;
@@ -31,12 +31,8 @@ namespace Boolka
         VertexBufferView m_VertexBufferView;
         UploadBuffer m_IndexBuffer;
         IndexBufferView m_IndexBufferView;
-        Buffer m_ConstantBuffers[BLK_IN_FLIGHT_FRAMES];
-        UploadBuffer m_UploadBuffers[BLK_IN_FLIGHT_FRAMES];
-        ConstantBufferView m_ConstantBufferViews[BLK_IN_FLIGHT_FRAMES];
 
         float m_CurrentAngle;
     };
 
 }
-

@@ -4,13 +4,11 @@
                            "DENY_GEOMETRY_SHADER_ROOT_ACCESS), " \
                 "CBV(b0), " \
                 "CBV(b1), " \
-                "SRV(t0), " \
-                "SRV(t1), " \
-                "SRV(t2), " \
-                "DescriptorTable(CBV(b0, space=1, numDescriptors = 4)), " \
-                "DescriptorTable(SRV(t0, space=1, numDescriptors = unbounded)), " \
-                "DescriptorTable(UAV(u0, space=1, numDescriptors = 4)), " \
-                "DescriptorTable(Sampler(s0, space=1, numDescriptors = 8)), " \
+                "DescriptorTable(SRV(t0, space=0, numDescriptors = 4, flags = DATA_VOLATILE), visibility = SHADER_VISIBILITY_PIXEL ), " \
+                "DescriptorTable(CBV(b0, space=1, numDescriptors = 4), visibility = SHADER_VISIBILITY_PIXEL ), " \
+                "DescriptorTable(SRV(t0, space=1, numDescriptors = unbounded, flags = DATA_STATIC), visibility = SHADER_VISIBILITY_PIXEL ), " \
+                "DescriptorTable(UAV(u0, space=1, numDescriptors = 4), visibility = SHADER_VISIBILITY_PIXEL ), " \
+                "DescriptorTable(Sampler(s0, space=1, numDescriptors = 8), visibility = SHADER_VISIBILITY_PIXEL ), " \
                 "StaticSampler(s0, " \
                               "filter = FILTER_MIN_MAG_MIP_POINT, " \
                               "addressU = TEXTURE_ADDRESS_WRAP, " \

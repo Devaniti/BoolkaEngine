@@ -2,6 +2,7 @@
 
 #ifdef BLK_DEBUG
 #define BLK_RENDER_DEBUG
+//#define BLK_USE_GPU_VALIDATION
 #define USE_PIX
 #endif
 

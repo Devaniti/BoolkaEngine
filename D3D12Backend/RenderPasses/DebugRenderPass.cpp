@@ -27,11 +27,14 @@ namespace Boolka
 
     bool DebugRenderPass::Render(RenderContext& renderContext, ResourceTracker& resourceTracker)
     {
+        auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
+        auto& resourceContainer = engineContext.GetResourceContainer();
+
         float deltaTime = renderContext.GetRenderFrameContext().GetDeltaTime();
 
         UINT frameIndex = renderContext.GetRenderFrameContext().GetFrameIndex();
-        Texture2D& backbuffer = renderContext.GetRenderEngineContext().GetSwapchainBackBuffer(frameIndex);
-        RenderTargetView& backbufferRTV = renderContext.GetRenderEngineContext().GetSwapchainRenderTargetView(frameIndex);
+        Texture2D& backbuffer = resourceContainer.GetBackBuffer(frameIndex);
+        RenderTargetView& backbufferRTV = resourceContainer.GetBackBufferRTV(frameIndex);
 
         GraphicCommandListImpl& commandList = renderContext.GetRenderThreadContext().GetGraphicCommandList();
 
@@ -44,8 +47,8 @@ namespace Boolka
         UINT width = renderContext.GetRenderEngineContext().GetBackbufferWidth();
         float aspectRatioCompensation = static_cast<float>(height) / width;
 
-        Buffer& currentConstantBuffer = m_ConstantBuffers[frameIndex];
-        UploadBuffer& currentUploadBuffer = m_UploadBuffers[frameIndex];
+        Buffer& frameConstantBuffer = resourceContainer.GetFlippableBuffer(frameIndex, ResourceContainer::FlipBuf::Frame);
+        UploadBuffer& currentUploadBuffer = resourceContainer.GetFlippableUploadBuffer(frameIndex, ResourceContainer::FlipUploadBuf::Frame);
 
         static const float rotationSpeed = FLOAT_PI / 2.0f;
         m_CurrentAngle += deltaTime * rotationSpeed;
@@ -58,9 +61,9 @@ namespace Boolka
         upload[3] = cos(m_CurrentAngle);
         currentUploadBuffer.Unmap();
 
-        commandList->CopyResource(currentConstantBuffer.Get(), currentUploadBuffer.Get());
+        commandList->CopyResource(frameConstantBuffer.Get(), currentUploadBuffer.Get());
 
-        ResourceTransition::Transition(currentConstantBuffer, commandList, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+        ResourceTransition::Transition(frameConstantBuffer, commandList, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
 
         D3D12_VIEWPORT viewportDesc = {};
         viewportDesc.Width = static_cast<float>(width);
@@ -78,7 +81,7 @@ namespace Boolka
         const float clearColor[] = { 0.0f, 0.2f, 0.4f, 1.0f };
         commandList->ClearRenderTargetView(*backbufferRTV.GetCPUDescriptor(), clearColor, 0, nullptr);
 
-        commandList->SetGraphicsRootConstantBufferView(0, currentConstantBuffer->GetGPUVirtualAddress());
+        commandList->SetGraphicsRootConstantBufferView(static_cast<UINT>(ResourceContainer::DefaultRootSigBindPoints::FrameConstantBuffer), frameConstantBuffer->GetGPUVirtualAddress());
 
         commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
         commandList->IASetIndexBuffer(m_IndexBufferView.GetView());
@@ -86,7 +89,7 @@ namespace Boolka
         commandList->SetPipelineState(m_PSO.Get());
         commandList->DrawIndexedInstanced(3, 1, 0, 0, 0);
 
-        ResourceTransition::Transition(currentConstantBuffer, commandList, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, D3D12_RESOURCE_STATE_COPY_DEST);
+        ResourceTransition::Transition(frameConstantBuffer, commandList, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, D3D12_RESOURCE_STATE_COPY_DEST);
 
         return true;
     }
@@ -96,9 +99,12 @@ namespace Boolka
         throw std::logic_error("The method or operation is not implemented.");
     }
 
-    bool DebugRenderPass::Initialize(Device& device, RenderContext& renderContext, ResourceTracker& resourceTracker)
+    bool DebugRenderPass::Initialize(Device& device, RenderContext& renderContext)
     {
         BLK_ASSERT(m_CurrentAngle == 0.0f);
+
+        auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
+        auto& resourceContainer = engineContext.GetResourceContainer();
 
         MemoryBlock PS = DebugFileReader::ReadFile("DebugPassPixelShader.cso");
         MemoryBlock VS = DebugFileReader::ReadFile("DebugPassVertexShader.cso");
@@ -146,32 +152,16 @@ namespace Boolka
         res = m_IndexBufferView.Initialize(m_IndexBuffer, indexBufferSize, DXGI_FORMAT_R16_UINT);
         BLK_ASSERT(res);
 
-        res = m_PSO.Initialize(device, renderContext.GetRenderEngineContext().GetDefaultRootSig(), inputLayout, VS, PS, 1);
+        res = m_PSO.Initialize(device, resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default), inputLayout, VS, PS, 1);
         BLK_ASSERT(res);
 
         inputLayout.Unload();
-
-        static const UINT64 floatSize = 4;
-        static const UINT64 cbSize = BLK_CEIL_TO_POWER_OF_TWO(4 * floatSize, 256);
-
-        BLK_INITIALIZE_ARRAY(m_ConstantBuffers, device, cbSize, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_FLAG_NONE, D3D12_RESOURCE_STATE_COPY_DEST);
-        BLK_INITIALIZE_ARRAY(m_UploadBuffers, device, cbSize);
-
-        for (UINT i = 0; i < BLK_IN_FLIGHT_FRAMES; ++i)
-        {
-            D3D12_CPU_DESCRIPTOR_HANDLE destHandle = renderContext.GetRenderEngineContext().GetMainDescriptorHeap().GetCPUHandle(i);
-            m_ConstantBufferViews[i].Initialize(device, m_ConstantBuffers[i], destHandle, static_cast<UINT>(cbSize));
-        }
 
         return true;
     }
 
     void DebugRenderPass::Unload()
     {
-        BLK_UNLOAD_ARRAY(m_ConstantBuffers);
-        BLK_UNLOAD_ARRAY(m_UploadBuffers);
-        BLK_UNLOAD_ARRAY(m_ConstantBufferViews);
-
         m_VertexBufferView.Unload();
         m_VertexBuffer.Unload();
         m_IndexBuffer.Unload();

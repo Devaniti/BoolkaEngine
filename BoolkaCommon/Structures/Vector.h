@@ -3,7 +3,7 @@
 namespace Boolka
 {
 
-    template<size_t componentCount = 4, typename elementType = float>
+    template<size_t componentCount, typename elementType = float>
     class Vector
     {
     public:
@@ -24,6 +24,7 @@ namespace Boolka
             std::copy(data.begin(), data.end(), begin());
         };
 
+        // TODO forbid implicit vector truncation somehow (when otherComponentCount > componentCount)
         template<size_t otherComponentCount>
         Vector(const Vector<otherComponentCount, elementType>& other)
             : m_data{}
@@ -36,6 +37,22 @@ namespace Boolka
             {
                 std::copy(other.begin(), other.end(), begin());
             }
+        }
+
+        // Allows to use HLSL style Vector construction: 
+        // eg. Vector4 vec = Vector4(someVector3Var, 1.0f)
+        // or Vector4 vec = Vector4(0.0f, vector3Var)
+        template<size_t firstComponentCount, typename... Args>
+        Vector(const Vector<firstComponentCount, elementType>& first, Args... args)
+            : m_data{}
+        {
+            InitializeTemplateList<0>(first, args...);
+        }
+        template<typename... Args>
+        Vector(float first, Args... args)
+            : m_data{}
+        {
+            InitializeTemplateList<0>(first, args...);
         }
 
         elementType x() const { static_assert(componentCount > 0); return m_data[0]; };
@@ -104,6 +121,26 @@ namespace Boolka
 
     protected:
         elementType m_data[componentCount];
+
+        template<size_t currentIndex, size_t firstComponentCount, typename... Args>
+        void InitializeTemplateList(const Vector<firstComponentCount, elementType>& first, Args... args)
+        {
+            static_assert(currentIndex + firstComponentCount <= componentCount);
+            std::copy(first.begin(), first.end(), &m_data[currentIndex]);
+            InitializeTemplateList<currentIndex + firstComponentCount>(args...);
+        }
+        template<size_t currentIndex, typename... Args>
+        void InitializeTemplateList(float first, Args... args)
+        {
+            static_assert(currentIndex + 1 <= componentCount);
+            m_data[currentIndex] = first;
+            InitializeTemplateList<currentIndex + 1>(args...);
+        }
+        template<size_t currentIndex>
+        void InitializeTemplateList()
+        {
+            static_assert(currentIndex == componentCount, "Incorrect number of elements passed");
+        }
     };
 
     template<size_t componentCount, typename elementType>

@@ -90,6 +90,137 @@ namespace Boolka
         return !operator==(other);
     }
 
+    Matrix4x4 Matrix4x4::Inverse(bool& isSuccessfull) const
+    {
+        Matrix4x4 result;
+
+        result[0][0] = (*this)[1][1] * (*this)[2][2] * (*this)[3][3] -
+            (*this)[1][1] * (*this)[2][3] * (*this)[3][2] -
+            (*this)[2][1] * (*this)[1][2] * (*this)[3][3] +
+            (*this)[2][1] * (*this)[1][3] * (*this)[3][2] +
+            (*this)[3][1] * (*this)[1][2] * (*this)[2][3] -
+            (*this)[3][1] * (*this)[1][3] * (*this)[2][2];
+
+        result[1][0] = -(*this)[1][0] * (*this)[2][2] * (*this)[3][3] +
+            (*this)[1][0] * (*this)[2][3] * (*this)[3][2] +
+            (*this)[2][0] * (*this)[1][2] * (*this)[3][3] -
+            (*this)[2][0] * (*this)[1][3] * (*this)[3][2] -
+            (*this)[3][0] * (*this)[1][2] * (*this)[2][3] +
+            (*this)[3][0] * (*this)[1][3] * (*this)[2][2];
+
+        result[2][0] = (*this)[1][0] * (*this)[2][1] * (*this)[3][3] -
+            (*this)[1][0] * (*this)[2][3] * (*this)[3][1] -
+            (*this)[2][0] * (*this)[1][1] * (*this)[3][3] +
+            (*this)[2][0] * (*this)[1][3] * (*this)[3][1] +
+            (*this)[3][0] * (*this)[1][1] * (*this)[2][3] -
+            (*this)[3][0] * (*this)[1][3] * (*this)[2][1];
+
+        result[3][0] = -(*this)[1][0] * (*this)[2][1] * (*this)[3][2] +
+            (*this)[1][0] * (*this)[2][2] * (*this)[3][1] +
+            (*this)[2][0] * (*this)[1][1] * (*this)[3][2] -
+            (*this)[2][0] * (*this)[1][2] * (*this)[3][1] -
+            (*this)[3][0] * (*this)[1][1] * (*this)[2][2] +
+            (*this)[3][0] * (*this)[1][2] * (*this)[2][1];
+
+        result[0][1] = -(*this)[0][1] * (*this)[2][2] * (*this)[3][3] +
+            (*this)[0][1] * (*this)[2][3] * (*this)[3][2] +
+            (*this)[2][1] * (*this)[0][2] * (*this)[3][3] -
+            (*this)[2][1] * (*this)[0][3] * (*this)[3][2] -
+            (*this)[3][1] * (*this)[0][2] * (*this)[2][3] +
+            (*this)[3][1] * (*this)[0][3] * (*this)[2][2];
+
+        result[1][1] = (*this)[0][0] * (*this)[2][2] * (*this)[3][3] -
+            (*this)[0][0] * (*this)[2][3] * (*this)[3][2] -
+            (*this)[2][0] * (*this)[0][2] * (*this)[3][3] +
+            (*this)[2][0] * (*this)[0][3] * (*this)[3][2] +
+            (*this)[3][0] * (*this)[0][2] * (*this)[2][3] -
+            (*this)[3][0] * (*this)[0][3] * (*this)[2][2];
+
+        result[2][1] = -(*this)[0][0] * (*this)[2][1] * (*this)[3][3] +
+            (*this)[0][0] * (*this)[2][3] * (*this)[3][1] +
+            (*this)[2][0] * (*this)[0][1] * (*this)[3][3] -
+            (*this)[2][0] * (*this)[0][3] * (*this)[3][1] -
+            (*this)[3][0] * (*this)[0][1] * (*this)[2][3] +
+            (*this)[3][0] * (*this)[0][3] * (*this)[2][1];
+
+        result[3][1] = (*this)[0][0] * (*this)[2][1] * (*this)[3][2] -
+            (*this)[0][0] * (*this)[2][2] * (*this)[3][1] -
+            (*this)[2][0] * (*this)[0][1] * (*this)[3][2] +
+            (*this)[2][0] * (*this)[0][2] * (*this)[3][1] +
+            (*this)[3][0] * (*this)[0][1] * (*this)[2][2] -
+            (*this)[3][0] * (*this)[0][2] * (*this)[2][1];
+
+        result[0][2] = (*this)[0][1] * (*this)[1][2] * (*this)[3][3] -
+            (*this)[0][1] * (*this)[1][3] * (*this)[3][2] -
+            (*this)[1][1] * (*this)[0][2] * (*this)[3][3] +
+            (*this)[1][1] * (*this)[0][3] * (*this)[3][2] +
+            (*this)[3][1] * (*this)[0][2] * (*this)[1][3] -
+            (*this)[3][1] * (*this)[0][3] * (*this)[1][2];
+
+        result[1][2] = -(*this)[0][0] * (*this)[1][2] * (*this)[3][3] +
+            (*this)[0][0] * (*this)[1][3] * (*this)[3][2] +
+            (*this)[1][0] * (*this)[0][2] * (*this)[3][3] -
+            (*this)[1][0] * (*this)[0][3] * (*this)[3][2] -
+            (*this)[3][0] * (*this)[0][2] * (*this)[1][3] +
+            (*this)[3][0] * (*this)[0][3] * (*this)[1][2];
+
+        result[2][2] = (*this)[0][0] * (*this)[1][1] * (*this)[3][3] -
+            (*this)[0][0] * (*this)[1][3] * (*this)[3][1] -
+            (*this)[1][0] * (*this)[0][1] * (*this)[3][3] +
+            (*this)[1][0] * (*this)[0][3] * (*this)[3][1] +
+            (*this)[3][0] * (*this)[0][1] * (*this)[1][3] -
+            (*this)[3][0] * (*this)[0][3] * (*this)[1][1];
+
+        result[3][2] = -(*this)[0][0] * (*this)[1][1] * (*this)[3][2] +
+            (*this)[0][0] * (*this)[1][2] * (*this)[3][1] +
+            (*this)[1][0] * (*this)[0][1] * (*this)[3][2] -
+            (*this)[1][0] * (*this)[0][2] * (*this)[3][1] -
+            (*this)[3][0] * (*this)[0][1] * (*this)[1][2] +
+            (*this)[3][0] * (*this)[0][2] * (*this)[1][1];
+
+        result[0][3] = -(*this)[0][1] * (*this)[1][2] * (*this)[2][3] +
+            (*this)[0][1] * (*this)[1][3] * (*this)[2][2] +
+            (*this)[1][1] * (*this)[0][2] * (*this)[2][3] -
+            (*this)[1][1] * (*this)[0][3] * (*this)[2][2] -
+            (*this)[2][1] * (*this)[0][2] * (*this)[1][3] +
+            (*this)[2][1] * (*this)[0][3] * (*this)[1][2];
+
+        result[1][3] = (*this)[0][0] * (*this)[1][2] * (*this)[2][3] -
+            (*this)[0][0] * (*this)[1][3] * (*this)[2][2] -
+            (*this)[1][0] * (*this)[0][2] * (*this)[2][3] +
+            (*this)[1][0] * (*this)[0][3] * (*this)[2][2] +
+            (*this)[2][0] * (*this)[0][2] * (*this)[1][3] -
+            (*this)[2][0] * (*this)[0][3] * (*this)[1][2];
+
+        result[2][3] = -(*this)[0][0] * (*this)[1][1] * (*this)[2][3] +
+            (*this)[0][0] * (*this)[1][3] * (*this)[2][1] +
+            (*this)[1][0] * (*this)[0][1] * (*this)[2][3] -
+            (*this)[1][0] * (*this)[0][3] * (*this)[2][1] -
+            (*this)[2][0] * (*this)[0][1] * (*this)[1][3] +
+            (*this)[2][0] * (*this)[0][3] * (*this)[1][1];
+
+        result[3][3] = (*this)[0][0] * (*this)[1][1] * (*this)[2][2] -
+            (*this)[0][0] * (*this)[1][2] * (*this)[2][1] -
+            (*this)[1][0] * (*this)[0][1] * (*this)[2][2] +
+            (*this)[1][0] * (*this)[0][2] * (*this)[2][1] +
+            (*this)[2][0] * (*this)[0][1] * (*this)[1][2] -
+            (*this)[2][0] * (*this)[0][2] * (*this)[1][1];
+
+        float det = (*this)[0][0] * result[0][0] + (*this)[0][1] * result[1][0] + (*this)[0][2] * result[2][0] + (*this)[0][3] * result[3][0];
+
+        if (::abs(det) < FLT_EPSILON)
+        {
+            isSuccessfull = false;
+            return result;
+        }
+
+        isSuccessfull = true;
+
+        result /= det;
+
+        return result;
+    }
+
     Matrix4x4 Matrix4x4::Transpose() const
     {
         return Matrix4x4

@@ -26,8 +26,15 @@ namespace Boolka
         void Unload();
 
         void Flush();
+
+#ifdef BLK_RENDER_DEBUG
+        void FilterMessage(D3D12_MESSAGE_ID id);
+        void FilterMessage(D3D12_MESSAGE_ID* idArray, UINT idCount);
+        void RemoveLastMessageFilter();
+#endif
     private:
 #ifdef BLK_RENDER_DEBUG
+        void InitializeDebug();
         void SetDebugBreakSeverity(D3D12_MESSAGE_SEVERITY severity);
         void ReportObjectLeaks();
 #endif

@@ -116,6 +116,7 @@ namespace Boolka
             const auto& textureHeader = dataWrapper.textureHeaders[i];
 
             texture.Initialize(device, m_ResourceHeap, textureOffsets[i], textureHeader.width, textureHeader.height, textureHeader.mipCount, DXGI_FORMAT_B8G8R8A8_UNORM, D3D12_RESOURCE_FLAG_NONE, nullptr, D3D12_RESOURCE_STATE_COMMON);
+            BLK_RENDER_DEBUG_ONLY(texture.SetDebugName(L"Scene::m_Textures[%d]", i));
         }
 
         for (UINT i = 0; i < dataWrapper.textureCount; ++i)

@@ -12,7 +12,9 @@ namespace Boolka
         if (SUCCEEDED(hr))
         {
             d3d12DebugInterface->EnableDebugLayer();
+#ifdef BLK_USE_GPU_VALIDATION
             d3d12DebugInterface->SetEnableGPUBasedValidation(TRUE);
+#endif
             d3d12DebugInterface->Release();
         }
 #endif

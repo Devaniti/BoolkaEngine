@@ -17,7 +17,8 @@ namespace Boolka
         bool useDepthTest /*= false*/,
         bool writeDepth /*= true*/,
         D3D12_COMPARISON_FUNC depthFunc /*= D3D12_COMPARISON_FUNC_LESS*/,
-        bool useAlphaBlend /*= false*/)
+        bool useAlphaBlend /*= false*/,
+        DXGI_FORMAT renderTargetFormat /*= DXGI_FORMAT_R8G8B8A8_UNORM*/)
     {
         ID3D12PipelineState* state = nullptr;
         D3D12_GRAPHICS_PIPELINE_STATE_DESC desc;
@@ -45,26 +46,26 @@ namespace Boolka
         desc.NumRenderTargets = renderTargetCount;
         for (UINT i = 0; i < renderTargetCount; ++i)
         {
-            desc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
-            desc.BlendState.RenderTarget[0].LogicOp = D3D12_LOGIC_OP_NOOP;
-            desc.BlendState.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_RED | D3D12_COLOR_WRITE_ENABLE_GREEN | D3D12_COLOR_WRITE_ENABLE_BLUE;
+            desc.RTVFormats[i] = renderTargetFormat;
+            desc.BlendState.RenderTarget[i].LogicOp = D3D12_LOGIC_OP_NOOP;
+            desc.BlendState.RenderTarget[i].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_RED | D3D12_COLOR_WRITE_ENABLE_GREEN | D3D12_COLOR_WRITE_ENABLE_BLUE;
             if (useAlphaBlend)
             {
-                desc.BlendState.RenderTarget[0].BlendEnable = TRUE;
-                desc.BlendState.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
-                desc.BlendState.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
-                desc.BlendState.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+                desc.BlendState.RenderTarget[i].BlendEnable = TRUE;
+                desc.BlendState.RenderTarget[i].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+                desc.BlendState.RenderTarget[i].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+                desc.BlendState.RenderTarget[i].BlendOp = D3D12_BLEND_OP_ADD;
             }
             else
             {
-                desc.BlendState.RenderTarget[0].BlendEnable = FALSE;
-                desc.BlendState.RenderTarget[0].SrcBlend = D3D12_BLEND_ONE;
-                desc.BlendState.RenderTarget[0].DestBlend = D3D12_BLEND_ZERO;
-                desc.BlendState.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+                desc.BlendState.RenderTarget[i].BlendEnable = FALSE;
+                desc.BlendState.RenderTarget[i].SrcBlend = D3D12_BLEND_ONE;
+                desc.BlendState.RenderTarget[i].DestBlend = D3D12_BLEND_ZERO;
+                desc.BlendState.RenderTarget[i].BlendOp = D3D12_BLEND_OP_ADD;
             }
-            desc.BlendState.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ZERO;
-            desc.BlendState.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
-            desc.BlendState.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+            desc.BlendState.RenderTarget[i].SrcBlendAlpha = D3D12_BLEND_ZERO;
+            desc.BlendState.RenderTarget[i].DestBlendAlpha = D3D12_BLEND_ZERO;
+            desc.BlendState.RenderTarget[i].BlendOpAlpha = D3D12_BLEND_OP_ADD;
         }
 
         HRESULT hr = device->CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(&state));
@@ -86,7 +87,7 @@ namespace Boolka
     void GraphicPipelineState::SetDefaultRasterizerDesc(D3D12_RASTERIZER_DESC& desc)
     {
         desc.FillMode = D3D12_FILL_MODE_SOLID;
-        desc.CullMode = D3D12_CULL_MODE_BACK;
+        desc.CullMode = D3D12_CULL_MODE_NONE; // TODO reenable backface cull when scene will allow to
         desc.FrontCounterClockwise = TRUE;
         desc.DepthBias = D3D12_DEFAULT_DEPTH_BIAS;
         desc.DepthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;

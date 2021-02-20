@@ -11,13 +11,8 @@
 namespace Boolka
 {
 
-    bool PresentPass::Initialize(Device& device, RenderContext& renderContext, ResourceTracker& resourceTracker)
+    bool PresentPass::Initialize(Device& device, RenderContext& renderContext)
     {
-        for (UINT i = 0; i < BLK_IN_FLIGHT_FRAMES; ++i)
-        {
-            resourceTracker.RegisterResource(renderContext.GetRenderEngineContext().GetSwapchainBackBuffer(i), D3D12_RESOURCE_STATE_PRESENT);
-        }
-
         return true;
     }
 
@@ -27,8 +22,16 @@ namespace Boolka
 
     bool PresentPass::Render(RenderContext& renderContext, ResourceTracker& resourceTracker)
     {
-        UINT frameIndex = renderContext.GetRenderFrameContext().GetFrameIndex();
-        resourceTracker.Transition(renderContext.GetRenderEngineContext().GetSwapchainBackBuffer(frameIndex), renderContext.GetRenderThreadContext().GetGraphicCommandList(), D3D12_RESOURCE_STATE_PRESENT);
+        auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
+        auto& resourceContainer = engineContext.GetResourceContainer();
+
+        GraphicCommandListImpl& commandList = threadContext.GetGraphicCommandList();
+
+        BLK_GPU_SCOPE(commandList.Get(), "PresentPass");
+        BLK_RENDER_DEBUG_ONLY(resourceTracker.ValidateStates(commandList));
+
+        UINT frameIndex = frameContext.GetFrameIndex();
+        resourceTracker.Transition(resourceContainer.GetBackBuffer(frameIndex), commandList, D3D12_RESOURCE_STATE_PRESENT);
 
         return true;
     }

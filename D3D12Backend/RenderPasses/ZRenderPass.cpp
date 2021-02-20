@@ -17,16 +17,21 @@ namespace Boolka
     bool ZRenderPass::Render(RenderContext& renderContext, ResourceTracker& resourceTracker)
     {
         auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
+        auto& resourceContainer = engineContext.GetResourceContainer();
 
         UINT frameIndex = frameContext.GetFrameIndex();
+        Texture2D& gbufferDepth = resourceContainer.GetTexture(ResourceContainer::Tex::GbufferDepth);
+        DepthStencilView& gbufferDSV = resourceContainer.GetDSV(ResourceContainer::DSV::GbufferDepth);
+        Buffer& frameConstantBuffer = resourceContainer.GetFlippableBuffer(frameIndex, ResourceContainer::FlipBuf::Frame);
         GraphicCommandListImpl& commandList = threadContext.GetGraphicCommandList();
 
         BLK_GPU_SCOPE(commandList.Get(), "ZRenderPass");
+        BLK_RENDER_DEBUG_ONLY(resourceTracker.ValidateStates(commandList));
+        
+        resourceTracker.Transition(gbufferDepth, commandList, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 
         UINT height = engineContext.GetBackbufferHeight();
         UINT width = engineContext.GetBackbufferWidth();
-
-        Buffer& currentConstantBuffer = engineContext.GetConstantBuffer(frameIndex);
 
         D3D12_VIEWPORT viewportDesc = {};
         viewportDesc.Width = static_cast<float>(width);
@@ -41,10 +46,10 @@ namespace Boolka
 
         commandList->RSSetScissorRects(1, &scissorRect);
 
-        commandList->ClearDepthStencilView(*engineContext.GetDepthStencilView().GetCPUDescriptor(), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-        commandList->OMSetRenderTargets(0, nullptr, FALSE, engineContext.GetDepthStencilView().GetCPUDescriptor());
+        commandList->ClearDepthStencilView(*gbufferDSV.GetCPUDescriptor(), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+        commandList->OMSetRenderTargets(0, nullptr, FALSE, gbufferDSV.GetCPUDescriptor());
 
-        commandList->SetGraphicsRootConstantBufferView(0, currentConstantBuffer->GetGPUVirtualAddress());
+        commandList->SetGraphicsRootConstantBufferView(static_cast<UINT>(ResourceContainer::DefaultRootSigBindPoints::FrameConstantBuffer), frameConstantBuffer->GetGPUVirtualAddress());
 
         commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
         commandList->IASetIndexBuffer(engineContext.GetScene().GetIndexBufferView().GetView());
@@ -62,9 +67,10 @@ namespace Boolka
         throw std::logic_error("The method or operation is not implemented.");
     }
 
-    bool ZRenderPass::Initialize(Device& device, RenderContext& renderContext, ResourceTracker& resourceTracker)
+    bool ZRenderPass::Initialize(Device& device, RenderContext& renderContext)
     {
         auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
+        auto& resourceContainer = engineContext.GetResourceContainer();
 
         MemoryBlock PS = {};
         MemoryBlock VS = DebugFileReader::ReadFile("ZPassVertexShader.cso");
@@ -74,7 +80,7 @@ namespace Boolka
 
         Scene& scene = engineContext.GetScene();
 
-        bool res = m_PSO.Initialize(device, engineContext.GetDefaultRootSig(), inputLayout, VS, PS, 0, true);
+        bool res = m_PSO.Initialize(device, resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default), inputLayout, VS, PS, 0, true);
         BLK_ASSERT(res);
 
         inputLayout.Unload();

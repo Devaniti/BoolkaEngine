@@ -52,9 +52,6 @@
     <Filter Include="Shaders\Debug3DPass">
       <UniqueIdentifier>{341f5c74-d14b-4416-a6a2-81c2e433e1d2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Shaders\GBufferPass">
-      <UniqueIdentifier>{3475a855-5eae-4f85-9885-54bf4a64b6a2}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Shaders\ZPass">
       <UniqueIdentifier>{33588987-cc8f-4751-991e-c6579bd8650f}</UniqueIdentifier>
     </Filter>
@@ -69,6 +66,18 @@
     </Filter>
     <Filter Include="Containers\Streaming">
       <UniqueIdentifier>{94bdee21-606f-434d-b9f2-2dbd5d33a675}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\FullScreen">
+      <UniqueIdentifier>{c7f1599d-055d-4044-9d9b-753de0fed418}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\DeferredLightingPass">
+      <UniqueIdentifier>{8889e568-91c0-48a5-aac2-103749eed935}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\ToneMappingPass">
+      <UniqueIdentifier>{6926a7f8-8f91-4c2f-bc89-f1da541d48ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\GBufferPass">
+      <UniqueIdentifier>{3475a855-5eae-4f85-9885-54bf4a64b6a2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -270,6 +279,18 @@
     <ClInclude Include="Contexts\FrameStats.h">
       <Filter>Contexts</Filter>
     </ClInclude>
+    <ClInclude Include="RenderSchedule\ResourceContainer.h">
+      <Filter>RenderSchedule</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderPasses\ReferenceRenderPass.h">
+      <Filter>RenderPasses</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderPasses\DeferredLightingPass.h">
+      <Filter>RenderPasses</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderPasses\ToneMappingPass.h">
+      <Filter>RenderPasses</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WindowManagement\WindowManager.cpp">
@@ -467,6 +488,18 @@
     <ClCompile Include="Contexts\FrameStats.cpp">
       <Filter>Contexts</Filter>
     </ClCompile>
+    <ClCompile Include="RenderSchedule\ResourceContainer.cpp">
+      <Filter>RenderSchedule</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderPasses\ReferenceRenderPass.cpp">
+      <Filter>RenderPasses</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderPasses\DeferredLightingPass.cpp">
+      <Filter>RenderPasses</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderPasses\ToneMappingPass.cpp">
+      <Filter>RenderPasses</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\RootSig.hlsl">
@@ -499,6 +532,15 @@
     <FxCompile Include="Shaders\TransparentPass\TransparentPassPixelShader.hlsl">
       <Filter>Shaders\TransparentPass</Filter>
     </FxCompile>
+    <FxCompile Include="Shaders\FullScreen\FullScreenVS.hlsl">
+      <Filter>Shaders\FullScreen</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\DeferredLightingPass\DeferredLightingPassPS.hlsl">
+      <Filter>Shaders\DeferredLightingPass</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\ToneMappingPass\ToneMappingPassPS.hlsl">
+      <Filter>Shaders\ToneMappingPass</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\DebugPass\DebugPassShadersCommon.hlsli">
@@ -507,7 +549,6 @@
     <None Include="Shaders\Debug3DPass\Debug3DPassShadersCommon.hlsli">
       <Filter>Shaders\Debug3DPass</Filter>
     </None>
-    <None Include="packages.config" />
     <None Include="Shaders\GBufferPass\GBufferPassShadersCommon.hlsli">
       <Filter>Shaders\GBufferPass</Filter>
     </None>
@@ -516,6 +557,16 @@
     </None>
     <None Include="Shaders\TransparentPass\TransparentPassShadersCommon.hlsli">
       <Filter>Shaders\TransparentPass</Filter>
+    </None>
+    <None Include="packages.config" />
+    <None Include="Shaders\Common.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\FullScreen\FullScreenCommon.hlsli">
+      <Filter>Shaders\FullScreen</Filter>
+    </None>
+    <None Include="Shaders\Color.hlsli">
+      <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -29,23 +29,26 @@ namespace Boolka
     {
         float deltaTime = renderContext.GetRenderFrameContext().GetDeltaTime();
 
+        auto& resourceContainer = renderContext.GetRenderEngineContext().GetResourceContainer();
+
         UINT frameIndex = renderContext.GetRenderFrameContext().GetFrameIndex();
-        Texture2D& backbuffer = renderContext.GetRenderEngineContext().GetSwapchainBackBuffer(frameIndex);
-        RenderTargetView& backbufferRTV = renderContext.GetRenderEngineContext().GetSwapchainRenderTargetView(frameIndex);
+        Texture2D& backbuffer = resourceContainer.GetBackBuffer(frameIndex);
+        RenderTargetView& backbufferRTV = resourceContainer.GetBackBufferRTV(frameIndex);
+        DepthStencilView& gbufferDSV = resourceContainer.GetDSV(ResourceContainer::DSV::GbufferDepth);
 
         GraphicCommandListImpl& commandList = renderContext.GetRenderThreadContext().GetGraphicCommandList();
 
         BLK_GPU_SCOPE(commandList.Get(), "Debug3DRenderPass");
 
         resourceTracker.Transition(backbuffer, commandList, D3D12_RESOURCE_STATE_RENDER_TARGET);
-        commandList->OMSetRenderTargets(1, backbufferRTV.GetCPUDescriptor(), FALSE, m_DSV.GetCPUDescriptor());
+        commandList->OMSetRenderTargets(1, backbufferRTV.GetCPUDescriptor(), FALSE, gbufferDSV.GetCPUDescriptor());
 
         UINT height = renderContext.GetRenderEngineContext().GetBackbufferHeight();
         UINT width = renderContext.GetRenderEngineContext().GetBackbufferWidth();
         float aspectRatioCompensation = static_cast<float>(height) / width;
 
-        Buffer& currentConstantBuffer = m_ConstantBuffers[frameIndex];
-        UploadBuffer& currentUploadBuffer = m_UploadBuffers[frameIndex];
+        Buffer& frameConstantBuffer = resourceContainer.GetFlippableBuffer(frameIndex, ResourceContainer::FlipBuf::Frame);
+        UploadBuffer& currentUploadBuffer = resourceContainer.GetFlippableUploadBuffer(frameIndex, ResourceContainer::FlipUploadBuf::Frame);
 
         static const float rotationSpeed = FLOAT_PI / 8.0f;
         m_CurrentAngle += deltaTime * rotationSpeed;
@@ -72,9 +75,9 @@ namespace Boolka
 
         currentUploadBuffer.Upload(viewProj.GetBuffer(), sizeof(viewProj));
 
-        commandList->CopyResource(currentConstantBuffer.Get(), currentUploadBuffer.Get());
+        commandList->CopyResource(frameConstantBuffer.Get(), currentUploadBuffer.Get());
 
-        ResourceTransition::Transition(currentConstantBuffer, commandList, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+        ResourceTransition::Transition(frameConstantBuffer, commandList, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
 
         D3D12_VIEWPORT viewportDesc = {};
         viewportDesc.Width = static_cast<float>(width);
@@ -91,9 +94,9 @@ namespace Boolka
 
         const float clearColor[] = { 0.0f, 0.2f, 0.4f, 1.0f };
         commandList->ClearRenderTargetView(*backbufferRTV.GetCPUDescriptor(), clearColor, 0, nullptr);
-        commandList->ClearDepthStencilView(*m_DSV.GetCPUDescriptor(), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+        commandList->ClearDepthStencilView(*gbufferDSV.GetCPUDescriptor(), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
-        commandList->SetGraphicsRootConstantBufferView(0, currentConstantBuffer->GetGPUVirtualAddress());
+        commandList->SetGraphicsRootConstantBufferView(static_cast<UINT>(ResourceContainer::DefaultRootSigBindPoints::FrameConstantBuffer), frameConstantBuffer->GetGPUVirtualAddress());
 
         commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
         commandList->IASetIndexBuffer(m_IndexBufferView.GetView());
@@ -104,7 +107,7 @@ namespace Boolka
         commandList->SetPipelineState(m_PSO.Get());
         commandList->DrawIndexedInstanced(36, 5, 0, 0, 0);
 
-        ResourceTransition::Transition(currentConstantBuffer, commandList, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, D3D12_RESOURCE_STATE_COPY_DEST);
+        ResourceTransition::Transition(frameConstantBuffer, commandList, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, D3D12_RESOURCE_STATE_COPY_DEST);
 
         return true;
     }
@@ -114,7 +117,7 @@ namespace Boolka
         throw std::logic_error("The method or operation is not implemented.");
     }
 
-    bool Debug3DRenderPass::Initialize(Device& device, RenderContext& renderContext, ResourceTracker& resourceTracker)
+    bool Debug3DRenderPass::Initialize(Device& device, RenderContext& renderContext)
     {
         BLK_ASSERT(m_CurrentAngle == 0.0f);
 
@@ -216,49 +219,18 @@ namespace Boolka
         res = m_IndexBufferView.Initialize(m_IndexBuffer, indexBufferSize, DXGI_FORMAT_R16_UINT);
         BLK_ASSERT(res);
 
-        res = m_PSO.Initialize(device, renderContext.GetRenderEngineContext().GetDefaultRootSig(), inputLayout, VS, PS, 1, true);
+        auto& resourceContainer = renderContext.GetRenderEngineContext().GetResourceContainer();
+
+        res = m_PSO.Initialize(device, resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default), inputLayout, VS, PS, 1, true);
         BLK_ASSERT(res);
 
         inputLayout.Unload();
-
-        static const UINT64 floatSize = 4;
-        static const UINT64 cbSize = BLK_CEIL_TO_POWER_OF_TWO(4 * 4 * floatSize, 256);
-
-        BLK_INITIALIZE_ARRAY(m_ConstantBuffers, device, cbSize, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_FLAG_NONE, D3D12_RESOURCE_STATE_COPY_DEST);
-        BLK_INITIALIZE_ARRAY(m_UploadBuffers, device, cbSize);
-
-        for (UINT i = 0; i < BLK_IN_FLIGHT_FRAMES; ++i)
-        {
-            D3D12_CPU_DESCRIPTOR_HANDLE destHandle = renderContext.GetRenderEngineContext().GetMainDescriptorHeap().GetCPUHandle(i);
-            m_ConstantBufferViews[i].Initialize(device, m_ConstantBuffers[i], destHandle, static_cast<UINT>(cbSize));
-        }
-
-        D3D12_CLEAR_VALUE dsvClearValue = {};
-        dsvClearValue.Format = DXGI_FORMAT_D32_FLOAT;
-        dsvClearValue.DepthStencil.Depth = 1.0f;
-
-        res = m_DepthBuffer.Initialize(device, D3D12_HEAP_TYPE_DEFAULT, 
-            renderContext.GetRenderEngineContext().GetBackbufferWidth(), 
-            renderContext.GetRenderEngineContext().GetBackbufferHeight(), 
-            1, DXGI_FORMAT_D32_FLOAT, D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL, 
-            &dsvClearValue, D3D12_RESOURCE_STATE_DEPTH_WRITE);
-
-        BLK_ASSERT(res);
-        
-        res = m_DSV.Initialize(device, m_DepthBuffer, DXGI_FORMAT_D32_FLOAT, renderContext.GetRenderEngineContext().GetDSVDescriptorHeap().GetCPUHandle(0));
-        BLK_ASSERT(res);
 
         return true;
     }
 
     void Debug3DRenderPass::Unload()
     {
-        BLK_UNLOAD_ARRAY(m_ConstantBuffers);
-        BLK_UNLOAD_ARRAY(m_UploadBuffers);
-        BLK_UNLOAD_ARRAY(m_ConstantBufferViews);
-
-        m_DSV.Unload();
-        m_DepthBuffer.Unload();
         m_VertexBufferView.Unload();
         m_VertexBuffer.Unload();
         m_VertexInstanceBuffer.Unload();

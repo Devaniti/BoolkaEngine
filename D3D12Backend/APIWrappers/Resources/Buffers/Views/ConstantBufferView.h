@@ -4,8 +4,6 @@
 namespace Boolka
 {
 
-    class ConstantBuffer;
-
     class ConstantBufferView
     {
     public:

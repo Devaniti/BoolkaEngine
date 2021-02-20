@@ -155,12 +155,16 @@
     <ClInclude Include="RenderPasses\Debug3DRenderPass.h" />
     <ClInclude Include="RenderPasses\DebugOverlayPass.h" />
     <ClInclude Include="RenderPasses\DebugRenderPass.h" />
+    <ClInclude Include="RenderPasses\DeferredLightingPass.h" />
     <ClInclude Include="RenderPasses\GBufferRenderPass.h" />
     <ClInclude Include="RenderPasses\PresentPass.h" />
+    <ClInclude Include="RenderPasses\ReferenceRenderPass.h" />
+    <ClInclude Include="RenderPasses\ToneMappingPass.h" />
     <ClInclude Include="RenderPasses\TransparentRenderPass.h" />
     <ClInclude Include="RenderPasses\UpdateRenderPass.h" />
     <ClInclude Include="RenderPasses\ZRenderPass.h" />
     <ClInclude Include="RenderSchedule\RenderSchedule.h" />
+    <ClInclude Include="RenderSchedule\ResourceContainer.h" />
     <ClInclude Include="RenderSchedule\ResourceTracker.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="WindowManagement\DisplayController.h" />
@@ -226,12 +230,16 @@
     <ClCompile Include="RenderPasses\Debug3DRenderPass.cpp" />
     <ClCompile Include="RenderPasses\DebugOverlayPass.cpp" />
     <ClCompile Include="RenderPasses\DebugRenderPass.cpp" />
+    <ClCompile Include="RenderPasses\DeferredLightingPass.cpp" />
     <ClCompile Include="RenderPasses\GBufferRenderPass.cpp" />
     <ClCompile Include="RenderPasses\PresentPass.cpp" />
+    <ClCompile Include="RenderPasses\ReferenceRenderPass.cpp" />
+    <ClCompile Include="RenderPasses\ToneMappingPass.cpp" />
     <ClCompile Include="RenderPasses\TransparentRenderPass.cpp" />
     <ClCompile Include="RenderPasses\UpdateRenderPass.cpp" />
     <ClCompile Include="RenderPasses\ZRenderPass.cpp" />
     <ClCompile Include="RenderSchedule\RenderSchedule.cpp" />
+    <ClCompile Include="RenderSchedule\ResourceContainer.cpp" />
     <ClCompile Include="RenderSchedule\ResourceTracker.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -258,6 +266,14 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
+    <FxCompile Include="Shaders\DeferredLightingPass\DeferredLightingPassPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\FullScreen\FullScreenVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
     <FxCompile Include="Shaders\GBufferPass\GBufferPassPixelShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
@@ -275,6 +291,10 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">RootSignature</ShaderType>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </AdditionalOptions>
+    </FxCompile>
+    <FxCompile Include="Shaders\ToneMappingPass\ToneMappingPassPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="Shaders\TransparentPass\TransparentPassPixelShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
@@ -299,8 +319,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="Shaders\Color.hlsli" />
+    <None Include="Shaders\Common.hlsli" />
     <None Include="Shaders\Debug3DPass\Debug3DPassShadersCommon.hlsli" />
     <None Include="Shaders\DebugPass\DebugPassShadersCommon.hlsli" />
+    <None Include="Shaders\FullScreen\FullScreenCommon.hlsli" />
     <None Include="Shaders\GBufferPass\GBufferPassShadersCommon.hlsli" />
     <None Include="Shaders\TransparentPass\TransparentPassShadersCommon.hlsli" />
     <None Include="Shaders\ZPass\ZPassShadersCommon.hlsli" />

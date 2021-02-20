@@ -17,7 +17,7 @@
 namespace Boolka
 {
 
-    bool DebugOverlayPass::Initialize(Device& device, RenderContext& renderContext, ResourceTracker& resourceTracker)
+    bool DebugOverlayPass::Initialize(Device& device, RenderContext& renderContext)
     {
         m_ImguiDescriptorHeap.Initialize(device, 1, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
 
@@ -50,17 +50,19 @@ namespace Boolka
         ImguiUIManagement(renderContext);
 
         auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
+        auto& resourceContainer = engineContext.GetResourceContainer();
 
         UINT frameIndex = frameContext.GetFrameIndex();
-        Texture2D& backbuffer = engineContext.GetSwapchainBackBuffer(frameIndex);
-        RenderTargetView& backbufferRTV = engineContext.GetSwapchainRenderTargetView(frameIndex);
+        Texture2D& backbuffer = resourceContainer.GetBackBuffer(frameIndex);
+        RenderTargetView& backbufferRTV = resourceContainer.GetBackBufferRTV(frameIndex);
 
         GraphicCommandListImpl& commandList = threadContext.GetGraphicCommandList();
 
         BLK_GPU_SCOPE(commandList.Get(), "DebugOverlayPass");
+        BLK_RENDER_DEBUG_ONLY(resourceTracker.ValidateStates(commandList));
 
         resourceTracker.Transition(backbuffer, commandList, D3D12_RESOURCE_STATE_RENDER_TARGET);
-        commandList->OMSetRenderTargets(1, backbufferRTV.GetCPUDescriptor(), FALSE, engineContext.GetDepthStencilView().GetCPUDescriptor());
+        commandList->OMSetRenderTargets(1, backbufferRTV.GetCPUDescriptor(), FALSE, nullptr);
         ID3D12DescriptorHeap* descriptorHeaps[] = { m_ImguiDescriptorHeap.Get() };
         commandList->SetDescriptorHeaps(ARRAYSIZE(descriptorHeaps), descriptorHeaps);
 

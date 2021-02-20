@@ -11,7 +11,7 @@ namespace Boolka
         UpdateRenderPass() = default;
         ~UpdateRenderPass() = default;
 
-        bool Initialize(Device& device, RenderContext& renderContext, ResourceTracker& resourceTracker) override;
+        bool Initialize(Device& device, RenderContext& renderContext) override;
         void Unload() override;
 
         bool Render(RenderContext& renderContext, ResourceTracker& resourceTracker) override;
@@ -21,4 +21,3 @@ namespace Boolka
     };
 
 }
-

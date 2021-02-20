@@ -9,6 +9,10 @@ namespace Boolka
         ID3D12Resource* Get() { BLK_ASSERT(m_Resource != nullptr); return m_Resource; }
         ID3D12Resource* operator->() { return Get(); }
 
+#ifdef BLK_RENDER_DEBUG
+        void SetDebugName(const wchar_t* format, ...);
+#endif
+
     protected:
         Resource();
         ~Resource();

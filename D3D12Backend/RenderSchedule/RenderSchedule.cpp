@@ -10,7 +10,7 @@ namespace Boolka
     {
         m_ResourceTracker.Initialize(device, 10);
 
-        bool res = m_EngineContext.Initialize(device, displayController);
+        bool res = m_EngineContext.Initialize(device, displayController, m_ResourceTracker);
         BLK_ASSERT(res);
         res = m_FrameContext.Initialize(device);
         BLK_ASSERT(res);
@@ -58,18 +58,22 @@ namespace Boolka
 
     bool RenderSchedule::InitializeRenderPasses(Device& device)
     {
-        bool res = m_UpdatePass.Initialize(device, m_RenderContext, m_ResourceTracker);
+        bool res = m_UpdatePass.Initialize(device, m_RenderContext);
         BLK_ASSERT(res);
-        res = m_ZPass.Initialize(device, m_RenderContext, m_ResourceTracker);
+        res = m_ZPass.Initialize(device, m_RenderContext);
         BLK_ASSERT(res);
-        res = m_GbufferPass.Initialize(device, m_RenderContext, m_ResourceTracker);
+        res = m_GbufferPass.Initialize(device, m_RenderContext);
         BLK_ASSERT(res);
-        res = m_TransparentPass.Initialize(device, m_RenderContext, m_ResourceTracker);
+        res = m_DeferredLightingPass.Initialize(device, m_RenderContext);
         BLK_ASSERT(res);
-        res = m_PresentPass.Initialize(device, m_RenderContext, m_ResourceTracker);
+        res = m_TransparentPass.Initialize(device, m_RenderContext);
+        BLK_ASSERT(res);
+        res = m_ToneMappingPass.Initialize(device, m_RenderContext);
+        BLK_ASSERT(res);
+        res = m_PresentPass.Initialize(device, m_RenderContext);
         BLK_ASSERT(res);
 #ifdef BLK_ENABLE_STATS
-        res = m_DebugOverlayPass.Initialize(device, m_RenderContext, m_ResourceTracker);
+        res = m_DebugOverlayPass.Initialize(device, m_RenderContext);
         BLK_ASSERT(res);
 #endif
 
@@ -81,7 +85,9 @@ namespace Boolka
         m_UpdatePass.Unload();
         m_ZPass.Unload();
         m_GbufferPass.Unload();
+        m_DeferredLightingPass.Unload();
         m_TransparentPass.Unload();
+        m_ToneMappingPass.Unload();
         m_PresentPass.Unload();
 #ifdef BLK_ENABLE_STATS
         m_DebugOverlayPass.Unload();
@@ -107,7 +113,11 @@ namespace Boolka
         BLK_ASSERT(res);
         res = m_GbufferPass.Render(m_RenderContext, m_ResourceTracker);
         BLK_ASSERT(res);
+        res = m_DeferredLightingPass.Render(m_RenderContext, m_ResourceTracker);
+        BLK_ASSERT(res);
         res = m_TransparentPass.Render(m_RenderContext, m_ResourceTracker);
+        BLK_ASSERT(res);
+        res = m_ToneMappingPass.Render(m_RenderContext, m_ResourceTracker);
         BLK_ASSERT(res);
 #ifdef BLK_ENABLE_STATS
         res = m_DebugOverlayPass.Render(m_RenderContext, m_ResourceTracker);
@@ -123,7 +133,7 @@ namespace Boolka
 
     void RenderSchedule::PrepareCommandList(GraphicCommandListImpl& commandList)
     {
-        commandList->SetGraphicsRootSignature(m_EngineContext.GetDefaultRootSig().Get());
+        commandList->SetGraphicsRootSignature(m_EngineContext.GetResourceContainer().GetRootSignature(ResourceContainer::RootSig::Default).Get());
     }
 
     void RenderSchedule::FinishCommandList(Device& device, GraphicCommandListImpl& commandList)

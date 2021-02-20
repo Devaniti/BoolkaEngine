@@ -40,21 +40,18 @@ namespace Boolka
         desc.Flags = DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
         IDXGISwapChain1* swapchain1 = nullptr;
         HRESULT hr = factory->CreateSwapChainForHwnd(graphicQueue, window, &desc, nullptr, nullptr, &swapchain1);
-        if (FAILED(hr))
-        {
-            return false;
-        }
+        BLK_CRITICAL_ASSERT(SUCCEEDED(hr));
+
+        hr = factory->MakeWindowAssociation(window, DXGI_MWA_NO_ALT_ENTER | DXGI_MWA_NO_PRINT_SCREEN);
+        BLK_CRITICAL_ASSERT(SUCCEEDED(hr));
 
         hr = swapchain1->QueryInterface(&m_Swapchain);
         swapchain1->Release();
+        BLK_CRITICAL_ASSERT(SUCCEEDED(hr));
 
-        if (FAILED(hr))
-        {
-            return false;
-        }
-
-        m_Swapchain->SetMaximumFrameLatency(BLK_IN_FLIGHT_FRAMES - 1);
-        if (windowState.windowMode == WindowState::WindowMode::Borderless)
+        hr = m_Swapchain->SetMaximumFrameLatency(BLK_IN_FLIGHT_FRAMES - 1);
+        BLK_CRITICAL_ASSERT(SUCCEEDED(hr));
+        if (windowState.windowMode == WindowState::WindowMode::Fullscreen)
         {
             m_Swapchain->SetFullscreenState(TRUE, NULL);
             m_Swapchain->ResizeBuffers(BLK_IN_FLIGHT_FRAMES, 0, 0, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT);

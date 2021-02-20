@@ -128,8 +128,6 @@ namespace Boolka
             return WS_OVERLAPPEDWINDOW;
             break;
         case WindowState::WindowMode::Borderless:
-            return WS_POPUP;
-            break;
         case WindowState::WindowMode::Fullscreen:
             return WS_POPUP;
             break;

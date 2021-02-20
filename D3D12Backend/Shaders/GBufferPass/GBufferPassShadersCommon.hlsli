@@ -1,3 +1,4 @@
+#include "../Common.hlsli"
 
 Texture2D<float4> sceneTextures[300] : register(t0, space1);
 SamplerState pointSampler : register(s0);
@@ -23,12 +24,6 @@ struct VSOut
 
 struct PSOut
 {
-    float4 color : SV_Target;
-};
-
-cbuffer PerFrame : register(b0)
-{
-    float4x4 viewProjectionMatrix;
-    float4x4 viewMatrix;
-
+    float4 color : SV_Target0;
+    float4 normal : SV_Target1;
 };
