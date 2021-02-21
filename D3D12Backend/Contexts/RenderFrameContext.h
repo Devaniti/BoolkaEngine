@@ -27,7 +27,7 @@ namespace Boolka
         Matrix4x4& GetInvViewMatrix() { return m_InvViewMatrix; };
         Matrix4x4& GetInvProjMatrix() { return m_InvProjMatrix; };
         Matrix4x4& GetInvViewProjMatrix() { return m_InvViewProjMatrix; };
-        Vector4& GetCameraPos() { return m_CameraPos; };
+        Vector3& GetCameraPos() { return m_CameraPos; };
 
         const Matrix4x4& GetViewMatrix() const { return m_ViewMatrix; };
         const Matrix4x4& GetProjMatrix() const { return m_ProjMatrix; };
@@ -35,7 +35,7 @@ namespace Boolka
         const Matrix4x4& GetInvViewMatrix() const { return m_InvViewMatrix; };
         const Matrix4x4& GetInvProjMatrix() const { return m_InvProjMatrix; };
         const Matrix4x4& GetInvViewProjMatrix() const { return m_InvViewProjMatrix; };
-        const Vector4& GetCameraPos() const { return m_CameraPos; };
+        const Vector3& GetCameraPos() const { return m_CameraPos; };
 
 #ifdef BLK_ENABLE_STATS
         FrameStats& GetFrameStats() { return m_FraneStats; };
@@ -50,7 +50,7 @@ namespace Boolka
         Matrix4x4 m_InvViewMatrix;
         Matrix4x4 m_InvProjMatrix;
         Matrix4x4 m_InvViewProjMatrix;
-        Vector4 m_CameraPos;
+        Vector3 m_CameraPos;
 
         float m_DeltaTime;
         UINT m_FrameIndex;

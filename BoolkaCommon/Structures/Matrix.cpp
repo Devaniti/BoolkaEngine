@@ -320,9 +320,9 @@ namespace Boolka
         };
     }
 
-    Matrix4x4 Matrix4x4::GetView(const Vector4& right, const Vector4& up, const Vector4& forward, const Vector4& position)
+    Matrix4x4 Matrix4x4::GetView(const Vector3& right, const Vector3& up, const Vector3& forward, const Vector3& position)
     {
-        Vector4 negativePos = -position;
+        const Vector3 negativePos = -position;
 
         Matrix4x4 view
         {

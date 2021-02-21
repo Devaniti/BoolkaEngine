@@ -34,8 +34,30 @@ namespace Boolka
         m_CameraPos = {};
     }
 
-    bool Camera::Update(float deltaTime, float aspectRatio, float moveSpeed, float rotationSpeed, Matrix4x4& outViewMatrix, Matrix4x4& outProjMatrix, Vector4& outCameraPos)
+    bool Camera::Update(float deltaTime, float aspectRatio, Matrix4x4& outViewMatrix, Matrix4x4& outProjMatrix, Vector3& outCameraPos)
     {
+        static const Vector3 upDirection{ 0, 0, 1 };
+        Vector3 forward
+        {
+            cos(m_RotationYaw) * cos(m_RotationPitch),
+            sin(m_RotationYaw) * cos(m_RotationPitch),
+            sin(m_RotationPitch)
+        };
+        Vector3 right = upDirection.Cross(forward).Normalize();
+        Vector3 up = forward.Cross(right).Normalize();
+
+        UpdateInput(deltaTime, right, up, forward);
+        UpdateMatrices(aspectRatio, right, up, forward, outViewMatrix, outProjMatrix);
+        outCameraPos = m_CameraPos;
+
+        return true;
+    }
+
+    void Camera::UpdateInput(float deltaTime, const Vector3& right, const Vector3& up, const Vector3& forward)
+    {
+        static const float defaultMoveSpeed = 15.0f;
+        static const float defaultRotationSpeed = DEG_TO_RAD(60.0f);
+
         float speedMult = 1.0f;
         float angleSpeedMult = 1.0f;
 
@@ -51,71 +73,48 @@ namespace Boolka
             angleSpeedMult /= 2.5f;
         }
 
-        float moveDelta = moveSpeed * deltaTime * speedMult;
-        float rotationDelta = DEG_TO_RAD(rotationSpeed) * deltaTime * angleSpeedMult;
+        float moveDelta = defaultMoveSpeed * deltaTime * speedMult;
+        float rotationDelta = defaultRotationSpeed * deltaTime * angleSpeedMult;
 
-        static const Vector4 upDirection{ 0, 0, 1, 0 };
-
-        if (::GetAsyncKeyState(VK_LEFT))
+        bool leftPressed = static_cast<bool>(::GetAsyncKeyState(VK_LEFT));
+        bool rightPressed = static_cast<bool>(::GetAsyncKeyState(VK_RIGHT));
+        int rotationYawChange = static_cast<int>(rightPressed) - static_cast<int>(leftPressed);
+        if (rotationYawChange != 0)
         {
-            m_RotationYaw -= rotationDelta;
-            if (m_RotationYaw < DEG_TO_RAD(-180.0f))
-                m_RotationYaw += DEG_TO_RAD(360.0f);
+            m_RotationYaw += rotationDelta * rotationYawChange;
+            m_RotationYaw = fmod(m_RotationYaw, 2 * FLOAT_PI);
         }
 
-        if (::GetAsyncKeyState(VK_RIGHT))
+        bool upPressed = static_cast<bool>(::GetAsyncKeyState(VK_UP));
+        bool downPressed = static_cast<bool>(::GetAsyncKeyState(VK_DOWN));
+        int rotationPitchChange = static_cast<int>(upPressed) - static_cast<int>(downPressed);
+        if (rotationPitchChange != 0)
         {
-            m_RotationYaw += rotationDelta;
-            if (m_RotationYaw > DEG_TO_RAD(180.0f))
-                m_RotationYaw -= DEG_TO_RAD(360.0f);
+            m_RotationPitch += rotationDelta * rotationPitchChange;
+            m_RotationPitch = std::clamp(m_RotationPitch, -FLOAT_PI / 2.0f, FLOAT_PI / 2.0f);
         }
 
-        if (::GetAsyncKeyState(VK_UP))
+        bool DPressed = static_cast<bool>(::GetAsyncKeyState('D'));
+        bool APressed = static_cast<bool>(::GetAsyncKeyState('A'));
+        int leftRightChange = static_cast<int>(DPressed) - static_cast<int>(APressed);
+        if (leftRightChange != 0)
         {
-            m_RotationPitch += rotationDelta;
-            m_RotationPitch = min(DEG_TO_RAD(90.0f), m_RotationPitch);
+            m_CameraPos += right * (moveDelta * leftRightChange);
         }
 
-        if (::GetAsyncKeyState(VK_DOWN))
+        bool WPressed = static_cast<bool>(::GetAsyncKeyState('W'));
+        bool SPressed = static_cast<bool>(::GetAsyncKeyState('S'));
+        int forwardBackwardChange = static_cast<int>(WPressed) - static_cast<int>(SPressed);
+        if (forwardBackwardChange != 0)
         {
-            m_RotationPitch -= rotationDelta;
-            m_RotationPitch = max(DEG_TO_RAD(-90.0f), m_RotationPitch);
+            m_CameraPos += forward * (moveDelta * forwardBackwardChange);
         }
+    }
 
-        Vector4 forward
-        {
-            cos(m_RotationYaw) * cos(m_RotationPitch),
-            sin(m_RotationYaw) * cos(m_RotationPitch),
-            sin(m_RotationPitch),
-            0.0f
-        };
-
-        Vector4 right = upDirection.Cross(forward).Normalize();
-        Vector4 up = forward.Cross(right).Normalize();
-
-
-        if (::GetAsyncKeyState('D'))
-        {
-            m_CameraPos += right * moveDelta;
-        }
-
-        if (::GetAsyncKeyState('A'))
-        {
-            m_CameraPos -= right * moveDelta;
-        }
-
-        if (::GetAsyncKeyState('W'))
-        {
-            m_CameraPos += forward * moveDelta;
-        }
-
-        if (::GetAsyncKeyState('S'))
-        {
-            m_CameraPos -= forward * moveDelta;
-        }
-
-        float nearZ = 2.0f;
-        float farZ = 100.0f;
+    void Camera::UpdateMatrices(float aspectRatio, const Vector3& right, const Vector3& up, const Vector3& forward, Matrix4x4& outViewMatrix, Matrix4x4& outProjMatrix)
+    {
+        float nearZ = 0.2f;
+        float farZ = 1000.0f;
 
         // Perspective projection
         float fovY = DEG_TO_RAD(30.0f);
@@ -139,10 +138,6 @@ namespace Boolka
             forward,
             m_CameraPos
         );
-
-        outCameraPos = m_CameraPos;
-
-        return true;
     }
 
 }

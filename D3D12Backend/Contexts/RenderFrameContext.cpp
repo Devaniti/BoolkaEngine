@@ -67,7 +67,7 @@ namespace Boolka
 
         float aspectRatio = static_cast<float>(width) / height;
 
-        engineContext.GetCamera().Update(m_DeltaTime, aspectRatio, 15.0f, 60.0f, m_ViewMatrix, m_ProjMatrix, m_CameraPos);
+        engineContext.GetCamera().Update(m_DeltaTime, aspectRatio, m_ViewMatrix, m_ProjMatrix, m_CameraPos);
 
         m_ViewProjMatrix = m_ViewMatrix * m_ProjMatrix;
         bool isSuccessfull;

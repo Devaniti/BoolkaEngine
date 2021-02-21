@@ -12,9 +12,12 @@ namespace Boolka
         bool Initialize(float rotationYaw, float rotationPitch, const Vector4& cameraPos);
         void Unload();
 
-        bool Camera::Update(float deltaTime, float aspectRatio, float moveSpeed, float rotationSpeed, Matrix4x4& outViewMatrix, Matrix4x4& outProjMatrix, Vector4& outCameraPos);
+        bool Update(float deltaTime, float aspectRatio, Matrix4x4& outViewMatrix, Matrix4x4& outProjMatrix, Vector3& outCameraPos);
 
     private:
+
+        void UpdateInput(float deltaTime, const Vector3& right, const Vector3& up, const Vector3& forward);
+        void UpdateMatrices(float aspectRatio, const Vector3& right, const Vector3& up, const Vector3& forward, Matrix4x4& outViewMatrix, Matrix4x4& outProjMatrix);
         float m_RotationYaw;
         float m_RotationPitch;
         Vector4 m_CameraPos;
