@@ -4,7 +4,8 @@
                            "DENY_GEOMETRY_SHADER_ROOT_ACCESS), " \
                 "CBV(b0), " \
                 "CBV(b1), " \
-                "DescriptorTable(SRV(t0, space=0, numDescriptors = 4, flags = DATA_VOLATILE), visibility = SHADER_VISIBILITY_PIXEL ), " \
+                "RootConstants(num32BitConstants=1, b2), " \
+                "DescriptorTable(SRV(t0, space=0, numDescriptors = 8, flags = DATA_VOLATILE), visibility = SHADER_VISIBILITY_PIXEL ), " \
                 "DescriptorTable(CBV(b0, space=1, numDescriptors = 4), visibility = SHADER_VISIBILITY_PIXEL ), " \
                 "DescriptorTable(SRV(t0, space=1, numDescriptors = unbounded, flags = DATA_STATIC), visibility = SHADER_VISIBILITY_PIXEL ), " \
                 "DescriptorTable(UAV(u0, space=1, numDescriptors = 4), visibility = SHADER_VISIBILITY_PIXEL ), " \
@@ -29,4 +30,10 @@
                               "addressU = TEXTURE_ADDRESS_WRAP, " \
                               "addressV = TEXTURE_ADDRESS_WRAP, " \
                               "addressW = TEXTURE_ADDRESS_WRAP, " \
-                              "MaxAnisotropy = 16)"
+                              "MaxAnisotropy = 16)," \
+                "StaticSampler(s4, " \
+                              "filter = FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT, " \
+                              "addressU = TEXTURE_ADDRESS_WRAP, " \
+                              "addressV = TEXTURE_ADDRESS_WRAP, " \
+                              "addressW = TEXTURE_ADDRESS_WRAP, " \
+                              "comparisonFunc = COMPARISON_LESS_EQUAL)"

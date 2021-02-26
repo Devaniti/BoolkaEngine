@@ -13,7 +13,7 @@
 #define BLK_DEBUG_ONLY(...)           (__VA_ARGS__)
 
 // TODO move to platform dependent header
-#define SET_CURRENT_THREAD_NAME(Name) { HRESULT hr = ::SetThreadDescription(::GetCurrentThread(), Name); BLK_ASSERT(SUCCEEDED(hr)); }
+#define BLK_SET_CURRENT_THREAD_NAME(Name) { HRESULT hr = ::SetThreadDescription(::GetCurrentThread(), Name); BLK_ASSERT(SUCCEEDED(hr)); }
 
 #else
 
@@ -21,7 +21,7 @@
 #define BLK_ASSERT(condition)         BLK_NOOP()
 #define BLK_DEBUG_ONLY(...)
 
-#define SET_CURRENT_THREAD_NAME(Name) BLK_NOOP()
+#define BLK_SET_CURRENT_THREAD_NAME(Name) BLK_NOOP()
 
 #endif
 
@@ -38,15 +38,20 @@
 // Only unique in scope of single file
 #define BLK_UNIQUE_NAME(baseName) BLK_CONCAT(baseName, __LINE__)
 
+#define BLK_DECLARE_ENUM_OPERATOR_PLUS(enumType) enumType operator+(enumType a, size_t b);
+#define BLK_DEFINE_ENUM_OPERATOR_PLUS(enumType) enumType operator+(enumType a, size_t b) { return static_cast<enumType>(static_cast<size_t>(a) + b); }
 
-#define IS_PLAIN_DATA(type) (std::is_trivially_default_constructible<type>::value \
+#define BLK_DECLARE_ENUM_OPERATOR_MINUS(enumType) size_t operator-(enumType a, enumType b);
+#define BLK_DEFINE_ENUM_OPERATOR_MINUS(enumType) size_t operator-(enumType a, enumType b) { return static_cast<size_t>(a) - static_cast<size_t>(b); }
+
+#define BLK_IS_PLAIN_DATA(type) (std::is_trivially_default_constructible<type>::value \
                           && std::is_trivially_copy_constructible<type>::value \
                           && std::is_trivially_move_constructible<type>::value \
                           && std::is_trivially_copy_assignable<type>::value \
                           && std::is_trivially_move_assignable<type>::value \
                           && std::is_trivially_destructible<type>::value)
 
-#define BLK_IS_PLAIN_DATA_ASSERT(type) static_assert(IS_PLAIN_DATA(type), BLK_STRINGIFY(type) " is not plain data")
+#define BLK_IS_PLAIN_DATA_ASSERT(type) static_assert(BLK_IS_PLAIN_DATA(type), BLK_STRINGIFY(type) " is not plain data")
 
 #define BLK_IS_POWER_OF_TWO(intValue) ((intValue & (intValue - 1)) == 0)
 #define BLK_CEIL_TO_POWER_OF_TWO(intValue, powerOfTwo) ((intValue + (powerOfTwo - 1)) & (~(powerOfTwo - 1)))
@@ -55,10 +60,12 @@
 #define BLK_INITIALIZE_ARRAY(arr, ...) { for(auto& elem : arr) { bool res = elem.Initialize(__VA_ARGS__); BLK_ASSERT(res); } }
 #define BLK_UNLOAD_ARRAY(arr) { for(auto& elem : arr) elem.Unload(); }
 
-#define FLOAT_PI 3.141592f
+#define BLK_FLOAT_PI 3.141592f
 
-#define DEG_TO_RAD(deg) (deg * FLOAT_PI / 180.0f)
-#define RAD_TO_DEG(rad) (rad * 180.0f / FLOAT_PI)
+#define BLK_DEG_TO_RAD(deg) (deg * BLK_FLOAT_PI / 180.0f)
+#define BLK_RAD_TO_DEG(rad) (rad * 180.0f / BLK_FLOAT_PI)
+
+using uint = unsigned int;
 
 template <typename T1, typename T2>
 T1 checked_narrowing_cast(T2 value)

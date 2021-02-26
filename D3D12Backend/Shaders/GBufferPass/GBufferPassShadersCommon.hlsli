@@ -1,10 +1,6 @@
 #include "../Common.hlsli"
 
 Texture2D<float4> sceneTextures[300] : register(t0, space1);
-SamplerState pointSampler : register(s0);
-SamplerState linearSingleMipSampler : register(s1);
-SamplerState linearSampler : register(s2);
-SamplerState anisoSampler : register(s3);
 
 struct VSIn
 {

@@ -77,6 +77,8 @@ namespace Boolka
         BLK_ASSERT(isSuccessfull);
         m_InvViewProjMatrix = m_ViewProjMatrix.Inverse(isSuccessfull);
         BLK_ASSERT(isSuccessfull);
+
+        m_LightContainer.Update(m_DeltaTime);
     }
 
 }

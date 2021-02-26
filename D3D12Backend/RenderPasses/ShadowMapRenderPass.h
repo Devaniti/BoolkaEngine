@@ -5,19 +5,18 @@
 namespace Boolka
 {
 
-    class DeferredLightingPass :
+    class ShadowMapRenderPass :
         public RenderPass
     {
     public:
-        DeferredLightingPass() = default;
-        ~DeferredLightingPass() = default;
+        ShadowMapRenderPass() = default;
+        ~ShadowMapRenderPass() = default;
 
         bool Initialize(Device& device, RenderContext& renderContext) override;
         void Unload() override;
 
         bool Render(RenderContext& renderContext, ResourceTracker& resourceTracker) override;
         bool PrepareRendering() override;
-
     private:
         GraphicPipelineState m_PSO;
     };

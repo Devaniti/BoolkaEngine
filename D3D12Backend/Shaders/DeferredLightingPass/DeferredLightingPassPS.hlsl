@@ -4,18 +4,19 @@
 Texture2D<float4> albedo : register(t0);
 Texture2D<float4> normal : register(t1);
 Texture2D<float> depth : register(t2);
-SamplerState pointSampler : register(s0);
+TextureCube<float> shadowMapCube[4] : register(t4);
 
 struct Light
 {
-    float4 viewPos;
-    float4 color;
+    float4 viewPos_nearZ;
+    float4 color_farZ;
 };
 
 cbuffer DeferredPass : register(b1)
 {
     Light lights[4];
     uint lightCount;
+    float4x4 viewToShadowMatrix[24];
 };
 
 struct PSOut
@@ -38,42 +39,53 @@ float3 CalculateViewPos(float2 UV, float depthVal)
     return viewPos.xyz / viewPos.w;
 }
 
-float3 CalculateDiffuse(float3 albedoVal, float3 normalVal, float3 viewPos)
+float VectorToDepth(float3 vec, float n, float f)
 {
-    float3 result = 0.0f;
-    
-    [unroll(4)]
-    for (uint i = 0; i < lightCount; ++i)
-    {
-        float3 lightVector = lights[i].viewPos.xyz - viewPos.xyz;
-        float3 lightVectorSqr = lightVector * lightVector;
-        float3 lightDir = normalize(lightVector);
-        float angleMult = saturate(dot(lightDir, normalVal));
-        float distSqr = lightVectorSqr.x + lightVectorSqr.y + lightVectorSqr.z;
-        result += albedoVal * angleMult * lights[i].color.rgb / distSqr;
-    }
-    
-    return result;
+    float3 AbsVec = abs(vec);
+    float LocalZcomp = max(AbsVec.x, max(AbsVec.y, AbsVec.z));
+
+    float NormZComp = (f + n) / (f - n) - (2 * f * n) / (f - n) / LocalZcomp;
+    return (NormZComp + 1.0) * 0.5;
 }
 
-float3 CalculateSpecular(float3 specularVal, float3 normalVal, float3 viewPos)
+float CalculateShadow(uint lightIndex, float3 lightVector)
+{
+    static const float shadowBias = 0.001f;
+    float4 samplePos = mul(float4(-lightVector, 0.0f), invViewMatrix);
+    float comparisonValue = VectorToDepth(samplePos.xyz, lights[lightIndex].viewPos_nearZ.w, lights[lightIndex].color_farZ.w) - shadowBias;
+    return shadowMapCube[lightIndex].SampleCmp(shadowSampler, samplePos.xyz, comparisonValue);
+}
+
+float3 CalculateLight(uint lightIndex, float3 albedoVal, float3 specularVal, float3 normalVal, float3 viewPos)
 {
     float3 result = 0.0f;
+    
+    float3 lightVector = lights[lightIndex].viewPos_nearZ.xyz - viewPos;
+    float3 lightDir = normalize(lightVector);
+    float3 lightVectorSqr = lightVector * lightVector;
+    float distSqr = lightVectorSqr.x + lightVectorSqr.y + lightVectorSqr.z;
+    float farZ = lights[lightIndex].color_farZ.w;
+    // Non physically correct attenuation
+    // This is needed to limit light radius
+    float distanceAttenuation = (1.0f - distSqr / (farZ * farZ)) / distSqr;
+    float NdotL = dot(lightDir, normalVal);
+    if (NdotL <= 0.0f || distanceAttenuation <= 0.0f)
+        return 0.0;
+    
+    float shadowFactor = CalculateShadow(lightIndex, lightVector);
+    if (shadowFactor <= 0.0f)
+        return 0.0;
+    
+    // Diffuse
+    result += albedoVal * NdotL;
     
     float3 viewDir = normalize(viewPos);
     float3 reflectedLightVector = reflect(viewDir, normalVal);
+    float specularRefl = pow(saturate(dot(reflectedLightVector, lightDir)), specExp);
+    // Specular
+    result += specularVal * specularRefl;
     
-    [unroll(4)]
-    for (uint i = 0; i < lightCount; ++i)
-    {
-        float3 lightVector = lights[i].viewPos.xyz - viewPos.xyz;
-        float3 lightVectorSqr = lightVector * lightVector;
-        float3 lightDir = normalize(lightVector);
-        float angleMult = pow(saturate(dot(reflectedLightVector, lightDir)), specExp);
-        float distSqr = lightVectorSqr.x + lightVectorSqr.y + lightVectorSqr.z;
-        result += specularVal * angleMult * lights[i].color.rgb / distSqr;
-    }
-    
+    result *= lights[lightIndex].color_farZ.rgb * shadowFactor * distanceAttenuation;
     return result;
 }
 
@@ -87,7 +99,12 @@ PSOut main(VSOut In)
     float3 normalVal = normal.Load(uint3(vpos, 0)).xyz;
     float depthVal = depth.Load(uint3(vpos, 0));
     float3 viewPos = CalculateViewPos(UV, depthVal);
-    float3 result = CalculateAmbient(albedoVal) + CalculateDiffuse(albedoVal, normalVal, viewPos) + CalculateSpecular(albedoVal, normalVal, viewPos);
+    float3 result = CalculateAmbient(albedoVal);
+    [unroll(4)]
+    for (uint i = 0; i < lightCount; ++i)
+    {
+        result += CalculateLight(i, albedoVal, albedoVal, normalVal, viewPos);
+    }
     Out.light = float4(result, 0.0f);
     return Out;
 }

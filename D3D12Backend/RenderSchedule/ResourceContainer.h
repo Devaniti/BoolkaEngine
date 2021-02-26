@@ -26,7 +26,8 @@ namespace Boolka
             GBufferNormal,
             GbufferDepth,
             LightBuffer,
-            Count
+            ShadowMapCube0,
+            Count = ShadowMapCube0 + BLK_MAX_LIGHT_COUNT
         };
 
         enum class Buf
@@ -40,7 +41,8 @@ namespace Boolka
             GBufferNormal,
             GbufferDepth,
             LightBuffer,
-            Count
+            ShadowMapCube0,
+            Count = ShadowMapCube0 + BLK_MAX_LIGHT_COUNT
         };
 
         enum class RTV
@@ -54,7 +56,8 @@ namespace Boolka
         enum class DSV
         {
             GbufferDepth,
-            Count
+            ShadowMap0,
+            Count = ShadowMap0 + BLK_MAX_LIGHT_COUNT * BLK_TEXCUBE_FACE_COUNT
         };
 
         enum class VBV
@@ -85,13 +88,13 @@ namespace Boolka
         {
             Frame,
             DeferredLighting,
+            ShadowMap,
             Count
         };
 
         enum class FlipCBV
         {
             Frame,
-            DeferredLighting,
             Count
         };
 
@@ -99,6 +102,7 @@ namespace Boolka
         {
             Frame,
             DeferredLighting,
+            ShadowMap,
             Count
         };
 
@@ -106,8 +110,9 @@ namespace Boolka
         {
             FrameConstantBuffer = 0,
             PassConstantBuffer = 1,
-            RenderPassSRV = 2,
-            SceneSRV = 4
+            PassRootConstant = 2,
+            RenderPassSRV = 3,
+            SceneSRV = 5
         };
         
         ResourceContainer() = default;
@@ -158,5 +163,19 @@ namespace Boolka
 
         FlippedResources m_FlippedResources[BLK_IN_FLIGHT_FRAMES];
     };
+
+    BLK_DECLARE_ENUM_OPERATOR_PLUS(ResourceContainer::Tex);
+    BLK_DECLARE_ENUM_OPERATOR_PLUS(ResourceContainer::Buf);
+    BLK_DECLARE_ENUM_OPERATOR_PLUS(ResourceContainer::SRV);
+    BLK_DECLARE_ENUM_OPERATOR_PLUS(ResourceContainer::RTV);
+    BLK_DECLARE_ENUM_OPERATOR_PLUS(ResourceContainer::DSV);
+    BLK_DECLARE_ENUM_OPERATOR_PLUS(ResourceContainer::VBV);
+    BLK_DECLARE_ENUM_OPERATOR_PLUS(ResourceContainer::IBV);
+    BLK_DECLARE_ENUM_OPERATOR_PLUS(ResourceContainer::RootSig);
+    BLK_DECLARE_ENUM_OPERATOR_PLUS(ResourceContainer::DescHeap);
+    BLK_DECLARE_ENUM_OPERATOR_PLUS(ResourceContainer::FlipBuf);
+    BLK_DECLARE_ENUM_OPERATOR_PLUS(ResourceContainer::FlipCBV);
+    BLK_DECLARE_ENUM_OPERATOR_PLUS(ResourceContainer::FlipUploadBuf);
+    BLK_DECLARE_ENUM_OPERATOR_PLUS(ResourceContainer::DefaultRootSigBindPoints);
 
 }

@@ -11,3 +11,5 @@
 #define BLK_GPU_SCOPE(...) ((void)0)
 #define BLK_GPU_MARKER(...) ((void)0)
 #endif
+
+#define BLK_TEXCUBE_FACE_COUNT 6

@@ -21,9 +21,9 @@ namespace Boolka
 
         Frustum(Matrix4x4 viewProj);
 
-        bool CheckPoint(const Vector4& point);
-        bool CheckSphere(const Vector4& center, float radius);
-        TestResult CheckAABB(const AABB& boundingBox);
+        bool CheckPoint(const Vector4& point) const;
+        bool CheckSphere(const Vector4& center, float radius) const;
+        TestResult CheckAABB(const AABB& boundingBox) const;
 
     private:
         // 6 Planes of frustum in next order

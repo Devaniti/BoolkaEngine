@@ -50,7 +50,7 @@ namespace Boolka
         m_planes[5] = m_planes[5].Normalize3();
     }
 
-    bool Frustum::CheckPoint(const Vector4& point)
+    bool Frustum::CheckPoint(const Vector4& point) const
     {
         BLK_ASSERT(point.w() == 1.0f);
 
@@ -65,7 +65,7 @@ namespace Boolka
         return true;
     }
 
-    bool Frustum::CheckSphere(const Vector4& center, float radius)
+    bool Frustum::CheckSphere(const Vector4& center, float radius) const
     {
         BLK_ASSERT(center.w() == 1.0f);
 
@@ -80,7 +80,7 @@ namespace Boolka
         return true;
     }
 
-    Frustum::TestResult Frustum::CheckAABB(const AABB& boundingBox)
+    Frustum::TestResult Frustum::CheckAABB(const AABB& boundingBox) const
     {
         TestResult result = Inside;
 

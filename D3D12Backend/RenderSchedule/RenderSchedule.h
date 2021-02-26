@@ -13,6 +13,7 @@
 #include "RenderPasses/DebugOverlayPass.h"
 #include "RenderPasses/DeferredLightingPass.h"
 #include "RenderPasses/ToneMappingPass.h"
+#include "RenderPasses/ShadowMapRenderPass.h"
 
 namespace Boolka
 {
@@ -53,6 +54,7 @@ namespace Boolka
         ResourceTracker m_ResourceTracker;
         UpdateRenderPass m_UpdatePass;
         ZRenderPass m_ZPass;
+        ShadowMapRenderPass m_ShadowMapPass;
         GBufferRenderPass m_GbufferPass;
         DeferredLightingPass m_DeferredLightingPass;
         TransparentRenderPass m_TransparentPass;

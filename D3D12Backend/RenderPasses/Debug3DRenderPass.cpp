@@ -50,9 +50,9 @@ namespace Boolka
         Buffer& frameConstantBuffer = resourceContainer.GetFlippableBuffer(frameIndex, ResourceContainer::FlipBuf::Frame);
         UploadBuffer& currentUploadBuffer = resourceContainer.GetFlippableUploadBuffer(frameIndex, ResourceContainer::FlipUploadBuf::Frame);
 
-        static const float rotationSpeed = FLOAT_PI / 8.0f;
+        static const float rotationSpeed = BLK_FLOAT_PI / 8.0f;
         m_CurrentAngle += deltaTime * rotationSpeed;
-        m_CurrentAngle = fmod(m_CurrentAngle, 2.0f * FLOAT_PI);
+        m_CurrentAngle = fmod(m_CurrentAngle, 2.0f * BLK_FLOAT_PI);
 
         Matrix4x4 view = 
         {
@@ -184,7 +184,7 @@ namespace Boolka
             Matrix4x4::GetTranslation( 0.0f,  2.0f, 0.0f),
             Matrix4x4::GetTranslation(-2.0f,  0.0f, 0.0f),
             Matrix4x4::GetTranslation( 0.0f, -2.0f, 0.0f),
-            Matrix4x4::GetTranslation(0.0f, 0.0f, 2.0f) * Matrix4x4::GetScale(0.5f) * Matrix4x4::GetRotationZ(FLOAT_PI / 2.0f)
+            Matrix4x4::GetTranslation(0.0f, 0.0f, 2.0f) * Matrix4x4::GetScale(0.5f) * Matrix4x4::GetRotationZ(BLK_FLOAT_PI / 2.0f)
         };
 
         static const UINT64 instanceSize = sizeof(Matrix4x4);

@@ -50,9 +50,9 @@ namespace Boolka
         Buffer& frameConstantBuffer = resourceContainer.GetFlippableBuffer(frameIndex, ResourceContainer::FlipBuf::Frame);
         UploadBuffer& currentUploadBuffer = resourceContainer.GetFlippableUploadBuffer(frameIndex, ResourceContainer::FlipUploadBuf::Frame);
 
-        static const float rotationSpeed = FLOAT_PI / 2.0f;
+        static const float rotationSpeed = BLK_FLOAT_PI / 2.0f;
         m_CurrentAngle += deltaTime * rotationSpeed;
-        m_CurrentAngle = fmod(m_CurrentAngle, 2.0f * FLOAT_PI);
+        m_CurrentAngle = fmod(m_CurrentAngle, 2.0f * BLK_FLOAT_PI);
 
         float* upload = static_cast<float*>(currentUploadBuffer.Map());
         upload[0] = aspectRatioCompensation * cos(m_CurrentAngle);

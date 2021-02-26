@@ -38,7 +38,6 @@ namespace Boolka
         UINT GetObjectCount() const { return m_ObjectCount; };
         UINT GetOpaqueObjectCount() const { return m_OpaqueObjectCount; };
         DescriptorHeap& GetSRVDescriptorHeap() { return m_SRVDescriptorHeap; };
-        CullingManager& GetCullingManager() { return m_CullingManager; };
         BatchManager& GetBatchManager() { return m_BatchManager; };
         std::vector<SceneData::ObjectHeader>& GetObjects() { return m_Objects; };
 
@@ -56,7 +55,6 @@ namespace Boolka
         CommandSignature m_CommandSignature;
         DescriptorHeap m_SRVDescriptorHeap;
         ResourceHeap m_ResourceHeap;
-        CullingManager m_CullingManager;
         BatchManager m_BatchManager;
         std::vector<Texture2D> m_Textures;
         std::vector<ShaderResourceView> m_SRVs;

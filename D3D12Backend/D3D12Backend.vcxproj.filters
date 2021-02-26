@@ -79,6 +79,9 @@
     <Filter Include="Shaders\GBufferPass">
       <UniqueIdentifier>{3475a855-5eae-4f85-9885-54bf4a64b6a2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\ShadowMapPass">
+      <UniqueIdentifier>{5850310d-ac0a-4356-9054-7f4d0097560f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WindowManagement\WindowManager.h">
@@ -291,6 +294,12 @@
     <ClInclude Include="RenderPasses\ToneMappingPass.h">
       <Filter>RenderPasses</Filter>
     </ClInclude>
+    <ClInclude Include="Containers\LightContainer.h">
+      <Filter>Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderPasses\ShadowMapRenderPass.h">
+      <Filter>RenderPasses</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WindowManagement\WindowManager.cpp">
@@ -500,6 +509,12 @@
     <ClCompile Include="RenderPasses\ToneMappingPass.cpp">
       <Filter>RenderPasses</Filter>
     </ClCompile>
+    <ClCompile Include="RenderPasses\ShadowMapRenderPass.cpp">
+      <Filter>RenderPasses</Filter>
+    </ClCompile>
+    <ClCompile Include="Containers\LightContainer.cpp">
+      <Filter>Containers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\RootSig.hlsl">
@@ -541,6 +556,9 @@
     <FxCompile Include="Shaders\ToneMappingPass\ToneMappingPassPS.hlsl">
       <Filter>Shaders\ToneMappingPass</Filter>
     </FxCompile>
+    <FxCompile Include="Shaders\ShadowMapPass\ShadowMapVertexShader.hlsl">
+      <Filter>Shaders\ShadowMapPass</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\DebugPass\DebugPassShadersCommon.hlsli">
@@ -567,6 +585,9 @@
     </None>
     <None Include="Shaders\Color.hlsli">
       <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\ShadowMapPass\ShadowMapShadersCommon.hlsli">
+      <Filter>Shaders\ShadowMapPass</Filter>
     </None>
   </ItemGroup>
 </Project>

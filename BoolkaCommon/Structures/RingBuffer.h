@@ -22,19 +22,19 @@ namespace Boolka
     };
 
     template <typename T, size_t size>
-    Boolka::RingBuffer<T, size>::RingBuffer()
+    RingBuffer<T, size>::RingBuffer()
         : m_Data{}
         , m_Current(m_Data)
     {
     }
 
     template <typename T, size_t size>
-    Boolka::RingBuffer<T, size>::~RingBuffer()
+    RingBuffer<T, size>::~RingBuffer()
     {
     }
 
     template <typename T, size_t size>
-    void Boolka::RingBuffer<T, size>::Flip()
+    void RingBuffer<T, size>::Flip()
     {
         ++m_Current;
         if (m_Current == end())

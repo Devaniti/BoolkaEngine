@@ -2,7 +2,6 @@
 #include "../Color.hlsli"
 
 Texture2D<float4> lightBuffer : register(t3);
-SamplerState pointSampler : register(s0);
 
 struct PSOut
 {
@@ -48,8 +47,8 @@ PSOut main(VSOut In)
 {
     PSOut Out = (PSOut) 0;
     
-    float2 UV = In.texcoord;
-    float4 light = lightBuffer.Sample(pointSampler, UV);
+    uint2 vpos = uint2(In.position.xy);
+    float4 light = lightBuffer.Load(uint3(vpos, 0));
     Out.color = float4(Tonemap(light.rgb), 0.0f);
     return Out;
 }

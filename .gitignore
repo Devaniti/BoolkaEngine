@@ -6,6 +6,9 @@
 # User-specific files
 Scenes/
 
+# NuGet packages
+packages/
+
 *.rsuser
 *.suo
 *.user

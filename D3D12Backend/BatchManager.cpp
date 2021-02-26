@@ -3,9 +3,13 @@
 #include "Containers/Scene.h"
 #include "APIWrappers/CommandList/CommandList.h"
 #include "Contexts/RenderFrameContext.h"
+#include "BoolkaCommon/Structures/Frustum.h"
 
 namespace Boolka
 {
+
+    BLK_DEFINE_ENUM_OPERATOR_PLUS(BatchManager::BatchType);
+    BLK_DEFINE_ENUM_OPERATOR_MINUS(BatchManager::BatchType);
 
     BatchManager::~BatchManager()
     {
@@ -19,8 +23,12 @@ namespace Boolka
 
     bool BatchManager::Initialize(const Scene& scene)
     {
-        m_batches[static_cast<size_t>(BatchType::Opaque)].reserve(scene.GetOpaqueObjectCount());
-        m_batches[static_cast<size_t>(BatchType::Transparent)].reserve(scene.GetObjectCount() - scene.GetOpaqueObjectCount());
+        GetBatch(BatchType::Opaque).reserve(scene.GetOpaqueObjectCount());
+        GetBatch(BatchType::Transparent).reserve(scene.GetObjectCount() - scene.GetOpaqueObjectCount());
+        for (size_t i = 0; i < BLK_MAX_LIGHT_COUNT * BLK_TEXCUBE_FACE_COUNT; ++i)
+        {
+            GetBatch(BatchType::ShadowMap0 + i).reserve(32);
+        }
         return true;
     }
 
@@ -34,30 +42,49 @@ namespace Boolka
 
     bool BatchManager::PrepareBatches(RenderFrameContext& frameContext, Scene& scene)
     {
-        auto& cullingManager = scene.GetCullingManager();
         const auto& objects = scene.GetObjects();
-
-        cullingManager.Cull(frameContext, scene);
-
-        const auto& visibility = cullingManager.GetVisibility();
+        const auto& lightContainer = frameContext.GetLightContainer();
 
         for (BatchType batchType = BatchType::Opaque; batchType < BatchType::Count; batchType = static_cast<BatchType>(static_cast<int>(batchType) + 1))
         {
             UINT startIndex, endIndex;
             switch (batchType)
             {
-            case Boolka::BatchManager::BatchType::Opaque:
-                startIndex = 0;
-                endIndex = scene.GetOpaqueObjectCount();
-                break;
             case Boolka::BatchManager::BatchType::Transparent:
                 startIndex = scene.GetOpaqueObjectCount();
                 endIndex = scene.GetObjectCount();
                 break;
             default:
-                BLK_ASSERT(0);
+                startIndex = 0;
+                endIndex = scene.GetOpaqueObjectCount();
                 break;
             }
+
+            Vector3 cameraCoord;
+
+            Matrix4x4 viewProjMatrix;
+            switch (batchType)
+            {
+            case BatchType::Opaque:
+            case BatchType::Transparent:
+                viewProjMatrix = frameContext.GetViewProjMatrix();
+                cameraCoord = frameContext.GetCameraPos();
+                break;
+            default:
+            {
+                size_t shadowMapIndex = batchType - BatchType::ShadowMap0;
+                size_t lightIndex = shadowMapIndex / BLK_TEXCUBE_FACE_COUNT;
+                size_t faceIndex = shadowMapIndex % BLK_TEXCUBE_FACE_COUNT;
+                if (lightIndex >= lightContainer.GetLights().size())
+                    continue;
+                cameraCoord = lightContainer.GetLights()[lightIndex].worldPos;
+                viewProjMatrix = lightContainer.GetViewProjMatrices()[lightIndex][faceIndex];
+            }
+                break;
+
+            }
+
+            Frustum calculatedFrustum(viewProjMatrix);
 
             // used to sort objects by distance
             struct tempObject
@@ -73,11 +100,10 @@ namespace Boolka
 
             for (UINT i = startIndex; i < endIndex; ++i)
             {
-                if (visibility[i])
+                const auto& objectAABB = objects[i].boundingBox;
+                if (calculatedFrustum.CheckAABB(objectAABB))
                 {
-                    const auto& objectAABB = objects[i].boundingBox;
                     Vector3 objectCoord = (objectAABB.GetMin() + objectAABB.GetMax()) / 2.0f;
-                    Vector3 cameraCoord = frameContext.GetCameraPos();
                     float distance = (objectCoord - cameraCoord).LengthSlow();
                     tempObjects.push_back({ i, distance });
                 }
@@ -95,14 +121,11 @@ namespace Boolka
 
             switch (batchType)
             {
-            case BatchType::Opaque:
-                std::sort(tempObjects.begin(), tempObjects.end(), frontToBackPredicate);
-                break;
             case BatchType::Transparent:
                 std::sort(tempObjects.begin(), tempObjects.end(), backToFrontPredicate);
                 break;
             default:
-                BLK_ASSERT(0);
+                std::sort(tempObjects.begin(), tempObjects.end(), frontToBackPredicate);
                 break;
             }
 

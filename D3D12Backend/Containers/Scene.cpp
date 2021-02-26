@@ -100,7 +100,7 @@ namespace Boolka
             BLK_ASSERT(mipCount == currentMip);
             size_t alignment;
             size_t size;
-            Texture2D::GetRequiredSize(device, textureHeader.width, textureHeader.height, mipCount, DXGI_FORMAT_B8G8R8A8_UNORM, D3D12_RESOURCE_FLAG_NONE, alignment, size);
+            Texture2D::GetRequiredSize(alignment, size, device, textureHeader.width, textureHeader.height, mipCount, DXGI_FORMAT_B8G8R8A8_UNORM, D3D12_RESOURCE_FLAG_NONE);
 
             lastOffset = BLK_CEIL_TO_POWER_OF_TWO(lastOffset, alignment);
             textureOffsets.push_back(lastOffset);
@@ -192,7 +192,6 @@ namespace Boolka
         memcpy(m_Objects.data(), dataWrapper.objectData, dataWrapper.objectCount * sizeof(SceneData::ObjectHeader));
         m_OpaqueObjectCount = dataWrapper.opaqueCount;
 
-        m_CullingManager.Initialize(*this);
         m_BatchManager.Initialize(*this);
 
         return true;
@@ -234,7 +233,6 @@ namespace Boolka
         m_ObjectCount = 0;
         m_OpaqueObjectCount = 0;
         m_Objects.clear();
-        m_CullingManager.Unload();
         m_BatchManager.Unload();
     }
 

@@ -56,7 +56,7 @@ namespace Boolka
     void Camera::UpdateInput(float deltaTime, const Vector3& right, const Vector3& up, const Vector3& forward)
     {
         static const float defaultMoveSpeed = 15.0f;
-        static const float defaultRotationSpeed = DEG_TO_RAD(60.0f);
+        static const float defaultRotationSpeed = BLK_DEG_TO_RAD(60.0f);
 
         float speedMult = 1.0f;
         float angleSpeedMult = 1.0f;
@@ -82,7 +82,7 @@ namespace Boolka
         if (rotationYawChange != 0)
         {
             m_RotationYaw += rotationDelta * rotationYawChange;
-            m_RotationYaw = fmod(m_RotationYaw, 2 * FLOAT_PI);
+            m_RotationYaw = fmod(m_RotationYaw, 2 * BLK_FLOAT_PI);
         }
 
         bool upPressed = static_cast<bool>(::GetAsyncKeyState(VK_UP));
@@ -91,7 +91,7 @@ namespace Boolka
         if (rotationPitchChange != 0)
         {
             m_RotationPitch += rotationDelta * rotationPitchChange;
-            m_RotationPitch = std::clamp(m_RotationPitch, -FLOAT_PI / 2.0f, FLOAT_PI / 2.0f);
+            m_RotationPitch = std::clamp(m_RotationPitch, -BLK_FLOAT_PI / 2.0f, BLK_FLOAT_PI / 2.0f);
         }
 
         bool DPressed = static_cast<bool>(::GetAsyncKeyState('D'));
@@ -116,28 +116,8 @@ namespace Boolka
         float nearZ = 0.2f;
         float farZ = 1000.0f;
 
-        // Perspective projection
-        float fovY = DEG_TO_RAD(30.0f);
-
-        float h = 1.0f / tan(fovY * 0.5f);
-        float w = h / aspectRatio;
-        float a = farZ / (farZ - nearZ);
-        float b = (-nearZ * farZ) / (farZ - nearZ);
-
-        outProjMatrix =
-        {
-            w, 0, 0, 0,
-            0, h, 0, 0,
-            0, 0, a, 1,
-            0, 0, b, 0,
-        };
-
-        outViewMatrix = Matrix4x4::GetView(
-            right,
-            up,
-            forward,
-            m_CameraPos
-        );
+        outProjMatrix = Matrix4x4::CalculateProj(nearZ, farZ, aspectRatio, BLK_DEG_TO_RAD(30.0f));
+        outViewMatrix = Matrix4x4::CalculateView(right, up, forward, m_CameraPos);
     }
 
 }

@@ -320,7 +320,7 @@ namespace Boolka
         };
     }
 
-    Matrix4x4 Matrix4x4::GetView(const Vector3& right, const Vector3& up, const Vector3& forward, const Vector3& position)
+    Matrix4x4 Matrix4x4::CalculateView(const Vector3& right, const Vector3& up, const Vector3& forward, const Vector3& position)
     {
         const Vector3 negativePos = -position;
 
@@ -333,6 +333,61 @@ namespace Boolka
         };
 
         return view;
+    }
+
+    Matrix4x4 Matrix4x4::CalculateCubeMapView(size_t cubeMapFace, const Vector3& position)
+    {
+        BLK_ASSERT(cubeMapFace < 6);
+
+        static const Vector3 right[6] =
+        {
+            {0.0f, 0.0f, -1.0f},
+            {0.0f, 0.0f, 1.0f},
+            {1.0f, 0.0f, 0.0f},
+            {1.0f, 0.0f, 0.0f},
+            {1.0f, 0.0f, 0.0f},
+            {-1.0f, 0.0f, 0.0f},
+        };
+
+        static const Vector3 up[6] =
+        {
+            {0.0f, 1.0f, 0.0f},
+            {0.0f, 1.0f, 0.0f},
+            {0.0f, 0.0f, -1.0f},
+            {0.0f, 0.0f, 1.0f},
+            {0.0f, 1.0f, 0.0f},
+            {0.0f, 1.0f, 0.0f},
+        };
+
+        static const Vector3 forward[6] =
+        {
+            {1.0f, 0.0f, 0.0f},
+            {-1.0f, 0.0f, 0.0f},
+            {0.0f, 1.0f, 0.0f},
+            {0.0f, -1.0f, 0.0f},
+            {0.0f, 0.0f, 1.0f},
+            {0.0f, 0.0f, -1.0f},
+        };
+
+        return CalculateView(right[cubeMapFace], up[cubeMapFace], forward[cubeMapFace], position);
+    }
+
+    Matrix4x4 Matrix4x4::CalculateProj(float nearZ, float farZ, float aspectRatio, float fovY)
+    {
+        float h = 1.0f / tan(fovY * 0.5f);
+        float w = h / aspectRatio;
+        float a = farZ / (farZ - nearZ);
+        float b = (-nearZ * farZ) / (farZ - nearZ);
+
+        Matrix4x4 projMatrix =
+        {
+            w, 0, 0, 0,
+            0, h, 0, 0,
+            0, 0, a, 1,
+            0, 0, b, 0,
+        };
+
+        return projMatrix;
     }
 
     Vector4 operator*(const Vector4& first, const Matrix4x4& second)

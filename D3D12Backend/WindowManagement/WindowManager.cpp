@@ -151,7 +151,7 @@ namespace Boolka
 
     void WindowManager::InitializeThread()
     {
-        SET_CURRENT_THREAD_NAME(L"Window Thread");
+        BLK_SET_CURRENT_THREAD_NAME(L"Window Thread");
         ::SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
     }
 

@@ -70,6 +70,7 @@ namespace Boolka
         commandList->CopyResource(frameConstantBuffer.Get(), currentUploadBuffer.Get());
 
         ResourceTransition::Transition(frameConstantBuffer, commandList, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+
         return true;
     }
 

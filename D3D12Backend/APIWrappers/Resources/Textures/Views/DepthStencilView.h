@@ -11,7 +11,7 @@ namespace Boolka
         DepthStencilView();
         ~DepthStencilView();
 
-        bool Initialize(Device& device, Texture2D& texture, DXGI_FORMAT format, D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor);
+        bool Initialize(Device& device, Texture2D& texture, DXGI_FORMAT format, D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor, UINT16 arraySlice = 0);
         void Unload();
 
         D3D12_CPU_DESCRIPTOR_HANDLE* GetCPUDescriptor() { BLK_ASSERT(m_CPUDescriptorHandle.ptr != 0); return &m_CPUDescriptorHandle; };

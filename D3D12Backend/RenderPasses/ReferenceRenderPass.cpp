@@ -5,6 +5,7 @@
 #include "Contexts/RenderFrameContext.h"
 #include "Contexts/RenderThreadContext.h"
 #include "RenderSchedule/ResourceContainer.h"
+#include "RenderSchedule/ResourceTracker.h"
 #include "APIWrappers/Resources/Textures/Texture2D.h"
 #include "APIWrappers/Resources/Textures/Views/RenderTargetView.h"
 #include "APIWrappers/Resources/Textures/Views/DepthStencilView.h"
@@ -25,6 +26,7 @@ namespace Boolka
         GraphicCommandListImpl& commandList = threadContext.GetGraphicCommandList();
 
         BLK_GPU_SCOPE(commandList.Get(), "ReferenceRenderPass");
+        BLK_RENDER_DEBUG_ONLY(resourceTracker.ValidateStates(commandList));
 
         return true;
     }

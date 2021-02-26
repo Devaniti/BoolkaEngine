@@ -16,13 +16,15 @@ namespace Boolka
         BLK_ASSERT(m_CPUDescriptorHandle.ptr == 0);
     }
 
-    bool DepthStencilView::Initialize(Device& device, Texture2D& texture, DXGI_FORMAT format, D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor)
+    bool DepthStencilView::Initialize(Device& device, Texture2D& texture, DXGI_FORMAT format, D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor, UINT16 arraySlice /*= 0*/)
     {
         BLK_ASSERT(m_CPUDescriptorHandle.ptr == 0);
         
         D3D12_DEPTH_STENCIL_VIEW_DESC desc = {};
-        desc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+        desc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DARRAY;
         desc.Format = format;
+        desc.Texture2DArray.ArraySize = 1;
+        desc.Texture2DArray.FirstArraySlice = arraySlice;
 
         device->CreateDepthStencilView(texture.Get(), &desc, destDescriptor);
         m_CPUDescriptorHandle = destDescriptor;

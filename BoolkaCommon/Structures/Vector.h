@@ -49,7 +49,7 @@ namespace Boolka
             InitializeTemplateList<0>(first, args...);
         }
         template<typename... Args>
-        Vector(float first, Args... args)
+        Vector(elementType first, Args... args)
             : m_data{}
         {
             InitializeTemplateList<0>(first, args...);
@@ -130,7 +130,7 @@ namespace Boolka
             InitializeTemplateList<currentIndex + firstComponentCount>(args...);
         }
         template<size_t currentIndex, typename... Args>
-        void InitializeTemplateList(float first, Args... args)
+        void InitializeTemplateList(elementType first, Args... args)
         {
             static_assert(currentIndex + 1 <= componentCount);
             m_data[currentIndex] = first;
@@ -193,14 +193,14 @@ namespace Boolka
     }
 
     template<size_t componentCount, typename elementType>
-    elementType Boolka::Vector<componentCount, elementType>::Length3Slow() const
+    elementType Vector<componentCount, elementType>::Length3Slow() const
     {
         static_assert(componentCount >= 3);
         return ::sqrt(LengthSqr3());
     }
 
     template<size_t componentCount, typename elementType>
-    elementType Boolka::Vector<componentCount, elementType>::LengthSqr3() const
+    elementType Vector<componentCount, elementType>::LengthSqr3() const
     {
         static_assert(componentCount >= 3);
         elementType result = 0;
@@ -213,7 +213,7 @@ namespace Boolka
     }
 
     template<size_t componentCount, typename elementType>
-    Vector<componentCount, elementType> Boolka::Vector<componentCount, elementType>::Normalize3() const
+    Vector<componentCount, elementType> Vector<componentCount, elementType>::Normalize3() const
     {
         static_assert(componentCount >= 3);
         return (*this) / Length3Slow();
@@ -245,7 +245,7 @@ namespace Boolka
     template<size_t componentCount, typename elementType>
     Vector<componentCount, elementType>& Vector<componentCount, elementType>::operator/=(elementType other)
     {
-        for (float& element : m_data)
+        for (elementType& element : m_data)
         {
             element /= other;
         }
@@ -378,5 +378,9 @@ namespace Boolka
     using Vector2 = Vector<2>;
     using Vector3 = Vector<3>;
     using Vector4 = Vector<4>;
+
+    using Vector2u = Vector<2, uint>;
+    using Vector3u = Vector<3, uint>;
+    using Vector4u = Vector<4, uint>;
 
 }

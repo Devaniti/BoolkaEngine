@@ -2,6 +2,7 @@
 
 #include "APIWrappers/CommandAllocator/GraphicCommandAllocator.h"
 #include "Contexts/FrameStats.h"
+#include "Containers/LightContainer.h"
 
 namespace Boolka
 {
@@ -17,6 +18,8 @@ namespace Boolka
 
         bool Initialize(Device& device);
         void Unload();
+
+        LightContainer& GetLightContainer() { return m_LightContainer; }
 
         float GetDeltaTime() const { return m_DeltaTime; };
         UINT GetFrameIndex() const { return m_FrameIndex; };
@@ -44,6 +47,7 @@ namespace Boolka
 
         void FlipFrame(RenderEngineContext& engineContext, UINT frameIndex);
     private:
+        LightContainer m_LightContainer;
         Matrix4x4 m_ViewMatrix;
         Matrix4x4 m_ProjMatrix;
         Matrix4x4 m_ViewProjMatrix;

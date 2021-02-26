@@ -19,14 +19,14 @@ namespace Boolka
 {
     struct Light
     {
-        Vector4 viewPos;
-        Vector4 color;
+        Vector4 viewPos_nearZ;
+        Vector4 color_farZ;
     };
 
     struct DeferredPass
     {
-        Light lights[4];
-        unsigned int lightCount;
+        Light lights[BLK_MAX_LIGHT_COUNT];
+        Vector4u lightCount;
     };
 
     bool DeferredLightingPass::Render(RenderContext& renderContext, ResourceTracker& resourceTracker)
@@ -53,28 +53,17 @@ namespace Boolka
         // Temp lights position
         resourceTracker.Transition(passConstantBuffer, commandList, D3D12_RESOURCE_STATE_COPY_DEST);
 
-        m_CurrentRotation += frameContext.GetDeltaTime();
         DeferredPass uploadData{};
+        auto& lights = frameContext.GetLightContainer().GetLights();
 
-        Vector3 center = { 14.0f, 6.5f, 2.0f };
-        float distance = 6.0f;
-        Vector4 colors[] =
+        for (size_t i = 0; i < lights.size(); ++i)
         {
-            {4.0f, 0.0f, 0.0f, 0.0f},
-            {0.0f, 4.0f, 0.0f, 0.0f},
-            {0.0f, 0.0f, 4.0f, 0.0f},
-            {4.0f, 4.0f, 4.0f, 0.0f}
-        };
-
-        uploadData.lightCount = 4;
-        for (size_t i = 0; i < 4; ++i)
-        {
-            float rotation = m_CurrentRotation + FLOAT_PI / 2.0f * i;
-            Vector3 fromCenter = { distance * sin(rotation), distance * cos(rotation), 0.0f };
-            Vector4 worldPos = Vector4(center + fromCenter, 1.0f);
-            uploadData.lights[i].viewPos = worldPos * frameContext.GetViewMatrix();
-            uploadData.lights[i].color = colors[i];
+            Vector3 viewPos = Vector4(lights[i].worldPos, 1.0f) * frameContext.GetViewMatrix();
+            uploadData.lights[i].viewPos_nearZ = Vector4(viewPos, lights[i].nearZ);
+            uploadData.lights[i].color_farZ = Vector4(lights[i].color, lights[i].farZ);
         }
+
+        uploadData.lightCount = Vector4u(static_cast<uint>(lights.size()), 0, 0, 0);
 
         passUploadBuffer.Upload(&uploadData, sizeof(DeferredPass));
         commandList->CopyResource(passConstantBuffer.Get(), passUploadBuffer.Get());
@@ -85,6 +74,12 @@ namespace Boolka
         resourceTracker.Transition(normal, commandList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
         resourceTracker.Transition(depth, commandList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
         resourceTracker.Transition(lightBuffer, commandList, D3D12_RESOURCE_STATE_RENDER_TARGET);
+
+        for (size_t lightIndex = 0; lightIndex < lights.size(); ++lightIndex)
+        {
+            auto& shadowMap = resourceContainer.GetTexture(ResourceContainer::Tex::ShadowMapCube0 + lightIndex);
+            resourceTracker.Transition(shadowMap, commandList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+        }
 
         commandList->OMSetRenderTargets(1, lightBufferRTV.GetCPUDescriptor(), FALSE, nullptr);
         ID3D12DescriptorHeap* descriptorHeaps[] = { mainDescriptorHeap.Get() };
@@ -142,15 +137,12 @@ namespace Boolka
 
         inputLayout.Unload();
 
-        m_CurrentRotation = 0.0f;
-
         return true;
     }
 
     void DeferredLightingPass::Unload()
     {
         m_PSO.Unload();
-        m_CurrentRotation = 0.0f;
     }
 
 }
