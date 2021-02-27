@@ -90,13 +90,13 @@ namespace Boolka
 
         elementType Dot(const thisType& other) const;
         thisType Cross(const thisType& other) const;
+
         elementType LengthSlow() const;
         elementType LengthSqr() const;
-
         thisType Normalize() const;
 
         elementType Length3Slow() const;
-        elementType LengthSqr3() const;
+        elementType Length3Sqr() const;
         thisType Normalize3() const;
 
         thisType operator-() const;
@@ -196,11 +196,11 @@ namespace Boolka
     elementType Vector<componentCount, elementType>::Length3Slow() const
     {
         static_assert(componentCount >= 3);
-        return ::sqrt(LengthSqr3());
+        return ::sqrt(Length3Sqr());
     }
 
     template<size_t componentCount, typename elementType>
-    elementType Vector<componentCount, elementType>::LengthSqr3() const
+    elementType Vector<componentCount, elementType>::Length3Sqr() const
     {
         static_assert(componentCount >= 3);
         elementType result = 0;
