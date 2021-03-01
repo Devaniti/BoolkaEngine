@@ -93,6 +93,8 @@ inline void memcpy_strided(void* dst, size_t dstStride, const void* src, size_t 
 }
 
 // TODO move to platform specific header
+#define BLK_WINDOWS_DEFAULT_SCREEN_DPI 96
+
 inline LARGE_INTEGER operator-(LARGE_INTEGER a, LARGE_INTEGER b)
 {
     LARGE_INTEGER res;

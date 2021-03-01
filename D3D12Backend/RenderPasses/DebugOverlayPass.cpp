@@ -25,6 +25,15 @@ namespace Boolka
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImGui::StyleColorsDark();
+
+        // DPI Scaling
+        UINT dpi = ::GetDpiForWindow(renderContext.GetRenderEngineContext().GetHWND());
+        float scaleFactor = static_cast<float>(dpi) / BLK_WINDOWS_DEFAULT_SCREEN_DPI;
+        ImGui::GetStyle().ScaleAllSizes(scaleFactor);
+        ImFontConfig fontConfig{};
+        fontConfig.SizePixels = 13.0f * scaleFactor;
+        ImGui::GetIO().Fonts->AddFontDefault(&fontConfig);
+
         ImGui_ImplWin32_Init(renderContext.GetRenderEngineContext().GetHWND());
         ImGui_ImplDX12_Init(device.Get(), BLK_IN_FLIGHT_FRAMES,
             DXGI_FORMAT_R8G8B8A8_UNORM, m_ImguiDescriptorHeap.Get(),
@@ -85,14 +94,17 @@ namespace Boolka
 
     void DebugOverlayPass::ImguiUIManagement(const RenderContext& renderContext)
     {
+        auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
+
         ImGui::Begin("Stats");
-        const auto& debugStats = renderContext.GetRenderFrameContext().GetFrameStats();
+        const auto& debugStats = frameContext.GetFrameStats();
         const float fps = 1.0f / debugStats.frameTime;
-        const auto& cameraPos = renderContext.GetRenderFrameContext().GetCameraPos();
-        const auto& viewMatrix = renderContext.GetRenderFrameContext().GetViewMatrix();
+        const auto& cameraPos = frameContext.GetCameraPos();
+        const auto& viewMatrix = frameContext.GetViewMatrix();
         const Vector3 viewDir{ viewMatrix[0][2], viewMatrix[1][2], viewMatrix[2][2] };
         ImGui::Text("%.1f FPS", fps);
         ImGui::Text("%.2f ms", debugStats.frameTime * 1000.0f);
+        ImGui::Text("Resolution: %dx%d", engineContext.GetBackbufferWidth(), engineContext.GetBackbufferHeight());
         if (ImGui::CollapsingHeader("Culling"))
         {
             ImGui::Text("%llu inside frustum", debugStats.insideFrustum);

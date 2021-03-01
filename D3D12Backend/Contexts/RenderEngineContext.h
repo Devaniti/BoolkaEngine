@@ -45,7 +45,7 @@ namespace Boolka
 
         Camera& GetCamera() { return m_Camera; };
 
-        HWND GetHWND() { return m_HWND; };
+        HWND GetHWND() const { return m_HWND; };
 
 #ifdef BLK_RENDER_DEBUG
         Device& GetDevice() { BLK_ASSERT(m_Device); return *m_Device; };

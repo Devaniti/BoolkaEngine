@@ -6,4 +6,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="Application.manifest" />
+  </ItemGroup>
 </Project>
