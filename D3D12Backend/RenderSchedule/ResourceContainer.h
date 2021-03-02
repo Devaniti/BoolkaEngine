@@ -27,7 +27,8 @@ namespace Boolka
             GbufferDepth,
             LightBuffer,
             ShadowMapCube0,
-            Count = ShadowMapCube0 + BLK_MAX_LIGHT_COUNT
+            ShadowMapSun = ShadowMapCube0 + BLK_MAX_LIGHT_COUNT,
+            Count
         };
 
         enum class Buf
@@ -42,7 +43,8 @@ namespace Boolka
             GbufferDepth,
             LightBuffer,
             ShadowMapCube0,
-            Count = ShadowMapCube0 + BLK_MAX_LIGHT_COUNT
+            ShadowMapSun = ShadowMapCube0 + BLK_MAX_LIGHT_COUNT,
+            Count
         };
 
         enum class RTV
@@ -56,8 +58,9 @@ namespace Boolka
         enum class DSV
         {
             GbufferDepth,
-            ShadowMap0,
-            Count = ShadowMap0 + BLK_MAX_LIGHT_COUNT * BLK_TEXCUBE_FACE_COUNT
+            ShadowMapLight0,
+            ShadowMapSun = ShadowMapLight0 + BLK_MAX_LIGHT_COUNT * BLK_TEXCUBE_FACE_COUNT,
+            Count
         };
 
         enum class VBV

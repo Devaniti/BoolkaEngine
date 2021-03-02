@@ -5,7 +5,7 @@
                 "CBV(b0), " \
                 "CBV(b1), " \
                 "RootConstants(num32BitConstants=1, b2), " \
-                "DescriptorTable(SRV(t0, space=0, numDescriptors = 8, flags = DATA_VOLATILE), visibility = SHADER_VISIBILITY_PIXEL ), " \
+                "DescriptorTable(SRV(t0, space=0, numDescriptors = 9, flags = DATA_VOLATILE), visibility = SHADER_VISIBILITY_PIXEL ), " \
                 "DescriptorTable(CBV(b0, space=1, numDescriptors = 4), visibility = SHADER_VISIBILITY_PIXEL ), " \
                 "DescriptorTable(SRV(t0, space=1, numDescriptors = unbounded, flags = DATA_STATIC), visibility = SHADER_VISIBILITY_PIXEL ), " \
                 "DescriptorTable(UAV(u0, space=1, numDescriptors = 4), visibility = SHADER_VISIBILITY_PIXEL ), " \

@@ -23,10 +23,18 @@ namespace Boolka
         Vector4 color_farZ;
     };
 
+    struct Sun
+    {
+        Vector4 lightDirVS;
+        Vector4 color;
+        Matrix4x4 viewToShadow;
+    };
+
     struct DeferredPass
     {
         Light lights[BLK_MAX_LIGHT_COUNT];
         Vector4u lightCount;
+        Sun sun;
     };
 
     bool DeferredLightingPass::Render(RenderContext& renderContext, ResourceTracker& resourceTracker)
@@ -54,7 +62,8 @@ namespace Boolka
         resourceTracker.Transition(passConstantBuffer, commandList, D3D12_RESOURCE_STATE_COPY_DEST);
 
         DeferredPass uploadData{};
-        auto& lights = frameContext.GetLightContainer().GetLights();
+        auto& lightContainer = frameContext.GetLightContainer();
+        auto& lights = lightContainer.GetLights();
 
         for (size_t i = 0; i < lights.size(); ++i)
         {
@@ -62,6 +71,11 @@ namespace Boolka
             uploadData.lights[i].viewPos_nearZ = Vector4(viewPos, lights[i].nearZ);
             uploadData.lights[i].color_farZ = Vector4(lights[i].color, lights[i].farZ);
         }
+
+        auto& sun = lightContainer.GetSun();
+        uploadData.sun.lightDirVS = -(sun.lightDir * frameContext.GetViewMatrix());
+        uploadData.sun.color = sun.color;
+        uploadData.sun.viewToShadow = (frameContext.GetInvViewMatrix() * lightContainer.GetSunView() * lightContainer.GetSunProj() * Matrix4x4::GetUVToTexCoord()).Transpose();
 
         uploadData.lightCount = Vector4u(static_cast<uint>(lights.size()), 0, 0, 0);
 

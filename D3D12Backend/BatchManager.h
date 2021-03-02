@@ -14,8 +14,9 @@ namespace Boolka
         {
             Opaque,
             Transparent,
-            ShadowMap0,
-            Count = ShadowMap0 + BLK_MAX_LIGHT_COUNT * BLK_TEXCUBE_FACE_COUNT
+            ShadowMapLight0,
+            ShadowMapSun = ShadowMapLight0 + BLK_MAX_LIGHT_COUNT * BLK_TEXCUBE_FACE_COUNT,
+            Count
         };
 
         BatchManager() = default;

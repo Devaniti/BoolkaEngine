@@ -25,9 +25,10 @@ namespace Boolka
     {
         GetBatch(BatchType::Opaque).reserve(scene.GetOpaqueObjectCount());
         GetBatch(BatchType::Transparent).reserve(scene.GetObjectCount() - scene.GetOpaqueObjectCount());
+        GetBatch(BatchType::ShadowMapSun).reserve(scene.GetOpaqueObjectCount());
         for (size_t i = 0; i < BLK_MAX_LIGHT_COUNT * BLK_TEXCUBE_FACE_COUNT; ++i)
         {
-            GetBatch(BatchType::ShadowMap0 + i).reserve(32);
+            GetBatch(BatchType::ShadowMapLight0 + i).reserve(32);
         }
         return true;
     }
@@ -50,7 +51,7 @@ namespace Boolka
             UINT startIndex, endIndex;
             switch (batchType)
             {
-            case Boolka::BatchManager::BatchType::Transparent:
+            case BatchType::Transparent:
                 startIndex = scene.GetOpaqueObjectCount();
                 endIndex = scene.GetObjectCount();
                 break;
@@ -70,9 +71,13 @@ namespace Boolka
                 viewProjMatrix = frameContext.GetViewProjMatrix();
                 cameraCoord = frameContext.GetCameraPos();
                 break;
+            case BatchType::ShadowMapSun:
+                viewProjMatrix = lightContainer.GetSunView() * lightContainer.GetSunProj();
+                cameraCoord = lightContainer.GetSun().worldPos;
+                break;
             default:
             {
-                size_t shadowMapIndex = batchType - BatchType::ShadowMap0;
+                size_t shadowMapIndex = batchType - BatchType::ShadowMapLight0;
                 size_t lightIndex = shadowMapIndex / BLK_TEXCUBE_FACE_COUNT;
                 size_t faceIndex = shadowMapIndex % BLK_TEXCUBE_FACE_COUNT;
                 if (lightIndex >= lightContainer.GetLights().size())

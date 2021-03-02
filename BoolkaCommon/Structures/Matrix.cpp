@@ -372,8 +372,10 @@ namespace Boolka
         return CalculateView(right[cubeMapFace], up[cubeMapFace], forward[cubeMapFace], position);
     }
 
-    Matrix4x4 Matrix4x4::CalculateProj(float nearZ, float farZ, float aspectRatio, float fovY)
+    Matrix4x4 Matrix4x4::CalculateProjPerspective(float nearZ, float farZ, float aspectRatio, float fovY)
     {
+        BLK_ASSERT(farZ > nearZ);
+
         float h = 1.0f / tan(fovY * 0.5f);
         float w = h / aspectRatio;
         float a = farZ / (farZ - nearZ);
@@ -388,6 +390,48 @@ namespace Boolka
         };
 
         return projMatrix;
+    }
+
+    Matrix4x4 Matrix4x4::CalculateProjOrtographic(float nearZ, float farZ, float width, float height)
+    {
+        BLK_ASSERT(farZ > nearZ);
+
+        float w = 2.0f / width;
+        float h = 2.0f / height;
+        float a = 1.0f / (farZ - nearZ);
+        float b = -a * nearZ;
+
+        Matrix4x4 projMatrix =
+        {
+            w, 0, 0, 0,
+            0, h, 0, 0,
+            0, 0, a, 0,
+            0, 0, b, 1,
+        };
+
+        return projMatrix;
+    }
+
+    Matrix4x4 Matrix4x4::GetUVToTexCoord()
+    {
+        return Matrix4x4
+        {
+            0.5f,     0, 0, 0,
+            0,    -0.5f, 0, 0,
+            0,        0, 1, 0,
+            0.5f,  0.5f, 0, 1,
+        };
+    }
+
+    Matrix4x4 Matrix4x4::GetTexCoordToUV()
+    {
+        return Matrix4x4
+        {
+             2.0f,     0, 0, 0,
+            0,     -2.0f, 0, 0,
+            0,         0, 1, 0,
+            -1.0f,  1.0f, 0, 1,
+        };
     }
 
     Vector4 operator*(const Vector4& first, const Matrix4x4& second)

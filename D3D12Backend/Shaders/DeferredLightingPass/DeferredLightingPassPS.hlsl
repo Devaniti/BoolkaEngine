@@ -5,6 +5,7 @@ Texture2D<float4> albedo : register(t0);
 Texture2D<float4> normal : register(t1);
 Texture2D<float> depth : register(t2);
 TextureCube<float> shadowMapCube[4] : register(t4);
+Texture2D<float> shadowMapSun : register(t8);
 
 struct Light
 {
@@ -12,11 +13,18 @@ struct Light
     float4 color_farZ;
 };
 
+struct Sun
+{
+    float4 lightDirVS;
+    float4 color;
+    float4x4 viewToShadow;
+};
+
 cbuffer DeferredPass : register(b1)
 {
     Light lights[4];
     uint lightCount;
-    float4x4 viewToShadowMatrix[24];
+    Sun sun;
 };
 
 struct PSOut
@@ -48,7 +56,7 @@ float VectorToDepth(float3 vec, float n, float f)
     return (NormZComp + 1.0) * 0.5;
 }
 
-float CalculateShadow(uint lightIndex, float3 lightVector)
+float CalculateLightShadow(uint lightIndex, float3 lightVector)
 {
     static const float shadowBias = 0.001f;
     float4 samplePos = mul(float4(-lightVector, 0.0f), invViewMatrix);
@@ -72,7 +80,7 @@ float3 CalculateLight(uint lightIndex, float3 albedoVal, float3 specularVal, flo
     if (NdotL <= 0.0f || distanceAttenuation <= 0.0f)
         return 0.0;
     
-    float shadowFactor = CalculateShadow(lightIndex, lightVector);
+    float shadowFactor = CalculateLightShadow(lightIndex, lightVector);
     if (shadowFactor <= 0.0f)
         return 0.0;
     
@@ -89,6 +97,42 @@ float3 CalculateLight(uint lightIndex, float3 albedoVal, float3 specularVal, flo
     return result;
 }
 
+float CalculateSunShadow(float3 viewPos)
+{
+    static const float shadowBias = 0.003f;
+    float4 samplePos = mul(float4(viewPos, 1.0f), sun.viewToShadow);
+    float comparisonValue = samplePos.z - shadowBias;
+    return shadowMapSun.SampleCmp(shadowSampler, samplePos.xy, comparisonValue);
+}
+
+
+float3 CalculateSun(float3 albedoVal, float3 specularVal, float3 normalVal, float3 viewPos)
+{
+    float3 result = 0.0f;
+    
+    float3 lightDir = sun.lightDirVS.xyz;
+    float NdotL = dot(lightDir, normalVal);
+    
+    if (NdotL <= 0.0f)
+        return 0.0f;
+    
+    float shadowFactor = CalculateSunShadow(viewPos);
+    if (shadowFactor <= 0.0f)
+        return 0.0f;
+    
+    // Diffuse
+    result += albedoVal * NdotL;
+    
+    float3 viewDir = normalize(viewPos);
+    float3 reflectedLightVector = reflect(viewDir, normalVal);
+    float specularRefl = pow(saturate(dot(reflectedLightVector, lightDir)), specExp);
+    // Specular
+    result += specularVal * specularRefl;
+    
+    result *= sun.color.rgb * shadowFactor;
+    return result;
+}
+
 PSOut main(VSOut In)
 {
     PSOut Out = (PSOut) 0;
@@ -100,6 +144,7 @@ PSOut main(VSOut In)
     float depthVal = depth.Load(uint3(vpos, 0));
     float3 viewPos = CalculateViewPos(UV, depthVal);
     float3 result = CalculateAmbient(albedoVal);
+    result += CalculateSun(albedoVal, albedoVal, normalVal, viewPos);
     [unroll(4)]
     for (uint i = 0; i < lightCount; ++i)
     {

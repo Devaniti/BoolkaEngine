@@ -57,9 +57,11 @@ namespace Boolka
             gbufferDepthFormat, D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL, &dsvClearValue, D3D12_RESOURCE_STATE_DEPTH_WRITE);
         for (size_t i = 0; i < BLK_MAX_LIGHT_COUNT; i++)
         {
-            GetTexture(Tex::ShadowMapCube0 + i).Initialize(device, D3D12_HEAP_TYPE_DEFAULT, BLK_SHADOWMAP_SIZE, BLK_SHADOWMAP_SIZE, 1,
+            GetTexture(Tex::ShadowMapCube0 + i).Initialize(device, D3D12_HEAP_TYPE_DEFAULT, BLK_LIGHT_SHADOWMAP_SIZE, BLK_LIGHT_SHADOWMAP_SIZE, 1,
                 shadowMapFormat, D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL, &dsvClearValue, D3D12_RESOURCE_STATE_DEPTH_WRITE, 6);
         }
+        GetTexture(Tex::ShadowMapSun).Initialize(device, D3D12_HEAP_TYPE_DEFAULT, BLK_SUN_SHADOWMAP_SIZE, BLK_SUN_SHADOWMAP_SIZE, 1,
+            shadowMapFormat, D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL, &dsvClearValue, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 
         GetDescriptorHeap(DescHeap::RTVHeap).Initialize(device, rtvHeapDescriptorCount, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE);
         GetDescriptorHeap(DescHeap::DSVHeap).Initialize(device, dsvHeapDescriptorCount, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE);
@@ -77,6 +79,8 @@ namespace Boolka
         {
             GetSRV(SRV::ShadowMapCube0 + i).InitializeCube(device, GetTexture(Tex::ShadowMapCube0 + i), GetDescriptorHeap(DescHeap::MainHeap).GetCPUHandle(static_cast<size_t>(SRV::ShadowMapCube0 + i)), shadowMapSRVFormat);
         }
+        GetSRV(SRV::ShadowMapSun).Initialize(device, GetTexture(Tex::ShadowMapSun),
+            GetDescriptorHeap(DescHeap::MainHeap).GetCPUHandle(static_cast<size_t>(SRV::ShadowMapSun)), shadowMapSRVFormat);
 
         GetRTV(RTV::GBufferAlbedo).Initialize(device, GetTexture(Tex::GBufferAlbedo), 
             gbufferAlbedoFormat, GetDescriptorHeap(DescHeap::RTVHeap).GetCPUHandle(static_cast<size_t>(RTV::GBufferAlbedo)));
@@ -91,18 +95,20 @@ namespace Boolka
         {
             for (UINT16 arraySlice = 0; arraySlice < BLK_TEXCUBE_FACE_COUNT; ++arraySlice)
             {
-                GetDSV(DSV::ShadowMap0 + textureIndex * BLK_TEXCUBE_FACE_COUNT + arraySlice).Initialize(device,
+                GetDSV(DSV::ShadowMapLight0 + textureIndex * BLK_TEXCUBE_FACE_COUNT + arraySlice).Initialize(device,
                     GetTexture(Tex::ShadowMapCube0 + textureIndex), shadowMapFormat, 
-                    GetDescriptorHeap(DescHeap::DSVHeap).GetCPUHandle(static_cast<size_t>(DSV::ShadowMap0 + textureIndex * 6 + arraySlice)), arraySlice);
+                    GetDescriptorHeap(DescHeap::DSVHeap).GetCPUHandle(static_cast<size_t>(DSV::ShadowMapLight0 + textureIndex * 6 + arraySlice)), arraySlice);
             }
         }
+        GetDSV(DSV::ShadowMapSun).Initialize(device, GetTexture(Tex::ShadowMapSun),
+            gbufferDepthFormat, GetDescriptorHeap(DescHeap::DSVHeap).GetCPUHandle(static_cast<size_t>(DSV::ShadowMapSun)));
 
         m_RootSigs[static_cast<size_t>(DSV::GbufferDepth)].Initialize(device, "RootSig.cso");
 
         static const UINT64 floatSize = 4;
         static const UINT64 frameCbSize = BLK_CEIL_TO_POWER_OF_TWO(sizeof(Matrix4x4) * 6, 256);
         static const UINT64 deferredLightingCbSize = BLK_CEIL_TO_POWER_OF_TWO(sizeof(Vector4) * BLK_TEXCUBE_FACE_COUNT * 2 + sizeof(Vector4u), 256);
-        static const UINT64 shadowMapCbSize = BLK_CEIL_TO_POWER_OF_TWO(sizeof(Matrix4x4) * BLK_MAX_LIGHT_COUNT * BLK_TEXCUBE_FACE_COUNT, 256);
+        static const UINT64 shadowMapCbSize = BLK_CEIL_TO_POWER_OF_TWO(sizeof(Matrix4x4) * (BLK_MAX_LIGHT_COUNT * BLK_TEXCUBE_FACE_COUNT + 1), 256);
 
         // Group initializations of same types
         // This can potentially improve performance
@@ -123,6 +129,7 @@ namespace Boolka
         resourceTracker.RegisterResource(GetTexture(Tex::LightBuffer), D3D12_RESOURCE_STATE_RENDER_TARGET);
         resourceTracker.RegisterResource(GetTexture(Tex::GbufferDepth), D3D12_RESOURCE_STATE_DEPTH_WRITE);
         for (size_t i = 0; i < BLK_MAX_LIGHT_COUNT; i++) resourceTracker.RegisterResource(GetTexture(Tex::ShadowMapCube0 + i), D3D12_RESOURCE_STATE_DEPTH_WRITE);
+        resourceTracker.RegisterResource(GetTexture(Tex::ShadowMapSun), D3D12_RESOURCE_STATE_DEPTH_WRITE);
         for (UINT i = 0; i < BLK_IN_FLIGHT_FRAMES; ++i) resourceTracker.RegisterResource(GetBackBuffer(i), D3D12_RESOURCE_STATE_PRESENT);
         for (UINT i = 0; i < BLK_IN_FLIGHT_FRAMES; ++i) for (size_t j = 0; j < static_cast<size_t>(FlipBuf::Count); ++j)  resourceTracker.RegisterResource(m_FlippedResources[i].m_Buffer[j], D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
 
@@ -132,6 +139,7 @@ namespace Boolka
         GetTexture(Tex::LightBuffer).SetDebugName(L"LightBuffer");
         GetTexture(Tex::GbufferDepth).SetDebugName(L"GbufferDepth");
         for (size_t i = 0; i < BLK_MAX_LIGHT_COUNT; i++) GetTexture(Tex::ShadowMapCube0 + i).SetDebugName(L"ShadowMapCube%d", i);
+        GetTexture(Tex::ShadowMapSun).SetDebugName(L"ShadowMapSun");
 
         for (UINT i = 0; i < BLK_IN_FLIGHT_FRAMES; ++i) GetFlippableBuffer(i, FlipBuf::Frame).SetDebugName(L"FrameConstantBuffer%d", i);
         for (UINT i = 0; i < BLK_IN_FLIGHT_FRAMES; ++i) GetFlippableBuffer(i, FlipBuf::DeferredLighting).SetDebugName(L"DeferredLightingConstantBuffer%d", i);

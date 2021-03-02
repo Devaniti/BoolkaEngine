@@ -116,7 +116,7 @@ namespace Boolka
         float nearZ = 0.2f;
         float farZ = 1000.0f;
 
-        outProjMatrix = Matrix4x4::CalculateProj(nearZ, farZ, aspectRatio, BLK_DEG_TO_RAD(30.0f));
+        outProjMatrix = Matrix4x4::CalculateProjPerspective(nearZ, farZ, aspectRatio, BLK_DEG_TO_RAD(30.0f));
         outViewMatrix = Matrix4x4::CalculateView(right, up, forward, m_CameraPos);
     }
 
