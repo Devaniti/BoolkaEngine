@@ -1,4 +1,5 @@
 #include "stdafx.h"
+
 #include "WindowManager.h"
 
 #include "ThirdParty/imgui/imgui.h"
@@ -8,7 +9,8 @@
 #define WM_CUSTOM_FORCE_CLOSE (WM_APP + 1)
 #define WM_CUSTOM_SET_FOCUS (WM_CUSTOM_FORCE_CLOSE + 1)
 
-extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam,
+                                                             LPARAM lParam);
 
 namespace Boolka
 {
@@ -53,7 +55,9 @@ namespace Boolka
         m_WindowThread = std::thread(&WindowManager::WindowThreadEntryPoint, this, windowState);
 
         // TODO better wait
-        while (!m_IsUpdated) {};
+        while (!m_IsUpdated)
+        {
+        };
 
         return m_HWND != NULL;
     }
@@ -82,6 +86,11 @@ namespace Boolka
         return true;
     }
 
+    HWND WindowManager::GetHWND() const
+    {
+        return m_HWND;
+    }
+
     void WindowManager::ShowWindow(bool show)
     {
         BLK_ASSERT(m_HWND != 0);
@@ -90,7 +99,8 @@ namespace Boolka
             ::PostMessage(m_HWND, WM_CUSTOM_SET_FOCUS, NULL, NULL);
     }
 
-    LRESULT CALLBACK WindowManager::WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+    LRESULT CALLBACK WindowManager::WindowProc(HWND hwnd, UINT message, WPARAM wParam,
+                                               LPARAM lParam)
     {
         {
             const std::lock_guard<std::recursive_mutex> lock(g_imguiMutex);
@@ -103,8 +113,7 @@ namespace Boolka
         case WM_CUSTOM_FORCE_CLOSE:
             ::DestroyWindow(hwnd);
             return 0;
-        case WM_CUSTOM_SET_FOCUS:
-        {
+        case WM_CUSTOM_SET_FOCUS: {
             HWND res = ::SetFocus(hwnd);
             BLK_ASSERT(res != 0);
         }
@@ -122,7 +131,7 @@ namespace Boolka
 
     DWORD WindowManager::CalculateWindowStyle(WindowState::WindowMode windowMode)
     {
-        switch(windowMode)
+        switch (windowMode)
         {
         case WindowState::WindowMode::Windowed:
             return WS_OVERLAPPEDWINDOW;
@@ -168,18 +177,9 @@ namespace Boolka
         ::AdjustWindowRect(&calculatedRect, windowStyle, FALSE);
 
         m_HWND = CreateWindowExW(
-            NULL,
-            BLK_WINDOW_CLASS_NAME,
-            BLK_GAME_NAME,
-            windowStyle,
-            windowState.x,
-            windowState.y,
-            calculatedRect.right - calculatedRect.left,
-            calculatedRect.bottom - calculatedRect.top,
-            NULL,
-            NULL,
-            ms_CurrentInstance,
-            this);
+            NULL, BLK_WINDOW_CLASS_NAME, BLK_GAME_NAME, windowStyle, windowState.x, windowState.y,
+            calculatedRect.right - calculatedRect.left, calculatedRect.bottom - calculatedRect.top,
+            NULL, NULL, ms_CurrentInstance, this);
 
         BLK_CRITICAL_ASSERT(m_HWND != NULL);
     }
@@ -203,26 +203,28 @@ namespace Boolka
         }
     }
 
-    LRESULT CALLBACK WindowManager::WindowProcDetour(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+    LRESULT CALLBACK WindowManager::WindowProcDetour(HWND hwnd, UINT message, WPARAM wParam,
+                                                     LPARAM lParam)
     {
         // How can I make a WNDPROC or DLGPROC a member of my C++ class?
         // https://devblogs.microsoft.com/oldnewthing/20140203-00/?p=1893
         WindowManager* object;
-        if (message == WM_NCCREATE) {
+        if (message == WM_NCCREATE)
+        {
             LPCREATESTRUCT lpcs = reinterpret_cast<LPCREATESTRUCT>(lParam);
             object = static_cast<WindowManager*>(lpcs->lpCreateParams);
             ::SetWindowLongPtrW(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(object));
         }
         else
         {
-            object = reinterpret_cast<WindowManager*>(
-                ::GetWindowLongPtr(hwnd, GWLP_USERDATA));
+            object = reinterpret_cast<WindowManager*>(::GetWindowLongPtr(hwnd, GWLP_USERDATA));
         }
-        if (object) {
+        if (object)
+        {
             return object->WindowProc(hwnd, message, wParam, lParam);
         }
 
         return ::DefWindowProc(hwnd, message, wParam, lParam);
     }
 
-}
+} // namespace Boolka

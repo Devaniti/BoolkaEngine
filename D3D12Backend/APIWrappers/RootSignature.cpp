@@ -1,9 +1,9 @@
 #include "stdafx.h"
+
 #include "RootSignature.h"
 
-#include "BoolkaCommon/DebugHelpers/DebugFileReader.h"
-
 #include "APIWrappers/Device.h"
+#include "BoolkaCommon/DebugHelpers/DebugFileReader.h"
 
 namespace Boolka
 {
@@ -18,12 +18,25 @@ namespace Boolka
         BLK_ASSERT(m_RootSignature == nullptr);
     }
 
+    ID3D12RootSignature* RootSignature::Get()
+    {
+        BLK_ASSERT(m_RootSignature != nullptr);
+        return m_RootSignature;
+    }
+
+    ID3D12RootSignature* RootSignature::operator->()
+    {
+        return Get();
+    }
+
     bool RootSignature::Initialize(Device& device, const char* filename)
     {
         BLK_ASSERT(m_RootSignature == nullptr);
 
         MemoryBlock compiledRootSignature = DebugFileReader::ReadFile(filename);
-        HRESULT hr = device->CreateRootSignature(0, compiledRootSignature.m_Data, compiledRootSignature.m_Size, IID_PPV_ARGS(&m_RootSignature));
+        HRESULT hr = device->CreateRootSignature(0, compiledRootSignature.m_Data,
+                                                 compiledRootSignature.m_Size,
+                                                 IID_PPV_ARGS(&m_RootSignature));
         DebugFileReader::FreeMemory(compiledRootSignature);
         return SUCCEEDED(hr);
     }
@@ -35,4 +48,4 @@ namespace Boolka
         m_RootSignature = nullptr;
     }
 
-}
+} // namespace Boolka

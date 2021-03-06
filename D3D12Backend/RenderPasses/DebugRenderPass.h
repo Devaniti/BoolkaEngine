@@ -1,19 +1,17 @@
 #pragma once
-#include "RenderPass.h"
-
-#include "APIWrappers/PipelineState/GraphicPipelineState.h"
-#include "APIWrappers/RootSignature.h"
 #include "APIWrappers/DescriptorHeap.h"
-#include "APIWrappers/Resources/Buffers/Views/VertexBufferView.h"
-#include "APIWrappers/Resources/Buffers/Views/IndexBufferView.h"
+#include "APIWrappers/PipelineState/GraphicPipelineState.h"
 #include "APIWrappers/Resources/Buffers/UploadBuffer.h"
 #include "APIWrappers/Resources/Buffers/Views/ConstantBufferView.h"
+#include "APIWrappers/Resources/Buffers/Views/IndexBufferView.h"
+#include "APIWrappers/Resources/Buffers/Views/VertexBufferView.h"
+#include "APIWrappers/RootSignature.h"
+#include "RenderPass.h"
 
 namespace Boolka
 {
 
-    class DebugRenderPass :
-        public RenderPass
+    class DebugRenderPass : public RenderPass
     {
     public:
         DebugRenderPass();
@@ -35,4 +33,4 @@ namespace Boolka
         float m_CurrentAngle;
     };
 
-}
+} // namespace Boolka

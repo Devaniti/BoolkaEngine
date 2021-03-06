@@ -8,8 +8,8 @@ namespace Boolka
     public:
         bool Reset();
 
-        ID3D12CommandAllocator* Get() { BLK_ASSERT(m_CommandAllocator != nullptr); return m_CommandAllocator; };
-        ID3D12CommandAllocator* operator->() { return Get(); };
+        ID3D12CommandAllocator* Get();
+        ID3D12CommandAllocator* operator->();
 
     protected:
         CommandAllocator();
@@ -26,4 +26,4 @@ namespace Boolka
         ID3D12CommandAllocator* m_CommandAllocator;
     };
 
-}
+} // namespace Boolka

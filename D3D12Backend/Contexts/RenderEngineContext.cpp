@@ -1,9 +1,11 @@
 #include "stdafx.h"
+
 #include "RenderEngineContext.h"
-#include "WindowManagement/DisplayController.h"
-#include "APIWrappers/Resources/Textures/Views/RenderTargetView.h"
+
 #include "APIWrappers/Device.h"
+#include "APIWrappers/Resources/Textures/Views/RenderTargetView.h"
 #include "Contexts/RenderFrameContext.h"
+#include "WindowManagement/DisplayController.h"
 
 namespace Boolka
 {
@@ -13,7 +15,7 @@ namespace Boolka
         , m_backbufferHeight(0)
         , m_HWND(0)
 #ifdef BLK_RENDER_DEBUG
-        ,m_Device(nullptr)
+        , m_Device(nullptr)
 #endif
     {
     }
@@ -25,7 +27,8 @@ namespace Boolka
         BLK_ASSERT(m_HWND == 0);
     }
 
-    bool RenderEngineContext::Initialize(Device& device, DisplayController& displayController, ResourceTracker& resourceTracker)
+    bool RenderEngineContext::Initialize(Device& device, DisplayController& displayController,
+                                         ResourceTracker& resourceTracker)
     {
         const WindowState& windowState = displayController.GetWindowState();
 
@@ -34,14 +37,15 @@ namespace Boolka
 
         bool res = m_InitializationCommandAllocator.Initialize(device);
         BLK_ASSERT(res);
-        res = m_InitializationCommandList.Initialize(device, m_InitializationCommandAllocator.Get(), nullptr);
+        res = m_InitializationCommandList.Initialize(device, m_InitializationCommandAllocator.Get(),
+                                                     nullptr);
         BLK_ASSERT(res);
         m_InitializationCommandList->Close();
         res = m_InitializationFence.Initialize(device);
         BLK_ASSERT(res);
 
         // Temp initial camera position for san-miguel scene
-        res = m_Camera.Initialize(0.0f, 0.0f, { 6.35f, 3.46f, 1.22f, 0.0f });
+        res = m_Camera.Initialize(0.0f, 0.0f, {6.35f, 3.46f, 1.22f, 0.0f});
         BLK_ASSERT(res);
 
         m_HWND = displayController.GetHWND();
@@ -83,6 +87,31 @@ namespace Boolka
         m_Scene.Unload();
     }
 
+    const Scene& RenderEngineContext::GetScene() const
+    {
+        return m_Scene;
+    }
+
+    Scene& RenderEngineContext::GetScene()
+    {
+        return m_Scene;
+    }
+
+    UINT RenderEngineContext::GetBackbufferWidth() const
+    {
+        return m_backbufferWidth;
+    }
+
+    UINT RenderEngineContext::GetBackbufferHeight() const
+    {
+        return m_backbufferHeight;
+    }
+
+    ResourceContainer& RenderEngineContext::GetResourceContainer()
+    {
+        return m_resourceContainer;
+    }
+
     CopyCommandListImpl& RenderEngineContext::GetInitializationCommandList()
     {
         m_InitializationCommandAllocator.Reset();
@@ -99,4 +128,22 @@ namespace Boolka
         return true;
     }
 
-}
+    Camera& RenderEngineContext::GetCamera()
+    {
+        return m_Camera;
+    }
+
+    HWND RenderEngineContext::GetHWND() const
+    {
+        return m_HWND;
+    }
+
+#ifdef BLK_RENDER_DEBUG
+    Device& RenderEngineContext::GetDevice()
+    {
+        BLK_ASSERT(m_Device);
+        return *m_Device;
+    }
+#endif
+
+} // namespace Boolka

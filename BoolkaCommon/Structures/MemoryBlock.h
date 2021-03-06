@@ -9,4 +9,4 @@ namespace Boolka
         size_t m_Size;
     };
 
-}
+} // namespace Boolka

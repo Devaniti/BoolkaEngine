@@ -1,4 +1,5 @@
 #include "stdafx.h"
+
 #include "DebugRenderScope.h"
 
 #ifdef BLK_RENDER_DEBUG
@@ -27,6 +28,6 @@ namespace Boolka
         PIXEndEvent(m_commandList);
     }
 
-}
+} // namespace Boolka
 
 #endif

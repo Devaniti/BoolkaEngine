@@ -28,4 +28,4 @@ namespace Boolka
         ::OVERLAPPED m_async;
     };
 
-}
+} // namespace Boolka

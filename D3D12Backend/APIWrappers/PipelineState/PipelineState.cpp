@@ -1,4 +1,5 @@
 #include "stdafx.h"
+
 #include "PipelineState.h"
 
 namespace Boolka
@@ -22,6 +23,17 @@ namespace Boolka
         return true;
     }
 
+    ID3D12PipelineState* PipelineState::Get()
+    {
+        BLK_ASSERT(m_PipelineState != nullptr);
+        return m_PipelineState;
+    }
+
+    ID3D12PipelineState* PipelineState::operator->()
+    {
+        return Get();
+    }
+
     void PipelineState::Unload()
     {
         BLK_ASSERT(m_PipelineState != nullptr);
@@ -30,4 +42,4 @@ namespace Boolka
         m_PipelineState = nullptr;
     }
 
-}
+} // namespace Boolka

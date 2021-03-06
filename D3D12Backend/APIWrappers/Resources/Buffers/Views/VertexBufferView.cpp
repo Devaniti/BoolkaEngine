@@ -1,4 +1,5 @@
 #include "stdafx.h"
+
 #include "VertexBufferView.h"
 
 namespace Boolka
@@ -14,7 +15,8 @@ namespace Boolka
         BLK_ASSERT(m_View.BufferLocation == 0);
     }
 
-    bool VertexBufferView::Initialize(Buffer& vertexBuffer, UINT size, UINT stride, UINT64 bufferOffset /*= 0*/)
+    bool VertexBufferView::Initialize(Buffer& vertexBuffer, UINT size, UINT stride,
+                                      UINT64 bufferOffset /*= 0*/)
     {
         BLK_ASSERT(m_View.BufferLocation == 0);
 
@@ -31,4 +33,10 @@ namespace Boolka
         m_View = {};
     }
 
-}
+    const D3D12_VERTEX_BUFFER_VIEW* VertexBufferView::GetView()
+    {
+        BLK_ASSERT(m_View.BufferLocation != 0);
+        return &m_View;
+    }
+
+} // namespace Boolka

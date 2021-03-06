@@ -1,4 +1,5 @@
 #include "stdafx.h"
+
 #include "WindowState.h"
 
 namespace Boolka
@@ -15,4 +16,4 @@ namespace Boolka
         return result;
     }
 
-}
+} // namespace Boolka

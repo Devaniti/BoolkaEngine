@@ -1,15 +1,15 @@
 #pragma once
-#include "APIWrappers/RootSignature.h"
-#include "APIWrappers/DescriptorHeap.h"
-#include "APIWrappers/Resources/Textures/Views/RenderTargetView.h"
-#include "Containers/Scene.h"
 #include "APIWrappers/CommandAllocator/CopyCommandAllocator.h"
 #include "APIWrappers/CommandList/CopyCommandListImpl.h"
+#include "APIWrappers/DescriptorHeap.h"
 #include "APIWrappers/Fence.h"
-#include "APIWrappers/Resources/Buffers/Views/ConstantBufferView.h"
 #include "APIWrappers/Resources/Buffers/UploadBuffer.h"
+#include "APIWrappers/Resources/Buffers/Views/ConstantBufferView.h"
 #include "APIWrappers/Resources/Textures/Views/DepthStencilView.h"
+#include "APIWrappers/Resources/Textures/Views/RenderTargetView.h"
+#include "APIWrappers/RootSignature.h"
 #include "Camera.h"
+#include "Containers/Scene.h"
 #include "RenderSchedule/ResourceContainer.h"
 
 namespace Boolka
@@ -27,28 +27,29 @@ namespace Boolka
         RenderEngineContext();
         ~RenderEngineContext();
 
-        bool Initialize(Device& device, DisplayController& displayController, ResourceTracker& resourceTracker);
+        bool Initialize(Device& device, DisplayController& displayController,
+                        ResourceTracker& resourceTracker);
         void Unload();
 
         bool LoadScene(Device& device, SceneData& sceneData);
         void UnloadScene();
-        Scene& GetScene() { return m_Scene; }
-        const Scene& GetScene() const { return m_Scene; }
+        Scene& GetScene();
+        const Scene& GetScene() const;
 
-        UINT GetBackbufferWidth() const { return m_backbufferWidth; }
-        UINT GetBackbufferHeight() const { return m_backbufferHeight; }
+        UINT GetBackbufferWidth() const;
+        UINT GetBackbufferHeight() const;
 
-        ResourceContainer& GetResourceContainer() { return m_resourceContainer; }
+        ResourceContainer& GetResourceContainer();
 
         CopyCommandListImpl& GetInitializationCommandList();
         bool FinishInitializationCommandList(Device& device);
 
-        Camera& GetCamera() { return m_Camera; };
+        Camera& GetCamera();
 
-        HWND GetHWND() const { return m_HWND; };
+        HWND GetHWND() const;
 
 #ifdef BLK_RENDER_DEBUG
-        Device& GetDevice() { BLK_ASSERT(m_Device); return *m_Device; };
+        Device& GetDevice();
 #endif
     private:
         ResourceContainer m_resourceContainer;
@@ -65,4 +66,4 @@ namespace Boolka
 #endif
     };
 
-}
+} // namespace Boolka

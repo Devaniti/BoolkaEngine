@@ -8,7 +8,7 @@ namespace Boolka
     {
     public:
         DebugFileWriter();
-        ~DebugFileWriter();;
+        ~DebugFileWriter();
 
         bool OpenFile(const char* filename);
         bool Write(MemoryBlock memoryBlock);
@@ -18,9 +18,10 @@ namespace Boolka
 
         // Compact way of writing file from single MemoryBlock
         static bool WriteFile(const char* filename, MemoryBlock data, size_t alignment = 0);
+
     private:
         std::ofstream m_File;
         size_t m_BytesWritten;
     };
 
-}
+} // namespace Boolka

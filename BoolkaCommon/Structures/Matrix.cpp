@@ -1,4 +1,5 @@
 #include "stdafx.h"
+
 #include "Matrix.h"
 
 namespace Boolka
@@ -16,6 +17,62 @@ namespace Boolka
                 ++iter;
             }
         }
+    }
+
+    Matrix4x4::Matrix4x4(const Vector4& row1, const Vector4& row2, const Vector4& row3,
+                         const Vector4& row4)
+        : m_data{row1, row2, row3, row4}
+    {
+    }
+
+    Matrix4x4::Matrix4x4()
+    {
+    }
+
+    Matrix4x4::~Matrix4x4()
+    {
+    }
+
+    const Vector4* Matrix4x4::end() const
+    {
+        return m_data + 4;
+    }
+
+    Vector4* Matrix4x4::end()
+    {
+        return m_data + 4;
+    }
+
+    const Vector4& Matrix4x4::operator[](size_t i) const
+    {
+        BLK_ASSERT(i < 4);
+        return m_data[i];
+    }
+
+    Vector4& Matrix4x4::operator[](size_t i)
+    {
+        BLK_ASSERT(i < 4);
+        return m_data[i];
+    }
+
+    const float* Matrix4x4::GetBuffer() const
+    {
+        return m_data[0].GetBuffer();
+    }
+
+    float* Matrix4x4::GetBuffer()
+    {
+        return m_data[0].GetBuffer();
+    }
+
+    const Vector4* Matrix4x4::begin() const
+    {
+        return m_data;
+    }
+
+    Vector4* Matrix4x4::begin()
+    {
+        return m_data;
     }
 
     Matrix4x4 Matrix4x4::operator-()
@@ -62,7 +119,7 @@ namespace Boolka
 
     Matrix4x4 Matrix4x4::operator*(const Matrix4x4& other) const
     {
-        //Initialized with zeroes
+        // Initialized with zeroes
         Matrix4x4 result;
 
         for (size_t i = 0; i < 4; i++)
@@ -71,7 +128,7 @@ namespace Boolka
             {
                 for (size_t k = 0; k < 4; k++)
                 {
-                    //Order is important for cache coherence
+                    // Order is important for cache coherence
                     result[i][k] += (*this)[i][j] * other[j][k];
                 }
             }
@@ -89,6 +146,9 @@ namespace Boolka
     {
         return !operator==(other);
     }
+
+    // clang-format destroys formating of matrices
+    // clang-format off
 
     Matrix4x4 Matrix4x4::Inverse(bool& isSuccessfull) const
     {
@@ -261,7 +321,7 @@ namespace Boolka
             1.0f, 0.0f, 0.0f, xyz[0],
             0.0f, 1.0f, 0.0f, xyz[1],
             0.0f, 0.0f, 1.0f, xyz[2],
-            0.0f, 0.0f, 0.0f, 1.0f,
+            0.0f, 0.0f, 0.0f,   1.0f,
         };
     }
 
@@ -434,6 +494,8 @@ namespace Boolka
         };
     }
 
+    // clang-format on
+
     Vector4 operator*(const Vector4& first, const Matrix4x4& second)
     {
         Vector4 result;
@@ -449,5 +511,4 @@ namespace Boolka
         return result;
     }
 
-}
-
+} // namespace Boolka

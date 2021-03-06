@@ -1,5 +1,7 @@
 #include "stdafx.h"
+
 #include "ResourceTracker.h"
+
 #include "APIWrappers/Resources/ResourceTransition.h"
 
 namespace Boolka
@@ -24,11 +26,12 @@ namespace Boolka
 
     void ResourceTracker::RegisterResource(Resource& resource, D3D12_RESOURCE_STATES initialState)
     {
-        auto [resourceIterator, isInserted] = m_TrackedResources.insert({ &resource, initialState });
+        auto [resourceIterator, isInserted] = m_TrackedResources.insert({&resource, initialState});
         BLK_ASSERT(isInserted);
     }
 
-    bool ResourceTracker::Transition(Resource& resource, CommandList& commandList, D3D12_RESOURCE_STATES targetState)
+    bool ResourceTracker::Transition(Resource& resource, CommandList& commandList,
+                                     D3D12_RESOURCE_STATES targetState)
     {
         auto iterator = m_TrackedResources.find(&resource);
         BLK_ASSERT(iterator != m_TrackedResources.end());
@@ -77,4 +80,4 @@ namespace Boolka
         }
     }
 
-}
+} // namespace Boolka

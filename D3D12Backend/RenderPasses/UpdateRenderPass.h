@@ -4,8 +4,7 @@
 namespace Boolka
 {
 
-    class UpdateRenderPass :
-        public RenderPass
+    class UpdateRenderPass : public RenderPass
     {
     public:
         UpdateRenderPass() = default;
@@ -20,4 +19,4 @@ namespace Boolka
     private:
     };
 
-}
+} // namespace Boolka

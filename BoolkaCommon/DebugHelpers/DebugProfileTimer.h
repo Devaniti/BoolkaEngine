@@ -14,5 +14,4 @@ namespace Boolka
         DebugTimer m_Timer;
     };
 
-}
-
+} // namespace Boolka

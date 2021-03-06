@@ -6,8 +6,8 @@ namespace Boolka
     class Resource
     {
     public:
-        ID3D12Resource* Get() { BLK_ASSERT(m_Resource != nullptr); return m_Resource; }
-        ID3D12Resource* operator->() { return Get(); }
+        ID3D12Resource* Get();
+        ID3D12Resource* operator->();
 
 #ifdef BLK_RENDER_DEBUG
         void SetDebugName(const wchar_t* format, ...);
@@ -20,4 +20,4 @@ namespace Boolka
         ID3D12Resource* m_Resource;
     };
 
-}
+} // namespace Boolka

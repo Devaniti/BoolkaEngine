@@ -1,4 +1,5 @@
 #include "stdafx.h"
+
 #include "CommandList.h"
 
 namespace Boolka
@@ -22,6 +23,17 @@ namespace Boolka
         return true;
     }
 
+    ID3D12GraphicsCommandList5* CommandList::Get()
+    {
+        BLK_ASSERT(m_CommandList != nullptr);
+        return m_CommandList;
+    }
+
+    ID3D12GraphicsCommandList5* CommandList::operator->()
+    {
+        return Get();
+    }
+
     void CommandList::Unload()
     {
         BLK_ASSERT(m_CommandList != nullptr);
@@ -30,4 +42,4 @@ namespace Boolka
         m_CommandList = nullptr;
     }
 
-}
+} // namespace Boolka

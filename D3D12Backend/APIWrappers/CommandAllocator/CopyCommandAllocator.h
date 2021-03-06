@@ -1,6 +1,6 @@
 #pragma once
-#include "CommandAllocator.h"
 #include "APIWrappers/CommandList/CopyCommandListImpl.h"
+#include "CommandAllocator.h"
 
 namespace Boolka
 {
@@ -9,14 +9,15 @@ namespace Boolka
     class CopyCommandAllocator : public CommandAllocator
     {
     public:
-        CopyCommandAllocator() {};
-        ~CopyCommandAllocator() {};
+        CopyCommandAllocator() = default;
+        ~CopyCommandAllocator() = default;
 
         bool Initialize(Device& device);
         void Unload();
 
-        bool InitializeCommandList(CopyCommandListImpl& commandList, Device& device, ID3D12PipelineState* PSO);
+        bool InitializeCommandList(CopyCommandListImpl& commandList, Device& device,
+                                   ID3D12PipelineState* PSO);
         bool ResetCommandList(CopyCommandListImpl& commandList, ID3D12PipelineState* PSO);
     };
 
-}
+} // namespace Boolka

@@ -7,8 +7,8 @@ namespace Boolka
     class GraphicCommandList : public ComputeCommandList
     {
     protected:
-        GraphicCommandList() {};
-        ~GraphicCommandList() {};
+        GraphicCommandList() = default;
+        ~GraphicCommandList() = default;
     };
 
-}
+} // namespace Boolka

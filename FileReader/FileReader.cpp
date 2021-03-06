@@ -1,5 +1,7 @@
 #include "stdafx.h"
+
 #include "FileReader.h"
+
 #include <iostream>
 
 namespace Boolka
@@ -19,7 +21,8 @@ namespace Boolka
     bool FileReader::OpenFile(wchar_t* filename)
     {
         BLK_ASSERT(m_file == NULL);
-        m_file = ::CreateFileW(filename, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED | FILE_FLAG_NO_BUFFERING , NULL);
+        m_file = ::CreateFileW(filename, GENERIC_READ, 0, NULL, OPEN_EXISTING,
+                               FILE_FLAG_OVERLAPPED | FILE_FLAG_NO_BUFFERING, NULL);
         return m_file != INVALID_HANDLE_VALUE;
     }
 
@@ -46,7 +49,7 @@ namespace Boolka
 
         res = ::ReadFile(m_file, data.m_Data, static_cast<DWORD>(data.m_Size), NULL, &m_async);
 
-        // ReadFile must return FALSE for async IO operations and set last error to ERROR_IO_PENDING 
+        // ReadFile must return FALSE for async IO operations and set last error to ERROR_IO_PENDING
         BLK_ASSERT(res == FALSE);
         BLK_ASSERT(GetLastError() == ERROR_IO_PENDING);
 
@@ -86,7 +89,8 @@ namespace Boolka
             BLK_ASSERT(res == TRUE || GetLastError() == ERROR_IO_INCOMPLETE);
             if (bytesRead >= dataToWait || res == TRUE)
             {
-                // Catch case when IO operation is done, but there was less bytes read than requested
+                // Catch case when IO operation is done, but there was less bytes read than
+                // requested
                 BLK_ASSERT(bytesRead >= dataToWait);
                 break;
             }
@@ -103,4 +107,4 @@ namespace Boolka
         data = {};
     }
 
-}
+} // namespace Boolka

@@ -1,4 +1,5 @@
 #include "stdafx.h"
+
 #include "Fence.h"
 
 #include "Device.h"
@@ -105,4 +106,4 @@ namespace Boolka
         }
     }
 
-}
+} // namespace Boolka

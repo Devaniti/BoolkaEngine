@@ -6,8 +6,7 @@
 namespace Boolka
 {
 
-    class ReferenceRenderPass :
-        public RenderPass
+    class ReferenceRenderPass : public RenderPass
     {
     public:
         ReferenceRenderPass() = default;
@@ -22,4 +21,4 @@ namespace Boolka
     private:
     };
 
-}
+} // namespace Boolka

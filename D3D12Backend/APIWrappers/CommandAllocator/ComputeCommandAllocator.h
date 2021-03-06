@@ -1,6 +1,6 @@
 #pragma once
-#include "CommandAllocator.h"
 #include "APIWrappers/CommandList/ComputeCommandListImpl.h"
+#include "CommandAllocator.h"
 
 namespace Boolka
 {
@@ -8,14 +8,15 @@ namespace Boolka
     class ComputeCommandAllocator : public CommandAllocator
     {
     public:
-        ComputeCommandAllocator() {};
-        ~ComputeCommandAllocator() {};
+        ComputeCommandAllocator() = default;
+        ~ComputeCommandAllocator() = default;
 
         bool Initialize(Device& device);
         void Unload();
 
-        bool InitializeCommandList(ComputeCommandListImpl& commandList, Device& device, ID3D12PipelineState* PSO);
+        bool InitializeCommandList(ComputeCommandListImpl& commandList, Device& device,
+                                   ID3D12PipelineState* PSO);
         bool ResetCommandList(ComputeCommandListImpl& commandList, ID3D12PipelineState* PSO);
     };
 
-}
+} // namespace Boolka

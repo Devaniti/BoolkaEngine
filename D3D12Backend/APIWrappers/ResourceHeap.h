@@ -11,14 +11,15 @@ namespace Boolka
         ResourceHeap();
         ~ResourceHeap();
 
-        ID3D12Heap* Get() { BLK_ASSERT(m_heap != nullptr); return m_heap; };
-        ID3D12Heap* operator->() { return Get(); };
+        ID3D12Heap* Get();
+        ID3D12Heap* operator->();
 
-        bool Initialize(Device& device, size_t size, D3D12_HEAP_TYPE heapType, D3D12_HEAP_FLAGS heapFlags);
+        bool Initialize(Device& device, size_t size, D3D12_HEAP_TYPE heapType,
+                        D3D12_HEAP_FLAGS heapFlags);
         void Unload();
 
     private:
         ID3D12Heap* m_heap;
     };
 
-}
+} // namespace Boolka

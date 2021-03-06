@@ -1,8 +1,10 @@
 #include "stdafx.h"
+
 #include "RenderBackendImpl.h"
+
+#include "APIWrappers/Resources/ResourceTransition.h"
 #include "APIWrappers/Resources/Textures/Texture2D.h"
 #include "APIWrappers/Resources/Textures/Views/RenderTargetView.h"
-#include "APIWrappers/Resources/ResourceTransition.h"
 
 namespace Boolka
 {
@@ -66,7 +68,8 @@ namespace Boolka
     bool RenderBackendImpl::RenderFrame()
     {
         BLK_ASSERT(m_FrameID >= BLK_IN_FLIGHT_FRAMES);
-        // Safe to do without underflow check, since we initialize m_FrameId with BLK_IN_FLIGHT_FRAMES
+        // Safe to do without underflow check, since we initialize m_FrameId
+        // with BLK_IN_FLIGHT_FRAMES
         m_FrameFence.WaitCPU(m_FrameID - BLK_IN_FLIGHT_FRAMES);
 
         UINT currentFrameIndex = m_DisplayController.GetCurrentFrameIndex();
@@ -93,4 +96,4 @@ namespace Boolka
         m_Device.Flush();
     }
 
-}
+} // namespace Boolka

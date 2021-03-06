@@ -1,8 +1,8 @@
 #pragma once
-#include "Factory.h"
-#include "CommandQueue/GraphicQueue.h"
 #include "CommandQueue/ComputeQueue.h"
 #include "CommandQueue/CopyQueue.h"
+#include "CommandQueue/GraphicQueue.h"
+#include "Factory.h"
 #include "FeatureSupportHelper.h"
 #include "StateManager.h"
 
@@ -15,12 +15,12 @@ namespace Boolka
         Device();
         ~Device();
 
-        ID3D12Device6* Get() { BLK_ASSERT(m_Device != nullptr); return m_Device; };
-        ID3D12Device6* operator->() { return Get(); };
+        ID3D12Device6* Get();
+        ID3D12Device6* operator->();
 
-        GraphicQueue& GetGraphicQueue() { return m_GraphicQueue; }
-        ComputeQueue& GetComputeQueue() { return m_ComputeQueue; }
-        CopyQueue& GetCopyQueue() { return m_CopyQueue; }
+        GraphicQueue& GetGraphicQueue();
+        ComputeQueue& GetComputeQueue();
+        CopyQueue& GetCopyQueue();
 
         bool Initialize(Factory& factory);
         void Unload();
@@ -47,4 +47,4 @@ namespace Boolka
         FeatureSupportHelper m_FeatureSupportHelper;
     };
 
-}
+} // namespace Boolka

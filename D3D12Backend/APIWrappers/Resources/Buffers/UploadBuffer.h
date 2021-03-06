@@ -6,8 +6,7 @@ namespace Boolka
 
     class Device;
 
-    class UploadBuffer :
-        public Buffer
+    class UploadBuffer : public Buffer
     {
     public:
         UploadBuffer() = default;
@@ -22,4 +21,4 @@ namespace Boolka
         void Upload(void* data, UINT64 size);
     };
 
-}
+} // namespace Boolka

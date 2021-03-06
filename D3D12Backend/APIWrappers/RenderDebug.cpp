@@ -1,4 +1,5 @@
 #include "stdafx.h"
+
 #include "RenderDebug.h"
 
 namespace Boolka
@@ -34,4 +35,4 @@ namespace Boolka
 #endif
     }
 
-}
+} // namespace Boolka

@@ -12,5 +12,4 @@ namespace Boolka
         ~Texture() = default;
     };
 
-}
-
+} // namespace Boolka

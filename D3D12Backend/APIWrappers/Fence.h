@@ -32,5 +32,4 @@ namespace Boolka
         HANDLE m_CPUEvent;
     };
 
-}
-
+} // namespace Boolka

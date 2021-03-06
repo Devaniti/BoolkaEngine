@@ -1,5 +1,7 @@
 #include "stdafx.h"
+
 #include "CommandQueue.h"
+
 #include "APIWrappers/Device.h"
 
 namespace Boolka
@@ -24,6 +26,17 @@ namespace Boolka
         m_Fence.Initialize(device);
 
         return true;
+    }
+
+    ID3D12CommandQueue* CommandQueue::Get()
+    {
+        BLK_ASSERT(m_Queue != nullptr);
+        return m_Queue;
+    }
+
+    ID3D12CommandQueue* CommandQueue::operator->()
+    {
+        return Get();
     }
 
     void CommandQueue::Unload()
@@ -62,4 +75,9 @@ namespace Boolka
         WaitCPU(value);
     }
 
-}
+    Fence& CommandQueue::GetFence()
+    {
+        return m_Fence;
+    }
+
+} // namespace Boolka

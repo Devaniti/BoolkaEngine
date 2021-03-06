@@ -4,8 +4,7 @@
 namespace Boolka
 {
 
-    class PresentPass :
-        public RenderPass
+    class PresentPass : public RenderPass
     {
     public:
         PresentPass() = default;
@@ -20,4 +19,4 @@ namespace Boolka
     private:
     };
 
-}
+} // namespace Boolka

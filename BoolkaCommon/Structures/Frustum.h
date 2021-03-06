@@ -8,7 +8,6 @@ namespace Boolka
     class Frustum
     {
     public:
-
         enum TestResult
         {
             Outside = 0,
@@ -36,4 +35,4 @@ namespace Boolka
         Vector4 m_planes[6];
     };
 
-}
+} // namespace Boolka

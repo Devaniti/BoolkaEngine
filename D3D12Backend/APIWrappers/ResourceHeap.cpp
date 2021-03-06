@@ -1,5 +1,7 @@
 #include "stdafx.h"
+
 #include "ResourceHeap.h"
+
 #include "APIWrappers/Device.h"
 
 namespace Boolka
@@ -15,7 +17,19 @@ namespace Boolka
         BLK_ASSERT(m_heap == nullptr);
     }
 
-    bool ResourceHeap::Initialize(Device& device, size_t size, D3D12_HEAP_TYPE heapType, D3D12_HEAP_FLAGS heapFlags)
+    ID3D12Heap* ResourceHeap::Get()
+    {
+        BLK_ASSERT(m_heap != nullptr);
+        return m_heap;
+    }
+
+    ID3D12Heap* ResourceHeap::operator->()
+    {
+        return Get();
+    }
+
+    bool ResourceHeap::Initialize(Device& device, size_t size, D3D12_HEAP_TYPE heapType,
+                                  D3D12_HEAP_FLAGS heapFlags)
     {
         BLK_ASSERT(m_heap == nullptr);
 
@@ -41,5 +55,4 @@ namespace Boolka
         m_heap = nullptr;
     }
 
-
-}
+} // namespace Boolka

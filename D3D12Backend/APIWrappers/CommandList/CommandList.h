@@ -15,8 +15,8 @@ namespace Boolka
         CommandList& operator=(CommandList&&) = delete;
 
     public:
-        ID3D12GraphicsCommandList5* Get() { BLK_ASSERT(m_CommandList != nullptr); return m_CommandList; };
-        ID3D12GraphicsCommandList5* operator->() { return Get(); };
+        ID3D12GraphicsCommandList5* Get();
+        ID3D12GraphicsCommandList5* operator->();
 
         void Unload();
 
@@ -26,4 +26,4 @@ namespace Boolka
         ID3D12GraphicsCommandList5* m_CommandList;
     };
 
-}
+} // namespace Boolka

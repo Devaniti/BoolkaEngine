@@ -1,12 +1,11 @@
 #pragma once
-#include "RenderPass.h"
 #include "APIWrappers/PipelineState/GraphicPipelineState.h"
+#include "RenderPass.h"
 
 namespace Boolka
 {
 
-    class DeferredLightingPass :
-        public RenderPass
+    class DeferredLightingPass : public RenderPass
     {
     public:
         DeferredLightingPass() = default;
@@ -22,4 +21,4 @@ namespace Boolka
         GraphicPipelineState m_PSO;
     };
 
-}
+} // namespace Boolka

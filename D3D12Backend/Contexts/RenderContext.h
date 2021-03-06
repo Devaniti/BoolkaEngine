@@ -13,19 +13,22 @@ namespace Boolka
         RenderContext();
         ~RenderContext();
 
-        bool Initialize(RenderEngineContext& engineContext, RenderFrameContext& frameContext, RenderThreadContext& threadContext);
+        bool Initialize(RenderEngineContext& engineContext, RenderFrameContext& frameContext,
+                        RenderThreadContext& threadContext);
         void Unload();
 
-        RenderEngineContext& GetRenderEngineContext() { BLK_ASSERT(m_engineContext != nullptr); return *m_engineContext; };
-        RenderFrameContext& GetRenderFrameContext() { BLK_ASSERT(m_frameContext != nullptr); return *m_frameContext; };
-        RenderThreadContext& GetRenderThreadContext() { BLK_ASSERT(m_threadContext != nullptr); return *m_threadContext; };
+        RenderEngineContext& GetRenderEngineContext();
+        RenderFrameContext& GetRenderFrameContext();
+        RenderThreadContext& GetRenderThreadContext();
 
-        const RenderEngineContext& GetRenderEngineContext() const { BLK_ASSERT(m_engineContext != nullptr); return *m_engineContext; };
-        const RenderFrameContext& GetRenderFrameContext() const { BLK_ASSERT(m_frameContext != nullptr); return *m_frameContext; };
-        const RenderThreadContext& GetRenderThreadContext() const { BLK_ASSERT(m_threadContext != nullptr); return *m_threadContext; };
+        const RenderEngineContext& GetRenderEngineContext() const;
+        const RenderFrameContext& GetRenderFrameContext() const;
+        const RenderThreadContext& GetRenderThreadContext() const;
 
-        std::tuple<RenderEngineContext&, RenderFrameContext&, RenderThreadContext&> GetContexts() { return { GetRenderEngineContext(), GetRenderFrameContext(), GetRenderThreadContext() }; };
-        std::tuple<const RenderEngineContext&, const RenderFrameContext&, const RenderThreadContext&> GetContexts() const { return { GetRenderEngineContext(), GetRenderFrameContext(), GetRenderThreadContext() }; };
+        std::tuple<RenderEngineContext&, RenderFrameContext&, RenderThreadContext&> GetContexts();
+        std::tuple<const RenderEngineContext&, const RenderFrameContext&,
+                   const RenderThreadContext&>
+        GetContexts() const;
 
     private:
         RenderEngineContext* m_engineContext;
@@ -33,4 +36,4 @@ namespace Boolka
         RenderThreadContext* m_threadContext;
     };
 
-}
+} // namespace Boolka

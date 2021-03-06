@@ -1,12 +1,13 @@
 #include "stdafx.h"
+
 #include "UpdateRenderPass.h"
 
-#include "RenderSchedule/ResourceTracker.h"
+#include "APIWrappers/Resources/ResourceTransition.h"
 #include "Contexts/RenderContext.h"
 #include "Contexts/RenderEngineContext.h"
 #include "Contexts/RenderFrameContext.h"
 #include "Contexts/RenderThreadContext.h"
-#include "APIWrappers/Resources/ResourceTransition.h"
+#include "RenderSchedule/ResourceTracker.h"
 
 namespace Boolka
 {
@@ -28,16 +29,21 @@ namespace Boolka
         UINT frameIndex = frameContext.GetFrameIndex();
         Texture2D& backbuffer = resourceContainer.GetBackBuffer(frameIndex);
         RenderTargetView& backbufferRTV = resourceContainer.GetBackBufferRTV(frameIndex);
-        DepthStencilView& gbufferDSV = resourceContainer.GetDSV(ResourceContainer::DSV::GbufferDepth);
-        Buffer& frameConstantBuffer = resourceContainer.GetFlippableBuffer(frameIndex, ResourceContainer::FlipBuf::Frame);
-        UploadBuffer& currentUploadBuffer = resourceContainer.GetFlippableUploadBuffer(frameIndex, ResourceContainer::FlipUploadBuf::Frame);
+        DepthStencilView& gbufferDSV =
+            resourceContainer.GetDSV(ResourceContainer::DSV::GbufferDepth);
+        Buffer& frameConstantBuffer =
+            resourceContainer.GetFlippableBuffer(frameIndex, ResourceContainer::FlipBuf::Frame);
+        UploadBuffer& currentUploadBuffer = resourceContainer.GetFlippableUploadBuffer(
+            frameIndex, ResourceContainer::FlipUploadBuf::Frame);
 
         GraphicCommandListImpl& commandList = threadContext.GetGraphicCommandList();
 
         BLK_GPU_SCOPE(commandList.Get(), "UpdateRenderPass");
         BLK_RENDER_DEBUG_ONLY(resourceTracker.ValidateStates(commandList));
 
-        ResourceTransition::Transition(frameConstantBuffer, commandList, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, D3D12_RESOURCE_STATE_COPY_DEST);
+        ResourceTransition::Transition(frameConstantBuffer, commandList,
+                                       D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER,
+                                       D3D12_RESOURCE_STATE_COPY_DEST);
 
         const Matrix4x4& viewMatrix = frameContext.GetViewMatrix();
         const Matrix4x4& projMatrix = frameContext.GetProjMatrix();
@@ -69,7 +75,9 @@ namespace Boolka
 
         commandList->CopyResource(frameConstantBuffer.Get(), currentUploadBuffer.Get());
 
-        ResourceTransition::Transition(frameConstantBuffer, commandList, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+        ResourceTransition::Transition(frameConstantBuffer, commandList,
+                                       D3D12_RESOURCE_STATE_COPY_DEST,
+                                       D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
 
         return true;
     }
@@ -79,4 +87,4 @@ namespace Boolka
         return true;
     }
 
-}
+} // namespace Boolka

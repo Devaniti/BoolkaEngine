@@ -1,8 +1,7 @@
 #pragma once
-#include "WindowManager.h"
-#include "APIWrappers/Swapchain.h"
 #include "APIWrappers/Resources/Textures/Texture2D.h"
-
+#include "APIWrappers/Swapchain.h"
+#include "WindowManager.h"
 
 namespace Boolka
 {
@@ -28,8 +27,8 @@ namespace Boolka
         Texture2D& GetBuffer(UINT index);
         UINT GetCurrentFrameIndex();
 
-        const WindowState& GetWindowState() { return m_WindowState; };
-        HWND GetHWND() const { return m_Window.GetHWND(); };
+        const WindowState& GetWindowState();
+        HWND GetHWND() const;
 
     private:
         WindowManager m_Window;
@@ -38,5 +37,4 @@ namespace Boolka
         WindowState m_WindowState;
     };
 
-}
-
+} // namespace Boolka

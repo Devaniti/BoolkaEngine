@@ -1,14 +1,12 @@
 #pragma once
-#include "RenderPass.h"
-
 #include "APIWrappers/PipelineState/GraphicPipelineState.h"
 #include "Camera.h"
+#include "RenderPass.h"
 
 namespace Boolka
 {
 
-    class GBufferRenderPass :
-        public RenderPass
+    class GBufferRenderPass : public RenderPass
     {
     public:
         GBufferRenderPass() = default;
@@ -24,4 +22,4 @@ namespace Boolka
         GraphicPipelineState m_PSO;
     };
 
-}
+} // namespace Boolka

@@ -1,11 +1,11 @@
 #include "stdafx.h"
+
 #include "Scene.h"
 
-#include "Contexts/RenderEngineContext.h"
-#include "APIWrappers/Resources/ResourceTransition.h"
 #include "APIWrappers/Resources/Buffers/UploadBuffer.h"
+#include "APIWrappers/Resources/ResourceTransition.h"
 #include "BoolkaCommon/DebugHelpers/DebugProfileTimer.h"
-
+#include "Contexts/RenderEngineContext.h"
 
 namespace Boolka
 {
@@ -35,7 +35,8 @@ namespace Boolka
 
         m_VertexBufferSize = dataWrapper.vertexBufferSize;
         BLK_ASSERT(m_VertexBufferSize != 0);
-        res = m_VertexBuffer.Initialize(device, m_VertexBufferSize, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_FLAG_NONE, D3D12_RESOURCE_STATE_COMMON);
+        res = m_VertexBuffer.Initialize(device, m_VertexBufferSize, D3D12_HEAP_TYPE_DEFAULT,
+                                        D3D12_RESOURCE_FLAG_NONE, D3D12_RESOURCE_STATE_COMMON);
         BLK_ASSERT(res);
 
         res = m_VertexBufferView.Initialize(m_VertexBuffer, m_VertexBufferSize, 9 * sizeof(float));
@@ -43,7 +44,8 @@ namespace Boolka
 
         m_IndexBufferSize = dataWrapper.indexBufferSize;
         BLK_ASSERT(m_IndexBufferSize != 0);
-        res = m_IndexBuffer.Initialize(device, m_IndexBufferSize, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_FLAG_NONE, D3D12_RESOURCE_STATE_COMMON);
+        res = m_IndexBuffer.Initialize(device, m_IndexBufferSize, D3D12_HEAP_TYPE_DEFAULT,
+                                       D3D12_RESOURCE_FLAG_NONE, D3D12_RESOURCE_STATE_COMMON);
         BLK_ASSERT(res);
 
         res = m_IndexBufferView.Initialize(m_IndexBuffer, m_IndexBufferSize, DXGI_FORMAT_R32_UINT);
@@ -58,10 +60,14 @@ namespace Boolka
         res = m_CommandSignature.Initialize(device);
         BLK_ASSERT(res);
 
-        res = m_DrawIndirectBuffer.Initialize(device, (static_cast<UINT64>(m_ObjectCount) + 1) * 32, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        res = m_DrawIndirectBuffer.Initialize(
+            device, (static_cast<UINT64>(m_ObjectCount) + 1) * 32, D3D12_HEAP_TYPE_DEFAULT,
+            D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         BLK_ASSERT(res);
 
-        res = m_SRVDescriptorHeap.Initialize(device, dataWrapper.textureCount, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
+        res = m_SRVDescriptorHeap.Initialize(device, dataWrapper.textureCount,
+                                             D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+                                             D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
         BLK_ASSERT(res);
 
         m_Textures.resize(dataWrapper.textureCount);
@@ -100,7 +106,9 @@ namespace Boolka
             BLK_ASSERT(mipCount == currentMip);
             size_t alignment;
             size_t size;
-            Texture2D::GetRequiredSize(alignment, size, device, textureHeader.width, textureHeader.height, mipCount, DXGI_FORMAT_B8G8R8A8_UNORM, D3D12_RESOURCE_FLAG_NONE);
+            Texture2D::GetRequiredSize(alignment, size, device, textureHeader.width,
+                                       textureHeader.height, mipCount, DXGI_FORMAT_B8G8R8A8_UNORM,
+                                       D3D12_RESOURCE_FLAG_NONE);
 
             lastOffset = BLK_CEIL_TO_POWER_OF_TWO(lastOffset, alignment);
             textureOffsets.push_back(lastOffset);
@@ -108,26 +116,30 @@ namespace Boolka
         }
         size_t heapSize = lastOffset;
 
-        m_ResourceHeap.Initialize(device, heapSize, D3D12_HEAP_TYPE_DEFAULT, D3D12_HEAP_FLAG_ALLOW_ONLY_NON_RT_DS_TEXTURES);
+        m_ResourceHeap.Initialize(device, heapSize, D3D12_HEAP_TYPE_DEFAULT,
+                                  D3D12_HEAP_FLAG_ALLOW_ONLY_NON_RT_DS_TEXTURES);
 
         for (UINT i = 0; i < dataWrapper.textureCount; ++i)
         {
             auto& texture = m_Textures[i];
             const auto& textureHeader = dataWrapper.textureHeaders[i];
 
-            texture.Initialize(device, m_ResourceHeap, textureOffsets[i], textureHeader.width, textureHeader.height, textureHeader.mipCount, DXGI_FORMAT_B8G8R8A8_UNORM, D3D12_RESOURCE_FLAG_NONE, nullptr, D3D12_RESOURCE_STATE_COMMON);
+            texture.Initialize(device, m_ResourceHeap, textureOffsets[i], textureHeader.width,
+                               textureHeader.height, textureHeader.mipCount,
+                               DXGI_FORMAT_B8G8R8A8_UNORM, D3D12_RESOURCE_FLAG_NONE, nullptr,
+                               D3D12_RESOURCE_STATE_COMMON);
             BLK_RENDER_DEBUG_ONLY(texture.SetDebugName(L"Scene::m_Textures[%d]", i));
         }
 
         for (UINT i = 0; i < dataWrapper.textureCount; ++i)
         {
-            bool res = m_SRVs[i].Initialize(device, m_Textures[i], m_SRVDescriptorHeap.GetCPUHandle(i));
+            bool res =
+                m_SRVs[i].Initialize(device, m_Textures[i], m_SRVDescriptorHeap.GetCPUHandle(i));
             BLK_ASSERT(res);
         }
 
         UploadBuffer uploadBuffer;
         uploadBuffer.Initialize(device, max(64, uploadSize));
-
 
         DebugProfileTimer streamingWait;
         streamingWait.Start();
@@ -140,10 +152,12 @@ namespace Boolka
 
         UINT64 uploadBufferOffset = 0;
 
-        initCommandList->CopyBufferRegion(m_VertexBuffer.Get(), 0, uploadBuffer.Get(), uploadBufferOffset, m_VertexBufferSize);
+        initCommandList->CopyBufferRegion(m_VertexBuffer.Get(), 0, uploadBuffer.Get(),
+                                          uploadBufferOffset, m_VertexBufferSize);
         uploadBufferOffset += m_VertexBufferSize;
 
-        initCommandList->CopyBufferRegion(m_IndexBuffer.Get(), 0, uploadBuffer.Get(), uploadBufferOffset, m_IndexBufferSize);
+        initCommandList->CopyBufferRegion(m_IndexBuffer.Get(), 0, uploadBuffer.Get(),
+                                          uploadBufferOffset, m_IndexBufferSize);
         uploadBufferOffset += m_IndexBufferSize;
 
         for (UINT i = 0; i < dataWrapper.textureCount; ++i)
@@ -161,7 +175,7 @@ namespace Boolka
             {
                 size_t rowPitch = BLK_CEIL_TO_POWER_OF_TWO(width * bytesPerPixel, 256);
                 size_t textureSize = BLK_CEIL_TO_POWER_OF_TWO(rowPitch * height, 512);
-            
+
                 D3D12_TEXTURE_COPY_LOCATION copyDest;
                 copyDest.pResource = texture.Get();
                 copyDest.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
@@ -189,7 +203,8 @@ namespace Boolka
 
         uploadBuffer.Unload();
 
-        memcpy(m_Objects.data(), dataWrapper.objectData, dataWrapper.objectCount * sizeof(SceneData::ObjectHeader));
+        memcpy(m_Objects.data(), dataWrapper.objectData,
+               dataWrapper.objectCount * sizeof(SceneData::ObjectHeader));
         m_OpaqueObjectCount = dataWrapper.opaqueCount;
 
         m_BatchManager.Initialize(*this);
@@ -236,4 +251,69 @@ namespace Boolka
         m_BatchManager.Unload();
     }
 
-}
+    UINT Scene::GetVertexBufferSize() const
+    {
+        return m_VertexBufferSize;
+    }
+
+    Buffer& Scene::GetVertexBuffer()
+    {
+        return m_VertexBuffer;
+    }
+
+    VertexBufferView& Scene::GetVertexBufferView()
+    {
+        return m_VertexBufferView;
+    }
+
+    UINT Scene::GetIndexBufferSize() const
+    {
+        return m_IndexBufferSize;
+    }
+
+    Buffer& Scene::GetIndexBuffer()
+    {
+        return m_IndexBuffer;
+    }
+
+    IndexBufferView& Scene::GetIndexBufferView()
+    {
+        return m_IndexBufferView;
+    }
+
+    UINT Scene::GetIndexCount() const
+    {
+        return m_IndexCount;
+    }
+
+    UINT Scene::GetObjectCount() const
+    {
+        return m_ObjectCount;
+    }
+
+    UINT Scene::GetOpaqueObjectCount() const
+    {
+        return m_OpaqueObjectCount;
+    }
+
+    DescriptorHeap& Scene::GetSRVDescriptorHeap()
+    {
+        return m_SRVDescriptorHeap;
+    }
+
+    BatchManager& Scene::GetBatchManager()
+    {
+        return m_BatchManager;
+    }
+
+    const std::vector<SceneData::ObjectHeader>& Scene::GetObjects() const
+    {
+        return m_Objects;
+    }
+
+    std::vector<SceneData::ObjectHeader>& Scene::GetObjects()
+    {
+        return m_Objects;
+    }
+
+} // namespace Boolka

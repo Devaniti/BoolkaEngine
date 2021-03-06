@@ -1,10 +1,11 @@
 #include "stdafx.h"
+
 #include "DebugFileWriter.h"
 
 namespace Boolka
 {
 
-    DebugFileWriter::DebugFileWriter() 
+    DebugFileWriter::DebugFileWriter()
         : m_BytesWritten(0)
     {
     }
@@ -68,7 +69,8 @@ namespace Boolka
         return !m_File.fail();
     }
 
-    bool DebugFileWriter::WriteFile(const char* filename, MemoryBlock data, size_t alignment /*= 0*/)
+    bool DebugFileWriter::WriteFile(const char* filename, MemoryBlock data,
+                                    size_t alignment /*= 0*/)
     {
         DebugFileWriter fileWriter;
         bool res = fileWriter.OpenFile(filename);
@@ -92,4 +94,4 @@ namespace Boolka
         return true;
     }
 
-}
+} // namespace Boolka

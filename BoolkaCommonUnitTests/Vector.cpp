@@ -1,5 +1,8 @@
 #include "pch.h"
 
+// clang-format mess up formating due to preprocessor class definition
+// clang-format off
+
 namespace Boolka
 {
 

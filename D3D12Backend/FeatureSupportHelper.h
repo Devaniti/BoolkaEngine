@@ -13,10 +13,10 @@ namespace Boolka
 
         bool Initialize(Device& device);
         void Unload();
+
     private:
         bool CheckOptions(Device& device);
         bool CheckShaderModel(Device& device);
     };
 
-}
-
+} // namespace Boolka

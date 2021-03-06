@@ -1,12 +1,13 @@
 #include "stdafx.h"
+
 #include "PresentPass.h"
 
-#include "RenderSchedule/ResourceTracker.h"
 #include "APIWrappers/Resources/Textures/Texture2D.h"
 #include "Contexts/RenderContext.h"
 #include "Contexts/RenderEngineContext.h"
 #include "Contexts/RenderFrameContext.h"
 #include "Contexts/RenderThreadContext.h"
+#include "RenderSchedule/ResourceTracker.h"
 
 namespace Boolka
 {
@@ -31,7 +32,8 @@ namespace Boolka
         BLK_RENDER_DEBUG_ONLY(resourceTracker.ValidateStates(commandList));
 
         UINT frameIndex = frameContext.GetFrameIndex();
-        resourceTracker.Transition(resourceContainer.GetBackBuffer(frameIndex), commandList, D3D12_RESOURCE_STATE_PRESENT);
+        resourceTracker.Transition(resourceContainer.GetBackBuffer(frameIndex), commandList,
+                                   D3D12_RESOURCE_STATE_PRESENT);
 
         return true;
     }
@@ -41,4 +43,4 @@ namespace Boolka
         return true;
     }
 
-}
+} // namespace Boolka

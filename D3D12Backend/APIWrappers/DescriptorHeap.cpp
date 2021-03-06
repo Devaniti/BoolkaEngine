@@ -1,4 +1,5 @@
 #include "stdafx.h"
+
 #include "DescriptorHeap.h"
 
 #include "APIWrappers/Device.h"
@@ -28,6 +29,17 @@ namespace Boolka
 #endif
     }
 
+    ID3D12DescriptorHeap* DescriptorHeap::Get()
+    {
+        BLK_ASSERT(m_DescriptorHeap != nullptr);
+        return m_DescriptorHeap;
+    }
+
+    ID3D12DescriptorHeap* DescriptorHeap::operator->()
+    {
+        return Get();
+    }
+
     D3D12_CPU_DESCRIPTOR_HANDLE DescriptorHeap::GetCPUHandle(UINT index)
     {
 #ifdef BLK_DEBUG
@@ -52,7 +64,9 @@ namespace Boolka
         return result;
     }
 
-    bool DescriptorHeap::Initialize(Device& device, UINT elementCount, D3D12_DESCRIPTOR_HEAP_TYPE heapType, D3D12_DESCRIPTOR_HEAP_FLAGS heapFlags)
+    bool DescriptorHeap::Initialize(Device& device, UINT elementCount,
+                                    D3D12_DESCRIPTOR_HEAP_TYPE heapType,
+                                    D3D12_DESCRIPTOR_HEAP_FLAGS heapFlags)
     {
         BLK_ASSERT(m_DescriptorHeap == nullptr);
 
@@ -61,7 +75,8 @@ namespace Boolka
         rtvHeapDesc.Type = heapType;
         rtvHeapDesc.Flags = heapFlags;
         HRESULT hr = device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_DescriptorHeap));
-        if (!SUCCEEDED(hr)) return false;
+        if (!SUCCEEDED(hr))
+            return false;
 
         m_DescriptorHandleIncrementSize = device->GetDescriptorHandleIncrementSize(heapType);
 
@@ -99,4 +114,4 @@ namespace Boolka
 #endif
     }
 
-}
+} // namespace Boolka

@@ -20,8 +20,8 @@ cbuffer PerFrame : register(b0)
     float4 vertexToScreenPacked;
 };
 
-static float2x2 vertexToScreen = 
-{ 
-    {vertexToScreenPacked[0], vertexToScreenPacked[1]}, 
-    {vertexToScreenPacked[2], vertexToScreenPacked[3]} 
+static float2x2 vertexToScreen =
+{
+    { vertexToScreenPacked[0], vertexToScreenPacked[1] },
+    { vertexToScreenPacked[2], vertexToScreenPacked[3] }
 };

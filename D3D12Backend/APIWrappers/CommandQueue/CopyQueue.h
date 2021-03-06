@@ -10,15 +10,14 @@ namespace Boolka
     class CopyQueue : public CommandQueue
     {
     public:
-        CopyQueue() {};
-        ~CopyQueue() {};
+        CopyQueue() = default;
+        ~CopyQueue() = default;
 
         bool Initialize(Device& device);
 
         void ExecuteCommandList(CopyCommandListImpl& commandList);
-    private:
 
+    private:
     };
 
-}
-
+} // namespace Boolka

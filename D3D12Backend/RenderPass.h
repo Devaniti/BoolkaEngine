@@ -9,8 +9,8 @@ namespace Boolka
     class RenderPass
     {
     public:
-        RenderPass() {};
-        virtual ~RenderPass() {};
+        RenderPass() = default;
+        virtual ~RenderPass() = default;
 
         virtual bool PrepareRendering() = 0;
         virtual bool Render(RenderContext& renderContext, ResourceTracker& resourceTracker) = 0;
@@ -19,5 +19,4 @@ namespace Boolka
         virtual void Unload() = 0;
     };
 
-}
-
+} // namespace Boolka

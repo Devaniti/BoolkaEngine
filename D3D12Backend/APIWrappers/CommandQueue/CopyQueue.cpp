@@ -1,8 +1,9 @@
 #include "stdafx.h"
+
 #include "CopyQueue.h"
 
-#include "APIWrappers/Device.h"
 #include "APIWrappers/CommandList/CopyCommandListImpl.h"
+#include "APIWrappers/Device.h"
 
 namespace Boolka
 {
@@ -16,7 +17,8 @@ namespace Boolka
         desc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
         desc.NodeMask = 0;
         HRESULT hr = device->CreateCommandQueue(&desc, IID_PPV_ARGS(&commandQueue));
-        if (FAILED(hr)) return false;
+        if (FAILED(hr))
+            return false;
 
         return CommandQueue::Initialize(device, commandQueue);
     }
@@ -27,4 +29,4 @@ namespace Boolka
         m_Queue->ExecuteCommandLists(1, &nativeCommandList);
     }
 
-}
+} // namespace Boolka

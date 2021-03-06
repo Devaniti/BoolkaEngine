@@ -20,7 +20,8 @@ namespace Boolka
         void Unload();
 
         void RegisterResource(Resource& resource, D3D12_RESOURCE_STATES initialState);
-        bool Transition(Resource& resource, CommandList& commandList, D3D12_RESOURCE_STATES targetState);
+        bool Transition(Resource& resource, CommandList& commandList,
+                        D3D12_RESOURCE_STATES targetState);
 
 #ifdef BLK_RENDER_DEBUG
         void ValidateStates(CommandList& commandList);
@@ -29,8 +30,7 @@ namespace Boolka
         void Decay();
 
     private:
-
         std::unordered_map<Resource*, D3D12_RESOURCE_STATES> m_TrackedResources;
     };
 
-}
+} // namespace Boolka

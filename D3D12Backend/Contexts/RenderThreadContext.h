@@ -16,9 +16,10 @@ namespace Boolka
         bool Initialize(Device& device);
         void Unload();
 
-        GraphicCommandListImpl& GetGraphicCommandList() { return *m_CurrentGraphicCommandList; };
+        GraphicCommandListImpl& GetGraphicCommandList();
 
         void FlipFrame(UINT frameIndex);
+
     private:
         GraphicCommandAllocator* m_CurrentGraphicCommandAllocator;
         GraphicCommandListImpl* m_CurrentGraphicCommandList;
@@ -26,4 +27,4 @@ namespace Boolka
         GraphicCommandListImpl m_GraphicCommandList[BLK_IN_FLIGHT_FRAMES];
     };
 
-}
+} // namespace Boolka

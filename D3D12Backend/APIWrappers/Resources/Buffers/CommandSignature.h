@@ -12,8 +12,8 @@ namespace Boolka
         CommandSignature();
         ~CommandSignature();
 
-        ID3D12CommandSignature* Get() { BLK_ASSERT(m_CommandSignature != nullptr); return m_CommandSignature; }
-        ID3D12CommandSignature* operator->() { return Get(); }
+        ID3D12CommandSignature* Get();
+        ID3D12CommandSignature* operator->();
 
         bool Initialize(Device& device);
         void Unload();
@@ -22,4 +22,4 @@ namespace Boolka
         ID3D12CommandSignature* m_CommandSignature;
     };
 
-}
+} // namespace Boolka

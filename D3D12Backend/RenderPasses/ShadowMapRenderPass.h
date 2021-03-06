@@ -1,12 +1,11 @@
 #pragma once
-#include "RenderPass.h"
 #include "APIWrappers/PipelineState/GraphicPipelineState.h"
+#include "RenderPass.h"
 
 namespace Boolka
 {
 
-    class ShadowMapRenderPass :
-        public RenderPass
+    class ShadowMapRenderPass : public RenderPass
     {
     public:
         ShadowMapRenderPass() = default;
@@ -17,8 +16,9 @@ namespace Boolka
 
         bool Render(RenderContext& renderContext, ResourceTracker& resourceTracker) override;
         bool PrepareRendering() override;
+
     private:
         GraphicPipelineState m_PSO;
     };
 
-}
+} // namespace Boolka

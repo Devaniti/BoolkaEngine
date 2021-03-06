@@ -1,4 +1,5 @@
 #include "stdafx.h"
+
 #include "Swapchain.h"
 
 #include "Device.h"
@@ -20,9 +21,23 @@ namespace Boolka
         BLK_ASSERT(m_IsFullscreen == false);
     }
 
-    bool Swapchain::Initialize(Device& device, Factory& factory, HWND window, WindowState& windowState)
+    IDXGISwapChain4* Swapchain::Get()
     {
-        static_assert(BLK_IN_FLIGHT_FRAMES > 1, "DXGI_SWAP_EFFECT_FLIP_DISCARD swapchain only support 2+ backbuffers");
+        BLK_ASSERT(m_Swapchain != nullptr);
+        return m_Swapchain;
+    }
+
+    IDXGISwapChain4* Swapchain::operator->()
+    {
+        return Get();
+    }
+
+    bool Swapchain::Initialize(Device& device, Factory& factory, HWND window,
+                               WindowState& windowState)
+    {
+        static_assert(BLK_IN_FLIGHT_FRAMES > 1,
+                      "DXGI_SWAP_EFFECT_FLIP_DISCARD swapchain only support 2+ "
+                      "backbuffers");
 
         ID3D12CommandQueue* graphicQueue = device.GetGraphicQueue().Get();
         DXGI_SWAP_CHAIN_DESC1 desc = {};
@@ -39,10 +54,12 @@ namespace Boolka
         desc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
         desc.Flags = DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
         IDXGISwapChain1* swapchain1 = nullptr;
-        HRESULT hr = factory->CreateSwapChainForHwnd(graphicQueue, window, &desc, nullptr, nullptr, &swapchain1);
+        HRESULT hr = factory->CreateSwapChainForHwnd(graphicQueue, window, &desc, nullptr, nullptr,
+                                                     &swapchain1);
         BLK_CRITICAL_ASSERT(SUCCEEDED(hr));
 
-        hr = factory->MakeWindowAssociation(window, DXGI_MWA_NO_ALT_ENTER | DXGI_MWA_NO_PRINT_SCREEN);
+        hr = factory->MakeWindowAssociation(window,
+                                            DXGI_MWA_NO_ALT_ENTER | DXGI_MWA_NO_PRINT_SCREEN);
         BLK_CRITICAL_ASSERT(SUCCEEDED(hr));
 
         hr = swapchain1->QueryInterface(&m_Swapchain);
@@ -54,7 +71,8 @@ namespace Boolka
         if (windowState.windowMode == WindowState::WindowMode::Fullscreen)
         {
             m_Swapchain->SetFullscreenState(TRUE, NULL);
-            m_Swapchain->ResizeBuffers(BLK_IN_FLIGHT_FRAMES, 0, 0, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT);
+            m_Swapchain->ResizeBuffers(BLK_IN_FLIGHT_FRAMES, 0, 0, DXGI_FORMAT_R8G8B8A8_UNORM,
+                                       DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT);
             m_IsFullscreen = true;
         }
 
@@ -105,11 +123,13 @@ namespace Boolka
     bool Swapchain::Update(Device& device, WindowState windowState)
     {
         device.Flush();
-        HRESULT hr = m_Swapchain->ResizeBuffers(BLK_IN_FLIGHT_FRAMES, windowState.width, windowState.height, DXGI_FORMAT_B8G8R8A8_UNORM, DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT);
+        HRESULT hr = m_Swapchain->ResizeBuffers(BLK_IN_FLIGHT_FRAMES, windowState.width,
+                                                windowState.height, DXGI_FORMAT_B8G8R8A8_UNORM,
+                                                DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT);
         BLK_ASSERT(SUCCEEDED(hr));
         device.Flush();
 
         return true;
     }
 
-}
+} // namespace Boolka

@@ -14,10 +14,18 @@ namespace Boolka
         ~Texture2D() = default;
 
         // Creates committed resource
-        bool Initialize(Device& device, D3D12_HEAP_TYPE heapType, UINT64 width, UINT height, UINT16 mipCount, DXGI_FORMAT format, D3D12_RESOURCE_FLAGS resourceFlags, D3D12_CLEAR_VALUE* clearValue, D3D12_RESOURCE_STATES initialState, UINT16 arraySize = 1);
+        bool Initialize(Device& device, D3D12_HEAP_TYPE heapType, UINT64 width, UINT height,
+                        UINT16 mipCount, DXGI_FORMAT format, D3D12_RESOURCE_FLAGS resourceFlags,
+                        D3D12_CLEAR_VALUE* clearValue, D3D12_RESOURCE_STATES initialState,
+                        UINT16 arraySize = 1);
         // Creates placed resource
-        bool Initialize(Device& device, ResourceHeap& resourceHeap, size_t heapOffset, UINT64 width, UINT height, UINT16 mipCount, DXGI_FORMAT format, D3D12_RESOURCE_FLAGS resourceFlags, D3D12_CLEAR_VALUE* clearValue, D3D12_RESOURCE_STATES initialState, UINT16 arraySize = 1);
-        static void GetRequiredSize(size_t& outAlignment, size_t& outSize, Device& device, UINT64 width, UINT height, UINT16 mipCount, DXGI_FORMAT format, D3D12_RESOURCE_FLAGS resourceFlags, UINT16 arraySize = 1);
+        bool Initialize(Device& device, ResourceHeap& resourceHeap, size_t heapOffset, UINT64 width,
+                        UINT height, UINT16 mipCount, DXGI_FORMAT format,
+                        D3D12_RESOURCE_FLAGS resourceFlags, D3D12_CLEAR_VALUE* clearValue,
+                        D3D12_RESOURCE_STATES initialState, UINT16 arraySize = 1);
+        static void GetRequiredSize(size_t& outAlignment, size_t& outSize, Device& device,
+                                    UINT64 width, UINT height, UINT16 mipCount, DXGI_FORMAT format,
+                                    D3D12_RESOURCE_FLAGS resourceFlags, UINT16 arraySize = 1);
 
         // This method don't increment resource's reference count
         // You should do it yourself if needed
@@ -25,7 +33,9 @@ namespace Boolka
         void Unload();
 
     private:
-        static D3D12_RESOURCE_DESC FillDesc(UINT64 width, UINT height, UINT16 mipCount, DXGI_FORMAT format, D3D12_RESOURCE_FLAGS resourceFlags, UINT16 arraySize);
+        static D3D12_RESOURCE_DESC FillDesc(UINT64 width, UINT height, UINT16 mipCount,
+                                            DXGI_FORMAT format, D3D12_RESOURCE_FLAGS resourceFlags,
+                                            UINT16 arraySize);
     };
 
-}
+} // namespace Boolka

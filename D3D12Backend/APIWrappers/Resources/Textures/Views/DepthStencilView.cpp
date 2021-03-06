@@ -1,5 +1,7 @@
 #include "stdafx.h"
+
 #include "DepthStencilView.h"
+
 #include "APIWrappers/Device.h"
 #include "APIWrappers/Resources/Textures/Texture2D.h"
 
@@ -16,10 +18,12 @@ namespace Boolka
         BLK_ASSERT(m_CPUDescriptorHandle.ptr == 0);
     }
 
-    bool DepthStencilView::Initialize(Device& device, Texture2D& texture, DXGI_FORMAT format, D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor, UINT16 arraySlice /*= 0*/)
+    bool DepthStencilView::Initialize(Device& device, Texture2D& texture, DXGI_FORMAT format,
+                                      D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor,
+                                      UINT16 arraySlice /*= 0*/)
     {
         BLK_ASSERT(m_CPUDescriptorHandle.ptr == 0);
-        
+
         D3D12_DEPTH_STENCIL_VIEW_DESC desc = {};
         desc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DARRAY;
         desc.Format = format;
@@ -37,4 +41,11 @@ namespace Boolka
         BLK_ASSERT(m_CPUDescriptorHandle.ptr != 0);
         m_CPUDescriptorHandle = {};
     }
-}
+
+    D3D12_CPU_DESCRIPTOR_HANDLE* DepthStencilView::GetCPUDescriptor()
+    {
+        BLK_ASSERT(m_CPUDescriptorHandle.ptr != 0);
+        return &m_CPUDescriptorHandle;
+    }
+
+} // namespace Boolka

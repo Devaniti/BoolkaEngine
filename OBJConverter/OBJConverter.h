@@ -9,4 +9,4 @@ namespace Boolka
         static bool Convert(std::string inFile, std::string outFile);
     };
 
-}
+} // namespace Boolka

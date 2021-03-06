@@ -1,25 +1,25 @@
 #pragma once
 
-#include "RenderSchedule/ResourceTracker.h"
 #include "Contexts/RenderContext.h"
-#include "Contexts/RenderThreadContext.h"
-#include "Contexts/RenderFrameContext.h"
 #include "Contexts/RenderEngineContext.h"
-#include "RenderPasses/GBufferRenderPass.h"
-#include "RenderPasses/PresentPass.h"
-#include "RenderPasses/ZRenderPass.h"
-#include "RenderPasses/UpdateRenderPass.h"
-#include "RenderPasses/TransparentRenderPass.h"
+#include "Contexts/RenderFrameContext.h"
+#include "Contexts/RenderThreadContext.h"
 #include "RenderPasses/DebugOverlayPass.h"
 #include "RenderPasses/DeferredLightingPass.h"
-#include "RenderPasses/ToneMappingPass.h"
+#include "RenderPasses/GBufferRenderPass.h"
+#include "RenderPasses/PresentPass.h"
 #include "RenderPasses/ShadowMapRenderPass.h"
+#include "RenderPasses/ToneMappingPass.h"
+#include "RenderPasses/TransparentRenderPass.h"
+#include "RenderPasses/UpdateRenderPass.h"
+#include "RenderPasses/ZRenderPass.h"
+#include "RenderSchedule/ResourceTracker.h"
 
 namespace Boolka
 {
 
     class Device;
-    class DisplayController; 
+    class DisplayController;
     class SceneData;
 
     class RenderSchedule
@@ -35,7 +35,7 @@ namespace Boolka
 
         bool Render(Device& device, UINT frameIndex);
 
-        ResourceTracker& GetResourceTracker() { return m_ResourceTracker; };
+        ResourceTracker& GetResourceTracker();
 
     private:
         bool InitializeRenderPasses(Device& device);
@@ -66,4 +66,4 @@ namespace Boolka
     public:
     };
 
-}
+} // namespace Boolka

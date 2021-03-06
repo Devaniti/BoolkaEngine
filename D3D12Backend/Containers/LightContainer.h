@@ -6,7 +6,6 @@ namespace Boolka
     class LightContainer
     {
     public:
-
         LightContainer();
 
         struct Light
@@ -24,12 +23,13 @@ namespace Boolka
             Vector3 color;
         };
 
-        const std::vector<Light>& GetLights() const { return m_Lights; }
-        const std::vector<std::array<Matrix4x4, BLK_TEXCUBE_FACE_COUNT>>& GetViewProjMatrices() const { return m_ViewProjMatrices; }
+        const std::vector<Light>& GetLights() const;
+        const std::vector<std::array<Matrix4x4, BLK_TEXCUBE_FACE_COUNT>>& GetViewProjMatrices()
+            const;
 
-        const Sun& GetSun() const { return m_Sun; }
-        const Matrix4x4& GetSunView() const { return m_SunView; }
-        const Matrix4x4& GetSunProj() const { return m_SunProj; }
+        const Sun& GetSun() const;
+        const Matrix4x4& GetSunView() const;
+        const Matrix4x4& GetSunProj() const;
 
         void Update(float deltaTime);
 
@@ -45,4 +45,4 @@ namespace Boolka
         float m_CurrentRotation;
     };
 
-}
+} // namespace Boolka

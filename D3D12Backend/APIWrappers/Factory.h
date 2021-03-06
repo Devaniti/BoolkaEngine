@@ -9,13 +9,14 @@ namespace Boolka
         Factory();
         ~Factory();
 
-        IDXGIFactory7* Get() { BLK_ASSERT(m_Factory != nullptr); return m_Factory; };
-        IDXGIFactory7* operator->() { return Get(); };
+        IDXGIFactory7* Get();
+        IDXGIFactory7* operator->();
 
         bool Initialize();
         void Unload();
+
     private:
         IDXGIFactory7* m_Factory;
     };
 
-}
+} // namespace Boolka

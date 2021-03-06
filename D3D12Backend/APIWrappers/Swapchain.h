@@ -13,8 +13,8 @@ namespace Boolka
         Swapchain();
         ~Swapchain();
 
-        IDXGISwapChain4* Get() { BLK_ASSERT(m_Swapchain != nullptr); return m_Swapchain; };
-        IDXGISwapChain4* operator->() { return Get(); };
+        IDXGISwapChain4* Get();
+        IDXGISwapChain4* operator->();
 
         bool Present(const WindowState& windowState);
         ID3D12Resource* GetBuffer(UINT index);
@@ -24,9 +24,10 @@ namespace Boolka
         void Unload();
 
         bool Update(Device& device, WindowState windowState);
+
     private:
         IDXGISwapChain4* m_Swapchain;
         bool m_IsFullscreen;
     };
 
-}
+} // namespace Boolka

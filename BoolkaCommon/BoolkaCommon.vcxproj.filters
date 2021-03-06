@@ -16,9 +16,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Structures\RingBuffer.h">
-      <Filter>Structures</Filter>
-    </ClInclude>
     <ClInclude Include="Structures\MemoryBlock.h">
       <Filter>Structures</Filter>
     </ClInclude>

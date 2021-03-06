@@ -1,11 +1,12 @@
 #include "stdafx.h"
+
 #include "InputLayout.h"
 
 namespace Boolka
 {
 
     InputLayout::InputLayout()
-        : m_Header({ 0 })
+        : m_Header{0}
         , m_Entries(nullptr)
         , m_NativeEntries(nullptr)
     {
@@ -28,7 +29,8 @@ namespace Boolka
         unsigned char* memoryBlock = new unsigned char[size];
 
         m_Entries = reinterpret_cast<InputLayoutEntry*>(memoryBlock);
-        m_NativeEntries = reinterpret_cast<D3D12_INPUT_ELEMENT_DESC*>(memoryBlock + numEntries * sizeof(InputLayoutEntry));
+        m_NativeEntries = reinterpret_cast<D3D12_INPUT_ELEMENT_DESC*>(
+            memoryBlock + numEntries * sizeof(InputLayoutEntry));
     }
 
     void InputLayout::Unload()
@@ -52,4 +54,4 @@ namespace Boolka
         desc.pInputElementDescs = m_NativeEntries;
     }
 
-}
+} // namespace Boolka

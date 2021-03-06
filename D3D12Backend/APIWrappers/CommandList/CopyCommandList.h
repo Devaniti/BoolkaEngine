@@ -7,8 +7,8 @@ namespace Boolka
     class CopyCommandList : public CommandList
     {
     protected:
-        CopyCommandList() {};
-        ~CopyCommandList() {};
+        CopyCommandList() = default;
+        ~CopyCommandList() = default;
     };
 
-}
+} // namespace Boolka

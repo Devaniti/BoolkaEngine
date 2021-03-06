@@ -24,4 +24,4 @@ namespace Boolka
 
     BLK_IS_PLAIN_DATA_ASSERT(WindowState);
 
-}
+} // namespace Boolka

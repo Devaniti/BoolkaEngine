@@ -1,4 +1,5 @@
 #include "stdafx.h"
+
 #include "RenderBackend.h"
 
 #include "RenderBackendImpl.h"
@@ -16,5 +17,4 @@ namespace Boolka
         delete object;
     }
 
-}
-
+} // namespace Boolka

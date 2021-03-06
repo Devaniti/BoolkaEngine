@@ -1,5 +1,7 @@
 #include "stdafx.h"
+
 #include "RenderTargetView.h"
+
 #include "APIWrappers/Device.h"
 #include "APIWrappers/Resources/Textures/Texture2D.h"
 
@@ -16,7 +18,8 @@ namespace Boolka
         BLK_ASSERT(m_CPUDescriptorHandle.ptr == 0);
     }
 
-    bool RenderTargetView::Initialize(Device& device, Texture2D& texture, DXGI_FORMAT format, D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor)
+    bool RenderTargetView::Initialize(Device& device, Texture2D& texture, DXGI_FORMAT format,
+                                      D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor)
     {
         BLK_ASSERT(m_CPUDescriptorHandle.ptr == 0);
 
@@ -35,4 +38,11 @@ namespace Boolka
         BLK_ASSERT(m_CPUDescriptorHandle.ptr != 0);
         m_CPUDescriptorHandle = {};
     }
-}
+
+    D3D12_CPU_DESCRIPTOR_HANDLE* RenderTargetView::GetCPUDescriptor()
+    {
+        BLK_ASSERT(m_CPUDescriptorHandle.ptr != 0);
+        return &m_CPUDescriptorHandle;
+    }
+
+} // namespace Boolka

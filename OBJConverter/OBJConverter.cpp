@@ -1,10 +1,11 @@
 #include "stdafx.h"
 
 #include "ObjConverter.h"
-#include "tinyobjloader/tiny_obj_loader.h"
-#include "BoolkaCommon/Structures/MemoryBlock.h"
+
 #include "BoolkaCommon/DebugHelpers/DebugFileWriter.h"
+#include "BoolkaCommon/Structures/MemoryBlock.h"
 #include "D3D12Backend/Containers/Streaming/SceneData.h"
+#include "tinyobjloader/tiny_obj_loader.h"
 
 namespace Boolka
 {
@@ -20,7 +21,6 @@ namespace Boolka
         bool Convert(std::string inFile, std::string outFile);
 
     private:
-
         void Reset();
 
         struct VertexData
@@ -52,20 +52,22 @@ namespace Boolka
         void ProcessVerticesIndices();
 
         void RemapVertices(const tinyobj::shape_t& shape,
-            std::map<UniqueVertexKey, uint32_t>& verticesMap,
-            uint32_t& currentIndex);
+                           std::map<UniqueVertexKey, uint32_t>& verticesMap,
+                           uint32_t& currentIndex);
 
         void BuildIndices(const tinyobj::shape_t& shape,
-            std::map<UniqueVertexKey, uint32_t>& verticesMap,
-            SceneData::ObjectHeader& object);
+                          std::map<UniqueVertexKey, uint32_t>& verticesMap,
+                          SceneData::ObjectHeader& object);
 
         void WriteHeader(DebugFileWriter& fileWriter);
 
         template <typename T>
-        void WriteVector(DebugFileWriter& fileWriter, const std::vector<T>& vertexDataVector, size_t alignment);
+        void WriteVector(DebugFileWriter& fileWriter, const std::vector<T>& vertexDataVector,
+                         size_t alignment);
         void WriteTextureHeaders(DebugFileWriter& fileWriter);
         void WriteTextures(DebugFileWriter& fileWriter);
-        void WriteMIPChain(DebugFileWriter& fileWriter, const unsigned char* textureData, int width, int height);
+        void WriteMIPChain(DebugFileWriter& fileWriter, const unsigned char* textureData, int width,
+                           int height);
 
         static const size_t ms_bytesPerPixel = 4;
 
@@ -137,7 +139,7 @@ namespace Boolka
 
         WriteVector(fileWriter, m_indexDataVector, gs_ResourceAlignment);
         std::cout << "Written index buffer" << std::endl;
-        
+
         WriteTextures(fileWriter);
         std::cout << "Written textures" << std::endl;
 
@@ -162,7 +164,8 @@ namespace Boolka
         std::string warn;
         std::string err;
 
-        bool ret = tinyobj::LoadObj(&m_attrib, &m_shapes, &m_materials, &warn, &err, inFile.c_str(), NULL, true);
+        bool ret = tinyobj::LoadObj(&m_attrib, &m_shapes, &m_materials, &warn, &err, inFile.c_str(),
+                                    NULL, true);
 
         if (!warn.empty())
         {
@@ -251,7 +254,7 @@ namespace Boolka
 
         m_objects.reserve(m_shapes.size());
 
-        for (size_t processTransparent = 0; processTransparent < 2; ++ processTransparent)
+        for (size_t processTransparent = 0; processTransparent < 2; ++processTransparent)
         {
             for (auto& shape : m_shapes)
             {
@@ -298,13 +301,15 @@ namespace Boolka
             auto& index = indices[i];
             size_t triangleIndex = i / 3;
             int materialIndex = mesh.material_ids[triangleIndex];
-            verticesMap.insert(std::pair(UniqueVertexKey{ materialIndex, index.vertex_index, index.normal_index, index.texcoord_index }, 0));
+            verticesMap.insert(std::pair(UniqueVertexKey{materialIndex, index.vertex_index,
+                                                         index.normal_index, index.texcoord_index},
+                                         0));
         }
 
         auto& positions = m_attrib.vertices;
         auto& normals = m_attrib.normals;
         auto& texcoords = m_attrib.texcoords;
-        
+
         uint32_t i = 0;
         for (auto& [uniqueVertex, arrayIndex] : verticesMap)
         {
@@ -325,8 +330,8 @@ namespace Boolka
                 memcpy(vertexData.position, empty, sizeof(vertexData.position));
             }
 
-            vertexData.materialId = m_materialsMap[m_materials[uniqueVertex.materialIndex].diffuse_texname];
-
+            vertexData.materialId =
+                m_materialsMap[m_materials[uniqueVertex.materialIndex].diffuse_texname];
 
             if (uniqueVertex.normalIndex >= 0)
             {
@@ -369,8 +374,8 @@ namespace Boolka
 
         object.indexCount = checked_narrowing_cast<UINT>(indices.size());
         object.startIndex = checked_narrowing_cast<UINT>(m_indexDataVector.size());
-        object.boundingBox.GetMax() = { -FLT_MAX, -FLT_MAX, -FLT_MAX };
-        object.boundingBox.GetMin() = { FLT_MAX, FLT_MAX, FLT_MAX };
+        object.boundingBox.GetMax() = {-FLT_MAX, -FLT_MAX, -FLT_MAX};
+        object.boundingBox.GetMin() = {FLT_MAX, FLT_MAX, FLT_MAX};
 
         auto& positions = m_attrib.vertices;
 
@@ -379,10 +384,12 @@ namespace Boolka
             auto& index = indices[i];
             size_t triangleIndex = i / 3;
             int materialIndex = mesh.material_ids[triangleIndex];
-            m_indexDataVector.push_back(verticesMap[UniqueVertexKey{ materialIndex, index.vertex_index, index.normal_index, index.texcoord_index }]);
+            m_indexDataVector.push_back(verticesMap[UniqueVertexKey{
+                materialIndex, index.vertex_index, index.normal_index, index.texcoord_index}]);
 
             int vertexIndex = index.vertex_index;
-            Vector3 xyz = { positions[3 * vertexIndex], positions[3 * vertexIndex + 2], positions[3 * vertexIndex + 1] };
+            Vector3 xyz = {positions[3 * vertexIndex], positions[3 * vertexIndex + 2],
+                           positions[3 * vertexIndex + 1]};
             object.boundingBox.GetMax() = Max(object.boundingBox.GetMax(), xyz);
             object.boundingBox.GetMin() = Min(object.boundingBox.GetMin(), xyz);
         }
@@ -392,16 +399,16 @@ namespace Boolka
 
     void ObjConverterImpl::WriteHeader(DebugFileWriter& fileWriter)
     {
-        SceneData::SceneHeader header
-        {
-            checked_narrowing_cast<UINT>(BLK_CEIL_TO_POWER_OF_TWO(m_vertexDataVector.size() * sizeof(VertexData), gs_ResourceAlignment)),
-            checked_narrowing_cast<UINT>(BLK_CEIL_TO_POWER_OF_TWO(m_indexDataVector.size() * sizeof(uint32_t), gs_ResourceAlignment)),
+        SceneData::SceneHeader header{
+            checked_narrowing_cast<UINT>(BLK_CEIL_TO_POWER_OF_TWO(
+                m_vertexDataVector.size() * sizeof(VertexData), gs_ResourceAlignment)),
+            checked_narrowing_cast<UINT>(BLK_CEIL_TO_POWER_OF_TWO(
+                m_indexDataVector.size() * sizeof(uint32_t), gs_ResourceAlignment)),
             checked_narrowing_cast<UINT>(m_objects.size() * sizeof(SceneData::ObjectHeader)),
             checked_narrowing_cast<UINT>(m_indexDataVector.size()),
             checked_narrowing_cast<UINT>(m_objects.size()),
             checked_narrowing_cast<UINT>(m_opaqueObjectCount),
-            checked_narrowing_cast<UINT>(m_remappedMaterials.size())
-        };
+            checked_narrowing_cast<UINT>(m_remappedMaterials.size())};
 
         bool res = fileWriter.Write(&header, sizeof(header));
         BLK_ASSERT(res);
@@ -415,7 +422,7 @@ namespace Boolka
         BLK_ASSERT(m_remappedMaterials.size() > 0);
         BLK_ASSERT(m_remappedMaterials[0].empty());
 
-        SceneData::TextureHeader firstHeader{ 1,1,1 };
+        SceneData::TextureHeader firstHeader{1, 1, 1};
         fileWriter.Write(&firstHeader, sizeof(firstHeader));
 
         for (size_t i = 1; i < m_remappedMaterials.size(); ++i)
@@ -436,12 +443,8 @@ namespace Boolka
                 dimension >>= 1;
             }
 
-            SceneData::TextureHeader textureHeader
-            {
-                checked_narrowing_cast<UINT>(width),
-                checked_narrowing_cast<UINT>(height),
-                mipCount
-            };
+            SceneData::TextureHeader textureHeader{checked_narrowing_cast<UINT>(width),
+                                                   checked_narrowing_cast<UINT>(height), mipCount};
 
             BLK_ASSERT(result != 0);
 
@@ -454,7 +457,8 @@ namespace Boolka
     }
 
     template <typename T>
-    void ObjConverterImpl::WriteVector(DebugFileWriter& fileWriter, const std::vector<T>& vertexDataVector, size_t alignment)
+    void ObjConverterImpl::WriteVector(DebugFileWriter& fileWriter,
+                                       const std::vector<T>& vertexDataVector, size_t alignment)
     {
         size_t size = vertexDataVector.size() * sizeof(T);
         bool res = fileWriter.Write(vertexDataVector.data(), size);
@@ -496,7 +500,8 @@ namespace Boolka
 
             int width, height, bitsPerPixel;
 
-            unsigned char* textureData = stbi_load(material.c_str(), &width, &height, &bitsPerPixel, 4);
+            unsigned char* textureData =
+                stbi_load(material.c_str(), &width, &height, &bitsPerPixel, 4);
 
             BLK_ASSERT(textureData);
 
@@ -508,7 +513,8 @@ namespace Boolka
         }
     }
 
-    void ObjConverterImpl::WriteMIPChain(DebugFileWriter& fileWriter, const unsigned char* textureData, int width, int height)
+    void ObjConverterImpl::WriteMIPChain(DebugFileWriter& fileWriter,
+                                         const unsigned char* textureData, int width, int height)
     {
         BLK_ASSERT(width > 0);
         BLK_ASSERT(height > 0);
@@ -526,13 +532,11 @@ namespace Boolka
         const unsigned char* prevMipData = mip0Data;
         size_t prevMipRowPitch = mip0RowPitch;
 
-        for (
-            size_t mipWidth = width / 2, mipHeight = height / 2;
-            mipWidth > 0 && mipHeight > 0;
-            mipWidth /= 2, mipHeight /= 2
-            )
+        for (size_t mipWidth = width / 2, mipHeight = height / 2; mipWidth > 0 && mipHeight > 0;
+             mipWidth /= 2, mipHeight /= 2)
         {
-            size_t rowPitch = BLK_CEIL_TO_POWER_OF_TWO(ms_bytesPerPixel * mipWidth, gs_PitchAlignment);
+            size_t rowPitch =
+                BLK_CEIL_TO_POWER_OF_TWO(ms_bytesPerPixel * mipWidth, gs_PitchAlignment);
             size_t mipSize = BLK_CEIL_TO_POWER_OF_TWO(rowPitch * mipHeight, gs_ResourceAlignment);
             unsigned char* mipData = new unsigned char[mipSize];
 
@@ -547,7 +551,10 @@ namespace Boolka
                     {
                         for (size_t j = 0; j < 2; ++j)
                         {
-                            memcpy(prevMipRGBA[2 * i + j], &prevMipData[prevMipRowPitch * (y * 2 + i) + ms_bytesPerPixel * (x * 2 + j)], ms_bytesPerPixel);
+                            memcpy(prevMipRGBA[2 * i + j],
+                                   &prevMipData[prevMipRowPitch * (y * 2 + i) +
+                                                ms_bytesPerPixel * (x * 2 + j)],
+                                   ms_bytesPerPixel);
                         }
                     }
 
@@ -571,7 +578,6 @@ namespace Boolka
 
             fileWriter.Write(mipData, mipSize);
         }
-        
     }
 
     bool ObjConverterImpl::UniqueVertexKey::operator<(const UniqueVertexKey& other) const
@@ -600,4 +606,4 @@ namespace Boolka
         return converter.Convert(inFile, outFile);
     }
 
-}
+} // namespace Boolka

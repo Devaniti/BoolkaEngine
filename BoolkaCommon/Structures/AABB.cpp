@@ -1,4 +1,5 @@
 #include "stdafx.h"
+
 #include "AABB.h"
 
 namespace Boolka
@@ -10,4 +11,24 @@ namespace Boolka
     {
     }
 
-}
+    const Vector3& AABB::GetMin() const
+    {
+        return m_min;
+    }
+
+    Vector3& AABB::GetMin()
+    {
+        return m_min;
+    }
+
+    const Vector3& AABB::GetMax() const
+    {
+        return m_max;
+    }
+
+    Vector3& AABB::GetMax()
+    {
+        return m_max;
+    }
+
+} // namespace Boolka

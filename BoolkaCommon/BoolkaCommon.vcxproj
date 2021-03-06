@@ -121,7 +121,6 @@
     <ClInclude Include="Structures\Frustum.h" />
     <ClInclude Include="Structures\Matrix.h" />
     <ClInclude Include="Structures\MemoryBlock.h" />
-    <ClInclude Include="Structures\RingBuffer.h" />
     <ClInclude Include="Structures\Vector.h" />
   </ItemGroup>
   <ItemGroup>

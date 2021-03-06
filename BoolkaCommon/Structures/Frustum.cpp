@@ -1,5 +1,7 @@
 #include "stdafx.h"
+
 #include "Frustum.h"
+
 #include "Structures/AABB.h"
 
 namespace Boolka
@@ -116,4 +118,4 @@ namespace Boolka
         return result;
     }
 
-}
+} // namespace Boolka

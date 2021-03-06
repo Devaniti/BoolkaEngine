@@ -1,4 +1,5 @@
 #include "stdafx.h"
+
 #include "DebugFileReader.h"
 
 namespace Boolka
@@ -14,7 +15,7 @@ namespace Boolka
         file.seekg(0, std::ios::beg);
         BLK_ASSERT(file);
 
-        MemoryBlock blob{ (void*)new char[size], static_cast<size_t>(size) };
+        MemoryBlock blob{(void*)new char[size], static_cast<size_t>(size)};
         file.read((char*)blob.m_Data, size);
         BLK_ASSERT(file);
         return blob;
@@ -26,4 +27,4 @@ namespace Boolka
         data = {};
     }
 
-}
+} // namespace Boolka

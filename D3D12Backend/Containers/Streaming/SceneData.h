@@ -1,6 +1,6 @@
 #pragma once
-#include "BoolkaCommon/Structures/MemoryBlock.h"
 #include "BoolkaCommon/Structures/AABB.h"
+#include "BoolkaCommon/Structures/MemoryBlock.h"
 
 namespace Boolka
 {
@@ -55,12 +55,12 @@ namespace Boolka
         DataWrapper GetSceneWrapper();
         void PrepareTextureHeaders();
         void PrepareBinaryData();
-        MemoryBlock& GetMemory() { return m_MemoryBlock; };
-        const MemoryBlock& GetMemory() const { return m_MemoryBlock; };
+        MemoryBlock& GetMemory();
+        const MemoryBlock& GetMemory() const;
 
     private:
         MemoryBlock m_MemoryBlock;
         FileReader& m_FileReader;
     };
 
-}
+} // namespace Boolka

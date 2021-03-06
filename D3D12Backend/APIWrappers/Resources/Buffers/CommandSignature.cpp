@@ -1,5 +1,7 @@
 #include "stdafx.h"
+
 #include "CommandSignature.h"
+
 #include "APIWrappers/Device.h"
 #include "APIWrappers/RootSignature.h"
 
@@ -16,6 +18,17 @@ namespace Boolka
         BLK_ASSERT(m_CommandSignature == nullptr);
     }
 
+    ID3D12CommandSignature* CommandSignature::Get()
+    {
+        BLK_ASSERT(m_CommandSignature != nullptr);
+        return m_CommandSignature;
+    }
+
+    ID3D12CommandSignature* CommandSignature::operator->()
+    {
+        return Get();
+    }
+
     bool CommandSignature::Initialize(Device& device)
     {
         BLK_ASSERT(m_CommandSignature == nullptr);
@@ -28,7 +41,8 @@ namespace Boolka
         desc.NumArgumentDescs = 1;
         desc.pArgumentDescs = args;
 
-        HRESULT hr = device->CreateCommandSignature(&desc, nullptr, IID_PPV_ARGS(&m_CommandSignature));
+        HRESULT hr =
+            device->CreateCommandSignature(&desc, nullptr, IID_PPV_ARGS(&m_CommandSignature));
 
         return SUCCEEDED(hr);
     }
@@ -40,4 +54,4 @@ namespace Boolka
         m_CommandSignature = nullptr;
     }
 
-}
+} // namespace Boolka

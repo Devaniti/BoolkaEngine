@@ -1,6 +1,6 @@
 #include "stdafx.h"
-#include "RenderThreadContext.h"
 
+#include "RenderThreadContext.h"
 
 namespace Boolka
 {
@@ -26,7 +26,8 @@ namespace Boolka
         {
             bool res = m_GraphicCommandAllocator[i].Initialize(device);
             BLK_CRITICAL_ASSERT(res);
-            res = m_GraphicCommandAllocator[i].InitializeCommandList(m_GraphicCommandList[i], device, nullptr);
+            res = m_GraphicCommandAllocator[i].InitializeCommandList(m_GraphicCommandList[i],
+                                                                     device, nullptr);
             m_GraphicCommandList[i]->Close();
             BLK_CRITICAL_ASSERT(res);
         }
@@ -36,7 +37,8 @@ namespace Boolka
 
     void RenderThreadContext::Unload()
     {
-        // Current command list/allocator may actually be null here, so no assertion
+        // Current command list/allocator may actually be null here, so no
+        // assertion
         m_CurrentGraphicCommandList = nullptr;
         m_CurrentGraphicCommandAllocator = nullptr;
 
@@ -45,6 +47,11 @@ namespace Boolka
             m_GraphicCommandList[i].Unload();
             m_GraphicCommandAllocator[i].Unload();
         }
+    }
+
+    GraphicCommandListImpl& RenderThreadContext::GetGraphicCommandList()
+    {
+        return *m_CurrentGraphicCommandList;
     }
 
     void RenderThreadContext::FlipFrame(UINT frameIndex)
@@ -56,4 +63,4 @@ namespace Boolka
         m_CurrentGraphicCommandAllocator->ResetCommandList(*m_CurrentGraphicCommandList, nullptr);
     }
 
-}
+} // namespace Boolka

@@ -1,5 +1,7 @@
 #include "stdafx.h"
+
 #include "Buffer.h"
+
 #include "APIWrappers/Device.h"
 
 namespace Boolka
@@ -10,7 +12,8 @@ namespace Boolka
         BLK_ASSERT(m_Resource == nullptr);
     }
 
-    bool Buffer::Initialize(Device& device, UINT64 size, D3D12_HEAP_TYPE heapType, D3D12_RESOURCE_FLAGS resourceFlags, D3D12_RESOURCE_STATES initialState)
+    bool Buffer::Initialize(Device& device, UINT64 size, D3D12_HEAP_TYPE heapType,
+                            D3D12_RESOURCE_FLAGS resourceFlags, D3D12_RESOURCE_STATES initialState)
     {
         BLK_ASSERT(m_Resource == nullptr);
 
@@ -32,8 +35,9 @@ namespace Boolka
         resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
         resourceDesc.Flags = resourceFlags;
 
-        HRESULT hr = device->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDesc,
-            initialState, nullptr, IID_PPV_ARGS(&m_Resource));
+        HRESULT hr =
+            device->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDesc,
+                                            initialState, nullptr, IID_PPV_ARGS(&m_Resource));
 
         if (FAILED(hr))
             return false;
@@ -48,4 +52,4 @@ namespace Boolka
         m_Resource = nullptr;
     }
 
-}
+} // namespace Boolka

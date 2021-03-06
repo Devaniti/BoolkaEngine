@@ -2,13 +2,13 @@
 
 namespace Boolka
 {
-    
+
     class SceneData;
 
     class RenderBackend
     {
     public:
-        virtual ~RenderBackend() {};
+        virtual ~RenderBackend() = default;
 
         virtual bool Initialize() = 0;
         virtual void Unload() = 0;
@@ -21,4 +21,4 @@ namespace Boolka
         virtual void UnloadScene() = 0;
     };
 
-}
+} // namespace Boolka

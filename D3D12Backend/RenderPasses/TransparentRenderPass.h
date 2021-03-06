@@ -1,13 +1,11 @@
 #pragma once
-#include "RenderPass.h"
-
 #include "APIWrappers/PipelineState/GraphicPipelineState.h"
+#include "RenderPass.h"
 
 namespace Boolka
 {
 
-    class TransparentRenderPass :
-        public RenderPass
+    class TransparentRenderPass : public RenderPass
     {
     public:
         TransparentRenderPass() = default;
@@ -23,4 +21,4 @@ namespace Boolka
         GraphicPipelineState m_PSO;
     };
 
-}
+} // namespace Boolka

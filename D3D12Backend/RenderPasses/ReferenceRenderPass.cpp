@@ -1,16 +1,18 @@
 #include "stdafx.h"
+
 #include "ReferenceRenderPass.h"
+
+#include "APIWrappers/CommandList/GraphicCommandListImpl.h"
+#include "APIWrappers/Resources/Buffers/Buffer.h"
+#include "APIWrappers/Resources/Textures/Texture2D.h"
+#include "APIWrappers/Resources/Textures/Views/DepthStencilView.h"
+#include "APIWrappers/Resources/Textures/Views/RenderTargetView.h"
 #include "Contexts/RenderContext.h"
 #include "Contexts/RenderEngineContext.h"
 #include "Contexts/RenderFrameContext.h"
 #include "Contexts/RenderThreadContext.h"
 #include "RenderSchedule/ResourceContainer.h"
 #include "RenderSchedule/ResourceTracker.h"
-#include "APIWrappers/Resources/Textures/Texture2D.h"
-#include "APIWrappers/Resources/Textures/Views/RenderTargetView.h"
-#include "APIWrappers/Resources/Textures/Views/DepthStencilView.h"
-#include "APIWrappers/Resources/Buffers/Buffer.h"
-#include "APIWrappers/CommandList/GraphicCommandListImpl.h"
 
 namespace Boolka
 {
@@ -21,7 +23,8 @@ namespace Boolka
         auto& resourceContainer = engineContext.GetResourceContainer();
 
         UINT frameIndex = frameContext.GetFrameIndex();
-        Buffer& frameConstantBuffer = resourceContainer.GetFlippableBuffer(frameIndex, ResourceContainer::FlipBuf::Frame);
+        Buffer& frameConstantBuffer =
+            resourceContainer.GetFlippableBuffer(frameIndex, ResourceContainer::FlipBuf::Frame);
 
         GraphicCommandListImpl& commandList = threadContext.GetGraphicCommandList();
 
@@ -40,7 +43,8 @@ namespace Boolka
     {
         auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
         auto& resourceContainer = engineContext.GetResourceContainer();
-        auto& defaultRootSig = resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default);
+        auto& defaultRootSig =
+            resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default);
 
         return true;
     }
@@ -49,4 +53,4 @@ namespace Boolka
     {
     }
 
-}
+} // namespace Boolka

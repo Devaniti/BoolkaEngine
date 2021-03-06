@@ -9,13 +9,12 @@ namespace Boolka
     class ComputeQueue : public CommandQueue
     {
     public:
-        ComputeQueue() {};
-        ~ComputeQueue() {};
+        ComputeQueue() = default;
+        ~ComputeQueue() = default;
 
         bool Initialize(Device& device);
-    private:
 
+    private:
     };
 
-}
-
+} // namespace Boolka

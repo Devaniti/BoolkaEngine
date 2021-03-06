@@ -12,13 +12,14 @@ namespace Boolka
         IndexBufferView();
         ~IndexBufferView();
 
-        bool Initialize(Buffer& indexBuffer, UINT size, DXGI_FORMAT format, UINT64 bufferOffset = 0);
+        bool Initialize(Buffer& indexBuffer, UINT size, DXGI_FORMAT format,
+                        UINT64 bufferOffset = 0);
         void Unload();
 
-        const D3D12_INDEX_BUFFER_VIEW* GetView() { BLK_ASSERT(m_View.BufferLocation != 0); return &m_View; };
+        const D3D12_INDEX_BUFFER_VIEW* GetView();
 
     private:
         D3D12_INDEX_BUFFER_VIEW m_View;
     };
 
-}
+} // namespace Boolka

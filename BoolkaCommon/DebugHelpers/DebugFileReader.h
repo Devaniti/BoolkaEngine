@@ -11,4 +11,4 @@ namespace Boolka
         static void FreeMemory(MemoryBlock& blob);
     };
 
-}
+} // namespace Boolka

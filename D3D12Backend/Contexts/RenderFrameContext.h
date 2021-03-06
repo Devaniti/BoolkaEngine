@@ -1,8 +1,8 @@
 #pragma once
 
 #include "APIWrappers/CommandAllocator/GraphicCommandAllocator.h"
-#include "Contexts/FrameStats.h"
 #include "Containers/LightContainer.h"
+#include "Contexts/FrameStats.h"
 
 namespace Boolka
 {
@@ -19,33 +19,35 @@ namespace Boolka
         bool Initialize(Device& device);
         void Unload();
 
-        LightContainer& GetLightContainer() { return m_LightContainer; }
+        LightContainer& GetLightContainer();
+        const LightContainer& GetLightContainer() const;
 
-        float GetDeltaTime() const { return m_DeltaTime; };
-        UINT GetFrameIndex() const { return m_FrameIndex; };
+        float GetDeltaTime() const;
+        UINT GetFrameIndex() const;
 
-        Matrix4x4& GetViewMatrix() { return m_ViewMatrix; };
-        Matrix4x4& GetProjMatrix() { return m_ProjMatrix; };
-        Matrix4x4& GetViewProjMatrix() { return m_ViewProjMatrix; };
-        Matrix4x4& GetInvViewMatrix() { return m_InvViewMatrix; };
-        Matrix4x4& GetInvProjMatrix() { return m_InvProjMatrix; };
-        Matrix4x4& GetInvViewProjMatrix() { return m_InvViewProjMatrix; };
-        Vector3& GetCameraPos() { return m_CameraPos; };
+        Matrix4x4& GetViewMatrix();
+        Matrix4x4& GetProjMatrix();
+        Matrix4x4& GetViewProjMatrix();
+        Matrix4x4& GetInvViewMatrix();
+        Matrix4x4& GetInvProjMatrix();
+        Matrix4x4& GetInvViewProjMatrix();
+        Vector3& GetCameraPos();
 
-        const Matrix4x4& GetViewMatrix() const { return m_ViewMatrix; };
-        const Matrix4x4& GetProjMatrix() const { return m_ProjMatrix; };
-        const Matrix4x4& GetViewProjMatrix() const { return m_ViewProjMatrix; };
-        const Matrix4x4& GetInvViewMatrix() const { return m_InvViewMatrix; };
-        const Matrix4x4& GetInvProjMatrix() const { return m_InvProjMatrix; };
-        const Matrix4x4& GetInvViewProjMatrix() const { return m_InvViewProjMatrix; };
-        const Vector3& GetCameraPos() const { return m_CameraPos; };
+        const Matrix4x4& GetViewMatrix() const;
+        const Matrix4x4& GetProjMatrix() const;
+        const Matrix4x4& GetViewProjMatrix() const;
+        const Matrix4x4& GetInvViewMatrix() const;
+        const Matrix4x4& GetInvProjMatrix() const;
+        const Matrix4x4& GetInvViewProjMatrix() const;
+        const Vector3& GetCameraPos() const;
 
 #ifdef BLK_ENABLE_STATS
-        FrameStats& GetFrameStats() { return m_FraneStats; };
-        const FrameStats& GetFrameStats() const { return m_FraneStats; };
+        FrameStats& GetFrameStats();
+        const FrameStats& GetFrameStats() const;
 #endif
 
         void FlipFrame(RenderEngineContext& engineContext, UINT frameIndex);
+
     private:
         LightContainer m_LightContainer;
         Matrix4x4 m_ViewMatrix;
@@ -67,4 +69,4 @@ namespace Boolka
 #endif
     };
 
-}
+} // namespace Boolka

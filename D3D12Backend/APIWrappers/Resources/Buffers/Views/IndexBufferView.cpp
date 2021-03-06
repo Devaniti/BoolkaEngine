@@ -1,4 +1,5 @@
 #include "stdafx.h"
+
 #include "IndexBufferView.h"
 
 namespace Boolka
@@ -14,7 +15,8 @@ namespace Boolka
         BLK_ASSERT(m_View.BufferLocation == 0);
     }
 
-    bool IndexBufferView::Initialize(Buffer& indexBuffer, UINT size, DXGI_FORMAT format, UINT64 bufferOffset /*= 0*/)
+    bool IndexBufferView::Initialize(Buffer& indexBuffer, UINT size, DXGI_FORMAT format,
+                                     UINT64 bufferOffset /*= 0*/)
     {
         BLK_ASSERT(m_View.BufferLocation == 0);
         BLK_ASSERT(format == DXGI_FORMAT_R16_UINT || format == DXGI_FORMAT_R32_UINT);
@@ -32,4 +34,10 @@ namespace Boolka
         m_View = {};
     }
 
-}
+    const D3D12_INDEX_BUFFER_VIEW* IndexBufferView::GetView()
+    {
+        BLK_ASSERT(m_View.BufferLocation != 0);
+        return &m_View;
+    }
+
+} // namespace Boolka

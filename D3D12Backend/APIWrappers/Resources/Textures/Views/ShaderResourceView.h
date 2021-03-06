@@ -11,15 +11,18 @@ namespace Boolka
         ShaderResourceView();
         ~ShaderResourceView();
 
-        bool Initialize(Device& device, Texture2D& texture, D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor);
-        bool Initialize(Device& device, Texture2D& texture, D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor, DXGI_FORMAT format);
-        bool InitializeCube(Device& device, Texture2D& texture, D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor, DXGI_FORMAT format);
+        bool Initialize(Device& device, Texture2D& texture,
+                        D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor);
+        bool Initialize(Device& device, Texture2D& texture,
+                        D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor, DXGI_FORMAT format);
+        bool InitializeCube(Device& device, Texture2D& texture,
+                            D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor, DXGI_FORMAT format);
         void Unload();
 
-        D3D12_CPU_DESCRIPTOR_HANDLE* GetCPUDescriptor() { BLK_ASSERT(m_CPUDescriptorHandle.ptr != 0); return &m_CPUDescriptorHandle; };
+        D3D12_CPU_DESCRIPTOR_HANDLE* GetCPUDescriptor();
 
     private:
         D3D12_CPU_DESCRIPTOR_HANDLE m_CPUDescriptorHandle;
     };
 
-}
+} // namespace Boolka

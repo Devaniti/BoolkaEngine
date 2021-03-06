@@ -1,4 +1,5 @@
 #include "stdafx.h"
+
 #include "DebugTimer.h"
 
 namespace Boolka
@@ -34,4 +35,4 @@ namespace Boolka
         return timestampDifference / m_Frequency;
     }
 
-}
+} // namespace Boolka

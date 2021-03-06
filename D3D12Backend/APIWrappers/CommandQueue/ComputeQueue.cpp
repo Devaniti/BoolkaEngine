@@ -1,4 +1,5 @@
 #include "stdafx.h"
+
 #include "ComputeQueue.h"
 
 #include "APIWrappers/Device.h"
@@ -15,9 +16,10 @@ namespace Boolka
         desc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
         desc.NodeMask = 0;
         HRESULT hr = device->CreateCommandQueue(&desc, IID_PPV_ARGS(&commandQueue));
-        if (FAILED(hr)) return false;
+        if (FAILED(hr))
+            return false;
 
         return CommandQueue::Initialize(device, commandQueue);
     }
 
-}
+} // namespace Boolka

@@ -1,16 +1,17 @@
 #include "stdafx.h"
+
 #include "DebugRenderPass.h"
 
-#include "BoolkaCommon/DebugHelpers/DebugFileReader.h"
-#include "APIWrappers/InputLayout.h"
-#include "RenderSchedule/ResourceTracker.h"
 #include "APIWrappers/CommandList/GraphicCommandListImpl.h"
-#include "APIWrappers/Resources/Textures/Texture2D.h"
+#include "APIWrappers/InputLayout.h"
 #include "APIWrappers/Resources/ResourceTransition.h"
+#include "APIWrappers/Resources/Textures/Texture2D.h"
+#include "BoolkaCommon/DebugHelpers/DebugFileReader.h"
 #include "Contexts/RenderContext.h"
-#include "Contexts/RenderFrameContext.h"
 #include "Contexts/RenderEngineContext.h"
+#include "Contexts/RenderFrameContext.h"
 #include "Contexts/RenderThreadContext.h"
+#include "RenderSchedule/ResourceTracker.h"
 
 namespace Boolka
 {
@@ -36,7 +37,8 @@ namespace Boolka
         Texture2D& backbuffer = resourceContainer.GetBackBuffer(frameIndex);
         RenderTargetView& backbufferRTV = resourceContainer.GetBackBufferRTV(frameIndex);
 
-        GraphicCommandListImpl& commandList = renderContext.GetRenderThreadContext().GetGraphicCommandList();
+        GraphicCommandListImpl& commandList =
+            renderContext.GetRenderThreadContext().GetGraphicCommandList();
 
         BLK_GPU_SCOPE(commandList.Get(), "DebugRenderPass");
 
@@ -47,8 +49,10 @@ namespace Boolka
         UINT width = renderContext.GetRenderEngineContext().GetBackbufferWidth();
         float aspectRatioCompensation = static_cast<float>(height) / width;
 
-        Buffer& frameConstantBuffer = resourceContainer.GetFlippableBuffer(frameIndex, ResourceContainer::FlipBuf::Frame);
-        UploadBuffer& currentUploadBuffer = resourceContainer.GetFlippableUploadBuffer(frameIndex, ResourceContainer::FlipUploadBuf::Frame);
+        Buffer& frameConstantBuffer =
+            resourceContainer.GetFlippableBuffer(frameIndex, ResourceContainer::FlipBuf::Frame);
+        UploadBuffer& currentUploadBuffer = resourceContainer.GetFlippableUploadBuffer(
+            frameIndex, ResourceContainer::FlipUploadBuf::Frame);
 
         static const float rotationSpeed = BLK_FLOAT_PI / 2.0f;
         m_CurrentAngle += deltaTime * rotationSpeed;
@@ -63,7 +67,9 @@ namespace Boolka
 
         commandList->CopyResource(frameConstantBuffer.Get(), currentUploadBuffer.Get());
 
-        ResourceTransition::Transition(frameConstantBuffer, commandList, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+        ResourceTransition::Transition(frameConstantBuffer, commandList,
+                                       D3D12_RESOURCE_STATE_COPY_DEST,
+                                       D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
 
         D3D12_VIEWPORT viewportDesc = {};
         viewportDesc.Width = static_cast<float>(width);
@@ -78,10 +84,13 @@ namespace Boolka
 
         commandList->RSSetScissorRects(1, &scissorRect);
 
-        const float clearColor[] = { 0.0f, 0.2f, 0.4f, 1.0f };
-        commandList->ClearRenderTargetView(*backbufferRTV.GetCPUDescriptor(), clearColor, 0, nullptr);
+        const float clearColor[] = {0.0f, 0.2f, 0.4f, 1.0f};
+        commandList->ClearRenderTargetView(*backbufferRTV.GetCPUDescriptor(), clearColor, 0,
+                                           nullptr);
 
-        commandList->SetGraphicsRootConstantBufferView(static_cast<UINT>(ResourceContainer::DefaultRootSigBindPoints::FrameConstantBuffer), frameConstantBuffer->GetGPUVirtualAddress());
+        commandList->SetGraphicsRootConstantBufferView(
+            static_cast<UINT>(ResourceContainer::DefaultRootSigBindPoints::FrameConstantBuffer),
+            frameConstantBuffer->GetGPUVirtualAddress());
 
         commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
         commandList->IASetIndexBuffer(m_IndexBufferView.GetView());
@@ -89,7 +98,9 @@ namespace Boolka
         commandList->SetPipelineState(m_PSO.Get());
         commandList->DrawIndexedInstanced(3, 1, 0, 0, 0);
 
-        ResourceTransition::Transition(frameConstantBuffer, commandList, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, D3D12_RESOURCE_STATE_COPY_DEST);
+        ResourceTransition::Transition(frameConstantBuffer, commandList,
+                                       D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER,
+                                       D3D12_RESOURCE_STATE_COPY_DEST);
 
         return true;
     }
@@ -110,8 +121,10 @@ namespace Boolka
         MemoryBlock VS = DebugFileReader::ReadFile("DebugPassVertexShader.cso");
         InputLayout inputLayout;
         inputLayout.Initialize(2);
-        inputLayout.SetEntry(0, { "POSITION", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 });
-        inputLayout.SetEntry(1, { "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 8, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 });
+        inputLayout.SetEntry(0, {"POSITION", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0,
+                                 D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0});
+        inputLayout.SetEntry(1, {"COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 8,
+                                 D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0});
 
         static const UINT64 vertexCount = 3;
 
@@ -121,12 +134,9 @@ namespace Boolka
         {
             float position[2];
             float color[3];
-        } vertexData[vertexCount] =
-        {
-            { {-sqrt(3.0f) / 2.0f * a, -a / 2.0f}, {1.0f, 0.0f, 0.0f} },
-            { {sqrt(3.0f) / 2.0f * a, -a / 2.0f}, {0.0f, 1.0f, 0.0f} },
-            { {0.0f, a}, {0.0f, 0.0f, 1.0f} }
-        };
+        } vertexData[vertexCount] = {{{-sqrt(3.0f) / 2.0f * a, -a / 2.0f}, {1.0f, 0.0f, 0.0f}},
+                                     {{sqrt(3.0f) / 2.0f * a, -a / 2.0f}, {0.0f, 1.0f, 0.0f}},
+                                     {{0.0f, a}, {0.0f, 0.0f, 1.0f}}};
 
         static const UINT64 vertexSize = sizeof(Vertex);
         static const UINT64 vertexBufferSize = vertexSize * vertexCount;
@@ -140,7 +150,7 @@ namespace Boolka
 
         static const UINT64 indexCount = 3;
 
-        uint16_t indexData[indexCount] = { 0, 1, 2 };
+        uint16_t indexData[indexCount] = {0, 1, 2};
 
         static const UINT64 indexSize = sizeof(uint16_t);
         static const UINT64 indexBufferSize = indexSize * indexCount;
@@ -152,7 +162,9 @@ namespace Boolka
         res = m_IndexBufferView.Initialize(m_IndexBuffer, indexBufferSize, DXGI_FORMAT_R16_UINT);
         BLK_ASSERT(res);
 
-        res = m_PSO.Initialize(device, resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default), inputLayout, VS, PS, 1);
+        res = m_PSO.Initialize(
+            device, resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default),
+            inputLayout, VS, PS, 1);
         BLK_ASSERT(res);
 
         inputLayout.Unload();
@@ -171,4 +183,4 @@ namespace Boolka
         m_CurrentAngle = 0.0f;
     }
 
-}
+} // namespace Boolka

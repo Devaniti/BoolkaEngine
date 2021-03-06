@@ -1,5 +1,7 @@
 #include "stdafx.h"
+
 #include "RenderSchedule.h"
+
 #include "APIWrappers/Device.h"
 #include "Contexts/RenderContext.h"
 
@@ -46,6 +48,11 @@ namespace Boolka
         BLK_ASSERT(res);
 
         return true;
+    }
+
+    ResourceTracker& RenderSchedule::GetResourceTracker()
+    {
+        return m_ResourceTracker;
     }
 
     bool RenderSchedule::LoadScene(Device& device, SceneData& sceneData)
@@ -138,7 +145,10 @@ namespace Boolka
 
     void RenderSchedule::PrepareCommandList(GraphicCommandListImpl& commandList)
     {
-        commandList->SetGraphicsRootSignature(m_EngineContext.GetResourceContainer().GetRootSignature(ResourceContainer::RootSig::Default).Get());
+        commandList->SetGraphicsRootSignature(
+            m_EngineContext.GetResourceContainer()
+                .GetRootSignature(ResourceContainer::RootSig::Default)
+                .Get());
     }
 
     void RenderSchedule::FinishCommandList(Device& device, GraphicCommandListImpl& commandList)
@@ -147,4 +157,4 @@ namespace Boolka
         device.GetGraphicQueue().ExecuteCommandList(commandList);
     }
 
-}
+} // namespace Boolka

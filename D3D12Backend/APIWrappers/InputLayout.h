@@ -32,10 +32,9 @@ namespace Boolka
         void FillInputLayoutDesc(D3D12_INPUT_LAYOUT_DESC& desc);
 
     private:
-
         InputLayoutHeader m_Header;
         InputLayoutEntry* m_Entries;
         D3D12_INPUT_ELEMENT_DESC* m_NativeEntries;
     };
 
-}
+} // namespace Boolka

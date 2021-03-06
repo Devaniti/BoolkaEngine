@@ -1,4 +1,5 @@
 #include "stdafx.h"
+
 #include "RenderFrameContext.h"
 
 #include "BoolkaCommon/DebugHelpers/DebugOutputStream.h"
@@ -41,6 +42,106 @@ namespace Boolka
         m_Frequency = {};
     }
 
+    const Matrix4x4& RenderFrameContext::GetProjMatrix() const
+    {
+        return m_ProjMatrix;
+    }
+
+    Matrix4x4& RenderFrameContext::GetProjMatrix()
+    {
+        return m_ProjMatrix;
+    }
+
+    const Matrix4x4& RenderFrameContext::GetViewProjMatrix() const
+    {
+        return m_ViewProjMatrix;
+    }
+
+    Matrix4x4& RenderFrameContext::GetViewProjMatrix()
+    {
+        return m_ViewProjMatrix;
+    }
+
+    const Matrix4x4& RenderFrameContext::GetInvViewMatrix() const
+    {
+        return m_InvViewMatrix;
+    }
+
+    Matrix4x4& RenderFrameContext::GetInvViewMatrix()
+    {
+        return m_InvViewMatrix;
+    }
+
+    const Matrix4x4& RenderFrameContext::GetInvProjMatrix() const
+    {
+        return m_InvProjMatrix;
+    }
+
+    Matrix4x4& RenderFrameContext::GetInvProjMatrix()
+    {
+        return m_InvProjMatrix;
+    }
+
+    const Matrix4x4& RenderFrameContext::GetInvViewProjMatrix() const
+    {
+        return m_InvViewProjMatrix;
+    }
+
+    Matrix4x4& RenderFrameContext::GetInvViewProjMatrix()
+    {
+        return m_InvViewProjMatrix;
+    }
+
+    const Vector3& RenderFrameContext::GetCameraPos() const
+    {
+        return m_CameraPos;
+    }
+
+    Vector3& RenderFrameContext::GetCameraPos()
+    {
+        return m_CameraPos;
+    }
+
+    const LightContainer& RenderFrameContext::GetLightContainer() const
+    {
+        return m_LightContainer;
+    }
+
+    LightContainer& RenderFrameContext::GetLightContainer()
+    {
+        return m_LightContainer;
+    }
+
+    float RenderFrameContext::GetDeltaTime() const
+    {
+        return m_DeltaTime;
+    }
+
+    UINT RenderFrameContext::GetFrameIndex() const
+    {
+        return m_FrameIndex;
+    }
+
+    const Matrix4x4& RenderFrameContext::GetViewMatrix() const
+    {
+        return m_ViewMatrix;
+    }
+
+    Matrix4x4& RenderFrameContext::GetViewMatrix()
+    {
+        return m_ViewMatrix;
+    }
+
+    const FrameStats& RenderFrameContext::GetFrameStats() const
+    {
+        return m_FraneStats;
+    }
+
+    FrameStats& RenderFrameContext::GetFrameStats()
+    {
+        return m_FraneStats;
+    }
+
     void RenderFrameContext::FlipFrame(RenderEngineContext& engineContext, UINT frameIndex)
     {
         m_FrameIndex = frameIndex;
@@ -67,7 +168,8 @@ namespace Boolka
 
         float aspectRatio = static_cast<float>(width) / height;
 
-        engineContext.GetCamera().Update(m_DeltaTime, aspectRatio, m_ViewMatrix, m_ProjMatrix, m_CameraPos);
+        engineContext.GetCamera().Update(m_DeltaTime, aspectRatio, m_ViewMatrix, m_ProjMatrix,
+                                         m_CameraPos);
 
         m_ViewProjMatrix = m_ViewMatrix * m_ProjMatrix;
         bool isSuccessfull;
@@ -81,4 +183,4 @@ namespace Boolka
         m_LightContainer.Update(m_DeltaTime);
     }
 
-}
+} // namespace Boolka

@@ -1,4 +1,5 @@
 #include "stdafx.h"
+
 #include "DisplayController.h"
 
 #include "APIWrappers/Resources/Textures/Texture2D.h"
@@ -60,17 +61,17 @@ namespace Boolka
 
         // TODO recreate RTVs;
 
-        //if (!m_Window.Update(m_WindowState))
+        // if (!m_Window.Update(m_WindowState))
         //    return false;
         //
-        //for (auto& backbuffer : m_BackBuffers)
+        // for (auto& backbuffer : m_BackBuffers)
         //{
         //    backbuffer.Unload();
         //}
         //
-        //m_Swapchain.Update(device, m_WindowState);
+        // m_Swapchain.Update(device, m_WindowState);
         //
-        //for (UINT i = 0; i < BLK_IN_FLIGHT_FRAMES; ++i)
+        // for (UINT i = 0; i < BLK_IN_FLIGHT_FRAMES; ++i)
         //{
         //    bool res = m_BackBuffers[i].Initialize(m_Swapchain.GetBuffer(i));
         //    BLK_CRITICAL_ASSERT(res);
@@ -92,4 +93,14 @@ namespace Boolka
         return m_Swapchain.GetCurrentFrameIndex();
     }
 
-}
+    const WindowState& DisplayController::GetWindowState()
+    {
+        return m_WindowState;
+    }
+
+    HWND DisplayController::GetHWND() const
+    {
+        return m_Window.GetHWND();
+    }
+
+} // namespace Boolka

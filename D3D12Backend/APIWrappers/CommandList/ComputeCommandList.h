@@ -7,8 +7,8 @@ namespace Boolka
     class ComputeCommandList : public CopyCommandList
     {
     protected:
-        ComputeCommandList() {};
-        ~ComputeCommandList() {};
+        ComputeCommandList() = default;
+        ~ComputeCommandList() = default;
     };
 
-}
+} // namespace Boolka

@@ -1,4 +1,5 @@
 #include "stdafx.h"
+
 #include "Factory.h"
 
 namespace Boolka
@@ -12,6 +13,17 @@ namespace Boolka
     Factory::~Factory()
     {
         BLK_ASSERT(m_Factory == nullptr);
+    }
+
+    IDXGIFactory7* Factory::Get()
+    {
+        BLK_ASSERT(m_Factory != nullptr);
+        return m_Factory;
+    }
+
+    IDXGIFactory7* Factory::operator->()
+    {
+        return Get();
     }
 
     bool Factory::Initialize()
@@ -34,4 +46,4 @@ namespace Boolka
         m_Factory = nullptr;
     }
 
-}
+} // namespace Boolka

@@ -11,13 +11,17 @@ namespace Boolka
         DescriptorHeap();
         ~DescriptorHeap();
 
-        ID3D12DescriptorHeap* Get() { BLK_ASSERT(m_DescriptorHeap != nullptr); return m_DescriptorHeap; };
-        ID3D12DescriptorHeap* operator->() { return Get(); };
+        ID3D12DescriptorHeap* Get();
+        ;
+        ID3D12DescriptorHeap* operator->();
+        ;
         D3D12_CPU_DESCRIPTOR_HANDLE GetCPUHandle(UINT index);
         D3D12_GPU_DESCRIPTOR_HANDLE GetGPUHandle(UINT index);
 
-        bool Initialize(Device& device, UINT elementCount, D3D12_DESCRIPTOR_HEAP_TYPE heapType, D3D12_DESCRIPTOR_HEAP_FLAGS heapFlags);
+        bool Initialize(Device& device, UINT elementCount, D3D12_DESCRIPTOR_HEAP_TYPE heapType,
+                        D3D12_DESCRIPTOR_HEAP_FLAGS heapFlags);
         void Unload();
+
     private:
         ID3D12DescriptorHeap* m_DescriptorHeap;
         UINT m_DescriptorHandleIncrementSize;
@@ -29,4 +33,4 @@ namespace Boolka
 #endif
     };
 
-}
+} // namespace Boolka

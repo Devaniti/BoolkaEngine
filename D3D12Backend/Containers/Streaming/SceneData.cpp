@@ -1,5 +1,7 @@
 #include "stdafx.h"
+
 #include "SceneData.h"
+
 #include "FileReader/FileReader.h"
 
 namespace Boolka
@@ -68,4 +70,14 @@ namespace Boolka
         BLK_ASSERT(res);
     }
 
-}
+    const MemoryBlock& SceneData::GetMemory() const
+    {
+        return m_MemoryBlock;
+    }
+
+    MemoryBlock& SceneData::GetMemory()
+    {
+        return m_MemoryBlock;
+    }
+
+} // namespace Boolka

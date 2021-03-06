@@ -1,9 +1,9 @@
 #include "BoolkaCommon/stdafx.h"
-#include "D3D12Backend/RenderBackend.h"
-#include "D3D12Backend/Containers/Streaming/SceneData.h"
-#include "FileReader/FileReader.h"
-#include "BoolkaCommon/DebugHelpers/DebugProfileTimer.h"
 
+#include "BoolkaCommon/DebugHelpers/DebugProfileTimer.h"
+#include "D3D12Backend/Containers/Streaming/SceneData.h"
+#include "D3D12Backend/RenderBackend.h"
+#include "FileReader/FileReader.h"
 #include <iostream>
 
 int RealMain(int argc, wchar_t* argv[])

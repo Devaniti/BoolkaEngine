@@ -10,14 +10,14 @@ namespace Boolka
     public:
         DebugRenderScope(ID3D12GraphicsCommandList* commandList, const char* name);
         ~DebugRenderScope();
-    private:
 
+    private:
         void StartEvent(const char* name);
         void EndEvent();
 
         ID3D12GraphicsCommandList* m_commandList;
     };
 
-}
+} // namespace Boolka
 
 #endif

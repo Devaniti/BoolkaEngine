@@ -1,5 +1,7 @@
 #include "stdafx.h"
+
 #include "ConstantBufferView.h"
+
 #include "APIWrappers/Device.h"
 
 namespace Boolka
@@ -15,7 +17,9 @@ namespace Boolka
         BLK_ASSERT(m_CPUDescriptorHandle.ptr == 0);
     }
 
-    bool ConstantBufferView::Initialize(Device& device, Buffer& constantBuffer, D3D12_CPU_DESCRIPTOR_HANDLE destinationDescriptorHandle, UINT size)
+    bool ConstantBufferView::Initialize(Device& device, Buffer& constantBuffer,
+                                        D3D12_CPU_DESCRIPTOR_HANDLE destinationDescriptorHandle,
+                                        UINT size)
     {
         BLK_ASSERT(m_CPUDescriptorHandle.ptr == 0);
         D3D12_CONSTANT_BUFFER_VIEW_DESC desc = {};
@@ -33,4 +37,10 @@ namespace Boolka
         m_CPUDescriptorHandle = {};
     }
 
-}
+    D3D12_CPU_DESCRIPTOR_HANDLE ConstantBufferView::GetCPUDescriptor()
+    {
+        BLK_ASSERT(m_CPUDescriptorHandle.ptr != 0);
+        return m_CPUDescriptorHandle;
+    }
+
+} // namespace Boolka

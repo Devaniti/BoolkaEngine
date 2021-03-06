@@ -18,5 +18,4 @@ namespace Boolka
         LARGE_INTEGER m_Frequency;
     };
 
-}
-
+} // namespace Boolka

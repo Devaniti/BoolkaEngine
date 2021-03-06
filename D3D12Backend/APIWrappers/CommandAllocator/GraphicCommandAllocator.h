@@ -1,6 +1,6 @@
 #pragma once
-#include "CommandAllocator.h"
 #include "APIWrappers/CommandList/GraphicCommandListImpl.h"
+#include "CommandAllocator.h"
 
 namespace Boolka
 {
@@ -9,14 +9,15 @@ namespace Boolka
     class GraphicCommandAllocator : public CommandAllocator
     {
     public:
-        GraphicCommandAllocator() {};
-        ~GraphicCommandAllocator() {};
+        GraphicCommandAllocator() = default;
+        ~GraphicCommandAllocator() = default;
 
         bool Initialize(Device& device);
         void Unload();
 
-        bool InitializeCommandList(GraphicCommandListImpl& commandList, Device& device, ID3D12PipelineState* PSO);
+        bool InitializeCommandList(GraphicCommandListImpl& commandList, Device& device,
+                                   ID3D12PipelineState* PSO);
         bool ResetCommandList(GraphicCommandListImpl& commandList, ID3D12PipelineState* PSO);
     };
 
-}
+} // namespace Boolka

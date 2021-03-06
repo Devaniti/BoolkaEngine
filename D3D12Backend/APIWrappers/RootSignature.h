@@ -10,13 +10,14 @@ namespace Boolka
         RootSignature();
         ~RootSignature();
 
-        ID3D12RootSignature* Get() { BLK_ASSERT(m_RootSignature != nullptr); return m_RootSignature; };
-        ID3D12RootSignature* operator->() { return Get(); };
+        ID3D12RootSignature* Get();
+        ID3D12RootSignature* operator->();
 
         bool Initialize(Device& device, const char* filename);
         void Unload();
+
     private:
         ID3D12RootSignature* m_RootSignature;
     };
 
-}
+} // namespace Boolka

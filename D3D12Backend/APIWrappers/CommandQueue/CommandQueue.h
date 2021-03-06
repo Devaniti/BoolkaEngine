@@ -10,8 +10,8 @@ namespace Boolka
     class CommandQueue
     {
     public:
-        ID3D12CommandQueue* Get() { BLK_ASSERT(m_Queue != nullptr); return m_Queue; };
-        ID3D12CommandQueue* operator->() { return Get(); };
+        ID3D12CommandQueue* Get();
+        ID3D12CommandQueue* operator->();
 
         void Unload();
 
@@ -21,8 +21,8 @@ namespace Boolka
         void WaitGPU(UINT64 value);
 
         void Flush();
-        
-        Fence& GetFence() { return m_Fence; }
+
+        Fence& GetFence();
 
     protected:
         CommandQueue();
@@ -39,4 +39,4 @@ namespace Boolka
         Fence m_Fence;
     };
 
-}
+} // namespace Boolka

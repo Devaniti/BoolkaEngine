@@ -1,5 +1,7 @@
 #include "stdafx.h"
+
 #include "DebugProfileTimer.h"
+
 #include "DebugHelpers/DebugOutputStream.h"
 
 namespace Boolka
@@ -19,4 +21,4 @@ namespace Boolka
         g_WDebugOutput << name << L" time:" << time << L"ms" << std::endl;
     }
 
-}
+} // namespace Boolka

@@ -232,7 +232,6 @@
       <Filter>RenderPasses</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h" />
-    <ClInclude Include="CullingManager.h" />
     <ClInclude Include="BatchManager.h" />
     <ClInclude Include="APIWrappers\Resources\Buffers\CommandSignature.h">
       <Filter>APIWrappers\Resources\Buffers</Filter>
@@ -447,7 +446,6 @@
     </ClCompile>
     <ClCompile Include="RenderBackend.cpp" />
     <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="CullingManager.cpp" />
     <ClCompile Include="BatchManager.cpp" />
     <ClCompile Include="APIWrappers\Resources\Buffers\CommandSignature.cpp">
       <Filter>APIWrappers\Resources\Buffers</Filter>

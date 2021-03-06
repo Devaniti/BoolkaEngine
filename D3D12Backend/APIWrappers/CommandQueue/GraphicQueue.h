@@ -10,15 +10,14 @@ namespace Boolka
     class GraphicQueue : public CommandQueue
     {
     public:
-        GraphicQueue() {};
-        ~GraphicQueue() {};
+        GraphicQueue() = default;
+        ~GraphicQueue() = default;
 
         bool Initialize(Device& device);
 
         void ExecuteCommandList(GraphicCommandListImpl& commandList);
-    private:
 
+    private:
     };
 
-}
-
+} // namespace Boolka

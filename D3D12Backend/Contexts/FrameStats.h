@@ -13,6 +13,6 @@ namespace Boolka
         size_t outsideFrustum;
     };
 
-}
+} // namespace Boolka
 
 #endif

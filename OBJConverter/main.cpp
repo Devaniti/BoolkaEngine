@@ -8,14 +8,8 @@ void WinError()
     DWORD dw = GetLastError();
 
     DWORD formatResult = FormatMessageA(
-        FORMAT_MESSAGE_ALLOCATE_BUFFER |
-        FORMAT_MESSAGE_FROM_SYSTEM |
-        FORMAT_MESSAGE_IGNORE_INSERTS,
-        NULL,
-        dw,
-        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-        (LPSTR)&lpMsgBuf,
-        0, NULL);
+        FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+        NULL, dw, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&lpMsgBuf, 0, NULL);
 
     if (formatResult == 0)
     {
@@ -53,6 +47,6 @@ int main(int argc, char* argv[])
     {
         return -1;
     }
-    
+
     return 0;
 }

@@ -1,6 +1,6 @@
 #pragma once
-#include "RootSignature.h"
 #include "DescriptorHeap.h"
+#include "RootSignature.h"
 
 namespace Boolka
 {
@@ -13,8 +13,9 @@ namespace Boolka
 
         bool Initialize(Device& device);
         void Unload();
+
     private:
         DescriptorHeap m_DescriptorHeapSRV;
     };
 
-}
+} // namespace Boolka

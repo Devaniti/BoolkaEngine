@@ -1,4 +1,5 @@
 #include "stdafx.h"
+
 #include "Camera.h"
 
 namespace Boolka
@@ -34,15 +35,12 @@ namespace Boolka
         m_CameraPos = {};
     }
 
-    bool Camera::Update(float deltaTime, float aspectRatio, Matrix4x4& outViewMatrix, Matrix4x4& outProjMatrix, Vector3& outCameraPos)
+    bool Camera::Update(float deltaTime, float aspectRatio, Matrix4x4& outViewMatrix,
+                        Matrix4x4& outProjMatrix, Vector3& outCameraPos)
     {
-        static const Vector3 upDirection{ 0, 0, 1 };
-        Vector3 forward
-        {
-            cos(m_RotationYaw) * cos(m_RotationPitch),
-            sin(m_RotationYaw) * cos(m_RotationPitch),
-            sin(m_RotationPitch)
-        };
+        static const Vector3 upDirection{0, 0, 1};
+        Vector3 forward{cos(m_RotationYaw) * cos(m_RotationPitch),
+                        sin(m_RotationYaw) * cos(m_RotationPitch), sin(m_RotationPitch)};
         Vector3 right = upDirection.Cross(forward).Normalize();
         Vector3 up = forward.Cross(right).Normalize();
 
@@ -53,7 +51,8 @@ namespace Boolka
         return true;
     }
 
-    void Camera::UpdateInput(float deltaTime, const Vector3& right, const Vector3& up, const Vector3& forward)
+    void Camera::UpdateInput(float deltaTime, const Vector3& right, const Vector3& up,
+                             const Vector3& forward)
     {
         static const float defaultMoveSpeed = 15.0f;
         static const float defaultRotationSpeed = BLK_DEG_TO_RAD(60.0f);
@@ -91,7 +90,8 @@ namespace Boolka
         if (rotationPitchChange != 0)
         {
             m_RotationPitch += rotationDelta * rotationPitchChange;
-            m_RotationPitch = std::clamp(m_RotationPitch, -BLK_FLOAT_PI / 2.0f, BLK_FLOAT_PI / 2.0f);
+            m_RotationPitch =
+                std::clamp(m_RotationPitch, -BLK_FLOAT_PI / 2.0f, BLK_FLOAT_PI / 2.0f);
         }
 
         bool DPressed = static_cast<bool>(::GetAsyncKeyState('D'));
@@ -111,13 +111,16 @@ namespace Boolka
         }
     }
 
-    void Camera::UpdateMatrices(float aspectRatio, const Vector3& right, const Vector3& up, const Vector3& forward, Matrix4x4& outViewMatrix, Matrix4x4& outProjMatrix)
+    void Camera::UpdateMatrices(float aspectRatio, const Vector3& right, const Vector3& up,
+                                const Vector3& forward, Matrix4x4& outViewMatrix,
+                                Matrix4x4& outProjMatrix)
     {
         float nearZ = 0.2f;
         float farZ = 1000.0f;
 
-        outProjMatrix = Matrix4x4::CalculateProjPerspective(nearZ, farZ, aspectRatio, BLK_DEG_TO_RAD(30.0f));
+        outProjMatrix =
+            Matrix4x4::CalculateProjPerspective(nearZ, farZ, aspectRatio, BLK_DEG_TO_RAD(30.0f));
         outViewMatrix = Matrix4x4::CalculateView(right, up, forward, m_CameraPos);
     }
 
-}
+} // namespace Boolka

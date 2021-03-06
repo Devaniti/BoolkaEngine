@@ -1,12 +1,16 @@
 #include "stdafx.h"
+
 #include "ResourceTransition.h"
-#include "APIWrappers/Resources/Resource.h"
+
 #include "APIWrappers/CommandList/CommandList.h"
+#include "APIWrappers/Resources/Resource.h"
 
 namespace Boolka
 {
 
-    bool ResourceTransition::Transition(Resource& resource, CommandList& commandList, D3D12_RESOURCE_STATES srcState, D3D12_RESOURCE_STATES dstState)
+    bool ResourceTransition::Transition(Resource& resource, CommandList& commandList,
+                                        D3D12_RESOURCE_STATES srcState,
+                                        D3D12_RESOURCE_STATES dstState)
     {
         BLK_ASSERT(srcState != dstState);
 
@@ -21,17 +25,22 @@ namespace Boolka
         return true;
     }
 
-    bool ResourceTransition::NeedTransition(D3D12_RESOURCE_STATES srcState, D3D12_RESOURCE_STATES dstState)
+    bool ResourceTransition::NeedTransition(D3D12_RESOURCE_STATES srcState,
+                                            D3D12_RESOURCE_STATES dstState)
     {
         return srcState != dstState;
     }
 
-    bool ResourceTransition::CanPromote(D3D12_RESOURCE_STATES srcState, D3D12_RESOURCE_STATES dstState)
+    bool ResourceTransition::CanPromote(D3D12_RESOURCE_STATES srcState,
+                                        D3D12_RESOURCE_STATES dstState)
     {
 #ifdef BLK_USE_COMMON_STATE_PROMOTION
-        // TODO rewrite check to be stricter as described in https://docs.microsoft.com/en-us/windows/win32/direct3d12/using-resource-barriers-to-synchronize-resource-states-in-direct3d-12#implicit-state-transitions
-        
-        static const D3D12_RESOURCE_STATES nonPromotableStates = D3D12_RESOURCE_STATE_DEPTH_WRITE | D3D12_RESOURCE_STATE_DEPTH_READ | D3D12_RESOURCE_STATE_RENDER_TARGET;
+        // TODO rewrite check to be stricter as described in
+        // https://docs.microsoft.com/en-us/windows/win32/direct3d12/using-resource-barriers-to-synchronize-resource-states-in-direct3d-12#implicit-state-transitions
+
+        static const D3D12_RESOURCE_STATES nonPromotableStates = D3D12_RESOURCE_STATE_DEPTH_WRITE |
+                                                                 D3D12_RESOURCE_STATE_DEPTH_READ |
+                                                                 D3D12_RESOURCE_STATE_RENDER_TARGET;
 
         bool isCommonState = srcState == D3D12_RESOURCE_STATE_COMMON;
         bool onlyOneBit = BLK_IS_POWER_OF_TWO(dstState);
@@ -46,9 +55,11 @@ namespace Boolka
     bool ResourceTransition::CanDecay(D3D12_RESOURCE_STATES srcState)
     {
 #ifdef BLK_USE_COMMON_STATE_PROMOTION
-        // TODO rewrite check to be stricter as described in https://docs.microsoft.com/en-us/windows/win32/direct3d12/using-resource-barriers-to-synchronize-resource-states-in-direct3d-12#implicit-state-transitions
+        // TODO rewrite check to be stricter as described in
+        // https://docs.microsoft.com/en-us/windows/win32/direct3d12/using-resource-barriers-to-synchronize-resource-states-in-direct3d-12#implicit-state-transitions
 
-        static const D3D12_RESOURCE_STATES nonPromotableStates = D3D12_RESOURCE_STATE_DEPTH_WRITE | D3D12_RESOURCE_STATE_DEPTH_READ;
+        static const D3D12_RESOURCE_STATES nonPromotableStates =
+            D3D12_RESOURCE_STATE_DEPTH_WRITE | D3D12_RESOURCE_STATE_DEPTH_READ;
         bool isPromotableState = (srcState & nonPromotableStates) == 0;
 
         return isPromotableState;
@@ -57,4 +68,4 @@ namespace Boolka
 #endif
     }
 
-}
+} // namespace Boolka

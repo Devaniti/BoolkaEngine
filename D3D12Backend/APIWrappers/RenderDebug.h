@@ -12,7 +12,8 @@ namespace Boolka
 
         bool Initialize();
         void Unload();
+
     private:
     };
 
-}
+} // namespace Boolka

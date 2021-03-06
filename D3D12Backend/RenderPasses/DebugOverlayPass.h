@@ -1,14 +1,13 @@
 #pragma once
-#include "RenderPass.h"
 #include "APIWrappers/DescriptorHeap.h"
+#include "RenderPass.h"
 
 #ifdef BLK_ENABLE_STATS
 
 namespace Boolka
 {
 
-    class DebugOverlayPass :
-        public RenderPass
+    class DebugOverlayPass : public RenderPass
     {
     public:
         DebugOverlayPass() = default;
@@ -27,6 +26,6 @@ namespace Boolka
         DescriptorHeap m_ImguiDescriptorHeap;
     };
 
-}
+} // namespace Boolka
 
 #endif

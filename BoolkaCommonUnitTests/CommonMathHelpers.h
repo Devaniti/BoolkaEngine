@@ -9,7 +9,7 @@ namespace Boolka
         return abs(a - b) <= TEST_EPSILON;
     }
 
-    template<size_t componentCount>
+    template <size_t componentCount>
     bool ApproxEqual(const Vector<componentCount>& a, const Vector<componentCount>& b)
     {
         for (size_t i = 0; i < componentCount; i++)
@@ -30,4 +30,4 @@ namespace Boolka
         return true;
     }
 
-}
+} // namespace Boolka

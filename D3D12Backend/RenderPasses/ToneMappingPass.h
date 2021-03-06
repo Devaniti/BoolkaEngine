@@ -1,12 +1,11 @@
 #pragma once
-#include "RenderPass.h"
 #include "APIWrappers/PipelineState/GraphicPipelineState.h"
+#include "RenderPass.h"
 
 namespace Boolka
 {
 
-    class ToneMappingPass :
-        public RenderPass
+    class ToneMappingPass : public RenderPass
     {
     public:
         ToneMappingPass() = default;
@@ -22,4 +21,4 @@ namespace Boolka
         GraphicPipelineState m_PSO;
     };
 
-}
+} // namespace Boolka
