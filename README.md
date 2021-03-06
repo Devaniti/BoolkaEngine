@@ -2,6 +2,8 @@ BoolkaEngine
 ============
 BoolkaEngine is DX12 rendering engine for Windows 10.
 
+![Screenshot](https://raw.githubusercontent.com/Devaniti/BoolkaEngine/master/ScreenshotSmall.png)
+
 Currently implemented features:
 * HDR Rendering + Tonemapping
 * Point lights with shadows
