@@ -159,7 +159,6 @@ namespace Boolka
 
         m_RootSigs[static_cast<size_t>(DSV::GbufferDepth)].Initialize(device, "RootSig.cso");
 
-        static const UINT64 floatSize = 4;
         static const UINT64 frameCbSize = BLK_CEIL_TO_POWER_OF_TWO(sizeof(Matrix4x4) * 6, 256);
         static const UINT64 deferredLightingCbSize = BLK_CEIL_TO_POWER_OF_TWO(
             sizeof(Vector4) * BLK_TEXCUBE_FACE_COUNT * 2 + sizeof(Vector4u), 256);

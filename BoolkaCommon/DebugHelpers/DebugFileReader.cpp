@@ -23,7 +23,7 @@ namespace Boolka
 
     void DebugFileReader::FreeMemory(MemoryBlock& data)
     {
-        delete[] data.m_Data;
+        delete[] static_cast<char*>(data.m_Data);
         data = {};
     }
 

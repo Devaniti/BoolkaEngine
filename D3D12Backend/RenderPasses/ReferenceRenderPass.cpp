@@ -23,6 +23,8 @@ namespace Boolka
         auto& resourceContainer = engineContext.GetResourceContainer();
 
         UINT frameIndex = frameContext.GetFrameIndex();
+
+        // NOLINTNEXTLINE(clang-diagnostic-unused-variable): remove this when copying render pass
         Buffer& frameConstantBuffer =
             resourceContainer.GetFlippableBuffer(frameIndex, ResourceContainer::FlipBuf::Frame);
 
@@ -43,6 +45,7 @@ namespace Boolka
     {
         auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
         auto& resourceContainer = engineContext.GetResourceContainer();
+        // NOLINTNEXTLINE(clang-diagnostic-unused-variable): remove this when copying render pass
         auto& defaultRootSig =
             resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default);
 

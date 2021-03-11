@@ -1,5 +1,5 @@
 #pragma once
-#include "Structures/Vector.h"
+#include "Vector.h"
 
 namespace Boolka
 {

@@ -25,8 +25,6 @@ namespace Boolka
         auto& resourceContainer = engineContext.GetResourceContainer();
 
         UINT frameIndex = frameContext.GetFrameIndex();
-        Buffer& frameConstantBuffer =
-            resourceContainer.GetFlippableBuffer(frameIndex, ResourceContainer::FlipBuf::Frame);
 
         GraphicCommandListImpl& commandList = threadContext.GetGraphicCommandList();
 
@@ -177,8 +175,6 @@ namespace Boolka
         inputLayout.Initialize(1);
         inputLayout.SetEntry(0, {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,
                                  D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0});
-
-        Scene& scene = engineContext.GetScene();
 
         bool res = m_PSO.Initialize(device, defaultRootSig, inputLayout, VS, PS, 0, true);
         BLK_ASSERT(res);

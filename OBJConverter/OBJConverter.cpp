@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-#include "ObjConverter.h"
+#include "OBJConverter.h"
 
 #include "BoolkaCommon/DebugHelpers/DebugFileWriter.h"
 #include "BoolkaCommon/Structures/MemoryBlock.h"
@@ -310,10 +310,9 @@ namespace Boolka
         auto& normals = m_attrib.normals;
         auto& texcoords = m_attrib.texcoords;
 
-        uint32_t i = 0;
         for (auto& [uniqueVertex, arrayIndex] : verticesMap)
         {
-            VertexData vertexData;
+            VertexData vertexData{};
 
             float empty[3] = {};
 
@@ -321,9 +320,9 @@ namespace Boolka
             {
                 // Swap y and z
                 // In OBJ y is up, and in Boolka Engine z is up
-                vertexData.position[0] = positions[3 * uniqueVertex.vertexIndex];
-                vertexData.position[1] = positions[3 * uniqueVertex.vertexIndex + 2];
-                vertexData.position[2] = positions[3 * uniqueVertex.vertexIndex + 1];
+                vertexData.position[0] = positions[3ll * uniqueVertex.vertexIndex];
+                vertexData.position[1] = positions[3ll * uniqueVertex.vertexIndex + 2];
+                vertexData.position[2] = positions[3ll * uniqueVertex.vertexIndex + 1];
             }
             else
             {
@@ -337,9 +336,9 @@ namespace Boolka
             {
                 // Swap y and z
                 // In OBJ y is up, and in Boolka Engine z is up
-                vertexData.normal[0] = normals[3 * uniqueVertex.normalIndex];
-                vertexData.normal[1] = normals[3 * uniqueVertex.normalIndex + 2];
-                vertexData.normal[2] = normals[3 * uniqueVertex.normalIndex + 1];
+                vertexData.normal[0] = normals[3ll * uniqueVertex.normalIndex];
+                vertexData.normal[1] = normals[3ll * uniqueVertex.normalIndex + 2];
+                vertexData.normal[2] = normals[3ll * uniqueVertex.normalIndex + 1];
             }
             else
             {
@@ -350,8 +349,8 @@ namespace Boolka
             {
                 // Flip y coordinate
                 // In obj, y = 0 is bottom and in DirectX y = 0 is top
-                vertexData.textureCoords[0] = texcoords[2 * uniqueVertex.texcoordIndex];
-                vertexData.textureCoords[1] = 1 - texcoords[2 * uniqueVertex.texcoordIndex + 1];
+                vertexData.textureCoords[0] = texcoords[2ll * uniqueVertex.texcoordIndex];
+                vertexData.textureCoords[1] = 1 - texcoords[2ll * uniqueVertex.texcoordIndex + 1];
             }
             else
             {
@@ -544,8 +543,8 @@ namespace Boolka
             {
                 for (size_t x = 0; x < mipWidth; ++x)
                 {
-                    unsigned char rgba[ms_bytesPerPixel];
-                    unsigned char prevMipRGBA[4][ms_bytesPerPixel];
+                    unsigned char rgba[ms_bytesPerPixel]{};
+                    unsigned char prevMipRGBA[4][ms_bytesPerPixel]{};
 
                     for (size_t i = 0; i < 2; ++i)
                     {

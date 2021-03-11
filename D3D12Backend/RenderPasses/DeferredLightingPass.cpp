@@ -157,8 +157,6 @@ namespace Boolka
     {
         auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
         auto& resourceContainer = engineContext.GetResourceContainer();
-        auto& defaultRootSig =
-            resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default);
 
         MemoryBlock PS = DebugFileReader::ReadFile("DeferredLightingPassPS.cso");
         MemoryBlock VS = DebugFileReader::ReadFile("FullScreenVS.cso");

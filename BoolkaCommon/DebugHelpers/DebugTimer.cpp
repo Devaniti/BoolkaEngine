@@ -6,8 +6,8 @@ namespace Boolka
 {
 
     DebugTimer::DebugTimer()
-        : m_Frequency{}
-        , m_LastTimestamp{}
+        : m_LastTimestamp{}
+        , m_Frequency{}
     {
         BOOL res = ::QueryPerformanceFrequency(&m_Frequency);
         BLK_CRITICAL_ASSERT(res);

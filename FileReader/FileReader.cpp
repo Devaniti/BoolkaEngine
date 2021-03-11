@@ -55,7 +55,7 @@ namespace Boolka
 
         if (GetLastError() != ERROR_IO_PENDING)
         {
-            delete[] data.m_Data;
+            delete[] static_cast<char*>(data.m_Data);
             data = {};
             return 0;
         }
@@ -103,7 +103,7 @@ namespace Boolka
     {
         BLK_ASSERT(data.m_Size != 0);
         BLK_ASSERT(data.m_Data != nullptr);
-        delete[] data.m_Data;
+        delete[] static_cast<char*>(data.m_Data);
         data = {};
     }
 

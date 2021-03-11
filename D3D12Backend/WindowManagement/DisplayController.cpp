@@ -19,7 +19,7 @@ namespace Boolka
     bool DisplayController::Initialize(Device& device, Factory& factory)
     {
         // TODO get window state from save
-        WindowState initialWindowState = WindowState::GetDefault();
+        m_WindowState = WindowState::GetDefault();
 
         bool res = m_Window.Initialize(m_WindowState);
         BLK_CRITICAL_ASSERT(res);

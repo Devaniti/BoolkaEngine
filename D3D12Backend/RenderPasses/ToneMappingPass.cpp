@@ -99,9 +99,8 @@ namespace Boolka
         // quad without Vertex/Index buffers
         BLK_RENDER_DEBUG_ONLY(
             device.FilterMessage(D3D12_MESSAGE_ID_CREATEINPUTLAYOUT_EMPTY_LAYOUT));
-        bool res = m_PSO.Initialize(
-            device, resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default),
-            inputLayout, VS, PS, 1, false, false, D3D12_COMPARISON_FUNC_ALWAYS, false);
+        bool res = m_PSO.Initialize(device, defaultRootSig, inputLayout, VS, PS, 1, false, false,
+                                    D3D12_COMPARISON_FUNC_ALWAYS, false);
         BLK_RENDER_DEBUG_ONLY(device.RemoveLastMessageFilter());
         BLK_ASSERT(res);
 

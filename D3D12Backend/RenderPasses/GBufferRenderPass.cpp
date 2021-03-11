@@ -112,8 +112,6 @@ namespace Boolka
         inputLayout.SetEntry(3, {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 28,
                                  D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0});
 
-        Scene& scene = engineContext.GetScene();
-
         bool res = m_PSO.Initialize(
             device, resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default),
             inputLayout, VS, PS, 2, true, false, D3D12_COMPARISON_FUNC_EQUAL, false,

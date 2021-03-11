@@ -2,7 +2,7 @@
 
 #include "Frustum.h"
 
-#include "Structures/AABB.h"
+#include "AABB.h"
 
 namespace Boolka
 {

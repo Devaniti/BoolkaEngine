@@ -27,10 +27,6 @@ namespace Boolka
         auto& resourceContainer = engineContext.GetResourceContainer();
 
         UINT frameIndex = frameContext.GetFrameIndex();
-        Texture2D& backbuffer = resourceContainer.GetBackBuffer(frameIndex);
-        RenderTargetView& backbufferRTV = resourceContainer.GetBackBufferRTV(frameIndex);
-        DepthStencilView& gbufferDSV =
-            resourceContainer.GetDSV(ResourceContainer::DSV::GbufferDepth);
         Buffer& frameConstantBuffer =
             resourceContainer.GetFlippableBuffer(frameIndex, ResourceContainer::FlipBuf::Frame);
         UploadBuffer& currentUploadBuffer = resourceContainer.GetFlippableUploadBuffer(
@@ -69,7 +65,6 @@ namespace Boolka
         upload += sizeof(Matrix4x4);
 
         memcpy(upload, invProjMatrix.Transpose().GetBuffer(), sizeof(Matrix4x4));
-        upload += sizeof(Matrix4x4);
 
         currentUploadBuffer.Unmap();
 
