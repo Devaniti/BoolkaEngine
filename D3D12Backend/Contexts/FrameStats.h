@@ -8,9 +8,11 @@ namespace Boolka
     struct FrameStats
     {
         float frameTime;
-        size_t insideFrustum;
-        size_t intersectFrustum;
-        size_t outsideFrustum;
+        float frameTimeStable;
+        size_t renderedObjects;
+        size_t culledObjects;
+        size_t renderedLights;
+        size_t renderedLightFrustums;
     };
 
 } // namespace Boolka

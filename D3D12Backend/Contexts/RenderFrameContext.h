@@ -31,7 +31,7 @@ namespace Boolka
         Matrix4x4& GetInvViewMatrix();
         Matrix4x4& GetInvProjMatrix();
         Matrix4x4& GetInvViewProjMatrix();
-        Vector3& GetCameraPos();
+        Vector4& GetCameraPos();
 
         const Matrix4x4& GetViewMatrix() const;
         const Matrix4x4& GetProjMatrix() const;
@@ -39,11 +39,10 @@ namespace Boolka
         const Matrix4x4& GetInvViewMatrix() const;
         const Matrix4x4& GetInvProjMatrix() const;
         const Matrix4x4& GetInvViewProjMatrix() const;
-        const Vector3& GetCameraPos() const;
+        const Vector4& GetCameraPos() const;
 
 #ifdef BLK_ENABLE_STATS
-        FrameStats& GetFrameStats();
-        const FrameStats& GetFrameStats() const;
+        FrameStats& GetFrameStats() const;
 #endif
 
         void FlipFrame(RenderEngineContext& engineContext, UINT frameIndex);
@@ -56,7 +55,7 @@ namespace Boolka
         Matrix4x4 m_InvViewMatrix;
         Matrix4x4 m_InvProjMatrix;
         Matrix4x4 m_InvViewProjMatrix;
-        Vector3 m_CameraPos;
+        Vector4 m_CameraPos;
 
         float m_DeltaTime;
         UINT m_FrameIndex;
@@ -65,7 +64,8 @@ namespace Boolka
         LARGE_INTEGER m_Frequency;
 
 #ifdef BLK_ENABLE_STATS
-        FrameStats m_FraneStats;
+        // Allow to write stats in places which otherwise would get const RenderFrameContext
+        mutable FrameStats m_FraneStats;
 #endif
     };
 

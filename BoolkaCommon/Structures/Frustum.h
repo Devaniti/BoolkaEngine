@@ -18,11 +18,21 @@ namespace Boolka
         Frustum() = default;
         ~Frustum() = default;
 
-        Frustum(Matrix4x4 viewProj);
+        Frustum(const Matrix4x4& viewProj);
 
         bool CheckPoint(const Vector4& point) const;
-        bool CheckSphere(const Vector4& center, float radius) const;
+        TestResult CheckSphere(const Vector4& center, float radius) const;
         TestResult CheckAABB(const AABB& boundingBox) const;
+        TestResult CheckFrustum(const Matrix4x4& invViewMatrix, const Matrix4x4 invProjMatrix) const;
+
+        // Fast variants return false if tested geometry is completely outside frustum, and true
+        // otherwise
+        // Faster since we don't need to distinguish between fully inside and intersection cases
+
+        bool CheckAABBFast(const AABB& boundingBox) const;
+        bool CheckSphereFast(const Vector4& center, float radius) const;
+        bool CheckFrustumFast(const Matrix4x4& invViewMatrix,
+                                const Matrix4x4 invProjMatrix) const;
 
     private:
         // 6 Planes of frustum in next order

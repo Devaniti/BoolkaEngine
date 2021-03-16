@@ -130,6 +130,23 @@
 
 using uint = unsigned int;
 
+template <bool value, typename ifTrue, typename ifFalse>
+struct template_if_t_impl;
+template <bool value, typename ifTrue, typename ifFalse>
+using template_if_t = typename template_if_t_impl<value, ifTrue, ifFalse>::type;
+
+template <typename ifTrue, typename ifFalse>
+struct template_if_t_impl<true, ifTrue, ifFalse>
+{
+    using type = ifTrue;
+};
+
+template <typename ifTrue, typename ifFalse>
+struct template_if_t_impl<false, ifTrue, ifFalse>
+{
+    using type = ifFalse;
+};
+
 template <typename T1, typename T2>
 T1 checked_narrowing_cast(T2 value)
 {
@@ -138,10 +155,17 @@ T1 checked_narrowing_cast(T2 value)
     return res;
 }
 
+template <typename T1, typename T2, typename intermediateType>
+T1 ptr_static_cast_internal(T2 value)
+{
+    return static_cast<T1>(static_cast<intermediateType>(value));
+}
+
 template <typename T1, typename T2>
 T1 ptr_static_cast(T2 value)
 {
-    return static_cast<T1>(static_cast<void*>(value));
+    using intermediateType = template_if_t<std::is_const_v<std::remove_pointer_t<T1>>, const void*, void*>;
+    return ptr_static_cast_internal<T1, T2, intermediateType>(value);
 }
 
 inline void memcpy_strided(void* dst, size_t dstStride, const void* src, size_t srcStride,

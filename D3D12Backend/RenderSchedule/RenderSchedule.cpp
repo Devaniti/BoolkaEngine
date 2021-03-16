@@ -108,6 +108,15 @@ namespace Boolka
     {
         Scene& scene = m_RenderContext.GetRenderEngineContext().GetScene();
         scene.GetBatchManager().PrepareBatches(m_FrameContext, scene);
+
+#ifdef BLK_ENABLE_STATS
+        auto& debugStats = m_FrameContext.GetFrameStats();
+        debugStats.renderedObjects =
+            scene.GetBatchManager().GetCount(BatchManager::BatchType::Opaque) +
+            scene.GetBatchManager().GetCount(BatchManager::BatchType::Transparent);
+        debugStats.culledObjects = scene.GetObjectCount() - debugStats.renderedObjects;
+#endif
+
         return true;
     }
 

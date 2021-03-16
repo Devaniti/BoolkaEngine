@@ -64,8 +64,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR pCmdLin
     return RealMain(argc, argv);
 }
 
-// NOLINTNEXTLINE(clang-diagnostic-error): Microsoft specific wide char cmd line main
-int main(int argc, wchar_t* argv[])
+int wmain(int argc, wchar_t* argv[])
 {
     return RealMain(argc, argv);
 }

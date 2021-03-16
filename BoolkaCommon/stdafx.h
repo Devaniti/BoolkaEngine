@@ -2,6 +2,10 @@
 
 // Careful, this header will be included in all projects precompiled headers
 
+// Solution configuration
+// only defines here
+#include "BoolkaCommon/SolutionConfig.h"
+
 // STL
 #include <algorithm>
 #include <array>
@@ -23,8 +27,17 @@
 #include <Windows.h>
 #include <shellapi.h>
 
-// Own code
-#include "BoolkaCommon/SolutionConfig.h"
+// Intrinsics
+#ifdef BLK_USE_SSE
+#include <xmmintrin.h>
+#include <intrin.h>
+#endif
+
+// Own common code
 #include "BoolkaCommon/SolutionHelpers.h"
 #include "Structures/Matrix.h"
 #include "Structures/Vector.h"
+
+#ifdef BLK_DEBUG
+#include "DebugHelpers/DebugOutputStream.h"
+#endif

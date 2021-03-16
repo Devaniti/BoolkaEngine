@@ -105,14 +105,19 @@ namespace Boolka
         const auto& viewMatrix = frameContext.GetViewMatrix();
         const Vector3 viewDir{viewMatrix[0][2], viewMatrix[1][2], viewMatrix[2][2]};
         ImGui::Text("%.1f FPS", fps);
-        ImGui::Text("%.2f ms", debugStats.frameTime * 1000.0f);
+        ImGui::Text("%.2f ms (avg %.2f ms)", debugStats.frameTime * 1000.0f,
+                    debugStats.frameTimeStable * 1000.0f);
         ImGui::Text("Resolution: %dx%d", engineContext.GetBackbufferWidth(),
                     engineContext.GetBackbufferHeight());
         if (ImGui::CollapsingHeader("Culling"))
         {
-            ImGui::Text("%llu inside frustum", debugStats.insideFrustum);
-            ImGui::Text("%llu intersect frustum", debugStats.intersectFrustum);
-            ImGui::Text("%llu outside frustum", debugStats.outsideFrustum);
+            ImGui::Text("%llu rendered objects", debugStats.renderedObjects);
+            ImGui::Text("%llu culled objects", debugStats.culledObjects);
+        }
+        if (ImGui::CollapsingHeader("Batches"))
+        {
+            ImGui::Text("%llu rendered lights", debugStats.renderedLights);
+            ImGui::Text("%llu rendered light frustums", debugStats.renderedLightFrustums);
         }
         if (ImGui::CollapsingHeader("Camera"))
         {

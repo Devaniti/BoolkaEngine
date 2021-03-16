@@ -373,8 +373,8 @@ namespace Boolka
 
         object.indexCount = checked_narrowing_cast<UINT>(indices.size());
         object.startIndex = checked_narrowing_cast<UINT>(m_indexDataVector.size());
-        object.boundingBox.GetMax() = {-FLT_MAX, -FLT_MAX, -FLT_MAX};
-        object.boundingBox.GetMin() = {FLT_MAX, FLT_MAX, FLT_MAX};
+        object.boundingBox.GetMax() = {-FLT_MAX, -FLT_MAX, -FLT_MAX, 1.0f};
+        object.boundingBox.GetMin() = {FLT_MAX, FLT_MAX, FLT_MAX, 1.0f};
 
         auto& positions = m_attrib.vertices;
 
@@ -387,8 +387,8 @@ namespace Boolka
                 materialIndex, index.vertex_index, index.normal_index, index.texcoord_index}]);
 
             int vertexIndex = index.vertex_index;
-            Vector3 xyz = {positions[3 * vertexIndex], positions[3 * vertexIndex + 2],
-                           positions[3 * vertexIndex + 1]};
+            Vector4 xyz = {positions[3 * vertexIndex], positions[3 * vertexIndex + 2],
+                           positions[3 * vertexIndex + 1], 1.0f};
             object.boundingBox.GetMax() = Max(object.boundingBox.GetMax(), xyz);
             object.boundingBox.GetMin() = Min(object.boundingBox.GetMin(), xyz);
         }

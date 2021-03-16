@@ -36,13 +36,13 @@ namespace Boolka
     }
 
     bool Camera::Update(float deltaTime, float aspectRatio, Matrix4x4& outViewMatrix,
-                        Matrix4x4& outProjMatrix, Vector3& outCameraPos)
+                        Matrix4x4& outProjMatrix, Vector4& outCameraPos)
     {
-        static const Vector3 upDirection{0, 0, 1};
-        Vector3 forward{cos(m_RotationYaw) * cos(m_RotationPitch),
+        static const Vector4 upDirection{0, 0, 1};
+        Vector4 forward{cos(m_RotationYaw) * cos(m_RotationPitch),
                         sin(m_RotationYaw) * cos(m_RotationPitch), sin(m_RotationPitch)};
-        Vector3 right = upDirection.Cross(forward).Normalize();
-        Vector3 up = forward.Cross(right).Normalize();
+        Vector4 right = upDirection.Cross(forward).Normalize();
+        Vector4 up = forward.Cross(right).Normalize();
 
         UpdateInput(deltaTime, right, up, forward);
         UpdateMatrices(aspectRatio, right, up, forward, outViewMatrix, outProjMatrix);
@@ -51,8 +51,8 @@ namespace Boolka
         return true;
     }
 
-    void Camera::UpdateInput(float deltaTime, const Vector3& right, const Vector3& up,
-                             const Vector3& forward)
+    void Camera::UpdateInput(float deltaTime, const Vector4& right, const Vector4& up,
+                             const Vector4& forward)
     {
         static const float defaultMoveSpeed = 15.0f;
         static const float defaultRotationSpeed = BLK_DEG_TO_RAD(60.0f);
@@ -111,8 +111,8 @@ namespace Boolka
         }
     }
 
-    void Camera::UpdateMatrices(float aspectRatio, const Vector3& right, const Vector3& up,
-                                const Vector3& forward, Matrix4x4& outViewMatrix,
+    void Camera::UpdateMatrices(float aspectRatio, const Vector4& right, const Vector4& up,
+                                const Vector4& forward, Matrix4x4& outViewMatrix,
                                 Matrix4x4& outProjMatrix)
     {
         float nearZ = 0.2f;

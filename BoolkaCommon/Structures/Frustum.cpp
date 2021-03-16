@@ -7,49 +7,16 @@
 namespace Boolka
 {
 
-    Frustum::Frustum(Matrix4x4 viewProj)
+    Frustum::Frustum(const Matrix4x4& viewProj)
     {
-        // Near
-        m_planes[0][0] = -viewProj[0][3] + viewProj[0][2];
-        m_planes[0][1] = -viewProj[1][3] + viewProj[1][2];
-        m_planes[0][2] = -viewProj[2][3] + viewProj[2][2];
-        m_planes[0][3] = -viewProj[3][3] + viewProj[3][2];
-        m_planes[0] = m_planes[0].Normalize3();
+        Matrix4x4 viewProjTransp = viewProj.Transpose();
 
-        // Far
-        m_planes[1][0] = -viewProj[0][3] - viewProj[0][2];
-        m_planes[1][1] = -viewProj[1][3] - viewProj[1][2];
-        m_planes[1][2] = -viewProj[2][3] - viewProj[2][2];
-        m_planes[1][3] = -viewProj[3][3] - viewProj[3][2];
-        m_planes[1] = m_planes[1].Normalize3();
-
-        // Left
-        m_planes[2][0] = -viewProj[0][3] + viewProj[0][0];
-        m_planes[2][1] = -viewProj[1][3] + viewProj[1][0];
-        m_planes[2][2] = -viewProj[2][3] + viewProj[2][0];
-        m_planes[2][3] = -viewProj[3][3] + viewProj[3][0];
-        m_planes[2] = m_planes[2].Normalize3();
-
-        // Right
-        m_planes[3][0] = -viewProj[0][3] - viewProj[0][0];
-        m_planes[3][1] = -viewProj[1][3] - viewProj[1][0];
-        m_planes[3][2] = -viewProj[2][3] - viewProj[2][0];
-        m_planes[3][3] = -viewProj[3][3] - viewProj[3][0];
-        m_planes[3] = m_planes[3].Normalize3();
-
-        // Top
-        m_planes[4][0] = -viewProj[0][3] + viewProj[0][1];
-        m_planes[4][1] = -viewProj[1][3] + viewProj[1][1];
-        m_planes[4][2] = -viewProj[2][3] + viewProj[2][1];
-        m_planes[4][3] = -viewProj[3][3] + viewProj[3][1];
-        m_planes[4] = m_planes[4].Normalize3();
-
-        // Bottom
-        m_planes[5][0] = -viewProj[0][3] - viewProj[0][1];
-        m_planes[5][1] = -viewProj[1][3] - viewProj[1][1];
-        m_planes[5][2] = -viewProj[2][3] - viewProj[2][1];
-        m_planes[5][3] = -viewProj[3][3] - viewProj[3][1];
-        m_planes[5] = m_planes[5].Normalize3();
+        m_planes[0] = (viewProjTransp[3] - viewProjTransp[2]).Normalize3();
+        m_planes[1] = (viewProjTransp[3] + viewProjTransp[2]).Normalize3();
+        m_planes[2] = (viewProjTransp[3] - viewProjTransp[0]).Normalize3();
+        m_planes[3] = (viewProjTransp[3] + viewProjTransp[0]).Normalize3();
+        m_planes[4] = (viewProjTransp[3] - viewProjTransp[1]).Normalize3();
+        m_planes[5] = (viewProjTransp[3] + viewProjTransp[1]).Normalize3();
     }
 
     bool Frustum::CheckPoint(const Vector4& point) const
@@ -67,10 +34,33 @@ namespace Boolka
         return true;
     }
 
-    bool Frustum::CheckSphere(const Vector4& center, float radius) const
+    Frustum::TestResult Frustum::CheckSphere(const Vector4& center, float radius) const
     {
         BLK_ASSERT(center.w() == 1.0f);
 
+        TestResult result = Inside;
+
+        for (const auto& plane : m_planes)
+        {
+            if (plane.Dot(center) < -radius)
+            {
+                return TestResult::Outside;
+            }
+
+            if (plane.Dot(center) < radius)
+            {
+                result = TestResult::Intersects;
+            }
+        }
+
+        return result;
+    }
+
+    bool Frustum::CheckSphereFast(const Vector4& center, float radius) const
+    {
+        BLK_ASSERT(center.w() == 1.0f);
+
+        // TODO rewrite, algorithm is incorrect
         for (const auto& plane : m_planes)
         {
             if (plane.Dot(center) < -radius)
@@ -82,40 +72,192 @@ namespace Boolka
         return true;
     }
 
-    Frustum::TestResult Frustum::CheckAABB(const AABB& boundingBox) const
+    // Can potentially give false positive, in case when tested frustum is close to the corner of
+    // this frustum
+    // If checked both ways intersection test would be correct
+    bool Frustum::CheckFrustumFast(const Matrix4x4& invViewMatrix,
+                                   const Matrix4x4 invProjMatrix) const
     {
-        TestResult result = Inside;
+        static const Vector4 cornerPoints[8] = {{-1, -1, -1, 1}, {-1, -1, 1, 1}, {-1, 1, -1, 1},
+                                                {-1, 1, 1, 1},   {1, -1, -1, 1}, {1, -1, 1, 1},
+                                                {1, 1, -1, 1},   {1, 1, 1, 1}};
+
+        Vector4 otherFrustumPoints[8];
+        for (size_t i = 0; i < 8; ++i)
+            otherFrustumPoints[i] = cornerPoints[i] * invProjMatrix;
+        for (size_t i = 0; i < 8; ++i)
+            otherFrustumPoints[i] = otherFrustumPoints[i] / otherFrustumPoints[i].w();
+        for (size_t i = 0; i < 8; ++i)
+            otherFrustumPoints[i] = otherFrustumPoints[i] * invViewMatrix;
+
+        // If there's a plane, for which all points of another frustum is outside, then whole other
+        // frustum is outside
+        // If all points are on the correct side of all planes, then other frustum is fully inside
 
         for (const auto& plane : m_planes)
         {
-            Vector4 min, max;
-            min.w() = max.w() = 1.0f;
-
-            for (size_t i = 0; i < 3; ++i)
+            bool atLeastOneInside = false;
+            for (size_t i = 0; i < 8; ++i)
             {
-                if (plane[i] > 0)
+                float distanceToPlane = plane.Dot(otherFrustumPoints[i]);
+                bool inside = distanceToPlane > 0.0f;
+                if (inside)
                 {
-                    min[i] = boundingBox.GetMin()[i];
-                    max[i] = boundingBox.GetMax()[i];
-                }
-                else
-                {
-                    min[i] = boundingBox.GetMax()[i];
-                    max[i] = boundingBox.GetMin()[i];
+                    atLeastOneInside = true;
+                    break;
                 }
             }
 
-            if (plane.Dot(min) > 0.0f)
-            {
+            if (!atLeastOneInside)
+                return false;
+        }
+
+        return true;
+    }
+
+    // Can potentially give false positive, in case when tested AABB is close to the corner of
+    // the frustum
+    Frustum::TestResult Frustum::CheckAABB(const AABB& boundingBox) const
+    {
+        BLK_ASSERT(boundingBox.GetMin().w() == 1.0f);
+        BLK_ASSERT(boundingBox.GetMax().w() == 1.0f);
+
+        TestResult result = Inside;
+        Vector4 zero;
+        const Vector4& aabbMin = boundingBox.GetMin();
+        const Vector4& aabbMax = boundingBox.GetMax();
+
+        // Batch by 2 planes
+        for (int i = 0; i < 3; ++i)
+        {
+            Vector4 mask[2] = {
+                m_planes[i * 2 + 0] > zero,
+                m_planes[i * 2 + 1] > zero,
+            };
+
+            Vector4 max[2] = {
+                aabbMax.Select(aabbMin, mask[0]),
+                aabbMax.Select(aabbMin, mask[1]),
+            };
+
+            Vector4 min[2] = {
+                aabbMin.Select(aabbMax, mask[0]),
+                aabbMin.Select(aabbMax, mask[1]),
+            };
+
+            float dotMin[2] = {
+                m_planes[i * 2 + 0].Dot(min[0]),
+                m_planes[i * 2 + 1].Dot(min[1]),
+            };
+
+            float dotMax[2] = {
+                m_planes[i * 2 + 0].Dot(max[0]),
+                m_planes[i * 2 + 1].Dot(max[1]),
+            };
+
+            bool isOutside[2] = {
+                dotMin[0] < 0.0f,
+                dotMin[1] < 0.0f,
+            };
+
+            bool isIntersecs[2] = {
+                dotMax[0] < 0.0f,
+                dotMax[1] < 0.0f,
+            };
+
+            if (isOutside[0] || isOutside[1])
                 return Outside;
-            }
-            if (plane.Dot(max) > 0.0f)
-            {
+
+            if (isIntersecs[0] || isIntersecs[1])
                 result = Intersects;
+        };
+
+        return result;
+    }
+
+    // Can potentially give false positive, in case when tested frustum is close to the corner of
+    // this frustum
+    // If checked both ways intersection test would be correct
+    Frustum::TestResult Frustum::CheckFrustum(const Matrix4x4& invViewMatrix,
+                                              const Matrix4x4 invProjMatrix) const
+    {
+        static const Vector4 cornerPoints[8] = {{-1, -1, -1, 1}, {-1, -1, 1, 1}, {-1, 1, -1, 1},
+                                                {-1, 1, 1, 1},   {1, -1, -1, 1}, {1, -1, 1, 1},
+                                                {1, 1, -1, 1},   {1, 1, 1, 1}};
+
+        Vector4 otherFrustumPoints[8];
+        for (size_t i = 0; i < 8; ++i)
+            otherFrustumPoints[i] = cornerPoints[i] * invProjMatrix;
+        for (size_t i = 0; i < 8; ++i)
+            otherFrustumPoints[i] = otherFrustumPoints[i] / otherFrustumPoints[i].w();
+        for (size_t i = 0; i < 8; ++i)
+            otherFrustumPoints[i] = otherFrustumPoints[i] * invViewMatrix;
+
+        TestResult result = Inside;
+
+        // If there's a plane, for which all points of another frustum is outside, then whole other
+        // frustum is outside
+        // If all points are on the correct side of all planes, then other frustum is fully inside
+
+        for (const auto& plane : m_planes)
+        {
+            bool testResults[2] = {};
+            for (size_t i = 0; i < 8; ++i)
+            {
+                float distanceToPlane = plane.Dot(otherFrustumPoints[i]);
+                bool inside = distanceToPlane > 0.0f;
+                testResults[inside] = true;
             }
+
+            if (!testResults[true])
+                return Outside;
+
+            if (testResults[false])
+                result = Intersects;
         }
 
         return result;
+    }
+
+    // Can potentially give false positive, in case when tested AABB is close to the corner of
+    // the frustum
+    bool Frustum::CheckAABBFast(const AABB& boundingBox) const
+    {
+        BLK_ASSERT(boundingBox.GetMin().w() == 1.0f);
+        BLK_ASSERT(boundingBox.GetMax().w() == 1.0f);
+
+        Vector4 zero;
+        const Vector4& aabbMin = boundingBox.GetMin();
+        const Vector4& aabbMax = boundingBox.GetMax();
+
+        // Batch by 2 planes
+        for (int i = 0; i < 3; ++i)
+        {
+            Vector4 mask[2] = {
+                m_planes[i * 2 + 0] > zero,
+                m_planes[i * 2 + 1] > zero,
+            };
+
+            Vector4 min[2] = {
+                aabbMin.Select(aabbMax, mask[0]),
+                aabbMin.Select(aabbMax, mask[1]),
+            };
+
+            float dotMin[2] = {
+                m_planes[i * 2 + 0].Dot(min[0]),
+                m_planes[i * 2 + 1].Dot(min[1]),
+            };
+
+            bool isOutside[2] = {
+                dotMin[0] < 0.0f,
+                dotMin[1] < 0.0f,
+            };
+
+            if (isOutside[0] || isOutside[1])
+                return false;
+        };
+
+        return true;
     }
 
 } // namespace Boolka

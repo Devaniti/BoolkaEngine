@@ -92,12 +92,12 @@ namespace Boolka
         return m_InvViewProjMatrix;
     }
 
-    const Vector3& RenderFrameContext::GetCameraPos() const
+    const Vector4& RenderFrameContext::GetCameraPos() const
     {
         return m_CameraPos;
     }
 
-    Vector3& RenderFrameContext::GetCameraPos()
+    Vector4& RenderFrameContext::GetCameraPos()
     {
         return m_CameraPos;
     }
@@ -132,12 +132,7 @@ namespace Boolka
         return m_ViewMatrix;
     }
 
-    const FrameStats& RenderFrameContext::GetFrameStats() const
-    {
-        return m_FraneStats;
-    }
-
-    FrameStats& RenderFrameContext::GetFrameStats()
+    FrameStats& RenderFrameContext::GetFrameStats() const
     {
         return m_FraneStats;
     }
@@ -158,10 +153,11 @@ namespace Boolka
 
 #ifdef BLK_ENABLE_STATS
         m_FraneStats.frameTime = m_DeltaTime;
+        m_FraneStats.frameTimeStable = 0.05f * m_DeltaTime + 0.95f * m_FraneStats.frameTimeStable;
 #endif
 
         // Clamp max delta time to 30 fps equivalent
-        m_DeltaTime = min(33.3f, m_DeltaTime);
+        m_DeltaTime = min(0.033f, m_DeltaTime);
 
         UINT width = engineContext.GetBackbufferWidth();
         UINT height = engineContext.GetBackbufferHeight();

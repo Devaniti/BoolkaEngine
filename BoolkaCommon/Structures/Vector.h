@@ -9,8 +9,7 @@ namespace Boolka
     public:
         using thisType = Vector<componentCount, elementType>;
 
-        Vector()
-            : m_data{} {};
+        Vector();
 
         ~Vector() = default;
 
@@ -20,6 +19,7 @@ namespace Boolka
         Vector& operator=(Vector&&) = default;
 
         Vector(std::initializer_list<elementType> data);
+        Vector(const elementType* first, const elementType* last);
 
         // TODO forbid implicit vector truncation somehow (when otherComponentCount >
         // componentCount)
@@ -75,9 +75,18 @@ namespace Boolka
         elementType LengthSqr() const;
         thisType Normalize() const;
 
+        // Calculates Length of first 3 components
         elementType Length3Slow() const;
         elementType Length3Sqr() const;
+        // Scales all 4 components so vector of first 3 ends up normalized
         thisType Normalize3() const;
+
+        thisType Min(const thisType& other) const;
+        thisType Max(const thisType& other) const;
+
+        // Selects elements from this or other vector based on mask
+        // false in mask represent this vector, otherwise other
+        thisType Select(const thisType& other, const thisType& mask) const;
 
         thisType operator-() const;
 
@@ -98,6 +107,16 @@ namespace Boolka
         bool operator==(const thisType& other) const;
         bool operator!=(const thisType& other) const;
 
+        // Returns mask which elements satisfy comparison
+        // 0 - false, anything else - true
+
+        thisType operator>(const thisType& other) const;
+        thisType operator<(const thisType& other) const;
+        thisType operator>=(const thisType& other) const;
+        thisType operator<=(const thisType& other) const;
+        thisType EqualMask(const thisType& other) const;
+        thisType NotEqualMask(const thisType& other) const;
+
     protected:
         elementType m_data[componentCount];
 
@@ -111,11 +130,25 @@ namespace Boolka
     };
 
     template <size_t componentCount, typename elementType>
+    Vector<componentCount, elementType>::Vector()
+        : m_data{}
+    {
+    }
+
+    template <size_t componentCount, typename elementType>
     Vector<componentCount, elementType>::Vector(std::initializer_list<elementType> data)
         : m_data{}
     {
         BLK_ASSERT(data.size() <= componentCount);
         std::copy(data.begin(), data.end(), begin());
+    }
+
+    template <size_t componentCount, typename elementType>
+    Vector<componentCount, elementType>::Vector(const elementType* first, const elementType* last)
+        : m_data{}
+    {
+        BLK_ASSERT(last - first <= componentCount);
+        std::copy(first, last, begin());
     }
 
     template <size_t componentCount, typename elementType>
@@ -377,6 +410,42 @@ namespace Boolka
     }
 
     template <size_t componentCount, typename elementType>
+    Vector<componentCount, elementType> Vector<componentCount, elementType>::Min(
+        const Vector<componentCount, elementType>& other) const
+    {
+        Vector<componentCount, elementType> result;
+        for (size_t i = 0; i < componentCount; ++i)
+        {
+            result[i] = min((*this)[i], other[i]);
+        }
+        return result;
+    }
+
+    template <size_t componentCount, typename elementType>
+    Vector<componentCount, elementType> Vector<componentCount, elementType>::Max(
+        const thisType& other) const
+    {
+        Vector<componentCount, elementType> result;
+        for (size_t i = 0; i < componentCount; ++i)
+        {
+            result[i] = max((*this)[i], other[i]);
+        }
+        return result;
+    }
+
+    template <size_t componentCount, typename elementType>
+    Vector<componentCount, elementType> Vector<componentCount, elementType>::Select(
+        const thisType& other, const thisType& mask) const
+    {
+        Vector<componentCount, elementType> result;
+        for (size_t i = 0; i < componentCount; ++i)
+        {
+            result[i] = mask[i] == 0.0f ? (*this)[i] : other[i];
+        }
+        return result;
+    }
+
+    template <size_t componentCount, typename elementType>
     Vector<componentCount, elementType> Vector<componentCount, elementType>::operator-() const
     {
         thisType result;
@@ -511,15 +580,87 @@ namespace Boolka
     }
 
     template <size_t componentCount, typename elementType>
+    bool Vector<componentCount, elementType>::operator==(const thisType& other) const
+    {
+        return std::equal(std::begin(m_data), std::end(m_data), std::begin(other.m_data));
+    }
+
+    template <size_t componentCount, typename elementType>
     bool Vector<componentCount, elementType>::operator!=(const thisType& other) const
     {
         return !operator==(other);
     }
 
     template <size_t componentCount, typename elementType>
-    bool Vector<componentCount, elementType>::operator==(const thisType& other) const
+    Vector<componentCount, elementType> Vector<componentCount, elementType>::operator>(
+        const thisType& other) const
     {
-        return std::equal(std::begin(m_data), std::end(m_data), std::begin(other.m_data));
+        thisType result;
+        for (size_t i = 0; i < componentCount; ++i)
+        {
+            result[i] = (*this)[i] > other[i] ? 1.0f : 0.0f;
+        }
+        return result;
+    }
+
+    template <size_t componentCount, typename elementType>
+    Vector<componentCount, elementType> Vector<componentCount, elementType>::operator<(
+        const thisType& other) const
+    {
+        thisType result;
+        for (size_t i = 0; i < componentCount; ++i)
+        {
+            result[i] = (*this)[i] < other[i] ? 1.0f : 0.0f;
+        }
+        return result;
+    }
+
+    template <size_t componentCount, typename elementType>
+    Vector<componentCount, elementType> Vector<componentCount, elementType>::operator>=(
+        const thisType& other) const
+    {
+        thisType result;
+        for (size_t i = 0; i < componentCount; ++i)
+        {
+            result[i] = (*this)[i] >= other[i] ? 1.0f : 0.0f;
+        }
+        return result;
+    }
+
+    template <size_t componentCount, typename elementType>
+    Vector<componentCount, elementType> Vector<componentCount, elementType>::operator<=(
+        const thisType& other) const
+    {
+        thisType result;
+        for (size_t i = 0; i < componentCount; ++i)
+        {
+            result[i] = (*this)[i] <= other[i] ? 1.0f : 0.0f;
+        }
+        return result;
+    }
+
+    template <size_t componentCount, typename elementType>
+    Vector<componentCount, elementType> Vector<componentCount, elementType>::EqualMask(
+        const thisType& other) const
+    {
+        thisType result;
+        for (size_t i = 0; i < componentCount; ++i)
+        {
+            result[i] = (*this)[i] == other[i] ? 1.0f : 0.0f;
+        }
+        return result;
+    }
+
+    template <size_t componentCount, typename elementType>
+    Vector<componentCount, elementType> Vector<componentCount, elementType>::NotEqualMask(
+        const thisType& other) const
+    {
+        thisType result;
+        for (size_t i = 0; i < componentCount; ++i)
+        {
+            result[i] = (*this)[i] != other[i] ? 1.0f : 0.0f;
+        }
+        return result;
     }
 
     template <size_t componentCount, typename elementType>
@@ -551,24 +692,14 @@ namespace Boolka
     Vector<componentCount, elementType> Min(const Vector<componentCount, elementType>& first,
                                             const Vector<componentCount, elementType>& second)
     {
-        Vector<componentCount, elementType> result;
-        for (size_t i = 0; i < componentCount; ++i)
-        {
-            result[i] = min(first[i], second[i]);
-        }
-        return result;
+        return first.Min(second);
     }
 
     template <size_t componentCount, typename elementType>
     Vector<componentCount, elementType> Max(const Vector<componentCount, elementType>& first,
                                             const Vector<componentCount, elementType>& second)
     {
-        Vector<componentCount, elementType> result;
-        for (size_t i = 0; i < componentCount; ++i)
-        {
-            result[i] = max(first[i], second[i]);
-        }
-        return result;
+        return first.Max(second);
     }
 
     using Vector2 = Vector<2>;
@@ -580,3 +711,5 @@ namespace Boolka
     using Vector4u = Vector<4, uint>;
 
 } // namespace Boolka
+
+#include "VectorSSE.h"

@@ -10,16 +10,16 @@ namespace Boolka
         AABB() = default;
         ~AABB() = default;
 
-        AABB(Vector3 min, Vector3 max);
+        AABB(Vector4 min, Vector4 max);
 
-        Vector3& GetMin();
-        const Vector3& GetMin() const;
-        Vector3& GetMax();
-        const Vector3& GetMax() const;
+        Vector4& GetMin();
+        const Vector4& GetMin() const;
+        Vector4& GetMax();
+        const Vector4& GetMax() const;
 
     private:
-        Vector3 m_min;
-        Vector3 m_max;
+        Vector4 m_min;
+        Vector4 m_max;
     };
 
 } // namespace Boolka

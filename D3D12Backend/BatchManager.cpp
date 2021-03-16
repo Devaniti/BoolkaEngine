@@ -12,6 +12,13 @@ namespace Boolka
 
     BLK_DEFINE_ENUM_OPERATORS(BatchManager::BatchType);
 
+    BatchManager::BatchManager()
+        : m_requiredBatches{}
+    {
+        // By default all batches are required
+        std::fill(std::begin(m_requiredBatches), std::end(m_requiredBatches), true);
+    };
+
     BatchManager::~BatchManager()
     {
 #ifdef BLK_DEBUG
@@ -45,15 +52,20 @@ namespace Boolka
 
     bool BatchManager::PrepareBatches(const RenderFrameContext& frameContext, const Scene& scene)
     {
+        CalculateRequiredBatches(frameContext);
+
         for (BatchType batch = BatchType::Opaque; batch < BatchType::Count; ++batch)
         {
-            if (!IsBatchEnabled(batch, frameContext))
+            if (!NeedRender(batch))
+            {
+                ClearBatch(batch);
                 continue;
+            }
 
             UINT startIndex, endIndex;
             GetBatchRange(batch, scene, startIndex, endIndex);
 
-            Vector3 cameraCoord;
+            Vector4 cameraCoord;
             Matrix4x4 viewProjMatrix;
             GetBatchView(batch, frameContext, cameraCoord, viewProjMatrix);
 
@@ -68,14 +80,24 @@ namespace Boolka
         return true;
     }
 
-    bool BatchManager::Render(CommandList& commandList, BatchType batch)
+    bool BatchManager::NeedRender(BatchType batch) const
+    {
+        return m_requiredBatches[static_cast<size_t>(batch)];
+    }
+
+    bool BatchManager::Render(CommandList& commandList, BatchType batch) const
     {
         BLK_ASSERT(batch < BatchType::Count);
-        for (const auto& object : m_batches[static_cast<size_t>(batch)])
+        for (const auto& object : GetBatch(batch))
         {
             commandList->DrawIndexedInstanced(object.indexCount, 1, object.startIndex, 0, 0);
         }
         return true;
+    }
+
+    size_t BatchManager::GetCount(BatchType batch)
+    {
+        return GetBatch(batch).size();
     }
 
     bool BatchManager::IsBatchEnabled(BatchType batch, const RenderFrameContext& frameContext)
@@ -87,7 +109,8 @@ namespace Boolka
         {
             size_t shadowMapIndex = batch - BatchType::ShadowMapLight0;
             size_t lightIndex = shadowMapIndex / BLK_TEXCUBE_FACE_COUNT;
-            return lightIndex < lightContainer.GetLights().size();
+            if (lightIndex >= lightContainer.GetLights().size())
+                return false;
         }
 
         return true;
@@ -110,7 +133,7 @@ namespace Boolka
     }
 
     void BatchManager::GetBatchView(BatchType batch, const RenderFrameContext& frameContext,
-                                    Vector3& cameraCoord, Matrix4x4& viewProjMatrix)
+                                    Vector4& cameraCoord, Matrix4x4& viewProjMatrix)
     {
         const auto& lightContainer = frameContext.GetLightContainer();
 
@@ -137,7 +160,7 @@ namespace Boolka
     }
 
     void BatchManager::CullObjects(const Scene& scene, Matrix4x4 viewProjMatrix,
-                                   Vector3 cameraCoord, UINT startIndex, UINT endIndex,
+                                   Vector4 cameraCoord, UINT startIndex, UINT endIndex,
                                    std::vector<SortingData>& culledObjects)
     {
         BLK_ASSERT(startIndex < endIndex);
@@ -149,9 +172,9 @@ namespace Boolka
         for (UINT i = startIndex; i < endIndex; ++i)
         {
             const auto& objectAABB = objects[i].boundingBox;
-            if (calculatedFrustum.CheckAABB(objectAABB))
+            if (calculatedFrustum.CheckAABBFast(objectAABB))
             {
-                Vector3 objectCoord = (objectAABB.GetMin() + objectAABB.GetMax()) / 2.0f;
+                Vector4 objectCoord = (objectAABB.GetMin() + objectAABB.GetMax()) / 2.0f;
                 float distance = (objectCoord - cameraCoord).LengthSqr();
                 culledObjects.push_back({i, distance});
             }
@@ -179,6 +202,16 @@ namespace Boolka
         }
     }
 
+    std::vector<BatchManager::DrawData>& BatchManager::GetBatch(BatchType id)
+    {
+        return m_batches[static_cast<size_t>(id)];
+    }
+
+    const std::vector<BatchManager::DrawData>& BatchManager::GetBatch(BatchType id) const
+    {
+        return m_batches[static_cast<size_t>(id)];
+    }
+
     void BatchManager::GenerateDrawData(BatchType batch, const Scene& scene,
                                         const std::vector<SortingData>& culledObjects)
     {
@@ -189,6 +222,78 @@ namespace Boolka
             const auto& sceneObject = objects[culledObjects[i].objectIndex];
             m_batches[static_cast<size_t>(batch)][i] =
                 DrawData{sceneObject.indexCount, sceneObject.startIndex};
+        }
+
+        m_requiredBatches[static_cast<size_t>(batch)] = true;
+    }
+
+    void BatchManager::ClearBatch(BatchType batch)
+    {
+        GetBatch(batch).resize(0);
+        m_requiredBatches[static_cast<size_t>(batch)] = false;
+    }
+
+    void BatchManager::CalculateRequiredBatches(const RenderFrameContext& frameContext)
+    {
+        const auto& lightContainer = frameContext.GetLightContainer();
+        Frustum mainCameraFrustum(frameContext.GetViewProjMatrix());
+
+#ifdef BLK_ENABLE_STATS
+        auto& frameStats = frameContext.GetFrameStats();
+        frameStats.renderedLights = 0;
+        frameStats.renderedLightFrustums = 0;
+#endif
+
+        for (size_t i = 0; i < lightContainer.GetLights().size(); ++i)
+        {
+            const auto& light = lightContainer.GetLights()[i];
+            Vector4 halfExtent{light.farZ, light.farZ, light.farZ, 0.0f};
+            Vector4 lightPos = Vector4(light.worldPos, 1.0f);
+            AABB lightAABB = AABB(lightPos - halfExtent, lightPos + halfExtent);
+            // Cull whole light
+            if (!mainCameraFrustum.CheckSphereFast(lightPos, light.farZ))
+            {
+                for (size_t j = 0; j < BLK_TEXCUBE_FACE_COUNT; ++j)
+                {
+                    BatchType batch = BatchType::ShadowMapLight0 + i * BLK_TEXCUBE_FACE_COUNT + j;
+                    m_requiredBatches[static_cast<size_t>(batch)] = false;
+                }
+                continue;
+            }
+
+#ifdef BLK_ENABLE_STATS
+            frameStats.renderedLights++;
+#endif
+
+            // Then cull each frustum separately
+            for (size_t j = 0; j < BLK_TEXCUBE_FACE_COUNT; ++j)
+            {
+                BatchType batch = BatchType::ShadowMapLight0 + i * BLK_TEXCUBE_FACE_COUNT + j;
+                const auto& viewMatrix = lightContainer.GetViewMatrices()[i][j];
+                const auto& projMatrix = lightContainer.GetProjMatrices()[i][j];
+                bool isSuccessfull{};
+                Matrix4x4 invViewMatrix = viewMatrix.Inverse(isSuccessfull);
+                BLK_ASSERT(isSuccessfull);
+                Matrix4x4 invProjMatrix = projMatrix.Inverse(isSuccessfull);
+                BLK_ASSERT(isSuccessfull);
+                m_requiredBatches[static_cast<size_t>(batch)] =
+                    mainCameraFrustum.CheckFrustumFast(invViewMatrix, invProjMatrix);
+
+#ifdef BLK_ENABLE_STATS
+                if (m_requiredBatches[static_cast<size_t>(batch)])
+                    frameStats.renderedLightFrustums++;
+#endif
+            }
+        }
+
+        // Mark all batches of out lights out of bounds as non required
+        for (size_t i = lightContainer.GetLights().size(); i < BLK_MAX_LIGHT_COUNT; ++i)
+        {
+            for (size_t j = 0; j < BLK_TEXCUBE_FACE_COUNT; ++j)
+            {
+                BatchType batch = BatchType::ShadowMapLight0 + i * BLK_TEXCUBE_FACE_COUNT + j;
+                m_requiredBatches[static_cast<size_t>(batch)] = false;
+            }
         }
     }
 

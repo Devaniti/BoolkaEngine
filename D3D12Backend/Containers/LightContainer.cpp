@@ -8,6 +8,8 @@ namespace Boolka
     LightContainer::LightContainer()
         : m_Lights(BLK_MAX_LIGHT_COUNT)
         , m_ViewProjMatrices(BLK_MAX_LIGHT_COUNT)
+        , m_ViewMatrices(BLK_MAX_LIGHT_COUNT)
+        , m_ProjMatrices(BLK_MAX_LIGHT_COUNT)
         , m_CurrentRotation(0.0f)
     {
     }
@@ -21,6 +23,18 @@ namespace Boolka
         GetViewProjMatrices() const
     {
         return m_ViewProjMatrices;
+    }
+
+    const std::vector<std::array<Matrix4x4, BLK_TEXCUBE_FACE_COUNT>>& LightContainer::
+        GetViewMatrices() const
+    {
+        return m_ViewMatrices;
+    }
+
+    const std::vector<std::array<Matrix4x4, BLK_TEXCUBE_FACE_COUNT>>& LightContainer::
+        GetProjMatrices() const
+    {
+        return m_ProjMatrices;
     }
 
     const LightContainer::Sun& LightContainer::GetSun() const
@@ -68,7 +82,7 @@ namespace Boolka
         {
             float rotation = m_CurrentRotation + BLK_FLOAT_PI / 2.0f * i;
             Vector3 fromCenter = {distance * sin(rotation), distance * cos(rotation), 0.0f};
-            Vector3 worldPos = Vector4(center + fromCenter);
+            Vector3 worldPos = center + fromCenter;
             m_Lights[i].worldPos = worldPos;
             m_Lights[i].color = colors[i];
             m_Lights[i].nearZ = nearZ;
@@ -76,7 +90,9 @@ namespace Boolka
 
             for (size_t j = 0; j < BLK_TEXCUBE_FACE_COUNT; ++j)
             {
-                m_ViewProjMatrices[i][j] = Matrix4x4::CalculateCubeMapView(j, worldPos) * proj;
+                m_ViewMatrices[i][j] = Matrix4x4::CalculateCubeMapView(j, worldPos);
+                m_ProjMatrices[i][j] = proj;
+                m_ViewProjMatrices[i][j] = m_ViewMatrices[i][j] * proj;
             }
         }
     }
@@ -86,13 +102,13 @@ namespace Boolka
         static const float nearZ = 0.1f;
         static const float farZ = 25.0f;
         static const float worldWidth = 100.0f;
-        static const Vector3 color{0.35f, 0.35f, 0.35f};
-        static const Vector3 lightDir = Vector3(-0.1f, -0.4f, -1.0f).Normalize();
-        static const Vector3 worldPos =
-            Vector3(15.0f, 0.0f, 0.0f) - lightDir * (farZ - nearZ) / 2.0f;
-        static const Vector3 upDirection{0, 0, 1};
-        static const Vector3 right = upDirection.Cross(lightDir).Normalize();
-        static const Vector3 up = lightDir.Cross(right).Normalize();
+        static const Vector4 color{0.35f, 0.35f, 0.35f};
+        static const Vector4 lightDir = Vector4{-0.1f, -0.4f, -1.0f}.Normalize();
+        static const Vector4 worldPos =
+            Vector4(15.0f, 0.0f, 0.0f, 1.0f) - lightDir * (farZ - nearZ) / 2.0f;
+        static const Vector4 upDirection{0, 0, 1};
+        static const Vector4 right = upDirection.Cross(lightDir).Normalize();
+        static const Vector4 up = lightDir.Cross(right).Normalize();
         static const Matrix4x4 view = Matrix4x4::CalculateView(right, up, lightDir, worldPos);
         static const Matrix4x4 proj =
             Matrix4x4::CalculateProjOrtographic(nearZ, farZ, worldWidth, worldWidth);

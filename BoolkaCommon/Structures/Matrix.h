@@ -57,8 +57,8 @@ namespace Boolka
         static Matrix4x4 GetRotationY(float angle);
         static Matrix4x4 GetRotationZ(float angle);
 
-        static Matrix4x4 CalculateView(const Vector3& right, const Vector3& up,
-                                       const Vector3& forward, const Vector3& position);
+        static Matrix4x4 CalculateView(const Vector4& right, const Vector4& up,
+                                       const Vector4& forward, const Vector4& position);
         static Matrix4x4 CalculateProjPerspective(float nearZ, float farZ, float aspectRatio,
                                                   float fovY);
         static Matrix4x4 CalculateProjOrtographic(float nearZ, float farZ, float width,
@@ -68,7 +68,7 @@ namespace Boolka
         static Matrix4x4 GetUVToTexCoord();
         static Matrix4x4 GetTexCoordToUV();
 
-        static Matrix4x4 CalculateCubeMapView(size_t cubeMapFace, const Vector3& position);
+        static Matrix4x4 CalculateCubeMapView(size_t cubeMapFace, const Vector4& position);
 
     private:
         Vector4 m_data[4];

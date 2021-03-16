@@ -142,6 +142,8 @@ PSOut main(VSOut In)
     float3 albedoVal = SRGBToLinear(albedo.Load(uint3(vpos, 0)).rgb);
     float3 normalVal = normal.Load(uint3(vpos, 0)).xyz;
     float depthVal = depth.Load(uint3(vpos, 0));
+    if (depthVal == 1.0f) // Far plane
+        return Out; // Clear far plane in shader for now
     float3 viewPos = CalculateViewPos(UV, depthVal);
     float3 result = CalculateAmbient(albedoVal);
     result += CalculateSun(albedoVal, albedoVal, normalVal, viewPos);

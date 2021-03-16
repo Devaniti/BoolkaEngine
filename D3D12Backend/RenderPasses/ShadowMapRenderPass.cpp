@@ -28,6 +28,8 @@ namespace Boolka
 
         GraphicCommandListImpl& commandList = threadContext.GetGraphicCommandList();
 
+        const auto& batchManager = engineContext.GetScene().GetBatchManager();
+
         BLK_GPU_SCOPE(commandList.Get(), "ShadowMapRenderPass");
         BLK_RENDER_DEBUG_ONLY(resourceTracker.ValidateStates(commandList));
 
@@ -97,6 +99,22 @@ namespace Boolka
         // Point lights
         for (size_t lightIndex = 0; lightIndex < lights.size(); ++lightIndex)
         {
+            bool isLightCulled = true;
+
+            for (size_t faceIndex = 0; faceIndex < BLK_TEXCUBE_FACE_COUNT; ++faceIndex)
+            {
+                size_t resourceIndex = lightIndex * BLK_TEXCUBE_FACE_COUNT + faceIndex;
+                if (batchManager.NeedRender(BatchManager::BatchType::ShadowMapLight0 +
+                                            resourceIndex))
+                {
+                    isLightCulled = false;
+                    break;
+                }
+            }
+
+            if (isLightCulled)
+                continue;
+
             auto& shadowMap =
                 resourceContainer.GetTexture(ResourceContainer::Tex::ShadowMapCube0 + lightIndex);
             resourceTracker.Transition(shadowMap, commandList, D3D12_RESOURCE_STATE_DEPTH_WRITE);
@@ -104,6 +122,10 @@ namespace Boolka
             for (size_t faceIndex = 0; faceIndex < BLK_TEXCUBE_FACE_COUNT; ++faceIndex)
             {
                 size_t resourceIndex = lightIndex * BLK_TEXCUBE_FACE_COUNT + faceIndex;
+
+                if (!batchManager.NeedRender(BatchManager::BatchType::ShadowMapLight0 +
+                                             resourceIndex))
+                    continue;
 
                 auto& shadowMapDSV =
                     resourceContainer.GetDSV(ResourceContainer::DSV::ShadowMapLight0 +
@@ -117,8 +139,8 @@ namespace Boolka
                         ResourceContainer::DefaultRootSigBindPoints::PassRootConstant),
                     static_cast<UINT>(resourceIndex), 0);
 
-                engineContext.GetScene().GetBatchManager().Render(
-                    commandList, BatchManager::BatchType::ShadowMapLight0 + resourceIndex);
+                batchManager.Render(commandList,
+                                    BatchManager::BatchType::ShadowMapLight0 + resourceIndex);
             }
         }
         // Sun light
