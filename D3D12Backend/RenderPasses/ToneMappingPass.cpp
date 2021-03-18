@@ -102,7 +102,7 @@ namespace Boolka
         bool res = m_PSO.Initialize(device, defaultRootSig, inputLayout, VS, PS, 1, false, false,
                                     D3D12_COMPARISON_FUNC_ALWAYS, false);
         BLK_RENDER_DEBUG_ONLY(device.RemoveLastMessageFilter());
-        BLK_ASSERT(res);
+        BLK_ASSERT_VAR(res);
 
         inputLayout.Unload();
 

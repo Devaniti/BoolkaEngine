@@ -91,7 +91,7 @@ namespace Boolka
         bool res = m_PSO.Initialize(
             device, resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default),
             inputLayout, VS, PS, 0, true);
-        BLK_ASSERT(res);
+        BLK_ASSERT_VAR(res);
 
         inputLayout.Unload();
 

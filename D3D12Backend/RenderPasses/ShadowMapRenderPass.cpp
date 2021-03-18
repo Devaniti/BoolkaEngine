@@ -199,7 +199,7 @@ namespace Boolka
                                  D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0});
 
         bool res = m_PSO.Initialize(device, defaultRootSig, inputLayout, VS, PS, 0, true);
-        BLK_ASSERT(res);
+        BLK_ASSERT_VAR(res);
 
         inputLayout.Unload();
 

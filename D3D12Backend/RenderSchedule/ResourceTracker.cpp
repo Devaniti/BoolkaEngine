@@ -27,7 +27,7 @@ namespace Boolka
     void ResourceTracker::RegisterResource(Resource& resource, D3D12_RESOURCE_STATES initialState)
     {
         auto [resourceIterator, isInserted] = m_TrackedResources.insert({&resource, initialState});
-        BLK_ASSERT(isInserted);
+        BLK_ASSERT_VAR(isInserted);
     }
 
     bool ResourceTracker::Transition(Resource& resource, CommandList& commandList,

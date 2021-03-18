@@ -61,13 +61,13 @@ namespace Boolka
         neededSize += textureCount * sizeof(TextureHeader);
 
         bool res = m_FileReader.WaitData(neededSize);
-        BLK_ASSERT(res);
+        BLK_ASSERT_VAR(res);
     }
 
     void SceneData::PrepareBinaryData()
     {
         bool res = m_FileReader.WaitData();
-        BLK_ASSERT(res);
+        BLK_ASSERT_VAR(res);
     }
 
     const MemoryBlock& SceneData::GetMemory() const

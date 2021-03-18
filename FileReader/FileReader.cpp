@@ -52,6 +52,7 @@ namespace Boolka
         // ReadFile must return FALSE for async IO operations and set last error to ERROR_IO_PENDING
         BLK_ASSERT(res == FALSE);
         BLK_ASSERT(GetLastError() == ERROR_IO_PENDING);
+        BLK_UNUSED_VARIABLE(res);
 
         if (GetLastError() != ERROR_IO_PENDING)
         {

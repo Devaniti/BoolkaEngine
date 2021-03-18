@@ -116,7 +116,7 @@ namespace Boolka
             device, resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default),
             inputLayout, VS, PS, 2, true, false, D3D12_COMPARISON_FUNC_EQUAL, false,
             DXGI_FORMAT_R16G16B16A16_FLOAT);
-        BLK_ASSERT(res);
+        BLK_ASSERT_VAR(res);
 
         inputLayout.Unload();
 

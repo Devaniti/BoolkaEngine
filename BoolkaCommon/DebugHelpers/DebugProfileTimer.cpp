@@ -10,7 +10,7 @@ namespace Boolka
     void DebugProfileTimer::Start()
     {
         bool res = m_Timer.Start();
-        BLK_ASSERT(res);
+        BLK_ASSERT_VAR(res);
     }
 
     void DebugProfileTimer::Stop(const wchar_t* name)

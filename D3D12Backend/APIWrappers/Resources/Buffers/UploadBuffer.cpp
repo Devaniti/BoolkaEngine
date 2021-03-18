@@ -26,7 +26,7 @@ namespace Boolka
         D3D12_RANGE readRange = {}; // empty read range = no reading
         void* result = nullptr;
         HRESULT hr = m_Resource->Map(0, &readRange, &result);
-        BLK_ASSERT(SUCCEEDED(hr));
+        BLK_ASSERT_VAR(SUCCEEDED(hr));
         return result;
     }
 

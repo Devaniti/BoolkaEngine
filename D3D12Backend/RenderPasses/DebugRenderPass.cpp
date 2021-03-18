@@ -142,11 +142,11 @@ namespace Boolka
         static const UINT64 vertexBufferSize = vertexSize * vertexCount;
 
         bool res = m_VertexBuffer.Initialize(device, vertexBufferSize);
-        BLK_ASSERT(res);
+        BLK_ASSERT_VAR(res);
         m_VertexBuffer.Upload(vertexData, vertexBufferSize);
 
         res = m_VertexBufferView.Initialize(m_VertexBuffer, vertexBufferSize, vertexSize);
-        BLK_ASSERT(res);
+        BLK_ASSERT_VAR(res);
 
         static const UINT64 indexCount = 3;
 
@@ -156,16 +156,16 @@ namespace Boolka
         static const UINT64 indexBufferSize = indexSize * indexCount;
 
         res = m_IndexBuffer.Initialize(device, indexBufferSize);
-        BLK_ASSERT(res);
+        BLK_ASSERT_VAR(res);
         m_IndexBuffer.Upload(indexData, indexBufferSize);
 
         res = m_IndexBufferView.Initialize(m_IndexBuffer, indexBufferSize, DXGI_FORMAT_R16_UINT);
-        BLK_ASSERT(res);
+        BLK_ASSERT_VAR(res);
 
         res = m_PSO.Initialize(
             device, resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default),
             inputLayout, VS, PS, 1);
-        BLK_ASSERT(res);
+        BLK_ASSERT_VAR(res);
 
         inputLayout.Unload();
 

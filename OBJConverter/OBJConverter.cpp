@@ -144,7 +144,7 @@ namespace Boolka
         std::cout << "Written textures" << std::endl;
 
         res = fileWriter.Close(BLK_FILE_BLOCK_SIZE);
-        BLK_ASSERT(res);
+        BLK_ASSERT_VAR(res);
 
         if (!res)
         {
@@ -292,6 +292,7 @@ namespace Boolka
         {
             // Further code assume that there are only triangles
             BLK_ASSERT(vertexesPerFace == 3);
+            BLK_UNUSED_VARIABLE(vertexesPerFace);
         }
 
         auto& mesh = shape.mesh;
@@ -410,7 +411,8 @@ namespace Boolka
             checked_narrowing_cast<UINT>(m_remappedMaterials.size())};
 
         bool res = fileWriter.Write(&header, sizeof(header));
-        BLK_ASSERT(res);
+        BLK_ASSERT_VAR(res);
+        BLK_UNUSED_VARIABLE(res);
 
         std::cout << "Written header" << std::endl;
     }
@@ -433,6 +435,10 @@ namespace Boolka
             int width, height, dummy;
 
             int result = stbi_info(material.c_str(), &width, &height, &dummy);
+            if (result == 0)
+            {
+                throw std::runtime_error("Can't get texture info");
+            }
 
             UINT mipCount = 0;
             int dimension = min(width, height);
@@ -461,6 +467,9 @@ namespace Boolka
     {
         size_t size = vertexDataVector.size() * sizeof(T);
         bool res = fileWriter.Write(vertexDataVector.data(), size);
+        BLK_ASSERT_VAR(res);
+        BLK_UNUSED_VARIABLE(res);
+
         if (alignment > 0)
         {
             size_t modulo = size % alignment;
@@ -470,7 +479,6 @@ namespace Boolka
             }
         }
 
-        BLK_ASSERT(res);
     }
 
     void ObjConverterImpl::WriteTextures(DebugFileWriter& fileWriter)

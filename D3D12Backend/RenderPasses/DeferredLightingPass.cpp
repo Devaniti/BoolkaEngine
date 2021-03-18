@@ -172,7 +172,7 @@ namespace Boolka
             inputLayout, VS, PS, 1, false, false, D3D12_COMPARISON_FUNC_ALWAYS, false,
             DXGI_FORMAT_R16G16B16A16_FLOAT);
         BLK_RENDER_DEBUG_ONLY(device.RemoveLastMessageFilter());
-        BLK_ASSERT(res);
+        BLK_ASSERT_VAR(res);
 
         inputLayout.Unload();
 

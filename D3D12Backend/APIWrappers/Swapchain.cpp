@@ -126,7 +126,7 @@ namespace Boolka
         HRESULT hr = m_Swapchain->ResizeBuffers(BLK_IN_FLIGHT_FRAMES, windowState.width,
                                                 windowState.height, DXGI_FORMAT_B8G8R8A8_UNORM,
                                                 DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT);
-        BLK_ASSERT(SUCCEEDED(hr));
+        BLK_ASSERT_VAR(SUCCEEDED(hr));
         device.Flush();
 
         return true;

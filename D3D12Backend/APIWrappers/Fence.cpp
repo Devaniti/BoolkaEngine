@@ -73,7 +73,7 @@ namespace Boolka
     void Fence::WaitCPU(UINT64 value)
     {
         HRESULT hr = m_Fence->SetEventOnCompletion(value, m_CPUEvent);
-        BLK_ASSERT(SUCCEEDED(hr));
+        BLK_ASSERT_VAR(SUCCEEDED(hr));
         ::WaitForSingleObject(m_CPUEvent, INFINITE);
         ::ResetEvent(m_CPUEvent);
     }
@@ -91,7 +91,7 @@ namespace Boolka
         for (size_t i = 0; i < count; i++)
         {
             HRESULT hr = fences[i]->m_Fence->SetEventOnCompletion(values[i], fences[i]->m_CPUEvent);
-            BLK_ASSERT(SUCCEEDED(hr));
+            BLK_ASSERT_VAR(SUCCEEDED(hr));
             cpuEvents[i] = fences[i]->m_CPUEvent;
         }
 

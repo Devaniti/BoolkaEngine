@@ -30,6 +30,11 @@
         if (!(condition))      \
             BLK_DEBUG_BREAK(); \
     }
+#define BLK_ASSERT_VAR(variable) \
+    {                            \
+        if (!(variable))         \
+            BLK_DEBUG_BREAK();   \
+    }
 #define BLK_DEBUG_ONLY(...) (__VA_ARGS__)
 
 // TODO move to platform dependent header
@@ -43,13 +48,14 @@
 
 #define BLK_DEBUG_BREAK() BLK_NOOP()
 #define BLK_ASSERT(condition) BLK_NOOP()
+#define BLK_ASSERT_VAR(variable) BLK_UNUSED_VARIABLE(variable)
 #define BLK_DEBUG_ONLY(...)
 
 #define BLK_SET_CURRENT_THREAD_NAME(Name) BLK_NOOP()
 
 #endif
 
-#define SAFE_RELEASE(p)     \
+#define BLK_SAFE_RELEASE(p) \
     {                       \
         if ((p))            \
         {                   \
@@ -57,12 +63,14 @@
             (p) = nullptr;  \
         }                   \
     }
-#define SAFE_DELETE(a)      \
+#define BLK_SAFE_DELETE(a)  \
     {                       \
         if ((a) != nullptr) \
             delete (a);     \
         (a) = nullptr;      \
     }
+
+#define BLK_UNUSED_VARIABLE(a) (void)a
 
 // If you want to stringify the result of expansion of a macro argument, you have to use two levels
 // of macros. https://gcc.gnu.org/onlinedocs/gcc-4.8.5/cpp/Stringification.html
@@ -114,7 +122,7 @@
         for (auto& elem : arr)                       \
         {                                            \
             bool res = elem.Initialize(__VA_ARGS__); \
-            BLK_ASSERT(res);                         \
+            BLK_ASSERT_VAR(res);                     \
         }                                            \
     }
 #define BLK_UNLOAD_ARRAY(arr)  \
@@ -164,7 +172,8 @@ T1 ptr_static_cast_internal(T2 value)
 template <typename T1, typename T2>
 T1 ptr_static_cast(T2 value)
 {
-    using intermediateType = template_if_t<std::is_const_v<std::remove_pointer_t<T1>>, const void*, void*>;
+    using intermediateType =
+        template_if_t<std::is_const_v<std::remove_pointer_t<T1>>, const void*, void*>;
     return ptr_static_cast_internal<T1, T2, intermediateType>(value);
 }
 

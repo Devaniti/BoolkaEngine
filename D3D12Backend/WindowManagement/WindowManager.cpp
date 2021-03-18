@@ -66,7 +66,7 @@ namespace Boolka
     {
         BLK_ASSERT(m_HWND != 0);
         BOOL res = ::PostMessage(m_HWND, WM_CUSTOM_FORCE_CLOSE, NULL, NULL);
-        BLK_ASSERT(res != 0);
+        BLK_ASSERT_VAR(res);
         m_WindowThread.join();
     }
 
@@ -78,7 +78,7 @@ namespace Boolka
         // User can only update width/height
         RECT windowClientRect = {};
         BOOL res = ::GetClientRect(m_HWND, &windowClientRect);
-        BLK_ASSERT(res);
+        BLK_ASSERT_VAR(res);
 
         stateToUpdate.width = windowClientRect.right - windowClientRect.left;
         stateToUpdate.height = windowClientRect.bottom - windowClientRect.top;
@@ -115,7 +115,7 @@ namespace Boolka
             return 0;
         case WM_CUSTOM_SET_FOCUS: {
             HWND res = ::SetFocus(hwnd);
-            BLK_ASSERT(res != 0);
+            BLK_ASSERT_VAR(res);
         }
             return 0;
         case WM_CLOSE:

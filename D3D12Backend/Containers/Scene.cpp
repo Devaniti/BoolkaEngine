@@ -37,19 +37,19 @@ namespace Boolka
         BLK_ASSERT(m_VertexBufferSize != 0);
         res = m_VertexBuffer.Initialize(device, m_VertexBufferSize, D3D12_HEAP_TYPE_DEFAULT,
                                         D3D12_RESOURCE_FLAG_NONE, D3D12_RESOURCE_STATE_COMMON);
-        BLK_ASSERT(res);
+        BLK_ASSERT_VAR(res);
 
         res = m_VertexBufferView.Initialize(m_VertexBuffer, m_VertexBufferSize, 9 * sizeof(float));
-        BLK_ASSERT(res);
+        BLK_ASSERT_VAR(res);
 
         m_IndexBufferSize = dataWrapper.indexBufferSize;
         BLK_ASSERT(m_IndexBufferSize != 0);
         res = m_IndexBuffer.Initialize(device, m_IndexBufferSize, D3D12_HEAP_TYPE_DEFAULT,
                                        D3D12_RESOURCE_FLAG_NONE, D3D12_RESOURCE_STATE_COMMON);
-        BLK_ASSERT(res);
+        BLK_ASSERT_VAR(res);
 
         res = m_IndexBufferView.Initialize(m_IndexBuffer, m_IndexBufferSize, DXGI_FORMAT_R32_UINT);
-        BLK_ASSERT(res);
+        BLK_ASSERT_VAR(res);
 
         m_IndexCount = dataWrapper.indexCount;
         BLK_ASSERT(m_IndexCount);
@@ -58,17 +58,17 @@ namespace Boolka
         BLK_ASSERT(m_ObjectCount != 0);
 
         res = m_CommandSignature.Initialize(device);
-        BLK_ASSERT(res);
+        BLK_ASSERT_VAR(res);
 
         res = m_DrawIndirectBuffer.Initialize(
             device, (static_cast<UINT64>(m_ObjectCount) + 1) * 32, D3D12_HEAP_TYPE_DEFAULT,
             D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-        BLK_ASSERT(res);
+        BLK_ASSERT_VAR(res);
 
         res = m_SRVDescriptorHeap.Initialize(device, dataWrapper.textureCount,
                                              D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
                                              D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
-        BLK_ASSERT(res);
+        BLK_ASSERT_VAR(res);
 
         m_Textures.resize(dataWrapper.textureCount);
         m_SRVs.resize(dataWrapper.textureCount);
@@ -135,7 +135,7 @@ namespace Boolka
         {
             bool res =
                 m_SRVs[i].Initialize(device, m_Textures[i], m_SRVDescriptorHeap.GetCPUHandle(i));
-            BLK_ASSERT(res);
+            BLK_ASSERT_VAR(res);
         }
 
         UploadBuffer uploadBuffer;

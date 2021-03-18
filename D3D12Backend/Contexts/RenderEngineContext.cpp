@@ -36,22 +36,22 @@ namespace Boolka
         m_backbufferHeight = windowState.height;
 
         bool res = m_InitializationCommandAllocator.Initialize(device);
-        BLK_ASSERT(res);
+        BLK_ASSERT_VAR(res);
         res = m_InitializationCommandList.Initialize(device, m_InitializationCommandAllocator.Get(),
                                                      nullptr);
-        BLK_ASSERT(res);
+        BLK_ASSERT_VAR(res);
         m_InitializationCommandList->Close();
         res = m_InitializationFence.Initialize(device);
-        BLK_ASSERT(res);
+        BLK_ASSERT_VAR(res);
 
         // Temp initial camera position for san-miguel scene
         res = m_Camera.Initialize(0.0f, 0.0f, {6.35f, 3.46f, 1.22f, 0.0f});
-        BLK_ASSERT(res);
+        BLK_ASSERT_VAR(res);
 
         m_HWND = displayController.GetHWND();
 
         res = m_resourceContainer.Initialize(device, *this, displayController, resourceTracker);
-        BLK_ASSERT(res);
+        BLK_ASSERT_VAR(res);
 
 #ifdef BLK_RENDER_DEBUG
         m_Device = &device;

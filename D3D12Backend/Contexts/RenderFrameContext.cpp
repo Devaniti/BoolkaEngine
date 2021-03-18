@@ -12,7 +12,10 @@ namespace Boolka
         : m_DeltaTime(0.0f)
         , m_FrameIndex(0)
         , m_LastTimestamp{}
-        , m_Frequency{}
+        , m_Frequency()
+#ifdef BLK_ENABLE_STATS
+        , m_FraneStats()
+#endif
     {
     }
 
@@ -143,7 +146,7 @@ namespace Boolka
 
         LARGE_INTEGER currentTimestamp;
         BOOL res = ::QueryPerformanceCounter(&currentTimestamp);
-        BLK_ASSERT(res);
+        BLK_ASSERT_VAR(res);
 
         LARGE_INTEGER timestampDifference = currentTimestamp - m_LastTimestamp;
 

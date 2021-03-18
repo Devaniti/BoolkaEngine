@@ -24,11 +24,12 @@ namespace Boolka
 
         UINT frameIndex = frameContext.GetFrameIndex();
 
-        // NOLINTNEXTLINE(clang-diagnostic-unused-variable): remove this when copying render pass
         Buffer& frameConstantBuffer =
             resourceContainer.GetFlippableBuffer(frameIndex, ResourceContainer::FlipBuf::Frame);
+        BLK_UNUSED_VARIABLE(frameConstantBuffer); // Remove when creating new RenderPass
 
         GraphicCommandListImpl& commandList = threadContext.GetGraphicCommandList();
+        BLK_UNUSED_VARIABLE(commandList); // Remove when creating new RenderPass
 
         BLK_GPU_SCOPE(commandList.Get(), "ReferenceRenderPass");
         BLK_RENDER_DEBUG_ONLY(resourceTracker.ValidateStates(commandList));
@@ -45,9 +46,9 @@ namespace Boolka
     {
         auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
         auto& resourceContainer = engineContext.GetResourceContainer();
-        // NOLINTNEXTLINE(clang-diagnostic-unused-variable): remove this when copying render pass
         auto& defaultRootSig =
             resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default);
+        BLK_UNUSED_VARIABLE(defaultRootSig); // Remove when creating new RenderPass
 
         return true;
     }
