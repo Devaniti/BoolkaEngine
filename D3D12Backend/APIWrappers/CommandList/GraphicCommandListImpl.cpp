@@ -10,7 +10,7 @@ namespace Boolka
     bool GraphicCommandListImpl::Initialize(Device& device, ID3D12CommandAllocator* allocator,
                                             ID3D12PipelineState* PSO)
     {
-        ID3D12GraphicsCommandList5* commandList = nullptr;
+        ID3D12GraphicsCommandList6* commandList = nullptr;
         HRESULT hr = device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, allocator, PSO,
                                                IID_PPV_ARGS(&commandList));
         if (FAILED(hr))

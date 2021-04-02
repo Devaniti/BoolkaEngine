@@ -23,6 +23,14 @@ namespace Boolka
         return !m_File.fail();
     }
 
+    bool DebugFileWriter::OpenFile(const wchar_t* filename)
+    {
+        m_File.open(filename, std::ios::binary | std::ios::trunc);
+        BLK_ASSERT(m_File);
+
+        return !m_File.fail();
+    }
+
     bool DebugFileWriter::Write(MemoryBlock memoryBlock)
     {
         return Write(memoryBlock.m_Data, memoryBlock.m_Size);

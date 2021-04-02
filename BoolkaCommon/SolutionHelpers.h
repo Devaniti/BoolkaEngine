@@ -35,6 +35,11 @@
         if (!(variable))         \
             BLK_DEBUG_BREAK();   \
     }
+#define BLK_ASSERT_VAR2(condition, variable) \
+    {                                        \
+        if (!(condition))                    \
+            BLK_DEBUG_BREAK();               \
+    }
 #define BLK_DEBUG_ONLY(...) (__VA_ARGS__)
 
 // TODO move to platform dependent header
@@ -49,6 +54,7 @@
 #define BLK_DEBUG_BREAK() BLK_NOOP()
 #define BLK_ASSERT(condition) BLK_NOOP()
 #define BLK_ASSERT_VAR(variable) BLK_UNUSED_VARIABLE(variable)
+#define BLK_ASSERT_VAR2(condition, variable) BLK_UNUSED_VARIABLE(variable)
 #define BLK_DEBUG_ONLY(...)
 
 #define BLK_SET_CURRENT_THREAD_NAME(Name) BLK_NOOP()
@@ -180,7 +186,7 @@ T1 ptr_static_cast(T2 value)
 inline void memcpy_strided(void* dst, size_t dstStride, const void* src, size_t srcStride,
                            size_t rows)
 {
-    size_t copiedStride = min(dstStride, srcStride);
+    size_t copiedStride = std::min(dstStride, srcStride);
     for (size_t i = 0; i < rows; ++i)
     {
         memcpy(dst, src, copiedStride);
@@ -202,4 +208,37 @@ inline LARGE_INTEGER operator-(LARGE_INTEGER a, LARGE_INTEGER b)
 inline float operator/(LARGE_INTEGER a, LARGE_INTEGER b)
 {
     return static_cast<float>(static_cast<double>(a.QuadPart) / static_cast<double>(b.QuadPart));
+}
+
+inline std::string utf8_encode(const std::wstring& wstr)
+{
+    if (wstr.empty())
+        return std::string();
+
+    int size_needed =
+        WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), NULL, 0, NULL, NULL);
+
+    std::string result(size_needed, 0);
+    int written = WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), &result[0],
+                                      size_needed, NULL, NULL);
+
+    BLK_ASSERT_VAR2(written == size_needed, written);
+
+    return result;
+}
+
+inline std::wstring utf8_decode(const std::string& str)
+{
+    if (str.empty())
+        return std::wstring();
+
+    int size_needed = MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), NULL, 0);
+
+    std::wstring result(size_needed, 0);
+    int written =
+        MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), &result[0], size_needed);
+
+    BLK_ASSERT_VAR2(written == size_needed, written);
+
+    return result;
 }

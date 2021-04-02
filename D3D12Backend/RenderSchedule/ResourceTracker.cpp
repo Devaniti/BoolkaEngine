@@ -54,7 +54,7 @@ namespace Boolka
 #ifdef BLK_RENDER_DEBUG
     void ResourceTracker::ValidateStates(CommandList& commandList)
     {
-        ID3D12GraphicsCommandList5* nativeCommandList = commandList.Get();
+        ID3D12GraphicsCommandList6* nativeCommandList = commandList.Get();
         ID3D12DebugCommandList1* debugCommandList = nullptr;
         HRESULT hr = nativeCommandList->QueryInterface<ID3D12DebugCommandList1>(&debugCommandList);
         if (FAILED(hr))

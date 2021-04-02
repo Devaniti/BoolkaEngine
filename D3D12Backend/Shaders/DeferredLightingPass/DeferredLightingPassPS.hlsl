@@ -1,5 +1,5 @@
-#include "../FullScreen/FullScreenCommon.hlsli"
 #include "../Color.hlsli"
+#include "../FullScreen/FullScreenCommon.hlsli"
 
 Texture2D<float4> albedo : register(t0);
 Texture2D<float4> normal : register(t1);
@@ -60,14 +60,16 @@ float CalculateLightShadow(uint lightIndex, float3 lightVector)
 {
     static const float shadowBias = 0.001f;
     float4 samplePos = mul(float4(-lightVector, 0.0f), invViewMatrix);
-    float comparisonValue = VectorToDepth(samplePos.xyz, lights[lightIndex].viewPos_nearZ.w, lights[lightIndex].color_farZ.w) - shadowBias;
+    float comparisonValue = VectorToDepth(samplePos.xyz, lights[lightIndex].viewPos_nearZ.w,
+                                          lights[lightIndex].color_farZ.w) - shadowBias;
     return shadowMapCube[lightIndex].SampleCmp(shadowSampler, samplePos.xyz, comparisonValue);
 }
 
-float3 CalculateLight(uint lightIndex, float3 albedoVal, float3 specularVal, float3 normalVal, float3 viewPos)
+float3 CalculateLight(uint lightIndex, float3 albedoVal, float3 specularVal, float3 normalVal,
+                      float3 viewPos)
 {
     float3 result = 0.0f;
-    
+
     float3 lightVector = lights[lightIndex].viewPos_nearZ.xyz - viewPos;
     float3 lightDir = normalize(lightVector);
     float3 lightVectorSqr = lightVector * lightVector;
@@ -79,20 +81,20 @@ float3 CalculateLight(uint lightIndex, float3 albedoVal, float3 specularVal, flo
     float NdotL = dot(lightDir, normalVal);
     if (NdotL <= 0.0f || distanceAttenuation <= 0.0f)
         return 0.0;
-    
+
     float shadowFactor = CalculateLightShadow(lightIndex, lightVector);
     if (shadowFactor <= 0.0f)
         return 0.0;
-    
+
     // Diffuse
     result += albedoVal * NdotL;
-    
+
     float3 viewDir = normalize(viewPos);
     float3 reflectedLightVector = reflect(viewDir, normalVal);
     float specularRefl = pow(saturate(dot(reflectedLightVector, lightDir)), specExp);
     // Specular
     result += specularVal * specularRefl;
-    
+
     result *= lights[lightIndex].color_farZ.rgb * shadowFactor * distanceAttenuation;
     return result;
 }
@@ -105,45 +107,44 @@ float CalculateSunShadow(float3 viewPos)
     return shadowMapSun.SampleCmp(shadowSampler, samplePos.xy, comparisonValue);
 }
 
-
 float3 CalculateSun(float3 albedoVal, float3 specularVal, float3 normalVal, float3 viewPos)
 {
     float3 result = 0.0f;
-    
+
     float3 lightDir = sun.lightDirVS.xyz;
     float NdotL = dot(lightDir, normalVal);
-    
+
     if (NdotL <= 0.0f)
         return 0.0f;
-    
+
     float shadowFactor = CalculateSunShadow(viewPos);
     if (shadowFactor <= 0.0f)
         return 0.0f;
-    
+
     // Diffuse
     result += albedoVal * NdotL;
-    
+
     float3 viewDir = normalize(viewPos);
     float3 reflectedLightVector = reflect(viewDir, normalVal);
     float specularRefl = pow(saturate(dot(reflectedLightVector, lightDir)), specExp);
     // Specular
     result += specularVal * specularRefl;
-    
+
     result *= sun.color.rgb * shadowFactor;
     return result;
 }
 
 PSOut main(VSOut In)
 {
-    PSOut Out = (PSOut) 0;
-    
+    PSOut Out = (PSOut)0;
+
     float2 UV = In.texcoord;
     uint2 vpos = uint2(In.position.xy);
     float3 albedoVal = SRGBToLinear(albedo.Load(uint3(vpos, 0)).rgb);
     float3 normalVal = normal.Load(uint3(vpos, 0)).xyz;
     float depthVal = depth.Load(uint3(vpos, 0));
     if (depthVal == 1.0f) // Far plane
-        return Out; // Clear far plane in shader for now
+        return Out;       // Clear far plane in shader for now
     float3 viewPos = CalculateViewPos(UV, depthVal);
     float3 result = CalculateAmbient(albedoVal);
     result += CalculateSun(albedoVal, albedoVal, normalVal, viewPos);

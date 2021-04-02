@@ -35,7 +35,7 @@ namespace Boolka
         m_Resource->Unmap(0, nullptr);
     }
 
-    void UploadBuffer::Upload(void* data, UINT64 size)
+    void UploadBuffer::Upload(const void* data, UINT64 size)
     {
         void* dst = Map();
         memcpy(dst, data, size);

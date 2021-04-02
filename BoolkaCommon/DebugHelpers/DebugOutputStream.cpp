@@ -14,7 +14,7 @@ namespace Boolka
     };
 
     // ASCII specialization
-    template<>
+    template <>
     std::streamsize DebugOutputStream<char>::xsputn(const std::char_traits<char>::char_type* s,
                                                     std::streamsize n)
     {

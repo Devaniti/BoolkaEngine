@@ -58,11 +58,8 @@ namespace Boolka
             static_cast<UINT>(ResourceContainer::DefaultRootSigBindPoints::FrameConstantBuffer),
             frameConstantBuffer->GetGPUVirtualAddress());
 
-        commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-        commandList->IASetIndexBuffer(engineContext.GetScene().GetIndexBufferView().GetView());
+        engineContext.GetScene().BindResources(commandList);
 
-        commandList->IASetVertexBuffers(0, 1,
-                                        engineContext.GetScene().GetVertexBufferView().GetView());
         commandList->SetPipelineState(m_PSO.Get());
 
         engineContext.GetScene().GetBatchManager().Render(commandList,
@@ -82,18 +79,13 @@ namespace Boolka
         auto& resourceContainer = engineContext.GetResourceContainer();
 
         MemoryBlock PS = {};
-        MemoryBlock VS = DebugFileReader::ReadFile("ZPassVertexShader.cso");
-        InputLayout inputLayout;
-        inputLayout.Initialize(1);
-        inputLayout.SetEntry(0, {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,
-                                 D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0});
+        MemoryBlock AS = DebugFileReader::ReadFile("AmplificationShader.cso");
+        MemoryBlock MS = DebugFileReader::ReadFile("MeshShader.cso");
 
         bool res = m_PSO.Initialize(
-            device, resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default),
-            inputLayout, VS, PS, 0, true);
+            device, resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default), AS, MS,
+            PS, 0, true);
         BLK_ASSERT_VAR(res);
-
-        inputLayout.Unload();
 
         return true;
     }

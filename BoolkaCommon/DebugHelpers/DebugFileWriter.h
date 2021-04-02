@@ -11,6 +11,7 @@ namespace Boolka
         ~DebugFileWriter();
 
         bool OpenFile(const char* filename);
+        bool OpenFile(const wchar_t* filename);
         bool Write(MemoryBlock memoryBlock);
         bool Write(const void* data, size_t size);
         bool AddPadding(size_t size);

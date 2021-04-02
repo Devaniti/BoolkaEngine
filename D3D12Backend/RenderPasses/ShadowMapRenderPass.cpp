@@ -9,6 +9,7 @@
 #include "APIWrappers/Resources/Textures/Views/DepthStencilView.h"
 #include "APIWrappers/Resources/Textures/Views/RenderTargetView.h"
 #include "BoolkaCommon/DebugHelpers/DebugFileReader.h"
+#include "BoolkaCommon/Structures/Frustum.h"
 #include "Contexts/RenderContext.h"
 #include "Contexts/RenderEngineContext.h"
 #include "Contexts/RenderFrameContext.h"
@@ -40,7 +41,11 @@ namespace Boolka
 
         resourceTracker.Transition(passConstantBuffer, commandList, D3D12_RESOURCE_STATE_COPY_DEST);
 
-        Matrix4x4 uploadData[BLK_MAX_LIGHT_COUNT * BLK_TEXCUBE_FACE_COUNT + 1];
+        struct UploadData
+        {
+            Frustum frustums[BLK_MAX_LIGHT_COUNT * BLK_TEXCUBE_FACE_COUNT + 1];
+            Matrix4x4 viewProjMatricies[BLK_MAX_LIGHT_COUNT * BLK_TEXCUBE_FACE_COUNT + 1];
+        } uploadData;
 
         // Point lights
         auto& lightContainer = frameContext.GetLightContainer();
@@ -54,14 +59,19 @@ namespace Boolka
             for (size_t faceIndex = 0; faceIndex < BLK_TEXCUBE_FACE_COUNT; ++faceIndex)
             {
                 size_t resourceIndex = lightIndex * BLK_TEXCUBE_FACE_COUNT + faceIndex;
-                uploadData[resourceIndex] =
+                uploadData.viewProjMatricies[resourceIndex] =
                     lightContainer.GetViewProjMatrices()[lightIndex][faceIndex].Transpose();
             }
         }
 
         // Sun light
-        uploadData[BLK_MAX_LIGHT_COUNT * BLK_TEXCUBE_FACE_COUNT] =
+        uploadData.viewProjMatricies[BLK_MAX_LIGHT_COUNT * BLK_TEXCUBE_FACE_COUNT] =
             (lightContainer.GetSunView() * lightContainer.GetSunProj()).Transpose();
+
+        for (size_t i = 0; i < BLK_MAX_LIGHT_COUNT * BLK_TEXCUBE_FACE_COUNT + 1; ++i)
+        {
+            uploadData.frustums[i] = Frustum(uploadData.viewProjMatricies[i]);
+        }
 
         passUploadBuffer.Upload(&uploadData, sizeof(uploadData));
         commandList->CopyResource(passConstantBuffer.Get(), passUploadBuffer.Get());
@@ -85,11 +95,7 @@ namespace Boolka
 
         commandList->RSSetScissorRects(1, &scissorRect);
 
-        commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-        commandList->IASetIndexBuffer(engineContext.GetScene().GetIndexBufferView().GetView());
-
-        commandList->IASetVertexBuffers(0, 1,
-                                        engineContext.GetScene().GetVertexBufferView().GetView());
+        engineContext.GetScene().BindResources(commandList);
         commandList->SetPipelineState(m_PSO.Get());
 
         commandList->SetGraphicsRootConstantBufferView(
@@ -137,7 +143,7 @@ namespace Boolka
                 commandList->SetGraphicsRoot32BitConstant(
                     static_cast<UINT>(
                         ResourceContainer::DefaultRootSigBindPoints::PassRootConstant),
-                    static_cast<UINT>(resourceIndex), 0);
+                    static_cast<UINT>(resourceIndex), 1);
 
                 batchManager.Render(commandList,
                                     BatchManager::BatchType::ShadowMapLight0 + resourceIndex);
@@ -170,7 +176,7 @@ namespace Boolka
             commandList->OMSetRenderTargets(0, nullptr, FALSE, shadowMapDSV.GetCPUDescriptor());
             commandList->SetGraphicsRoot32BitConstant(
                 static_cast<UINT>(ResourceContainer::DefaultRootSigBindPoints::PassRootConstant),
-                static_cast<UINT>(BLK_MAX_LIGHT_COUNT * BLK_TEXCUBE_FACE_COUNT), 0);
+                static_cast<UINT>(BLK_MAX_LIGHT_COUNT * BLK_TEXCUBE_FACE_COUNT), 1);
 
             engineContext.GetScene().GetBatchManager().Render(
                 commandList, BatchManager::BatchType::ShadowMapSun);
@@ -192,16 +198,11 @@ namespace Boolka
             resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default);
 
         MemoryBlock PS = {};
-        MemoryBlock VS = DebugFileReader::ReadFile("ShadowMapVertexShader.cso");
-        InputLayout inputLayout;
-        inputLayout.Initialize(1);
-        inputLayout.SetEntry(0, {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,
-                                 D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0});
+        MemoryBlock AS = DebugFileReader::ReadFile("SimpleAmplificationShader.cso");
+        MemoryBlock MS = DebugFileReader::ReadFile("ShadowMapPassMeshShader.cso");
 
-        bool res = m_PSO.Initialize(device, defaultRootSig, inputLayout, VS, PS, 0, true);
+        bool res = m_PSO.Initialize(device, defaultRootSig, AS, MS, PS, 0, true);
         BLK_ASSERT_VAR(res);
-
-        inputLayout.Unload();
 
         return true;
     }

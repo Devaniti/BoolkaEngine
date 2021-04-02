@@ -17,7 +17,12 @@
       <SDLCheck>true</SDLCheck>
       <TreatWarningAsError>true</TreatWarningAsError>
       <WarningLevel>Level3</WarningLevel>
+      <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
+    <FxCompile>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <ShaderModel>6.5</ShaderModel>
+    </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup />
 </Project>

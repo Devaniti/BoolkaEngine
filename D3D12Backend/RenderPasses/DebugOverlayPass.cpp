@@ -109,11 +109,6 @@ namespace Boolka
                     debugStats.frameTimeStable * 1000.0f);
         ImGui::Text("Resolution: %dx%d", engineContext.GetBackbufferWidth(),
                     engineContext.GetBackbufferHeight());
-        if (ImGui::CollapsingHeader("Culling"))
-        {
-            ImGui::Text("%llu rendered objects", debugStats.renderedObjects);
-            ImGui::Text("%llu culled objects", debugStats.culledObjects);
-        }
         if (ImGui::CollapsingHeader("Batches"))
         {
             ImGui::Text("%llu rendered lights", debugStats.renderedLights);

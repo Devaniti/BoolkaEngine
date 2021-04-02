@@ -18,7 +18,7 @@ namespace Boolka
         void* Map();
         void Unmap();
 
-        void Upload(void* data, UINT64 size);
+        void Upload(const void* data, UINT64 size);
     };
 
 } // namespace Boolka

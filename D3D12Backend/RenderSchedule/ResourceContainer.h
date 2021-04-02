@@ -100,7 +100,8 @@ namespace Boolka
             PassConstantBuffer = 1,
             PassRootConstant = 2,
             RenderPassSRV = 3,
-            SceneSRV = 5
+            SceneSRV = 5,
+            SceneMeshletsSRV = 6
         };
 
         ResourceContainer() = default;

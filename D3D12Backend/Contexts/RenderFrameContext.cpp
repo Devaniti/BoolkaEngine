@@ -160,7 +160,7 @@ namespace Boolka
 #endif
 
         // Clamp max delta time to 30 fps equivalent
-        m_DeltaTime = min(0.033f, m_DeltaTime);
+        m_DeltaTime = std::min(1.0f / 30.0f, m_DeltaTime);
 
         UINT width = engineContext.GetBackbufferWidth();
         UINT height = engineContext.GetBackbufferHeight();

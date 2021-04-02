@@ -1,19 +1,40 @@
 BoolkaEngine
 ============
-BoolkaEngine is DX12 rendering engine for Windows 10.
+BoolkaEngine is DX12 rendering engine.
 
-![Screenshot](https://raw.githubusercontent.com/Devaniti/BoolkaEngine/master/ScreenshotSmall.png)
+![Screenshot](https://raw.githubusercontent.com/Devaniti/BoolkaEngine/master/Screenshot.png)
 
-Currently implemented features:
+Features
+--------
 * HDR Rendering + Tonemapping
 * Point lights with shadows
 * Sun light with shadows
-* Frustum culling
+* GPU Frustum culling using mesh shaders
 * Fast loading using custom binary format (including converted from obj format)
 * ImGui debug output
 
+Requirements
+--------
+* Windows 10 version 2004 or newer
+* GPU with mesh shader support (NVIDIA GTX 16xx or higher, AMD RX 6xxx or higher)
+* SSD Recommended
+
+To build BoolkaEngine you'll also need:
+* Visual Studio 2019
+* Windows 10 SDK 10.0.19041
+
 Building
 --------
-Building BoolkaEngine requires Visual Studio 2017 (2019 recommended) and Windows SDK 10.0.19041 or later.
+You can just build BoolkaEngine.sln solution, but you'll also need binarized scene to run it
 
-If you want to use default scene, run PrepareScene.bat, which will download and convert to .scene format San Miguel scene.
+If you want to use default scene run PrepareScene.bat, which will download and binarize San Miguel scene
+
+If you want to use another scene, build OBJConverter project, use it to convert scene in obj format
+
+Command line parameters
+--------
+Bootstrap parameters:\
+Bootstrap.exe binarizedScenePath
+
+OBJConverter parameters:\
+OBJConverter.exe inObjFile outBinarizedFile

@@ -66,11 +66,8 @@ namespace Boolka
             static_cast<UINT>(ResourceContainer::DefaultRootSigBindPoints::FrameConstantBuffer),
             frameConstantBuffer->GetGPUVirtualAddress());
 
-        commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-        commandList->IASetIndexBuffer(engineContext.GetScene().GetIndexBufferView().GetView());
+        engineContext.GetScene().BindResources(commandList);
 
-        commandList->IASetVertexBuffers(0, 1,
-                                        engineContext.GetScene().GetVertexBufferView().GetView());
         commandList->SetPipelineState(m_PSO.Get());
 
         engineContext.GetScene().GetBatchManager().Render(commandList,
@@ -90,25 +87,13 @@ namespace Boolka
         auto& resourceContainer = engineContext.GetResourceContainer();
 
         MemoryBlock PS = DebugFileReader::ReadFile("TransparentPassPixelShader.cso");
-        MemoryBlock VS = DebugFileReader::ReadFile("TransparentPassVertexShader.cso");
-        InputLayout inputLayout;
-        inputLayout.Initialize(4);
-        inputLayout.SetEntry(0, {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,
-                                 D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0});
-        inputLayout.SetEntry(1, {"MATERIAL", 0, DXGI_FORMAT_R32_SINT, 0, 12,
-                                 D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0});
-        inputLayout.SetEntry(2, {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 16,
-                                 D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0});
-        inputLayout.SetEntry(3, {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 28,
-                                 D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0});
+        MemoryBlock AS = DebugFileReader::ReadFile("AmplificationShader.cso");
+        MemoryBlock MS = DebugFileReader::ReadFile("MeshShader.cso");
 
         bool res = m_PSO.Initialize(
-            device, resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default),
-            inputLayout, VS, PS, 1, true, false, D3D12_COMPARISON_FUNC_LESS, true,
-            DXGI_FORMAT_R16G16B16A16_FLOAT);
+            device, resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default), AS, MS,
+            PS, 1, true, false, D3D12_COMPARISON_FUNC_LESS, true, DXGI_FORMAT_R16G16B16A16_FLOAT);
         BLK_ASSERT_VAR(res);
-
-        inputLayout.Unload();
 
         return true;
     }

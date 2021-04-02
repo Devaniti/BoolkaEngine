@@ -4,9 +4,9 @@
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <Manifest Include="Application.manifest" />
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="Application.manifest" />
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

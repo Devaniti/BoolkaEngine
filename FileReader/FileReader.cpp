@@ -50,9 +50,8 @@ namespace Boolka
         res = ::ReadFile(m_file, data.m_Data, static_cast<DWORD>(data.m_Size), NULL, &m_async);
 
         // ReadFile must return FALSE for async IO operations and set last error to ERROR_IO_PENDING
-        BLK_ASSERT(res == FALSE);
+        BLK_ASSERT_VAR2(res == FALSE, res);
         BLK_ASSERT(GetLastError() == ERROR_IO_PENDING);
-        BLK_UNUSED_VARIABLE(res);
 
         if (GetLastError() != ERROR_IO_PENDING)
         {

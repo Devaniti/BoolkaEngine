@@ -1,5 +1,6 @@
 #include "stdafx.h"
 
+#include "BoolkaCommon/DebugHelpers/DebugTimer.h"
 #include "OBJConverter.h"
 
 void WinError()
@@ -22,7 +23,7 @@ void WinError()
     LocalFree(lpMsgBuf);
 }
 
-int main(int argc, char* argv[])
+int wmain(int argc, wchar_t* argv[], wchar_t* envp[])
 {
     if (argc != 4)
     {
@@ -30,18 +31,22 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    char* directory = argv[1];
-    char* objFile = argv[2];
-    char* outFile = argv[3];
+    wchar_t* directory = argv[1];
+    wchar_t* objFile = argv[2];
+    wchar_t* outFile = argv[3];
 
-    BOOL winSuccess = ::SetCurrentDirectoryA(directory);
+    BOOL winSuccess = ::SetCurrentDirectoryW(directory);
     if (!winSuccess)
     {
         WinError();
         return -1;
     }
 
+    Boolka::DebugTimer timer;
+    timer.Start();
     bool res = Boolka::OBJConverter::Convert(objFile, outFile);
+    float seconds = timer.Stop();
+    std::cout << "Conversion took " << seconds << "s" << std::endl;
 
     if (!res)
     {

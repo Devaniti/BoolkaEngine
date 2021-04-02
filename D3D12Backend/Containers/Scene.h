@@ -24,42 +24,34 @@ namespace Boolka
         bool Initialize(Device& device, SceneData& sceneData, RenderEngineContext& engineContext);
         void Unload();
 
-        UINT GetVertexBufferSize() const;
-        Buffer& GetVertexBuffer();
-        VertexBufferView& GetVertexBufferView();
-        UINT GetIndexBufferSize() const;
-        Buffer& GetIndexBuffer();
-        IndexBufferView& GetIndexBufferView();
-        UINT GetIndexCount() const;
         // All opaque objects placed before all transparent objects
         // So objects in range [0, m_OpaqueObjectCount) - are opaque
         // And objects in range [m_OpaqueObjectCount, m_ObjectCount) - are
         // transparent
         UINT GetObjectCount() const;
         UINT GetOpaqueObjectCount() const;
+        D3D12_GPU_DESCRIPTOR_HANDLE GetSceneTexturesTable() const;
+        D3D12_GPU_DESCRIPTOR_HANDLE GetMeshletsTable() const;
         DescriptorHeap& GetSRVDescriptorHeap();
         BatchManager& GetBatchManager();
-        std::vector<SceneData::ObjectHeader>& GetObjects();
-        const std::vector<SceneData::ObjectHeader>& GetObjects() const;
+
+        void BindResources(CommandList& commandList);
 
     private:
-        UINT m_VertexBufferSize;
-        UINT m_IndexBufferSize;
-        UINT m_IndexCount;
         UINT m_ObjectCount;
         UINT m_OpaqueObjectCount;
-        Buffer m_VertexBuffer;
+        Buffer m_VertexBuffer1;
+        Buffer m_VertexBuffer2;
+        Buffer m_VertexIndirectionBuffer;
         Buffer m_IndexBuffer;
-        Buffer m_DrawIndirectBuffer;
-        VertexBufferView m_VertexBufferView;
-        IndexBufferView m_IndexBufferView;
-        CommandSignature m_CommandSignature;
+        Buffer m_MeshletBuffer;
+        Buffer m_ObjectBuffer;
         DescriptorHeap m_SRVDescriptorHeap;
         ResourceHeap m_ResourceHeap;
         BatchManager m_BatchManager;
         std::vector<Texture2D> m_Textures;
-        std::vector<ShaderResourceView> m_SRVs;
-        std::vector<SceneData::ObjectHeader> m_Objects;
+
+        static const UINT ms_MeshletSRVCount;
     };
 
 } // namespace Boolka

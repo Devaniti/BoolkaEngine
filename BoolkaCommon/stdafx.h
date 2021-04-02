@@ -24,13 +24,19 @@
 
 // Windows
 #define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#define NODRAWTEXT
+#define NOGDI
+#define NOMCX
+#define NOSERVICE
+#define NOHELP
 #include <Windows.h>
 #include <shellapi.h>
 
 // Intrinsics
 #ifdef BLK_USE_SSE
-#include <xmmintrin.h>
 #include <intrin.h>
+#include <xmmintrin.h>
 #endif
 
 // Own common code

@@ -1,5 +1,5 @@
-#include "../FullScreen/FullScreenCommon.hlsli"
 #include "../Color.hlsli"
+#include "../FullScreen/FullScreenCommon.hlsli"
 
 Texture2D<float4> lightBuffer : register(t3);
 
@@ -45,8 +45,8 @@ float3 Tonemap(float3 c)
 
 PSOut main(VSOut In)
 {
-    PSOut Out = (PSOut) 0;
-    
+    PSOut Out = (PSOut)0;
+
     uint2 vpos = uint2(In.position.xy);
     float4 light = lightBuffer.Load(uint3(vpos, 0));
     Out.color = float4(Tonemap(light.rgb), 0.0f);

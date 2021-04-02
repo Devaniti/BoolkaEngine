@@ -1,0 +1,3 @@
+[submodule "ThirdParty/DirectXMesh"]
+	path = ThirdParty/DirectXMesh
+	url = https://github.com/microsoft/DirectXMesh.git

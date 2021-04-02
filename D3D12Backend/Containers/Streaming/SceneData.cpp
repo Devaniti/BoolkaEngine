@@ -25,28 +25,28 @@ namespace Boolka
 
         m_FileReader.WaitData(sizeof(SceneHeader));
 
-        unsigned char* data = static_cast<unsigned char*>(m_MemoryBlock.m_Data);
-        SceneHeader* sceneHeader = ptr_static_cast<SceneHeader*>(data);
+        const unsigned char* data = static_cast<const unsigned char*>(m_MemoryBlock.m_Data);
+        const SceneHeader* sceneHeader = ptr_static_cast<const SceneHeader*>(data);
 
-        result.vertexBufferSize = sceneHeader->vertexSize;
-        result.indexBufferSize = sceneHeader->indexSize;
-        result.cullingBufferSize = sceneHeader->objectsSize;
-        result.indexCount = sceneHeader->indexCount;
-        result.textureCount = sceneHeader->textureCount;
-        result.objectCount = sceneHeader->objectCount;
-        result.opaqueCount = sceneHeader->opaqueCount;
+        BLK_ASSERT(sceneHeader->vertex1Size != 0);
+        BLK_ASSERT(sceneHeader->vertex2Size != 0);
+        BLK_ASSERT(sceneHeader->vertexIndirectionSize != 0);
+        BLK_ASSERT(sceneHeader->indexSize != 0);
+        BLK_ASSERT(sceneHeader->meshletsSize != 0);
+        BLK_ASSERT(sceneHeader->objectsSize != 0);
+        BLK_ASSERT(sceneHeader->objectCount != 0);
+        BLK_ASSERT(sceneHeader->opaqueCount != 0);
+        BLK_ASSERT(sceneHeader->textureCount != 0);
+
+        result.header = *sceneHeader;
 
         data += sizeof(SceneHeader);
 
-        result.textureHeaders = ptr_static_cast<TextureHeader*>(data);
+        result.textureHeaders = ptr_static_cast<const TextureHeader*>(data);
 
-        data += sizeof(TextureHeader) * result.textureCount;
+        data += sizeof(TextureHeader) * result.header.textureCount;
 
-        result.objectData = ptr_static_cast<ObjectHeader*>(data);
-
-        data += sceneHeader->objectsSize;
-
-        result.binaryData = data;
+        result.binaryData = static_cast<const void*>(data);
 
         return result;
     }
@@ -54,8 +54,8 @@ namespace Boolka
     void SceneData::PrepareTextureHeaders()
     {
         size_t neededSize = sizeof(SceneHeader);
-        unsigned char* data = static_cast<unsigned char*>(m_MemoryBlock.m_Data);
-        SceneHeader* sceneHeader = ptr_static_cast<SceneHeader*>(data);
+        const unsigned char* data = static_cast<const unsigned char*>(m_MemoryBlock.m_Data);
+        const SceneHeader* sceneHeader = ptr_static_cast<const SceneHeader*>(data);
 
         size_t textureCount = sceneHeader->textureCount;
         neededSize += textureCount * sizeof(TextureHeader);

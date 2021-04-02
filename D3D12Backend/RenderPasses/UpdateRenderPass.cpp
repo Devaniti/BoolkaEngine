@@ -3,6 +3,7 @@
 #include "UpdateRenderPass.h"
 
 #include "APIWrappers/Resources/ResourceTransition.h"
+#include "BoolkaCommon/Structures/Frustum.h"
 #include "Contexts/RenderContext.h"
 #include "Contexts/RenderEngineContext.h"
 #include "Contexts/RenderFrameContext.h"
@@ -47,6 +48,7 @@ namespace Boolka
         const Matrix4x4& invViewMatrix = frameContext.GetInvViewMatrix();
         const Matrix4x4& invProjMatrix = frameContext.GetInvProjMatrix();
         const Matrix4x4& invViewProjMatrix = frameContext.GetInvViewProjMatrix();
+        const Frustum mainViewFrustum(viewProjMatrix);
 
         unsigned char* upload = static_cast<unsigned char*>(currentUploadBuffer.Map());
         memcpy(upload, viewProjMatrix.Transpose().GetBuffer(), sizeof(Matrix4x4));
@@ -65,6 +67,9 @@ namespace Boolka
         upload += sizeof(Matrix4x4);
 
         memcpy(upload, invProjMatrix.Transpose().GetBuffer(), sizeof(Matrix4x4));
+        upload += sizeof(Matrix4x4);
+
+        memcpy(upload, mainViewFrustum.GetBuffer(), sizeof(Frustum));
 
         currentUploadBuffer.Unmap();
 

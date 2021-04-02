@@ -86,9 +86,12 @@ IncludeCategories:
   - Regex:           'stdafx\.h'
     Priority:        -1
     SortPriority:    -1
-  - Regex:           '.*'
+  - Regex:           '\<.*\>'
     Priority:        1
     SortPriority:    1
+  - Regex:           '.*'
+    Priority:        2
+    SortPriority:    2
 IncludeIsMainRegex: '(Test)?$'
 IncludeIsMainSourceRegex: ''
 IndentCaseLabels: false

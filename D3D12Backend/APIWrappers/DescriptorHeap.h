@@ -12,11 +12,9 @@ namespace Boolka
         ~DescriptorHeap();
 
         ID3D12DescriptorHeap* Get();
-        ;
         ID3D12DescriptorHeap* operator->();
-        ;
-        D3D12_CPU_DESCRIPTOR_HANDLE GetCPUHandle(UINT index);
-        D3D12_GPU_DESCRIPTOR_HANDLE GetGPUHandle(UINT index);
+        D3D12_CPU_DESCRIPTOR_HANDLE GetCPUHandle(UINT index) const;
+        D3D12_GPU_DESCRIPTOR_HANDLE GetGPUHandle(UINT index) const;
 
         bool Initialize(Device& device, UINT elementCount, D3D12_DESCRIPTOR_HEAP_TYPE heapType,
                         D3D12_DESCRIPTOR_HEAP_FLAGS heapFlags);

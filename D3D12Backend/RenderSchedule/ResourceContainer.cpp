@@ -2,6 +2,7 @@
 
 #include "ResourceContainer.h"
 
+#include "BoolkaCommon/Structures/Frustum.h"
 #include "RenderSchedule/ResourceTracker.h"
 #include "WindowManagement/DisplayController.h"
 
@@ -159,11 +160,14 @@ namespace Boolka
 
         m_RootSigs[static_cast<size_t>(DSV::GbufferDepth)].Initialize(device, "RootSig.cso");
 
-        static const UINT64 frameCbSize = BLK_CEIL_TO_POWER_OF_TWO(sizeof(Matrix4x4) * 6, 256);
+        static const UINT64 frameCbSize =
+            BLK_CEIL_TO_POWER_OF_TWO(sizeof(Matrix4x4) * 6 + sizeof(Frustum), 256);
         static const UINT64 deferredLightingCbSize = BLK_CEIL_TO_POWER_OF_TWO(
             sizeof(Vector4) * BLK_TEXCUBE_FACE_COUNT * 2 + sizeof(Vector4u), 256);
-        static const UINT64 shadowMapCbSize = BLK_CEIL_TO_POWER_OF_TWO(
-            sizeof(Matrix4x4) * (BLK_MAX_LIGHT_COUNT * BLK_TEXCUBE_FACE_COUNT + 1), 256);
+        static const UINT64 shadowMapCbSize =
+            BLK_CEIL_TO_POWER_OF_TWO((sizeof(Frustum) + sizeof(Matrix4x4)) *
+                                         (BLK_MAX_LIGHT_COUNT * BLK_TEXCUBE_FACE_COUNT + 1),
+                                     256);
 
         // Group initializations of same types
         // This can potentially improve performance

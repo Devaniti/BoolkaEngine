@@ -15,7 +15,7 @@ namespace Boolka
         BLK_ASSERT(m_CommandList == nullptr);
     }
 
-    bool CommandList::Initialize(ID3D12GraphicsCommandList5* commandList)
+    bool CommandList::Initialize(ID3D12GraphicsCommandList6* commandList)
     {
         BLK_ASSERT(m_CommandList == nullptr);
 
@@ -23,13 +23,13 @@ namespace Boolka
         return true;
     }
 
-    ID3D12GraphicsCommandList5* CommandList::Get()
+    ID3D12GraphicsCommandList6* CommandList::Get()
     {
         BLK_ASSERT(m_CommandList != nullptr);
         return m_CommandList;
     }
 
-    ID3D12GraphicsCommandList5* CommandList::operator->()
+    ID3D12GraphicsCommandList6* CommandList::operator->()
     {
         return Get();
     }

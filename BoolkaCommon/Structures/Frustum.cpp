@@ -115,6 +115,16 @@ namespace Boolka
         return true;
     }
 
+    float* Frustum::GetBuffer()
+    {
+        return m_planes[0].GetBuffer();
+    }
+
+    const float* Frustum::GetBuffer() const
+    {
+        return m_planes[0].GetBuffer();
+    }
+
     // Can potentially give false positive, in case when tested AABB is close to the corner of
     // the frustum
     Frustum::TestResult Frustum::CheckAABB(const AABB& boundingBox) const

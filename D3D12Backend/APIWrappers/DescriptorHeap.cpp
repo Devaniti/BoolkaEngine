@@ -40,7 +40,7 @@ namespace Boolka
         return Get();
     }
 
-    D3D12_CPU_DESCRIPTOR_HANDLE DescriptorHeap::GetCPUHandle(UINT index)
+    D3D12_CPU_DESCRIPTOR_HANDLE DescriptorHeap::GetCPUHandle(UINT index) const
     {
 #ifdef BLK_DEBUG
         BLK_ASSERT(m_CPUStartHandle.ptr != 0);
@@ -52,7 +52,7 @@ namespace Boolka
         return result;
     }
 
-    D3D12_GPU_DESCRIPTOR_HANDLE DescriptorHeap::GetGPUHandle(UINT index)
+    D3D12_GPU_DESCRIPTOR_HANDLE DescriptorHeap::GetGPUHandle(UINT index) const
     {
 #ifdef BLK_DEBUG
         BLK_ASSERT(m_GPUStartHandle.ptr != 0);

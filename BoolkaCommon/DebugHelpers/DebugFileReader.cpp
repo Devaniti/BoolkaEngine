@@ -9,6 +9,18 @@ namespace Boolka
     {
         std::ifstream file(filename, std::ios::binary | std::ios::ate);
         BLK_ASSERT(file);
+        return ReadFile(file);
+    }
+
+    MemoryBlock DebugFileReader::ReadFile(const wchar_t* filename)
+    {
+        std::ifstream file(filename, std::ios::binary | std::ios::ate);
+        BLK_ASSERT(file);
+        return ReadFile(file);
+    }
+
+    MemoryBlock DebugFileReader::ReadFile(std::ifstream& file)
+    {
         std::streamsize size = file.tellg();
         BLK_ASSERT(file);
         BLK_ASSERT(size >= 0);

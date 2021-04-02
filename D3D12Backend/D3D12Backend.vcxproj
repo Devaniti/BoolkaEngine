@@ -25,19 +25,19 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Development|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -84,7 +84,6 @@
     </Link>
     <FxCompile>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <ShaderModel>6.0</ShaderModel>
       <AdditionalOptions>-Qembed_debug %(AdditionalOptions)</AdditionalOptions>
     </FxCompile>
     <Lib>
@@ -104,7 +103,6 @@
     </Link>
     <FxCompile>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <ShaderModel>6.0</ShaderModel>
       <AdditionalOptions>-Qembed_debug %(AdditionalOptions)</AdditionalOptions>
     </FxCompile>
     <Lib>
@@ -126,7 +124,6 @@
     </Link>
     <FxCompile>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <ShaderModel>6.0</ShaderModel>
     </FxCompile>
     <Lib>
       <AdditionalDependencies>D3D12.lib;DXGI.lib;D3DCompiler.lib;</AdditionalDependencies>
@@ -192,6 +189,7 @@
     <ClInclude Include="RenderBackendImpl.h" />
     <ClInclude Include="RenderPass.h" />
     <ClInclude Include="RenderPasses\Debug3DRenderPass.h" />
+    <ClInclude Include="RenderPasses\DebugMeshRenderPass.h" />
     <ClInclude Include="RenderPasses\DebugOverlayPass.h" />
     <ClInclude Include="RenderPasses\DebugRenderPass.h" />
     <ClInclude Include="RenderPasses\DeferredLightingPass.h" />
@@ -207,6 +205,7 @@
     <ClInclude Include="RenderSchedule\ResourceContainer.h" />
     <ClInclude Include="RenderSchedule\ResourceTracker.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="Util\d3dx12.h" />
     <ClInclude Include="WindowManagement\DisplayController.h" />
     <ClInclude Include="WindowManagement\WindowManager.h" />
     <ClInclude Include="WindowManagement\WindowState.h" />
@@ -268,6 +267,7 @@
     <ClCompile Include="RenderBackend.cpp" />
     <ClCompile Include="RenderBackendImpl.cpp" />
     <ClCompile Include="RenderPasses\Debug3DRenderPass.cpp" />
+    <ClCompile Include="RenderPasses\DebugMeshRenderPass.cpp" />
     <ClCompile Include="RenderPasses\DebugOverlayPass.cpp" />
     <ClCompile Include="RenderPasses\DebugRenderPass.cpp" />
     <ClCompile Include="RenderPasses\DeferredLightingPass.cpp" />
@@ -302,6 +302,16 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
+    <FxCompile Include="Shaders\DebugMeshPass\DebugMeshPassMeshShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Mesh</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Mesh</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Mesh</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\DebugMeshPass\DebugMeshPassPixelShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
     <FxCompile Include="Shaders\DebugPass\DebugPassPixelShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Pixel</ShaderType>
@@ -327,10 +337,25 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
-    <FxCompile Include="Shaders\GBufferPass\GBufferPassVertexShader.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    <FxCompile Include="Shaders\MeshShaders\AmplificationShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Amplification</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Amplification</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Amplification</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\MeshShaders\MeshShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Mesh</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Mesh</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Mesh</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\MeshShaders\SimpleAmplificationShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Amplification</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Amplification</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Amplification</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\MeshShaders\SimpleMeshShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Mesh</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Mesh</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Mesh</ShaderType>
     </FxCompile>
     <FxCompile Include="Shaders\RootSig.hlsl">
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">RootSig</EntryPointName>
@@ -347,10 +372,17 @@
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Development|x64'">
       </AdditionalOptions>
     </FxCompile>
-    <FxCompile Include="Shaders\ShadowMapPass\ShadowMapVertexShader.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    <FxCompile Include="Shaders\ShadowMapPass\ShadowMapAmplificationShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Amplification</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Amplification</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Amplification</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\ShadowMapPass\ShadowMapPassMeshShader.hlsl">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/Tms_6_5 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/Tms_6_5 %(AdditionalOptions)</AdditionalOptions>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Mesh</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Mesh</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Mesh</ShaderType>
     </FxCompile>
     <FxCompile Include="Shaders\ToneMappingPass\ToneMappingPassPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
@@ -361,16 +393,6 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-    </FxCompile>
-    <FxCompile Include="Shaders\TransparentPass\TransparentPassVertexShader.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-    </FxCompile>
-    <FxCompile Include="Shaders\ZPass\ZPassVertexShader.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
@@ -386,21 +408,20 @@
     <None Include="Shaders\Color.hlsli" />
     <None Include="Shaders\Common.hlsli" />
     <None Include="Shaders\Debug3DPass\Debug3DPassShadersCommon.hlsli" />
+    <None Include="Shaders\DebugMeshPass\DebugMeshPassShadersCommon.hlsli" />
     <None Include="Shaders\DebugPass\DebugPassShadersCommon.hlsli" />
     <None Include="Shaders\FullScreen\FullScreenCommon.hlsli" />
-    <None Include="Shaders\GBufferPass\GBufferPassShadersCommon.hlsli" />
+    <None Include="Shaders\MeshCommon.hlsli" />
     <None Include="Shaders\ShadowMapPass\ShadowMapShadersCommon.hlsli" />
-    <None Include="Shaders\TransparentPass\TransparentPassShadersCommon.hlsli" />
-    <None Include="Shaders\ZPass\ZPassShadersCommon.hlsli" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\packages\WinPixEventRuntime.1.0.200127001\build\WinPixEventRuntime.targets" Condition="Exists('..\packages\WinPixEventRuntime.1.0.200127001\build\WinPixEventRuntime.targets')" />
+    <Import Project="..\packages\WinPixEventRuntime.1.0.210209001\build\WinPixEventRuntime.targets" Condition="Exists('..\packages\WinPixEventRuntime.1.0.210209001\build\WinPixEventRuntime.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\WinPixEventRuntime.1.0.200127001\build\WinPixEventRuntime.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\WinPixEventRuntime.1.0.200127001\build\WinPixEventRuntime.targets'))" />
+    <Error Condition="!Exists('..\packages\WinPixEventRuntime.1.0.210209001\build\WinPixEventRuntime.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\WinPixEventRuntime.1.0.210209001\build\WinPixEventRuntime.targets'))" />
   </Target>
 </Project>

@@ -19,6 +19,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ThirdParty", "ThirdParty", 
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "imgui", "ThirdParty\imgui\imgui.vcxproj", "{B1E24752-26E8-49DB-8604-62AFB2866251}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DirectXMesh", "ThirdParty\DirectXMesh\DirectXMesh\DirectXMesh_Desktop_2019_Win10.vcxproj", "{6857F086-F6FE-4150-9ED7-7446F1C1C220}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -68,12 +70,19 @@ Global
 		{B1E24752-26E8-49DB-8604-62AFB2866251}.Development|x64.Build.0 = Development|x64
 		{B1E24752-26E8-49DB-8604-62AFB2866251}.Release|x64.ActiveCfg = Release|x64
 		{B1E24752-26E8-49DB-8604-62AFB2866251}.Release|x64.Build.0 = Release|x64
+		{6857F086-F6FE-4150-9ED7-7446F1C1C220}.Debug|x64.ActiveCfg = Debug|x64
+		{6857F086-F6FE-4150-9ED7-7446F1C1C220}.Debug|x64.Build.0 = Debug|x64
+		{6857F086-F6FE-4150-9ED7-7446F1C1C220}.Development|x64.ActiveCfg = Release|x64
+		{6857F086-F6FE-4150-9ED7-7446F1C1C220}.Development|x64.Build.0 = Release|x64
+		{6857F086-F6FE-4150-9ED7-7446F1C1C220}.Release|x64.ActiveCfg = Release|x64
+		{6857F086-F6FE-4150-9ED7-7446F1C1C220}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{B1E24752-26E8-49DB-8604-62AFB2866251} = {FEBDEC00-2EC3-48B7-B053-2DDA010EDD21}
+		{6857F086-F6FE-4150-9ED7-7446F1C1C220} = {FEBDEC00-2EC3-48B7-B053-2DDA010EDD21}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2C1512F8-C9D5-43B5-BB34-C71D6885AB27}

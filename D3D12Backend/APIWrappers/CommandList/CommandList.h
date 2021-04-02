@@ -15,15 +15,15 @@ namespace Boolka
         CommandList& operator=(CommandList&&) = delete;
 
     public:
-        ID3D12GraphicsCommandList5* Get();
-        ID3D12GraphicsCommandList5* operator->();
+        ID3D12GraphicsCommandList6* Get();
+        ID3D12GraphicsCommandList6* operator->();
 
         void Unload();
 
     protected:
-        bool Initialize(ID3D12GraphicsCommandList5* commandList);
+        bool Initialize(ID3D12GraphicsCommandList6* commandList);
 
-        ID3D12GraphicsCommandList5* m_CommandList;
+        ID3D12GraphicsCommandList6* m_CommandList;
     };
 
 } // namespace Boolka

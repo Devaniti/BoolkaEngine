@@ -52,9 +52,6 @@
     <Filter Include="Shaders\Debug3DPass">
       <UniqueIdentifier>{341f5c74-d14b-4416-a6a2-81c2e433e1d2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Shaders\ZPass">
-      <UniqueIdentifier>{33588987-cc8f-4751-991e-c6579bd8650f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Shaders\TransparentPass">
       <UniqueIdentifier>{c14b88fe-1e05-4b9f-a501-19546cfaac9e}</UniqueIdentifier>
     </Filter>
@@ -81,6 +78,15 @@
     </Filter>
     <Filter Include="Shaders\ShadowMapPass">
       <UniqueIdentifier>{5850310d-ac0a-4356-9054-7f4d0097560f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\MeshShaders">
+      <UniqueIdentifier>{2e3e6470-d445-4998-9ec9-8697aca5b8b7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Util">
+      <UniqueIdentifier>{97859756-2d88-4f79-baff-4ee611d9c97d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\DebugMeshPass">
+      <UniqueIdentifier>{b17d2e0e-2886-4e2c-ae1a-d2a1fbaa719b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -299,6 +305,12 @@
     <ClInclude Include="RenderPasses\ShadowMapRenderPass.h">
       <Filter>RenderPasses</Filter>
     </ClInclude>
+    <ClInclude Include="RenderPasses\DebugMeshRenderPass.h">
+      <Filter>RenderPasses</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\d3dx12.h">
+      <Filter>Util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WindowManagement\WindowManager.cpp">
@@ -513,6 +525,9 @@
     <ClCompile Include="Containers\LightContainer.cpp">
       <Filter>Containers</Filter>
     </ClCompile>
+    <ClCompile Include="RenderPasses\DebugMeshRenderPass.cpp">
+      <Filter>RenderPasses</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\RootSig.hlsl">
@@ -533,15 +548,6 @@
     <FxCompile Include="Shaders\GBufferPass\GBufferPassPixelShader.hlsl">
       <Filter>Shaders\GBufferPass</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\GBufferPass\GBufferPassVertexShader.hlsl">
-      <Filter>Shaders\GBufferPass</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\ZPass\ZPassVertexShader.hlsl">
-      <Filter>Shaders\ZPass</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\TransparentPass\TransparentPassVertexShader.hlsl">
-      <Filter>Shaders\TransparentPass</Filter>
-    </FxCompile>
     <FxCompile Include="Shaders\TransparentPass\TransparentPassPixelShader.hlsl">
       <Filter>Shaders\TransparentPass</Filter>
     </FxCompile>
@@ -554,7 +560,28 @@
     <FxCompile Include="Shaders\ToneMappingPass\ToneMappingPassPS.hlsl">
       <Filter>Shaders\ToneMappingPass</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\ShadowMapPass\ShadowMapVertexShader.hlsl">
+    <FxCompile Include="Shaders\MeshShaders\SimpleMeshShader.hlsl">
+      <Filter>Shaders\MeshShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\MeshShaders\SimpleAmplificationShader.hlsl">
+      <Filter>Shaders\MeshShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\ShadowMapPass\ShadowMapPassMeshShader.hlsl">
+      <Filter>Shaders\ShadowMapPass</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\MeshShaders\AmplificationShader.hlsl">
+      <Filter>Shaders\MeshShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\MeshShaders\MeshShader.hlsl">
+      <Filter>Shaders\MeshShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\DebugMeshPass\DebugMeshPassPixelShader.hlsl">
+      <Filter>Shaders\DebugMeshPass</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\DebugMeshPass\DebugMeshPassMeshShader.hlsl">
+      <Filter>Shaders\DebugMeshPass</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\ShadowMapPass\ShadowMapAmplificationShader.hlsl">
       <Filter>Shaders\ShadowMapPass</Filter>
     </FxCompile>
   </ItemGroup>
@@ -565,16 +592,6 @@
     <None Include="Shaders\Debug3DPass\Debug3DPassShadersCommon.hlsli">
       <Filter>Shaders\Debug3DPass</Filter>
     </None>
-    <None Include="Shaders\GBufferPass\GBufferPassShadersCommon.hlsli">
-      <Filter>Shaders\GBufferPass</Filter>
-    </None>
-    <None Include="Shaders\ZPass\ZPassShadersCommon.hlsli">
-      <Filter>Shaders\ZPass</Filter>
-    </None>
-    <None Include="Shaders\TransparentPass\TransparentPassShadersCommon.hlsli">
-      <Filter>Shaders\TransparentPass</Filter>
-    </None>
-    <None Include="packages.config" />
     <None Include="Shaders\Common.hlsli">
       <Filter>Shaders</Filter>
     </None>
@@ -583,6 +600,13 @@
     </None>
     <None Include="Shaders\Color.hlsli">
       <Filter>Shaders</Filter>
+    </None>
+    <None Include="packages.config" />
+    <None Include="Shaders\MeshCommon.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\DebugMeshPass\DebugMeshPassShadersCommon.hlsli">
+      <Filter>Shaders\DebugMeshPass</Filter>
     </None>
     <None Include="Shaders\ShadowMapPass\ShadowMapShadersCommon.hlsli">
       <Filter>Shaders\ShadowMapPass</Filter>
