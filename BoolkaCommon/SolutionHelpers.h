@@ -186,12 +186,15 @@ T1 ptr_static_cast(T2 value)
 inline void memcpy_strided(void* dst, size_t dstStride, const void* src, size_t srcStride,
                            size_t rows)
 {
+    char* currentDst = static_cast<char*>(dst);
+    const char* currentSrc = static_cast<const char*>(src);
+
     size_t copiedStride = std::min(dstStride, srcStride);
     for (size_t i = 0; i < rows; ++i)
     {
-        memcpy(dst, src, copiedStride);
-        dst = static_cast<void*>(static_cast<unsigned char*>(dst) + dstStride);
-        src = static_cast<const void*>(static_cast<const unsigned char*>(src) + srcStride);
+        memcpy(currentDst, currentSrc, copiedStride);
+        currentDst += dstStride;
+        currentSrc += srcStride;
     }
 }
 

@@ -27,6 +27,9 @@ namespace Boolka
         template <size_t otherComponentCount>
         Vector(const Vector<otherComponentCount, float>& other);
 
+        template <typename otherType>
+        Vector(const Vector<4, otherType>& other);
+
         template <size_t firstComponentCount, typename... Args>
         Vector(const Vector<firstComponentCount, float>& first, Args... args);
 
@@ -129,6 +132,7 @@ namespace Boolka
     template <size_t otherComponentCount>
     Vector<4, float>::Vector(const Vector<otherComponentCount, float>& other)
     {
+
         _declspec(align(16)) float tmpArr[4] = {};
         if constexpr (otherComponentCount > 4)
         {
@@ -139,6 +143,15 @@ namespace Boolka
             std::copy(other.begin(), other.end(), tmpArr);
         }
         m_sse = _mm_load_ps(tmpArr);
+    }
+
+    template <typename otherType>
+    Vector<4, float>::Vector(const Vector<4, otherType>& other)
+    {
+        for (size_t i = 0; i < 4; ++i)
+        {
+            m_data[i] = other[i];
+        }
     }
 
     template <size_t firstComponentCount, typename... Args>

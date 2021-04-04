@@ -67,6 +67,15 @@ namespace Boolka
                       "This struct is used in structured buffer, so for performance reasons its "
                       "size should be multiple of float4");
 
+        static const UINT ms_SceneVersion = 0;
+        struct FormatHeader
+        {
+            char signature[24] = "BoolkaEngineSceneFormat";
+            UINT formatVersion = ms_SceneVersion;
+
+            bool operator==(const FormatHeader& other) const;
+        };
+
         struct SceneHeader
         {
             UINT vertex1Size;
@@ -77,6 +86,8 @@ namespace Boolka
             UINT objectsSize;
             UINT objectCount;
             UINT opaqueCount;
+            UINT skyBoxResolution;
+            UINT skyBoxMipCount;
             UINT textureCount;
         };
 

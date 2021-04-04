@@ -88,6 +88,9 @@
     <Filter Include="Shaders\DebugMeshPass">
       <UniqueIdentifier>{b17d2e0e-2886-4e2c-ae1a-d2a1fbaa719b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\SkyBoxPass">
+      <UniqueIdentifier>{b267e45c-0583-42cd-a408-c1cc05828b2d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WindowManagement\WindowManager.h">
@@ -311,6 +314,9 @@
     <ClInclude Include="Util\d3dx12.h">
       <Filter>Util</Filter>
     </ClInclude>
+    <ClInclude Include="RenderPasses\SkyBoxRenderPass.h">
+      <Filter>RenderPasses</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WindowManagement\WindowManager.cpp">
@@ -528,6 +534,9 @@
     <ClCompile Include="RenderPasses\DebugMeshRenderPass.cpp">
       <Filter>RenderPasses</Filter>
     </ClCompile>
+    <ClCompile Include="RenderPasses\SkyBoxRenderPass.cpp">
+      <Filter>RenderPasses</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\RootSig.hlsl">
@@ -584,6 +593,9 @@
     <FxCompile Include="Shaders\ShadowMapPass\ShadowMapAmplificationShader.hlsl">
       <Filter>Shaders\ShadowMapPass</Filter>
     </FxCompile>
+    <FxCompile Include="Shaders\SkyBoxPass\SkyBoxPassPixelShader.hlsl">
+      <Filter>Shaders\SkyBoxPass</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\DebugPass\DebugPassShadersCommon.hlsli">
@@ -610,6 +622,9 @@
     </None>
     <None Include="Shaders\ShadowMapPass\ShadowMapShadersCommon.hlsli">
       <Filter>Shaders\ShadowMapPass</Filter>
+    </None>
+    <None Include="Shaders\TransformCommon.hlsli">
+      <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
 </Project>

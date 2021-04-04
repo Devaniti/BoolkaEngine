@@ -1,5 +1,7 @@
 #include "pch.h"
 
+#include <math.h>
+
 // clang-format mess up formating due to preprocessor class definition
 // clang-format off
 
@@ -717,45 +719,55 @@ namespace Boolka
 
         TEST_METHOD(ComparisonMaskOperators)
         {
+            const Vector4 v1{ 1.0f, 0.0f, -1.0f, 0.0f };
+            const Vector4 v2{ 0.0f, 0.0f,  0.0f, 0.0f };
+
             {
-                const Vector4 v1{ 1.0f, 0.0f, -1.0f, 0.0f };
-                const Vector4 v2{ 0.0f, 0.0f,  0.0f, 0.0f };
+                const Vector4 res = v1 > v2;
+                Assert::IsTrue(res[0] != 0.0f || isnan(res[0]));
+                Assert::IsTrue(res[1] == 0.0f);
+                Assert::IsTrue(res[2] == 0.0f);
+                Assert::IsTrue(res[3] == 0.0f);
+            }
 
-                const Vector4 v3 = v1 > v2;
-                Assert::IsTrue(v3[0] != 0.0f);
-                Assert::IsTrue(v3[1] == 0.0f);
-                Assert::IsTrue(v3[2] == 0.0f);
-                Assert::IsTrue(v3[3] == 0.0f);
+            {
+                const Vector4 res = v1 < v2;
+                Assert::IsTrue(res[0] == 0.0f);
+                Assert::IsTrue(res[1] == 0.0f);
+                Assert::IsTrue(res[2] != 0.0f || isnan(res[2]));
+                Assert::IsTrue(res[3] == 0.0f);
+            }
 
-                const Vector4 v4 = v1 < v2;
-                Assert::IsTrue(v4[0] == 0.0f);
-                Assert::IsTrue(v4[1] == 0.0f);
-                Assert::IsTrue(v4[2] != 0.0f);
-                Assert::IsTrue(v4[3] == 0.0f);
+            {
+                const Vector4 res = v1 >= v2;
+                Assert::IsTrue(res[0] != 0.0f || isnan(res[0]));
+                Assert::IsTrue(res[1] != 0.0f || isnan(res[1]));
+                Assert::IsTrue(res[2] == 0.0f);
+                Assert::IsTrue(res[3] != 0.0f || isnan(res[3]));
+            }
 
-                const Vector4 v5 = v1 >= v2;
-                Assert::IsTrue(v5[0] != 0.0f);
-                Assert::IsTrue(v5[1] != 0.0f);
-                Assert::IsTrue(v5[2] == 0.0f);
-                Assert::IsTrue(v5[3] != 0.0f);
+            {
+                const Vector4 res = v1 <= v2;
+                Assert::IsTrue(res[0] == 0.0f);
+                Assert::IsTrue(res[1] != 0.0f || isnan(res[1]));
+                Assert::IsTrue(res[2] != 0.0f || isnan(res[2]));
+                Assert::IsTrue(res[3] != 0.0f || isnan(res[3]));
+            }
 
-                const Vector4 v6 = v1 <= v2;
-                Assert::IsTrue(v6[0] == 0.0f);
-                Assert::IsTrue(v6[1] != 0.0f);
-                Assert::IsTrue(v6[2] != 0.0f);
-                Assert::IsTrue(v6[3] != 0.0f);
+            {
+                const Vector4 res = v1.EqualMask(v2);
+                Assert::IsTrue(res[0] == 0.0f);
+                Assert::IsTrue(res[1] != 0.0f || isnan(res[1]));
+                Assert::IsTrue(res[2] == 0.0f);
+                Assert::IsTrue(res[3] != 0.0f || isnan(res[3]));
+            }
 
-                const Vector4 v7 = v1.EqualMask(v2);
-                Assert::IsTrue(v7[0] == 0.0f);
-                Assert::IsTrue(v7[1] != 0.0f);
-                Assert::IsTrue(v7[2] == 0.0f);
-                Assert::IsTrue(v7[3] != 0.0f);
-
-                const Vector4 v8 = v1.NotEqualMask(v2);
-                Assert::IsTrue(v8[0] != 0.0f);
-                Assert::IsTrue(v8[1] == 0.0f);
-                Assert::IsTrue(v8[2] != 0.0f);
-                Assert::IsTrue(v8[3] == 0.0f);
+            {
+                const Vector4 res = v1.NotEqualMask(v2);
+                Assert::IsTrue(res[0] != 0.0f || isnan(res[0]));
+                Assert::IsTrue(res[1] == 0.0f);
+                Assert::IsTrue(res[2] != 0.0f || isnan(res[2]));
+                Assert::IsTrue(res[3] == 0.0f);
             }
         }
 

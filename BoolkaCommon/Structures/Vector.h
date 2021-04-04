@@ -26,6 +26,9 @@ namespace Boolka
         template <size_t otherComponentCount>
         Vector(const Vector<otherComponentCount, elementType>& other);
 
+        template <typename otherType>
+        Vector(const Vector<componentCount, otherType>& other);
+
         // Allows to use HLSL style Vector construction:
         // eg. Vector4 vec = Vector4(vector3Var, 1.0f);
         // or Vector4 vec = Vector4(0.0f, vector3Var);
@@ -128,6 +131,16 @@ namespace Boolka
         template <size_t currentIndex>
         void InitializeTemplateList();
     };
+
+    template <size_t componentCount, typename elementType>
+    template <typename otherType>
+    Vector<componentCount, elementType>::Vector(const Vector<componentCount, otherType>& other)
+    {
+        for (size_t i = 0; i < componentCount; ++i)
+        {
+            m_data[i] = other[i];
+        }
+    }
 
     template <size_t componentCount, typename elementType>
     Vector<componentCount, elementType>::Vector()

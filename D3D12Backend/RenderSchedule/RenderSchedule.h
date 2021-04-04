@@ -9,6 +9,7 @@
 #include "RenderPasses/GBufferRenderPass.h"
 #include "RenderPasses/PresentPass.h"
 #include "RenderPasses/ShadowMapRenderPass.h"
+#include "RenderPasses/SkyBoxRenderPass.h"
 #include "RenderPasses/ToneMappingPass.h"
 #include "RenderPasses/TransparentRenderPass.h"
 #include "RenderPasses/UpdateRenderPass.h"
@@ -57,6 +58,7 @@ namespace Boolka
         ShadowMapRenderPass m_ShadowMapPass;
         GBufferRenderPass m_GbufferPass;
         DeferredLightingPass m_DeferredLightingPass;
+        SkyBoxRenderPass m_SkyBoxPass;
         TransparentRenderPass m_TransparentPass;
         ToneMappingPass m_ToneMappingPass;
         PresentPass m_PresentPass;

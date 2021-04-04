@@ -197,6 +197,7 @@
     <ClInclude Include="RenderPasses\PresentPass.h" />
     <ClInclude Include="RenderPasses\ReferenceRenderPass.h" />
     <ClInclude Include="RenderPasses\ShadowMapRenderPass.h" />
+    <ClInclude Include="RenderPasses\SkyBoxRenderPass.h" />
     <ClInclude Include="RenderPasses\ToneMappingPass.h" />
     <ClInclude Include="RenderPasses\TransparentRenderPass.h" />
     <ClInclude Include="RenderPasses\UpdateRenderPass.h" />
@@ -275,6 +276,7 @@
     <ClCompile Include="RenderPasses\PresentPass.cpp" />
     <ClCompile Include="RenderPasses\ReferenceRenderPass.cpp" />
     <ClCompile Include="RenderPasses\ShadowMapRenderPass.cpp" />
+    <ClCompile Include="RenderPasses\SkyBoxRenderPass.cpp" />
     <ClCompile Include="RenderPasses\ToneMappingPass.cpp" />
     <ClCompile Include="RenderPasses\TransparentRenderPass.cpp" />
     <ClCompile Include="RenderPasses\UpdateRenderPass.cpp" />
@@ -384,6 +386,11 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Mesh</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Mesh</ShaderType>
     </FxCompile>
+    <FxCompile Include="Shaders\SkyBoxPass\SkyBoxPassPixelShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
     <FxCompile Include="Shaders\ToneMappingPass\ToneMappingPassPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Pixel</ShaderType>
@@ -413,6 +420,7 @@
     <None Include="Shaders\FullScreen\FullScreenCommon.hlsli" />
     <None Include="Shaders\MeshCommon.hlsli" />
     <None Include="Shaders\ShadowMapPass\ShadowMapShadersCommon.hlsli" />
+    <None Include="Shaders\TransformCommon.hlsli" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -16,6 +16,7 @@ namespace Boolka
 {
     static const size_t gs_ResourceAlignment = D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT;
     static const size_t gs_PitchAlignment = D3D12_TEXTURE_DATA_PITCH_ALIGNMENT;
+    static const size_t gs_CubeMapFaces = 6;
 
     class ObjConverterImpl
     {
@@ -37,33 +38,42 @@ namespace Boolka
             bool operator<(const UniqueVertexKey& other) const;
         };
 
+        // Loads OBJ
         bool Load(std::wstring inFile);
 
+        // Geometry
         void ProcessGeometry();
-
-        void RemapMaterials();
-
-        bool IsTransparent(const tinyobj::material_t& material);
-
         void ProcessVerticesIndices();
         void RemapVertices(std::map<UniqueVertexKey, uint32_t>& verticesMap);
 
+        // Parses textures
+        void RemapMaterials();
+        bool IsTransparent(const tinyobj::material_t& material);
+
+        // SkyBox
+        void PrepareSkyBox();
+
+        // Serialization
         void WriteHeader(DebugFileWriter& fileWriter);
+        void WriteTextureHeaders(DebugFileWriter& fileWriter);
+        void WriteSkyBoxTextures(DebugFileWriter& fileWriter);
+        void WriteSceneTextures(DebugFileWriter& fileWriter);
 
         template <typename T>
         void WriteVector(DebugFileWriter& fileWriter, const std::vector<T>& vertexDataVector,
                          size_t alignment);
-        void WriteTextureHeaders(DebugFileWriter& fileWriter);
-        void WriteTextures(DebugFileWriter& fileWriter);
+        template <typename pixelType, typename sumType = pixelType>
         void WriteMIPChain(DebugFileWriter& fileWriter, const unsigned char* textureData, int width,
                            int height);
 
-        static const size_t ms_bytesPerPixel = 4;
+        static const char* const ms_SkyBoxTexNames[gs_CubeMapFaces];
 
+        // Loaded OBJ
         tinyobj::attrib_t m_attrib;
         std::vector<tinyobj::shape_t> m_shapes;
         std::vector<tinyobj::material_t> m_materials;
 
+        // Geometry
         std::vector<SceneData::VertexData1> m_vertexData1;
         std::vector<SceneData::VertexData2> m_vertexData2;
         // Contains uint32_t data, but declared as uint8_t since DirectXMesh requires uint8_t vector
@@ -71,11 +81,20 @@ namespace Boolka
         std::vector<DirectX::MeshletTriangle> m_indexData;
         std::vector<SceneData::MeshletData> m_meshlets;
         std::vector<SceneData::ObjectHeader> m_objects;
-        std::vector<std::string> m_remappedMaterials;
         size_t m_opaqueObjectCount;
 
+        // Scene textures
+        std::vector<std::string> m_remappedMaterials;
         std::unordered_map<std::string, int> m_materialsMap;
+
+        // SkyBox
+        UINT m_SkyBoxTextureResolution;
+        UINT m_SkyBoxMipCount;
     };
+
+    const char* const ObjConverterImpl::ms_SkyBoxTexNames[gs_CubeMapFaces] = {
+        "skybox\\px.hdr", "skybox\\nx.hdr", "skybox\\py.hdr",
+        "skybox\\ny.hdr", "skybox\\pz.hdr", "skybox\\nz.hdr"};
 
     ObjConverterImpl::ObjConverterImpl()
     {
@@ -84,13 +103,22 @@ namespace Boolka
 
     void ObjConverterImpl::Reset()
     {
-        m_opaqueObjectCount = 0;
+        m_attrib = {};
+        m_shapes.clear();
+        m_materials.clear();
 
         m_vertexData1.clear();
         m_vertexData2.clear();
+        m_vertexIndirection.clear();
         m_indexData.clear();
-        m_remappedMaterials.clear();
+        m_meshlets.clear();
         m_objects.clear();
+
+        m_opaqueObjectCount = 0;
+
+        m_remappedMaterials.clear();
+
+        m_SkyBoxTextureResolution = 0;
 
         m_materialsMap.clear();
     }
@@ -109,6 +137,8 @@ namespace Boolka
         m_opaqueObjectCount = 0;
 
         ProcessGeometry();
+
+        PrepareSkyBox();
 
         DebugFileWriter fileWriter;
         bool res = fileWriter.OpenFile(outFile.c_str());
@@ -140,8 +170,11 @@ namespace Boolka
         WriteVector(fileWriter, m_objects, gs_ResourceAlignment);
         std::cout << "Written objects buffer" << std::endl;
 
-        WriteTextures(fileWriter);
-        std::cout << "Written textures" << std::endl;
+        WriteSkyBoxTextures(fileWriter);
+        std::cout << "Written skybox textures" << std::endl;
+
+        WriteSceneTextures(fileWriter);
+        std::cout << "Written scene textures" << std::endl;
 
         res = fileWriter.Close(BLK_FILE_BLOCK_SIZE);
         BLK_CRITICAL_ASSERT(res);
@@ -253,6 +286,25 @@ namespace Boolka
 
         s_calculated[filename] = result;
         return result;
+    }
+
+    void ObjConverterImpl::PrepareSkyBox()
+    {
+        int width, height, dummy;
+        int result = stbi_info(ms_SkyBoxTexNames[0], &width, &height, &dummy);
+
+        BLK_CRITICAL_ASSERT(width == height);
+
+        UINT mipCount = 0;
+        int dimension = width;
+        while (dimension)
+        {
+            mipCount++;
+            dimension >>= 1;
+        }
+
+        m_SkyBoxTextureResolution = width;
+        m_SkyBoxMipCount = mipCount;
     }
 
     void ObjConverterImpl::ProcessVerticesIndices()
@@ -436,34 +488,42 @@ namespace Boolka
 
     void ObjConverterImpl::WriteHeader(DebugFileWriter& fileWriter)
     {
-        SceneData::SceneHeader header{
-            checked_narrowing_cast<UINT>(BLK_CEIL_TO_POWER_OF_TWO(
+        SceneData::FormatHeader formatHeader{};
+        bool res = fileWriter.Write(&formatHeader, sizeof(formatHeader));
+
+        SceneData::SceneHeader sceneHeader{
+            .vertex1Size = checked_narrowing_cast<UINT>(BLK_CEIL_TO_POWER_OF_TWO(
                 m_vertexData1.size() * sizeof(m_vertexData1[0]), gs_ResourceAlignment)),
-            checked_narrowing_cast<UINT>(BLK_CEIL_TO_POWER_OF_TWO(
+            .vertex2Size = checked_narrowing_cast<UINT>(BLK_CEIL_TO_POWER_OF_TWO(
                 m_vertexData2.size() * sizeof(m_vertexData2[0]), gs_ResourceAlignment)),
-            checked_narrowing_cast<UINT>(BLK_CEIL_TO_POWER_OF_TWO(
+            .vertexIndirectionSize = checked_narrowing_cast<UINT>(BLK_CEIL_TO_POWER_OF_TWO(
                 m_vertexIndirection.size() * sizeof(m_vertexIndirection[0]), gs_ResourceAlignment)),
-            checked_narrowing_cast<UINT>(BLK_CEIL_TO_POWER_OF_TWO(
+            .indexSize = checked_narrowing_cast<UINT>(BLK_CEIL_TO_POWER_OF_TWO(
                 m_indexData.size() * sizeof(m_indexData[0]), gs_ResourceAlignment)),
-            checked_narrowing_cast<UINT>(BLK_CEIL_TO_POWER_OF_TWO(
+            .meshletsSize = checked_narrowing_cast<UINT>(BLK_CEIL_TO_POWER_OF_TWO(
                 m_meshlets.size() * sizeof(m_meshlets[0]), gs_ResourceAlignment)),
-            checked_narrowing_cast<UINT>(BLK_CEIL_TO_POWER_OF_TWO(
+            .objectsSize = checked_narrowing_cast<UINT>(BLK_CEIL_TO_POWER_OF_TWO(
                 m_objects.size() * sizeof(SceneData::ObjectHeader), gs_ResourceAlignment)),
-            checked_narrowing_cast<UINT>(m_objects.size()),
-            checked_narrowing_cast<UINT>(m_opaqueObjectCount),
-            checked_narrowing_cast<UINT>(m_remappedMaterials.size())};
+            .objectCount = checked_narrowing_cast<UINT>(m_objects.size()),
+            .opaqueCount = checked_narrowing_cast<UINT>(m_opaqueObjectCount),
+            .skyBoxResolution = m_SkyBoxTextureResolution,
+            .skyBoxMipCount = m_SkyBoxMipCount,
+            .textureCount =
+                checked_narrowing_cast<UINT>(m_remappedMaterials.size())};
 
-        BLK_CRITICAL_ASSERT(header.vertex1Size != 0);
-        BLK_CRITICAL_ASSERT(header.vertex2Size != 0);
-        BLK_CRITICAL_ASSERT(header.vertexIndirectionSize != 0);
-        BLK_CRITICAL_ASSERT(header.indexSize != 0);
-        BLK_CRITICAL_ASSERT(header.meshletsSize != 0);
-        BLK_CRITICAL_ASSERT(header.objectsSize != 0);
-        BLK_CRITICAL_ASSERT(header.objectCount != 0);
-        BLK_CRITICAL_ASSERT(header.opaqueCount != 0);
-        BLK_CRITICAL_ASSERT(header.textureCount != 0);
+        BLK_CRITICAL_ASSERT(sceneHeader.vertex1Size != 0);
+        BLK_CRITICAL_ASSERT(sceneHeader.vertex2Size != 0);
+        BLK_CRITICAL_ASSERT(sceneHeader.vertexIndirectionSize != 0);
+        BLK_CRITICAL_ASSERT(sceneHeader.indexSize != 0);
+        BLK_CRITICAL_ASSERT(sceneHeader.meshletsSize != 0);
+        BLK_CRITICAL_ASSERT(sceneHeader.objectsSize != 0);
+        BLK_CRITICAL_ASSERT(sceneHeader.objectCount != 0);
+        BLK_CRITICAL_ASSERT(sceneHeader.opaqueCount != 0);
+        BLK_CRITICAL_ASSERT(sceneHeader.skyBoxResolution != 0);
+        BLK_CRITICAL_ASSERT(sceneHeader.skyBoxMipCount != 0);
+        BLK_CRITICAL_ASSERT(sceneHeader.textureCount != 0);
 
-        bool res = fileWriter.Write(&header, sizeof(header));
+        res = fileWriter.Write(&sceneHeader, sizeof(sceneHeader));
         BLK_ASSERT_VAR(res);
 
         std::cout << "Written header" << std::endl;
@@ -507,7 +567,7 @@ namespace Boolka
 
             fileWriter.Write(&textureHeader, sizeof(textureHeader));
 
-            std::cout << "texture " << i << " loaded\n";
+            std::cout << "Scene texture " << i << " header processed\n";
         }
 
         std::cout << "Written texture headers" << std::endl;
@@ -530,29 +590,44 @@ namespace Boolka
         }
     }
 
-    void ObjConverterImpl::WriteTextures(DebugFileWriter& fileWriter)
+    void ObjConverterImpl::WriteSkyBoxTextures(DebugFileWriter& fileWriter)
+    {
+        for (size_t i = 0; i < gs_CubeMapFaces; ++i)
+        {
+            const char* texName = ms_SkyBoxTexNames[i];
+
+            int width, height, dummy;
+
+            void* textureData = stbi_loadf(texName, &width, &height, &dummy, 4);
+
+            BLK_CRITICAL_ASSERT(width == height && width == m_SkyBoxTextureResolution);
+
+            BLK_CRITICAL_ASSERT(textureData);
+
+            WriteMIPChain<Vector4>(fileWriter, static_cast<unsigned char*>(textureData), width,
+                                   height);
+
+            stbi_image_free(textureData);
+
+            std::cout << "SkyBox texture " << i << " written" << std::endl;
+        }
+    }
+
+    void ObjConverterImpl::WriteSceneTextures(DebugFileWriter& fileWriter)
     {
         // First element is always empty texture
         BLK_CRITICAL_ASSERT(m_remappedMaterials.size() > 0);
         BLK_CRITICAL_ASSERT(m_remappedMaterials[0].empty());
 
         // First empty texture
-        unsigned char pixel[4] = {};
-        WriteMIPChain(fileWriter, pixel, 1, 1);
-
+        Vector<4, unsigned char> pixel;
+        WriteMIPChain<Vector<4, unsigned char>, Vector<4, unsigned int>>(fileWriter,
+                                                                         pixel.GetBuffer(), 1, 1);
         for (size_t i = 1; i < m_remappedMaterials.size(); ++i)
         {
             auto& material = m_remappedMaterials[i];
 
             BLK_CRITICAL_ASSERT(!material.empty())
-
-            SceneData::TextureHeader textureHeader{};
-
-            if (material.empty())
-            {
-                fileWriter.Write(&textureHeader, sizeof(textureHeader));
-                continue;
-            }
 
             int width, height, bitsPerPixel;
 
@@ -561,22 +636,25 @@ namespace Boolka
 
             BLK_CRITICAL_ASSERT(textureData);
 
-            WriteMIPChain(fileWriter, textureData, width, height);
+            WriteMIPChain<Vector<4, unsigned char>, Vector<4, unsigned int>>(
+                fileWriter, textureData, width, height);
 
             stbi_image_free(textureData);
 
-            std::cout << "texture " << i << ":" << material << " written" << std::endl;
+            std::cout << "Scene texture " << i << ":" << material << " written" << std::endl;
         }
     }
 
+    template <typename pixelType, typename sumType>
     void ObjConverterImpl::WriteMIPChain(DebugFileWriter& fileWriter,
                                          const unsigned char* textureData, int width, int height)
     {
         BLK_CRITICAL_ASSERT(width > 0);
         BLK_CRITICAL_ASSERT(height > 0);
 
-        size_t srcRowPitch = ms_bytesPerPixel * width;
-        size_t mip0RowPitch = BLK_CEIL_TO_POWER_OF_TWO(ms_bytesPerPixel * width, gs_PitchAlignment);
+        size_t srcRowPitch = sizeof(pixelType) * width;
+        size_t mip0RowPitch =
+            BLK_CEIL_TO_POWER_OF_TWO(sizeof(pixelType) * width, gs_PitchAlignment);
         size_t mip0Size = BLK_CEIL_TO_POWER_OF_TWO(mip0RowPitch * height, gs_ResourceAlignment);
 
         unsigned char* mip0Data = new unsigned char[mip0Size];
@@ -592,7 +670,7 @@ namespace Boolka
              mipWidth /= 2, mipHeight /= 2)
         {
             size_t rowPitch =
-                BLK_CEIL_TO_POWER_OF_TWO(ms_bytesPerPixel * mipWidth, gs_PitchAlignment);
+                BLK_CEIL_TO_POWER_OF_TWO(sizeof(pixelType) * mipWidth, gs_PitchAlignment);
             size_t mipSize = BLK_CEIL_TO_POWER_OF_TWO(rowPitch * mipHeight, gs_ResourceAlignment);
             unsigned char* mipData = new unsigned char[mipSize];
 
@@ -600,31 +678,29 @@ namespace Boolka
             {
                 for (size_t x = 0; x < mipWidth; ++x)
                 {
-                    unsigned char rgba[ms_bytesPerPixel]{};
-                    unsigned char prevMipRGBA[4][ms_bytesPerPixel]{};
+                    pixelType pixel{};
+                    pixelType prevMipPixels[4]{};
 
                     for (size_t i = 0; i < 2; ++i)
                     {
                         for (size_t j = 0; j < 2; ++j)
                         {
-                            memcpy(prevMipRGBA[2 * i + j],
+                            memcpy(&prevMipPixels[2 * i + j],
                                    &prevMipData[prevMipRowPitch * (y * 2 + i) +
-                                                ms_bytesPerPixel * (x * 2 + j)],
-                                   ms_bytesPerPixel);
+                                                sizeof(pixelType) * (x * 2 + j)],
+                                   sizeof(pixelType));
                         }
                     }
 
-                    for (size_t i = 0; i < 4; ++i)
+                    sumType sum{};
+                    for (auto& data : prevMipPixels)
                     {
-                        int sum = 0;
-                        for (auto& data : prevMipRGBA)
-                        {
-                            sum += data[i];
-                        }
-                        rgba[i] = sum / 4;
+                        sum += static_cast<sumType>(data);
                     }
+                    pixel = static_cast<pixelType>(sum / 4);
 
-                    memcpy(&mipData[rowPitch * y + ms_bytesPerPixel * x], rgba, ms_bytesPerPixel);
+                    memcpy(&mipData[rowPitch * y + sizeof(pixelType) * x], &pixel,
+                           sizeof(pixelType));
                 }
             }
 

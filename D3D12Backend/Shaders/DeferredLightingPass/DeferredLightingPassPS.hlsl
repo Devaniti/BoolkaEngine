@@ -1,4 +1,5 @@
 #include "../Color.hlsli"
+#include "../TransformCommon.hlsli"
 #include "../FullScreen/FullScreenCommon.hlsli"
 
 Texture2D<float4> albedo : register(t0);
@@ -38,13 +39,6 @@ static const float specExp = 10.0f; // TODO implement per material specular expo
 float3 CalculateAmbient(float3 albedoVal)
 {
     return albedoVal * ambientLight;
-}
-
-float3 CalculateViewPos(float2 UV, float depthVal)
-{
-    float4 viewProjPos = float4(UV.x * 2.0f - 1.0f, UV.y * -2.0f + 1.0f, depthVal, 1.0f);
-    float4 viewPos = mul(viewProjPos, invProjMatrix);
-    return viewPos.xyz / viewPos.w;
 }
 
 float VectorToDepth(float3 vec, float n, float f)

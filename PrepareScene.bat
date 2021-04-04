@@ -1,7 +1,7 @@
 @echo off
 call FindVisualStudioInstallation.bat
 echo building OBJConverter
-%InstallDir%\MSBuild\Current\Bin\MSBuild.exe BoolkaEngine.sln -target:ObjConverter -p:Configuration=Release
+%InstallDir%\MSBuild\Current\Bin\MSBuild.exe BoolkaEngine.sln -m -target:ObjConverter -p:Configuration=Release
 
 if exist Scenes\SanMiguel\ (
   echo SanMiguel scene already present, skip download
@@ -13,8 +13,16 @@ if exist Scenes\SanMiguel\ (
   powershell -command "Start-BitsTransfer -Source https://casual-effects.com/g3d/data10/research/model/San_Miguel/San_Miguel.zip -Destination Scenes/SanMiguel/San_Miguel.zip"
   echo Downloaded scene, unpacking
   powershell -command "Expand-Archive Scenes/SanMiguel/San_Miguel.zip Scenes/SanMiguel/"
-  echo Unpacked, deleting archive
+  echo Scene unpacked, deleting archive
   del "Scenes\SanMiguel\San_Miguel.zip"
+)
+
+if exist Scenes\SanMiguel\skybox (
+  echo Skybox already present, skip unpacking
+) else (
+  mkdir Scenes\SanMiguel\skybox
+  powershell -command "Expand-Archive BinaryData/DefaultSkybox.zip Scenes/SanMiguel/skybox/"
+  echo Skybox unpacked
 )
 
 mkdir Scenes\Binarized

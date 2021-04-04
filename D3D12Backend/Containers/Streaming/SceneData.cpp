@@ -23,20 +23,28 @@ namespace Boolka
     {
         DataWrapper result;
 
-        m_FileReader.WaitData(sizeof(SceneHeader));
+        m_FileReader.WaitData(sizeof(FormatHeader) + sizeof(SceneHeader));
 
         const unsigned char* data = static_cast<const unsigned char*>(m_MemoryBlock.m_Data);
+
+        const FormatHeader* formatHeader = ptr_static_cast<const FormatHeader*>(data);
+        const FormatHeader correctHeader{};
+        BLK_CRITICAL_ASSERT(*formatHeader == correctHeader);
+        data += sizeof(FormatHeader);
+
         const SceneHeader* sceneHeader = ptr_static_cast<const SceneHeader*>(data);
 
-        BLK_ASSERT(sceneHeader->vertex1Size != 0);
-        BLK_ASSERT(sceneHeader->vertex2Size != 0);
-        BLK_ASSERT(sceneHeader->vertexIndirectionSize != 0);
-        BLK_ASSERT(sceneHeader->indexSize != 0);
-        BLK_ASSERT(sceneHeader->meshletsSize != 0);
-        BLK_ASSERT(sceneHeader->objectsSize != 0);
-        BLK_ASSERT(sceneHeader->objectCount != 0);
-        BLK_ASSERT(sceneHeader->opaqueCount != 0);
-        BLK_ASSERT(sceneHeader->textureCount != 0);
+        BLK_CRITICAL_ASSERT(sceneHeader->vertex1Size != 0);
+        BLK_CRITICAL_ASSERT(sceneHeader->vertex2Size != 0);
+        BLK_CRITICAL_ASSERT(sceneHeader->vertexIndirectionSize != 0);
+        BLK_CRITICAL_ASSERT(sceneHeader->indexSize != 0);
+        BLK_CRITICAL_ASSERT(sceneHeader->meshletsSize != 0);
+        BLK_CRITICAL_ASSERT(sceneHeader->objectsSize != 0);
+        BLK_CRITICAL_ASSERT(sceneHeader->objectCount != 0);
+        BLK_CRITICAL_ASSERT(sceneHeader->opaqueCount != 0);
+        BLK_CRITICAL_ASSERT(sceneHeader->skyBoxResolution != 0);
+        BLK_CRITICAL_ASSERT(sceneHeader->skyBoxMipCount != 0);
+        BLK_CRITICAL_ASSERT(sceneHeader->textureCount != 0);
 
         result.header = *sceneHeader;
 
@@ -78,6 +86,11 @@ namespace Boolka
     MemoryBlock& SceneData::GetMemory()
     {
         return m_MemoryBlock;
+    }
+
+    bool SceneData::FormatHeader::operator==(const FormatHeader& other) const
+    {
+        return (memcmp(signature, other.signature, sizeof(signature)) == 0) && (formatVersion == other.formatVersion);
     }
 
 } // namespace Boolka

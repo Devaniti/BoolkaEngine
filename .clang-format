@@ -86,6 +86,9 @@ IncludeCategories:
   - Regex:           'stdafx\.h'
     Priority:        -1
     SortPriority:    -1
+  - Regex:           'pch\.h'
+    Priority:        -1
+    SortPriority:    -1
   - Regex:           '\<.*\>'
     Priority:        1
     SortPriority:    1

@@ -75,6 +75,8 @@ namespace Boolka
         BLK_ASSERT_VAR(res);
         res = m_DeferredLightingPass.Initialize(device, m_RenderContext);
         BLK_ASSERT_VAR(res);
+        res = m_SkyBoxPass.Initialize(device, m_RenderContext);
+        BLK_ASSERT_VAR(res);
         res = m_TransparentPass.Initialize(device, m_RenderContext);
         BLK_ASSERT_VAR(res);
         res = m_ToneMappingPass.Initialize(device, m_RenderContext);
@@ -96,6 +98,7 @@ namespace Boolka
         m_ShadowMapPass.Unload();
         m_GbufferPass.Unload();
         m_DeferredLightingPass.Unload();
+        m_SkyBoxPass.Unload();
         m_TransparentPass.Unload();
         m_ToneMappingPass.Unload();
         m_PresentPass.Unload();
@@ -127,6 +130,8 @@ namespace Boolka
         res = m_GbufferPass.Render(m_RenderContext, m_ResourceTracker);
         BLK_ASSERT_VAR(res);
         res = m_DeferredLightingPass.Render(m_RenderContext, m_ResourceTracker);
+        BLK_ASSERT_VAR(res);
+        res = m_SkyBoxPass.Render(m_RenderContext, m_ResourceTracker);
         BLK_ASSERT_VAR(res);
         res = m_TransparentPass.Render(m_RenderContext, m_ResourceTracker);
         BLK_ASSERT_VAR(res);

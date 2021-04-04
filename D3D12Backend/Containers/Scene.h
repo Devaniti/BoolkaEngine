@@ -18,6 +18,7 @@ namespace Boolka
     class Scene
     {
     public:
+
         Scene();
         virtual ~Scene();
 
@@ -30,14 +31,29 @@ namespace Boolka
         // transparent
         UINT GetObjectCount() const;
         UINT GetOpaqueObjectCount() const;
-        D3D12_GPU_DESCRIPTOR_HANDLE GetSceneTexturesTable() const;
         D3D12_GPU_DESCRIPTOR_HANDLE GetMeshletsTable() const;
+        D3D12_GPU_DESCRIPTOR_HANDLE GetSkyBoxTable() const;
+        D3D12_GPU_DESCRIPTOR_HANDLE GetSceneTexturesTable() const;
         DescriptorHeap& GetSRVDescriptorHeap();
         BatchManager& GetBatchManager();
 
         void BindResources(CommandList& commandList);
 
     private:
+
+        enum SRVCount : UINT
+        {
+            MeshletSRVCount = 6,
+            SkyBoxSRVCount = 1
+        };
+
+        enum SRVOffset : UINT
+        {
+            MeshletSRVOffset = 0,
+            SkyBoxSRVOffset = MeshletSRVOffset + MeshletSRVCount,
+            SceneSRVOffset = SkyBoxSRVOffset + SkyBoxSRVCount
+        };
+
         UINT m_ObjectCount;
         UINT m_OpaqueObjectCount;
         Buffer m_VertexBuffer1;
@@ -49,9 +65,11 @@ namespace Boolka
         DescriptorHeap m_SRVDescriptorHeap;
         ResourceHeap m_ResourceHeap;
         BatchManager m_BatchManager;
-        std::vector<Texture2D> m_Textures;
+        Texture2D m_SkyBoxCubemap;
+        std::vector<Texture2D> m_SceneTextures;
 
-        static const UINT ms_MeshletSRVCount;
+        static const DXGI_FORMAT ms_SkyBoxTextureFormat;
+        static const DXGI_FORMAT ms_SceneTexturesFormat;
     };
 
 } // namespace Boolka

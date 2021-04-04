@@ -13,11 +13,11 @@ namespace Boolka
         DebugOverlayPass() = default;
         ~DebugOverlayPass() = default;
 
-        bool Initialize(Device& device, RenderContext& renderContext) override;
-        void Unload() override;
+        bool Initialize(Device& device, RenderContext& renderContext) final;
+        void Unload() final;
 
-        bool Render(RenderContext& renderContext, ResourceTracker& resourceTracker) override;
-        bool PrepareRendering() override;
+        bool Render(RenderContext& renderContext, ResourceTracker& resourceTracker) final;
+        bool PrepareRendering() final;
 
     private:
         void ImguiFlipFrame();

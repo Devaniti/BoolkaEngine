@@ -10,7 +10,8 @@
 namespace Boolka
 {
 
-    const UINT Scene::ms_MeshletSRVCount = 6;
+    const DXGI_FORMAT Scene::ms_SkyBoxTextureFormat = DXGI_FORMAT_R32G32B32A32_FLOAT;
+    const DXGI_FORMAT Scene::ms_SceneTexturesFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 
     Scene::Scene()
         : m_ObjectCount(0)
@@ -58,14 +59,12 @@ namespace Boolka
                                         D3D12_RESOURCE_FLAG_NONE, D3D12_RESOURCE_STATE_COMMON);
         BLK_ASSERT_VAR(res);
 
-        res = m_SRVDescriptorHeap.Initialize(device, ms_MeshletSRVCount + sceneHeader.textureCount,
+        res = m_SRVDescriptorHeap.Initialize(device, SceneSRVOffset + sceneHeader.textureCount,
                                              D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
                                              D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
         BLK_ASSERT_VAR(res);
 
-        m_Textures.resize(sceneHeader.textureCount);
-
-        static const size_t bytesPerPixel = 4;
+        m_SceneTextures.resize(sceneHeader.textureCount);
 
         sceneData.PrepareTextureHeaders();
 
@@ -76,6 +75,26 @@ namespace Boolka
         textureOffsets.reserve(sceneHeader.textureCount);
 
         size_t lastOffset = 0;
+
+        // Skybox texture
+        {
+            UINT skyBoxResolution = sceneHeader.skyBoxResolution;
+            UINT skyBoxMipCount = sceneHeader.skyBoxMipCount;
+
+            size_t alignment;
+            size_t size;
+            Texture2D::GetRequiredSize(alignment, size, device, skyBoxResolution, skyBoxResolution,
+                                       skyBoxMipCount, ms_SkyBoxTextureFormat,
+                                       D3D12_RESOURCE_FLAG_NONE, BLK_TEXCUBE_FACE_COUNT);
+
+            lastOffset += size;
+
+            uploadSize += Texture2D::GetUploadSize(
+                skyBoxResolution, skyBoxResolution, skyBoxMipCount, ms_SkyBoxTextureFormat,
+                D3D12_RESOURCE_FLAG_NONE, BLK_TEXCUBE_FACE_COUNT);
+        }
+
+        // Scene textures
         for (UINT i = 0; i < sceneHeader.textureCount; ++i)
         {
             const auto& textureHeader = dataWrapper.textureHeaders[i];
@@ -85,53 +104,50 @@ namespace Boolka
             BLK_ASSERT(width != 0);
             BLK_ASSERT(height != 0);
 
-            UINT currentWidth = width;
-            UINT currentHeight = height;
-            UINT16 currentMip = 0;
-            for (; currentWidth > 0 && currentHeight > 0; ++currentMip)
-            {
-                size_t rowPitch = BLK_CEIL_TO_POWER_OF_TWO(currentWidth * bytesPerPixel, 256);
-                size_t textureSize = BLK_CEIL_TO_POWER_OF_TWO(rowPitch * currentHeight, 512);
-                uploadSize += textureSize;
-                currentWidth >>= 1;
-                currentHeight >>= 1;
-            }
-            BLK_ASSERT(mipCount == currentMip);
             size_t alignment;
             size_t size;
             Texture2D::GetRequiredSize(alignment, size, device, textureHeader.width,
-                                       textureHeader.height, mipCount, DXGI_FORMAT_B8G8R8A8_UNORM,
+                                       textureHeader.height, mipCount, ms_SceneTexturesFormat,
                                        D3D12_RESOURCE_FLAG_NONE);
 
             lastOffset = BLK_CEIL_TO_POWER_OF_TWO(lastOffset, alignment);
             textureOffsets.push_back(lastOffset);
             lastOffset += size;
+
+            uploadSize += Texture2D::GetUploadSize(width, height, mipCount, ms_SceneTexturesFormat,
+                                                   D3D12_RESOURCE_FLAG_NONE);
         }
         size_t heapSize = lastOffset;
 
         m_ResourceHeap.Initialize(device, heapSize, D3D12_HEAP_TYPE_DEFAULT,
                                   D3D12_HEAP_FLAG_ALLOW_ONLY_NON_RT_DS_TEXTURES);
 
+        // Skybox texture
+        {
+            UINT skyBoxResolution = sceneHeader.skyBoxResolution;
+            UINT skyBoxMipCount = sceneHeader.skyBoxMipCount;
+            m_SkyBoxCubemap.Initialize(device, m_ResourceHeap, 0, skyBoxResolution,
+                                       skyBoxResolution, skyBoxMipCount, ms_SkyBoxTextureFormat,
+                                       D3D12_RESOURCE_FLAG_NONE, nullptr,
+                                       D3D12_RESOURCE_STATE_COMMON, BLK_TEXCUBE_FACE_COUNT);
+
+            BLK_RENDER_DEBUG_ONLY(m_SkyBoxCubemap.SetDebugName(L"Scene::m_SkyBoxCubemap"));
+        }
+
+        // Scene textures
         for (UINT i = 0; i < sceneHeader.textureCount; ++i)
         {
-            auto& texture = m_Textures[i];
+            auto& texture = m_SceneTextures[i];
             const auto& textureHeader = dataWrapper.textureHeaders[i];
 
             texture.Initialize(device, m_ResourceHeap, textureOffsets[i], textureHeader.width,
-                               textureHeader.height, textureHeader.mipCount,
-                               DXGI_FORMAT_B8G8R8A8_UNORM, D3D12_RESOURCE_FLAG_NONE, nullptr,
-                               D3D12_RESOURCE_STATE_COMMON);
+                               textureHeader.height, textureHeader.mipCount, ms_SceneTexturesFormat,
+                               D3D12_RESOURCE_FLAG_NONE, nullptr, D3D12_RESOURCE_STATE_COMMON);
             BLK_RENDER_DEBUG_ONLY(texture.SetDebugName(L"Scene::m_Textures[%d]", i));
         }
 
-        for (UINT i = 0; i < sceneHeader.textureCount; ++i)
-        {
-            ShaderResourceView::CreateSRV(device, m_Textures[i],
-                                          m_SRVDescriptorHeap.GetCPUHandle(ms_MeshletSRVCount + i));
-            BLK_ASSERT_VAR(res);
-        }
+        UINT slot = MeshletSRVOffset;
 
-        UINT slot = 0;
         ShaderResourceView::CreateSRV(
             device, m_VertexBuffer1, sceneHeader.vertex1Size / sizeof(SceneData::VertexData1),
             sizeof(SceneData::VertexData1), m_SRVDescriptorHeap.GetCPUHandle(slot++));
@@ -156,7 +172,20 @@ namespace Boolka
             device, m_ObjectBuffer, sceneHeader.objectsSize / sizeof(SceneData::ObjectHeader),
             sizeof(SceneData::ObjectHeader), m_SRVDescriptorHeap.GetCPUHandle(slot++));
 
-        BLK_ASSERT(slot == ms_MeshletSRVCount);
+        BLK_ASSERT(slot == SkyBoxSRVOffset);
+
+        ShaderResourceView::CreateSRVCube(device, m_SkyBoxCubemap,
+                                          m_SRVDescriptorHeap.GetCPUHandle(slot++),
+                                          ms_SkyBoxTextureFormat);
+
+        BLK_ASSERT(slot == SceneSRVOffset);
+
+        for (UINT i = 0; i < sceneHeader.textureCount; ++i)
+        {
+            ShaderResourceView::CreateSRV(device, m_SceneTextures[i],
+                                          m_SRVDescriptorHeap.GetCPUHandle(SceneSRVOffset + i));
+            BLK_ASSERT_VAR(res);
+        }
 
         UploadBuffer uploadBuffer;
         uploadBuffer.Initialize(device, std::max(size_t(64), uploadSize));
@@ -196,44 +225,98 @@ namespace Boolka
                                           uploadBufferOffset, sceneHeader.objectsSize);
         uploadBufferOffset += sceneHeader.objectsSize;
 
-        for (UINT i = 0; i < sceneHeader.textureCount; ++i)
         {
-            auto& texture = m_Textures[i];
-            auto& textureHeader = dataWrapper.textureHeaders[i];
+            UINT skyBoxResolution = sceneHeader.skyBoxResolution;
+            UINT skyBoxMipCount = sceneHeader.skyBoxMipCount;
+            UINT bytesPerPixel = Texture2D::GetBPP(ms_SkyBoxTextureFormat) / 8;
+            BLK_ASSERT(bytesPerPixel != 0);
 
-            if (textureHeader.width == 0)
-                continue;
+            BLK_ASSERT(bytesPerPixel == sizeof(Vector4));
 
-            UINT width = textureHeader.width;
-            UINT height = textureHeader.height;
-            UINT16 mipNumber = 0;
-            for (; width > 0 && height > 0; ++mipNumber)
+            UINT16 subresource = 0;
+
+            for (UINT face = 0; face < BLK_TEXCUBE_FACE_COUNT; ++face)
             {
-                size_t rowPitch = BLK_CEIL_TO_POWER_OF_TWO(width * bytesPerPixel, 256);
-                size_t textureSize = BLK_CEIL_TO_POWER_OF_TWO(rowPitch * height, 512);
+                UINT resolution = skyBoxResolution;
+                for (UINT16 mipNumber = 0; mipNumber < skyBoxMipCount; ++mipNumber)
+                {
+                    BLK_ASSERT(resolution != 0);
 
-                D3D12_TEXTURE_COPY_LOCATION copyDest;
-                copyDest.pResource = texture.Get();
-                copyDest.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
-                copyDest.SubresourceIndex = mipNumber;
+                    size_t rowPitch = BLK_CEIL_TO_POWER_OF_TWO(resolution * bytesPerPixel,
+                                                               D3D12_TEXTURE_DATA_PITCH_ALIGNMENT);
+                    size_t textureSize = BLK_CEIL_TO_POWER_OF_TWO(
+                        rowPitch * resolution, D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT);
 
-                D3D12_TEXTURE_COPY_LOCATION copySource;
-                copySource.pResource = uploadBuffer.Get();
-                copySource.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
-                copySource.PlacedFootprint.Offset = uploadBufferOffset;
-                copySource.PlacedFootprint.Footprint.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-                copySource.PlacedFootprint.Footprint.Width = width;
-                copySource.PlacedFootprint.Footprint.Height = height;
-                copySource.PlacedFootprint.Footprint.Depth = 1;
-                copySource.PlacedFootprint.Footprint.RowPitch = static_cast<UINT>(rowPitch);
+                    D3D12_TEXTURE_COPY_LOCATION copyDest;
+                    copyDest.pResource = m_SkyBoxCubemap.Get();
+                    copyDest.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+                    copyDest.SubresourceIndex = face * skyBoxMipCount + mipNumber;
 
-                initCommandList->CopyTextureRegion(&copyDest, 0, 0, 0, &copySource, nullptr);
+                    D3D12_TEXTURE_COPY_LOCATION copySource;
+                    copySource.pResource = uploadBuffer.Get();
+                    copySource.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
+                    copySource.PlacedFootprint.Offset = uploadBufferOffset;
+                    copySource.PlacedFootprint.Footprint.Format = ms_SkyBoxTextureFormat;
+                    copySource.PlacedFootprint.Footprint.Width = resolution;
+                    copySource.PlacedFootprint.Footprint.Height = resolution;
+                    copySource.PlacedFootprint.Footprint.Depth = 1;
+                    copySource.PlacedFootprint.Footprint.RowPitch = static_cast<UINT>(rowPitch);
 
-                width >>= 1;
-                height >>= 1;
-                uploadBufferOffset += textureSize;
+                    initCommandList->CopyTextureRegion(&copyDest, 0, 0, 0, &copySource, nullptr);
+
+                    resolution >>= 1;
+                    uploadBufferOffset += textureSize;
+                }
             }
         }
+
+        {
+            UINT bytesPerPixel = Texture2D::GetBPP(ms_SceneTexturesFormat) / 8;
+            BLK_ASSERT(bytesPerPixel != 0);
+
+            for (UINT i = 0; i < sceneHeader.textureCount; ++i)
+            {
+                auto& texture = m_SceneTextures[i];
+                auto& textureHeader = dataWrapper.textureHeaders[i];
+
+                UINT width = textureHeader.width;
+                UINT height = textureHeader.height;
+                UINT16 mipCount = textureHeader.mipCount;
+                for (UINT16 mipNumber = 0; mipNumber < mipCount; ++mipNumber)
+                {
+                    BLK_ASSERT(width != 0);
+                    BLK_ASSERT(height != 0);
+
+                    size_t rowPitch = BLK_CEIL_TO_POWER_OF_TWO(width * bytesPerPixel,
+                                                               D3D12_TEXTURE_DATA_PITCH_ALIGNMENT);
+                    size_t textureSize = BLK_CEIL_TO_POWER_OF_TWO(
+                        rowPitch * height, D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT);
+
+                    D3D12_TEXTURE_COPY_LOCATION copyDest;
+                    copyDest.pResource = texture.Get();
+                    copyDest.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+                    copyDest.SubresourceIndex = mipNumber;
+
+                    D3D12_TEXTURE_COPY_LOCATION copySource;
+                    copySource.pResource = uploadBuffer.Get();
+                    copySource.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
+                    copySource.PlacedFootprint.Offset = uploadBufferOffset;
+                    copySource.PlacedFootprint.Footprint.Format = ms_SceneTexturesFormat;
+                    copySource.PlacedFootprint.Footprint.Width = width;
+                    copySource.PlacedFootprint.Footprint.Height = height;
+                    copySource.PlacedFootprint.Footprint.Depth = 1;
+                    copySource.PlacedFootprint.Footprint.RowPitch = static_cast<UINT>(rowPitch);
+
+                    initCommandList->CopyTextureRegion(&copyDest, 0, 0, 0, &copySource, nullptr);
+
+                    width >>= 1;
+                    height >>= 1;
+                    uploadBufferOffset += textureSize;
+                }
+            }
+        }
+
+        BLK_ASSERT(uploadBufferOffset == uploadSize);
 
         engineContext.FinishInitializationCommandList(device);
 
@@ -249,11 +332,10 @@ namespace Boolka
 
     void Scene::Unload()
     {
-        for (auto& texture : m_Textures)
-        {
-            texture.Unload();
-        }
-        m_Textures.clear();
+        BLK_UNLOAD_ARRAY(m_SceneTextures);
+        m_SceneTextures.clear();
+
+        m_SkyBoxCubemap.Unload();
 
         m_ResourceHeap.Unload();
 
@@ -281,14 +363,19 @@ namespace Boolka
         return m_OpaqueObjectCount;
     }
 
-    D3D12_GPU_DESCRIPTOR_HANDLE Scene::GetSceneTexturesTable() const
-    {
-        return m_SRVDescriptorHeap.GetGPUHandle(ms_MeshletSRVCount);
-    }
-
     D3D12_GPU_DESCRIPTOR_HANDLE Scene::GetMeshletsTable() const
     {
-        return m_SRVDescriptorHeap.GetGPUHandle(0);
+        return m_SRVDescriptorHeap.GetGPUHandle(MeshletSRVOffset);
+    }
+
+    D3D12_GPU_DESCRIPTOR_HANDLE Scene::GetSkyBoxTable() const
+    {
+        return m_SRVDescriptorHeap.GetGPUHandle(SkyBoxSRVOffset);
+    }
+
+    D3D12_GPU_DESCRIPTOR_HANDLE Scene::GetSceneTexturesTable() const
+    {
+        return m_SRVDescriptorHeap.GetGPUHandle(SceneSRVOffset);
     }
 
     DescriptorHeap& Scene::GetSRVDescriptorHeap()
