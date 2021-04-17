@@ -317,6 +317,9 @@
     <ClInclude Include="RenderPasses\SkyBoxRenderPass.h">
       <Filter>RenderPasses</Filter>
     </ClInclude>
+    <ClInclude Include="APIWrappers\PipelineState\PipelineStateParameters.h">
+      <Filter>APIWrappers\PipelineState</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WindowManagement\WindowManager.cpp">

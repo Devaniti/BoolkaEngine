@@ -37,10 +37,13 @@ namespace Boolka
 
         bool res = m_InitializationCommandAllocator.Initialize(device);
         BLK_ASSERT_VAR(res);
+
         res = m_InitializationCommandList.Initialize(device, m_InitializationCommandAllocator.Get(),
                                                      nullptr);
         BLK_ASSERT_VAR(res);
+
         m_InitializationCommandList->Close();
+
         res = m_InitializationFence.Initialize(device);
         BLK_ASSERT_VAR(res);
 

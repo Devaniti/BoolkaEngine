@@ -10,8 +10,8 @@ namespace Boolka
         RootSignature();
         ~RootSignature();
 
-        ID3D12RootSignature* Get();
-        ID3D12RootSignature* operator->();
+        ID3D12RootSignature* Get() const;
+        ID3D12RootSignature* operator->() const;
 
         bool Initialize(Device& device, const char* filename);
         void Unload();

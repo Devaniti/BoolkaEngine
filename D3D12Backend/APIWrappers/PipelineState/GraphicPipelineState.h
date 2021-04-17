@@ -1,4 +1,5 @@
 #pragma once
+#include "APIWrappers/PipelineState/PipelineStateParameters.h"
 #include "BoolkaCommon/Structures/MemoryBlock.h"
 #include "PipelineState.h"
 
@@ -14,30 +15,51 @@ namespace Boolka
         GraphicPipelineState() = default;
         ~GraphicPipelineState() = default;
 
-        bool Initialize(Device& device, RootSignature& rootSig, InputLayout& inputLayout,
-                        const MemoryBlock& vertexShaderBytecode,
-                        const MemoryBlock& pixelShaderBytecode, UINT renderTargetCount,
-                        bool useDepthTest = false, bool writeDepth = true,
-                        D3D12_COMPARISON_FUNC depthFunc = D3D12_COMPARISON_FUNC_LESS,
-                        bool useAlphaBlend = false,
-                        DXGI_FORMAT renderTargetFormat = DXGI_FORMAT_R8G8B8A8_UNORM);
+        template <typename... Args>
+        bool Initialize(Device& device, const Args&... args)
+        {
+            // Add default parameters in case they are missing in args list
+            // TBD if we should error out instead
+            if constexpr (!has_type<BlendParam, Args...>::value)
+            {
+                return Initialize(device, args..., BlendParam{});
+            }
 
-        bool Initialize(Device& device, RootSignature& rootSig,
-                        const MemoryBlock& amplificationShaderBytecode,
-                        const MemoryBlock& meshShaderBytecode,
-                        const MemoryBlock& pixelShaderBytecode, UINT renderTargetCount,
-                        bool useDepthTest = false, bool writeDepth = true,
-                        D3D12_COMPARISON_FUNC depthFunc = D3D12_COMPARISON_FUNC_LESS,
-                        bool useAlphaBlend = false,
-                        DXGI_FORMAT renderTargetFormat = DXGI_FORMAT_R8G8B8A8_UNORM);
+            if constexpr (!has_type<RasterizerParam, Args...>::value)
+            {
+                return Initialize(device, args..., RasterizerParam{});
+            }
+
+            if constexpr (!has_type<DepthStencilParam, Args...>::value)
+            {
+                return Initialize(device, args..., DepthStencilParam{});
+            }
+
+            if constexpr (!has_type<RenderTargetParam, Args...>::value)
+            {
+                return Initialize(device, args..., RenderTargetParam{});
+            }
+
+            // Construct PipelineStateStream from our parameter wrappers
+            PipelineStateStream stateStream(args...);
+
+            D3D12_PIPELINE_STATE_STREAM_DESC psoStreamDesc = {sizeof(stateStream), &stateStream};
+            return InitializeInternal(device, psoStreamDesc);
+        }
 
     private:
-        static void SetDefaultRasterizerDesc(D3D12_RASTERIZER_DESC& desc);
+        bool InitializeInternal(Device& device, const D3D12_PIPELINE_STATE_STREAM_DESC& streamDesc);
+
+        static void SetRasterizerDesc(D3D12_RASTERIZER_DESC& desc, float depthBias,
+                                      float depthSlopeBias);
         static void SetDepthStencilDesc(D3D12_DEPTH_STENCIL_DESC& desc, bool useDepthTest,
                                         bool writeDepth, D3D12_COMPARISON_FUNC depthFunc);
         static void SetBlendDesc(D3D12_BLEND_DESC& blend, bool useAlphaBlend);
         static void SetRenderTargetFormats(D3D12_RT_FORMAT_ARRAY& renderTargetFormats,
                                            UINT renderTargetCount, DXGI_FORMAT renderTargetFormat);
+
+        static INT ConvertFloatDepthBiasToDXDepthBias(float depthBias,
+                                                      size_t formatMantissaBits = FLT_MANT_DIG);
     };
 
     BLK_IS_PLAIN_DATA_ASSERT(D3D12_GRAPHICS_PIPELINE_STATE_DESC);

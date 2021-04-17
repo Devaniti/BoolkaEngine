@@ -52,10 +52,9 @@ float VectorToDepth(float3 vec, float n, float f)
 
 float CalculateLightShadow(uint lightIndex, float3 lightVector)
 {
-    static const float shadowBias = 0.001f;
     float4 samplePos = mul(float4(-lightVector, 0.0f), invViewMatrix);
     float comparisonValue = VectorToDepth(samplePos.xyz, lights[lightIndex].viewPos_nearZ.w,
-                                          lights[lightIndex].color_farZ.w) - shadowBias;
+                                          lights[lightIndex].color_farZ.w);
     return shadowMapCube[lightIndex].SampleCmp(shadowSampler, samplePos.xyz, comparisonValue);
 }
 
@@ -138,7 +137,7 @@ PSOut main(VSOut In)
     float3 normalVal = normal.Load(uint3(vpos, 0)).xyz;
     float depthVal = depth.Load(uint3(vpos, 0));
     if (depthVal == 1.0f) // Far plane
-        return Out;       // Clear far plane in shader for now
+        discard;          // Skip writting to RT, SkyBox will overwrite it
     float3 viewPos = CalculateViewPos(UV, depthVal);
     float3 result = CalculateAmbient(albedoVal);
     result += CalculateSun(albedoVal, albedoVal, normalVal, viewPos);

@@ -11,106 +11,27 @@
 namespace Boolka
 {
 
-    bool GraphicPipelineState::Initialize(
-        Device& device, RootSignature& rootSig, InputLayout& inputLayout,
-        const MemoryBlock& vertexShaderBytecode, const MemoryBlock& pixelShaderBytecode,
-        UINT renderTargetCount, bool useDepthTest /*= false*/, bool writeDepth /*= true*/,
-        D3D12_COMPARISON_FUNC depthFunc /*= D3D12_COMPARISON_FUNC_LESS*/,
-        bool useAlphaBlend /*= false*/,
-        DXGI_FORMAT renderTargetFormat /*= DXGI_FORMAT_R8G8B8A8_UNORM*/)
+    bool GraphicPipelineState::InitializeInternal(
+        Device& device, const D3D12_PIPELINE_STATE_STREAM_DESC& streamDesc)
     {
-        struct alignas(void*) PipelineStateStream
-        {
-            CD3DX12_PIPELINE_STATE_STREAM_ROOT_SIGNATURE rootSig;
-            CD3DX12_PIPELINE_STATE_STREAM_VS vs;
-            CD3DX12_PIPELINE_STATE_STREAM_PS ps;
-            CD3DX12_PIPELINE_STATE_STREAM_BLEND_DESC blend;
-            CD3DX12_PIPELINE_STATE_STREAM_RASTERIZER rasterizer;
-            CD3DX12_PIPELINE_STATE_STREAM_DEPTH_STENCIL depthStencil;
-            CD3DX12_PIPELINE_STATE_STREAM_INPUT_LAYOUT inputLayout;
-            CD3DX12_PIPELINE_STATE_STREAM_PRIMITIVE_TOPOLOGY primitiveTopology;
-            CD3DX12_PIPELINE_STATE_STREAM_RENDER_TARGET_FORMATS renderTargetFormats;
-            CD3DX12_PIPELINE_STATE_STREAM_DEPTH_STENCIL_FORMAT depthStencilFormat;
-        } psoStream{};
-
-        D3D12_PIPELINE_STATE_STREAM_DESC psoStreamDesc = {sizeof(psoStream), &psoStream};
-
-        psoStream.rootSig = rootSig.Get();
-        psoStream.vs =
-            D3D12_SHADER_BYTECODE{vertexShaderBytecode.m_Data, vertexShaderBytecode.m_Size};
-        psoStream.ps =
-            D3D12_SHADER_BYTECODE{pixelShaderBytecode.m_Data, pixelShaderBytecode.m_Size};
-        SetBlendDesc(psoStream.blend, useAlphaBlend);
-        SetDefaultRasterizerDesc(psoStream.rasterizer);
-        SetDepthStencilDesc(psoStream.depthStencil, useDepthTest, writeDepth, depthFunc);
-        inputLayout.FillInputLayoutDesc(psoStream.inputLayout);
-        psoStream.primitiveTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-        SetRenderTargetFormats(psoStream.renderTargetFormats, renderTargetCount,
-                               renderTargetFormat);
-        psoStream.depthStencilFormat = DXGI_FORMAT_D32_FLOAT;
-
         ID3D12PipelineState* state = nullptr;
 
-        HRESULT hr = device->CreatePipelineState(&psoStreamDesc, IID_PPV_ARGS(&state));
+        HRESULT hr = device->CreatePipelineState(&streamDesc, IID_PPV_ARGS(&state));
         if (FAILED(hr))
             return false;
 
         return PipelineState::Initialize(state);
     }
 
-    bool GraphicPipelineState::Initialize(
-        Device& device, RootSignature& rootSig, const MemoryBlock& amplificationShaderBytecode,
-        const MemoryBlock& meshShaderBytecode, const MemoryBlock& pixelShaderBytecode,
-        UINT renderTargetCount, bool useDepthTest /*= false*/, bool writeDepth /*= true*/,
-        D3D12_COMPARISON_FUNC depthFunc /*= D3D12_COMPARISON_FUNC_LESS*/,
-        bool useAlphaBlend /*= false*/,
-        DXGI_FORMAT renderTargetFormat /*= DXGI_FORMAT_R8G8B8A8_UNORM*/)
-    {
-        struct PipelineStateStream
-        {
-            CD3DX12_PIPELINE_STATE_STREAM_ROOT_SIGNATURE rootSig;
-            CD3DX12_PIPELINE_STATE_STREAM_AS as;
-            CD3DX12_PIPELINE_STATE_STREAM_MS ms;
-            CD3DX12_PIPELINE_STATE_STREAM_PS ps;
-            CD3DX12_PIPELINE_STATE_STREAM_BLEND_DESC blend;
-            CD3DX12_PIPELINE_STATE_STREAM_RASTERIZER rasterizer;
-            CD3DX12_PIPELINE_STATE_STREAM_DEPTH_STENCIL depthStencil;
-            CD3DX12_PIPELINE_STATE_STREAM_RENDER_TARGET_FORMATS renderTargetFormats;
-            CD3DX12_PIPELINE_STATE_STREAM_DEPTH_STENCIL_FORMAT depthStencilFormat;
-        } psoStream{};
-
-        D3D12_PIPELINE_STATE_STREAM_DESC psoStreamDesc = {sizeof(psoStream), &psoStream};
-
-        psoStream.rootSig = rootSig.Get();
-        psoStream.as = D3D12_SHADER_BYTECODE{amplificationShaderBytecode.m_Data,
-                                             amplificationShaderBytecode.m_Size};
-        psoStream.ms = D3D12_SHADER_BYTECODE{meshShaderBytecode.m_Data, meshShaderBytecode.m_Size};
-        psoStream.ps =
-            D3D12_SHADER_BYTECODE{pixelShaderBytecode.m_Data, pixelShaderBytecode.m_Size};
-        SetBlendDesc(psoStream.blend, useAlphaBlend);
-        SetDefaultRasterizerDesc(psoStream.rasterizer);
-        SetDepthStencilDesc(psoStream.depthStencil, useDepthTest, writeDepth, depthFunc);
-        SetRenderTargetFormats(psoStream.renderTargetFormats, renderTargetCount,
-                               renderTargetFormat);
-        psoStream.depthStencilFormat = DXGI_FORMAT_D32_FLOAT;
-
-        ID3D12PipelineState* state = nullptr;
-
-        HRESULT hr = device->CreatePipelineState(&psoStreamDesc, IID_PPV_ARGS(&state));
-        if (FAILED(hr))
-            return false;
-
-        return PipelineState::Initialize(state);
-    }
-
-    void GraphicPipelineState::SetDefaultRasterizerDesc(D3D12_RASTERIZER_DESC& desc)
+    void GraphicPipelineState::SetRasterizerDesc(D3D12_RASTERIZER_DESC& desc, float depthBias,
+                                                 float depthSlopeBias)
     {
         desc.FillMode = D3D12_FILL_MODE_SOLID;
         desc.CullMode = D3D12_CULL_MODE_BACK; // TODO handle special case for transparent
         desc.FrontCounterClockwise = TRUE;
-        desc.DepthBias = D3D12_DEFAULT_DEPTH_BIAS;
+        desc.DepthBias = ConvertFloatDepthBiasToDXDepthBias(depthBias);
         desc.DepthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;
-        desc.SlopeScaledDepthBias = D3D12_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;
+        desc.SlopeScaledDepthBias = depthSlopeBias;
         desc.DepthClipEnable = TRUE;
         desc.MultisampleEnable = FALSE;
         desc.AntialiasedLineEnable = FALSE;
@@ -185,6 +106,14 @@ namespace Boolka
         {
             renderTargetFormats.RTFormats[i] = renderTargetFormat;
         }
+    }
+
+    INT GraphicPipelineState::ConvertFloatDepthBiasToDXDepthBias(
+        float depthBias, size_t formatMantissaBits /*= FLT_MANT_DIG*/)
+    {
+        // Minus one because DX doesn't count hidden bit
+        size_t mantissaDigits = formatMantissaBits - 1;
+        return static_cast<INT>(depthBias * (::powf(2, static_cast<float>(mantissaDigits))));
     }
 
 } // namespace Boolka

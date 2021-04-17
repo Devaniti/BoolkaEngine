@@ -150,6 +150,7 @@
     <ClInclude Include="APIWrappers\PipelineState\ComputePipelineState.h" />
     <ClInclude Include="APIWrappers\PipelineState\GraphicPipelineState.h" />
     <ClInclude Include="APIWrappers\PipelineState\PipelineState.h" />
+    <ClInclude Include="APIWrappers\PipelineState\PipelineStateParameters.h" />
     <ClInclude Include="APIWrappers\RenderDebug.h" />
     <ClInclude Include="APIWrappers\DescriptorHeap.h" />
     <ClInclude Include="APIWrappers\Device.h" />

@@ -48,7 +48,7 @@ namespace Boolka
         strcpy_s(m_Entries[index].SemanticName, desc.SemanticName);
     }
 
-    void InputLayout::FillInputLayoutDesc(D3D12_INPUT_LAYOUT_DESC& desc)
+    void InputLayout::FillInputLayoutDesc(D3D12_INPUT_LAYOUT_DESC& desc) const
     {
         desc.NumElements = m_Header.m_NumEntries;
         desc.pInputElementDescs = m_NativeEntries;

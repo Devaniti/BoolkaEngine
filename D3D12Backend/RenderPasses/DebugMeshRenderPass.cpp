@@ -116,8 +116,8 @@ namespace Boolka
         MemoryBlock PS = DebugFileReader::ReadFile("DebugMeshPassPixelShader.cso");
 
         bool res = m_PSO.Initialize(
-            device, resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default), AS, MS,
-            PS, 1);
+            device, resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default),
+            ASParam{AS}, MSParam{MS}, PSParam{PS});
         BLK_ASSERT_VAR(res);
 
         return true;

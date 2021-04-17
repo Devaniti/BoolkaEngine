@@ -29,7 +29,7 @@ namespace Boolka
         BLK_IS_PLAIN_DATA_ASSERT(InputLayoutEntry);
         BLK_IS_PLAIN_DATA_ASSERT(D3D12_INPUT_ELEMENT_DESC);
 
-        void FillInputLayoutDesc(D3D12_INPUT_LAYOUT_DESC& desc);
+        void FillInputLayoutDesc(D3D12_INPUT_LAYOUT_DESC& desc) const;
 
     private:
         InputLayoutHeader m_Header;

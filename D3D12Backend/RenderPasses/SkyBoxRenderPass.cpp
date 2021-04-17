@@ -42,7 +42,8 @@ namespace Boolka
 
         resourceTracker.Transition(depth, commandList, D3D12_RESOURCE_STATE_DEPTH_READ);
 
-        commandList->OMSetRenderTargets(1, lightBufferRTV.GetCPUDescriptor(), FALSE, gbufferDSV.GetCPUDescriptor());
+        commandList->OMSetRenderTargets(1, lightBufferRTV.GetCPUDescriptor(), FALSE,
+                                        gbufferDSV.GetCPUDescriptor());
         ID3D12DescriptorHeap* descriptorHeaps[] = {scene.GetSRVDescriptorHeap().Get()};
         commandList->SetDescriptorHeaps(ARRAYSIZE(descriptorHeaps), descriptorHeaps);
         commandList->SetGraphicsRootDescriptorTable(
@@ -98,8 +99,9 @@ namespace Boolka
             device.FilterMessage(D3D12_MESSAGE_ID_CREATEINPUTLAYOUT_EMPTY_LAYOUT));
         bool res = m_PSO.Initialize(
             device, resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default),
-            inputLayout, VS, PS, 1, true, false, D3D12_COMPARISON_FUNC_EQUAL, false,
-            DXGI_FORMAT_R16G16B16A16_FLOAT);
+            inputLayout, VSParam{VS}, PSParam{PS},
+            RenderTargetParam{1, DXGI_FORMAT_R16G16B16A16_FLOAT},
+            DepthStencilParam{true, false, D3D12_COMPARISON_FUNC_EQUAL}, DepthFormatParam{});
         BLK_RENDER_DEBUG_ONLY(device.RemoveLastMessageFilter());
         BLK_ASSERT_VAR(res);
 

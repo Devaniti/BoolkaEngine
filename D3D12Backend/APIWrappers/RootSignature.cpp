@@ -18,13 +18,13 @@ namespace Boolka
         BLK_ASSERT(m_RootSignature == nullptr);
     }
 
-    ID3D12RootSignature* RootSignature::Get()
+    ID3D12RootSignature* RootSignature::Get() const
     {
         BLK_ASSERT(m_RootSignature != nullptr);
         return m_RootSignature;
     }
 
-    ID3D12RootSignature* RootSignature::operator->()
+    ID3D12RootSignature* RootSignature::operator->() const
     {
         return Get();
     }

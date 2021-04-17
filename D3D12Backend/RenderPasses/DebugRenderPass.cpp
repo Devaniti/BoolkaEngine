@@ -65,11 +65,13 @@ namespace Boolka
         upload[3] = cos(m_CurrentAngle);
         currentUploadBuffer.Unmap();
 
+        resourceTracker.Transition(frameConstantBuffer, commandList,
+                                   D3D12_RESOURCE_STATE_COPY_DEST);
+
         commandList->CopyResource(frameConstantBuffer.Get(), currentUploadBuffer.Get());
 
-        ResourceTransition::Transition(frameConstantBuffer, commandList,
-                                       D3D12_RESOURCE_STATE_COPY_DEST,
-                                       D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+        resourceTracker.Transition(frameConstantBuffer, commandList,
+                                   D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
 
         D3D12_VIEWPORT viewportDesc = {};
         viewportDesc.Width = static_cast<float>(width);
@@ -97,10 +99,6 @@ namespace Boolka
         commandList->IASetVertexBuffers(0, 1, m_VertexBufferView.GetView());
         commandList->SetPipelineState(m_PSO.Get());
         commandList->DrawIndexedInstanced(3, 1, 0, 0, 0);
-
-        ResourceTransition::Transition(frameConstantBuffer, commandList,
-                                       D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER,
-                                       D3D12_RESOURCE_STATE_COPY_DEST);
 
         return true;
     }
@@ -164,7 +162,7 @@ namespace Boolka
 
         res = m_PSO.Initialize(
             device, resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default),
-            inputLayout, VS, PS, 1);
+            inputLayout, VSParam{VS}, PSParam{PS});
         BLK_ASSERT_VAR(res);
 
         inputLayout.Unload();

@@ -144,21 +144,9 @@
 
 using uint = unsigned int;
 
-template <bool value, typename ifTrue, typename ifFalse>
-struct template_if_t_impl;
-template <bool value, typename ifTrue, typename ifFalse>
-using template_if_t = typename template_if_t_impl<value, ifTrue, ifFalse>::type;
-
-template <typename ifTrue, typename ifFalse>
-struct template_if_t_impl<true, ifTrue, ifFalse>
+template <typename TypeToFind, typename... List>
+struct has_type : std::disjunction<std::is_same<TypeToFind, List>...>
 {
-    using type = ifTrue;
-};
-
-template <typename ifTrue, typename ifFalse>
-struct template_if_t_impl<false, ifTrue, ifFalse>
-{
-    using type = ifFalse;
 };
 
 template <typename T1, typename T2>
@@ -179,7 +167,7 @@ template <typename T1, typename T2>
 T1 ptr_static_cast(T2 value)
 {
     using intermediateType =
-        template_if_t<std::is_const_v<std::remove_pointer_t<T1>>, const void*, void*>;
+        std::conditional_t<std::is_const_v<std::remove_pointer_t<T1>>, const void*, void*>;
     return ptr_static_cast_internal<T1, T2, intermediateType>(value);
 }
 

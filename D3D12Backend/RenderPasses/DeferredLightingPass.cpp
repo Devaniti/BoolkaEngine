@@ -169,8 +169,9 @@ namespace Boolka
             device.FilterMessage(D3D12_MESSAGE_ID_CREATEINPUTLAYOUT_EMPTY_LAYOUT));
         bool res = m_PSO.Initialize(
             device, resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default),
-            inputLayout, VS, PS, 1, false, false, D3D12_COMPARISON_FUNC_ALWAYS, false,
-            DXGI_FORMAT_R16G16B16A16_FLOAT);
+            inputLayout, VSParam{VS}, PSParam{PS},
+            RenderTargetParam{1, DXGI_FORMAT_R16G16B16A16_FLOAT},
+            DepthStencilParam{false, false, D3D12_COMPARISON_FUNC_ALWAYS}, DepthFormatParam{});
         BLK_RENDER_DEBUG_ONLY(device.RemoveLastMessageFilter());
         BLK_ASSERT_VAR(res);
 
