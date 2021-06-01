@@ -14,7 +14,6 @@
 #include "Contexts/RenderEngineContext.h"
 #include "Contexts/RenderFrameContext.h"
 #include "Contexts/RenderThreadContext.h"
-#include "RenderSchedule/ResourceContainer.h"
 #include "RenderSchedule/ResourceTracker.h"
 
 namespace Boolka
@@ -95,7 +94,7 @@ namespace Boolka
 
         commandList->RSSetScissorRects(1, &scissorRect);
 
-        engineContext.GetScene().BindResources(commandList);
+        engineContext.BindSceneResourcesGraphic(commandList);
         commandList->SetPipelineState(m_PSO.Get());
 
         commandList->SetGraphicsRootConstantBufferView(
@@ -105,22 +104,6 @@ namespace Boolka
         // Point lights
         for (size_t lightIndex = 0; lightIndex < lights.size(); ++lightIndex)
         {
-            bool isLightCulled = true;
-
-            for (size_t faceIndex = 0; faceIndex < BLK_TEXCUBE_FACE_COUNT; ++faceIndex)
-            {
-                size_t resourceIndex = lightIndex * BLK_TEXCUBE_FACE_COUNT + faceIndex;
-                if (batchManager.NeedRender(BatchManager::BatchType::ShadowMapLight0 +
-                                            resourceIndex))
-                {
-                    isLightCulled = false;
-                    break;
-                }
-            }
-
-            if (isLightCulled)
-                continue;
-
             auto& shadowMap =
                 resourceContainer.GetTexture(ResourceContainer::Tex::ShadowMapCube0 + lightIndex);
             resourceTracker.Transition(shadowMap, commandList, D3D12_RESOURCE_STATE_DEPTH_WRITE);
@@ -128,10 +111,6 @@ namespace Boolka
             for (size_t faceIndex = 0; faceIndex < BLK_TEXCUBE_FACE_COUNT; ++faceIndex)
             {
                 size_t resourceIndex = lightIndex * BLK_TEXCUBE_FACE_COUNT + faceIndex;
-
-                if (!batchManager.NeedRender(BatchManager::BatchType::ShadowMapLight0 +
-                                             resourceIndex))
-                    continue;
 
                 auto& shadowMapDSV =
                     resourceContainer.GetDSV(ResourceContainer::DSV::ShadowMapLight0 +
@@ -197,15 +176,13 @@ namespace Boolka
         auto& defaultRootSig =
             resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default);
 
-        MemoryBlock PS = {};
         MemoryBlock AS = DebugFileReader::ReadFile("SimpleAmplificationShader.cso");
         MemoryBlock MS = DebugFileReader::ReadFile("ShadowMapPassMeshShader.cso");
 
-        bool res = m_PSO.Initialize(device, defaultRootSig, ASParam{AS}, MSParam{MS}, PSParam{PS},
-                                    RenderTargetParam{0},
-                                    DepthStencilParam{true, true, D3D12_COMPARISON_FUNC_LESS},
-                                    DepthFormatParam{}, RasterizerParam{0.001f, 0.0f});
-
+        bool res =
+            m_PSO.Initialize(device, defaultRootSig, ASParam{AS}, MSParam{MS}, RenderTargetParam{0},
+                             DepthStencilParam{true, true, D3D12_COMPARISON_FUNC_LESS},
+                             DepthFormatParam{}, RasterizerParam{0.001f, 0.0f});
         BLK_ASSERT_VAR(res);
 
         return true;

@@ -58,7 +58,7 @@ namespace Boolka
             static_cast<UINT>(ResourceContainer::DefaultRootSigBindPoints::FrameConstantBuffer),
             frameConstantBuffer->GetGPUVirtualAddress());
 
-        engineContext.GetScene().BindResources(commandList);
+        engineContext.BindSceneResourcesGraphic(commandList);
 
         commandList->SetPipelineState(m_PSO.Get());
 
@@ -78,14 +78,13 @@ namespace Boolka
         auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
         auto& resourceContainer = engineContext.GetResourceContainer();
 
-        MemoryBlock PS = {};
         MemoryBlock AS = DebugFileReader::ReadFile("AmplificationShader.cso");
         MemoryBlock MS = DebugFileReader::ReadFile("MeshShader.cso");
 
         bool res = m_PSO.Initialize(
             device, resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default),
-            ASParam{AS}, MSParam{MS}, PSParam{PS}, RenderTargetParam{0},
-            DepthStencilParam{true, true}, DepthFormatParam{});
+            ASParam{AS}, MSParam{MS}, RenderTargetParam{0}, DepthStencilParam{true, true},
+            DepthFormatParam{});
         BLK_ASSERT_VAR(res);
 
         return true;

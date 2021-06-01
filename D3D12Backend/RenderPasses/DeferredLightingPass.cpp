@@ -14,30 +14,10 @@
 #include "Contexts/RenderEngineContext.h"
 #include "Contexts/RenderFrameContext.h"
 #include "Contexts/RenderThreadContext.h"
-#include "RenderSchedule/ResourceContainer.h"
 #include "RenderSchedule/ResourceTracker.h"
 
 namespace Boolka
 {
-    struct Light
-    {
-        Vector4 viewPos_nearZ;
-        Vector4 color_farZ;
-    };
-
-    struct Sun
-    {
-        Vector4 lightDirVS;
-        Vector4 color;
-        Matrix4x4 viewToShadow;
-    };
-
-    struct DeferredPass
-    {
-        Light lights[BLK_MAX_LIGHT_COUNT];
-        Vector4u lightCount;
-        Sun sun;
-    };
 
     bool DeferredLightingPass::Render(RenderContext& renderContext,
                                       ResourceTracker& resourceTracker)
@@ -48,6 +28,8 @@ namespace Boolka
         UINT frameIndex = frameContext.GetFrameIndex();
         Texture2D& albedo = resourceContainer.GetTexture(ResourceContainer::Tex::GBufferAlbedo);
         Texture2D& normal = resourceContainer.GetTexture(ResourceContainer::Tex::GBufferNormal);
+        Texture2D& reflections =
+            resourceContainer.GetTexture(ResourceContainer::Tex::GBufferReflections);
         Texture2D& depth = resourceContainer.GetTexture(ResourceContainer::Tex::GbufferDepth);
         Texture2D& lightBuffer = resourceContainer.GetTexture(ResourceContainer::Tex::LightBuffer);
         RenderTargetView& lightBufferRTV =
@@ -66,38 +48,13 @@ namespace Boolka
         BLK_GPU_SCOPE(commandList.Get(), "DeferredLightingPass");
         BLK_RENDER_DEBUG_ONLY(resourceTracker.ValidateStates(commandList));
 
-        // Temp lights position
-        resourceTracker.Transition(passConstantBuffer, commandList, D3D12_RESOURCE_STATE_COPY_DEST);
-
-        DeferredPass uploadData{};
         auto& lightContainer = frameContext.GetLightContainer();
         auto& lights = lightContainer.GetLights();
 
-        for (size_t i = 0; i < lights.size(); ++i)
-        {
-            Vector3 viewPos = Vector4(lights[i].worldPos, 1.0f) * frameContext.GetViewMatrix();
-            uploadData.lights[i].viewPos_nearZ = Vector4(viewPos, lights[i].nearZ);
-            uploadData.lights[i].color_farZ = Vector4(lights[i].color, lights[i].farZ);
-        }
-
-        auto& sun = lightContainer.GetSun();
-        uploadData.sun.lightDirVS = -(sun.lightDir * frameContext.GetViewMatrix());
-        uploadData.sun.color = sun.color;
-        uploadData.sun.viewToShadow =
-            (frameContext.GetInvViewMatrix() * lightContainer.GetSunView() *
-             lightContainer.GetSunProj() * Matrix4x4::GetUVToTexCoord())
-                .Transpose();
-
-        uploadData.lightCount = Vector4u(static_cast<uint>(lights.size()), 0, 0, 0);
-
-        passUploadBuffer.Upload(&uploadData, sizeof(DeferredPass));
-        commandList->CopyResource(passConstantBuffer.Get(), passUploadBuffer.Get());
-
-        resourceTracker.Transition(passConstantBuffer, commandList,
-                                   D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
-
         resourceTracker.Transition(albedo, commandList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
         resourceTracker.Transition(normal, commandList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+        resourceTracker.Transition(reflections, commandList,
+                                   D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
         resourceTracker.Transition(depth, commandList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
         resourceTracker.Transition(lightBuffer, commandList, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
@@ -115,7 +72,7 @@ namespace Boolka
         commandList->SetGraphicsRootDescriptorTable(
             static_cast<UINT>(ResourceContainer::DefaultRootSigBindPoints::RenderPassSRV),
             mainDescriptorHeap.GetGPUHandle(
-                static_cast<UINT>(ResourceContainer::SRV::GBufferAlbedo)));
+                static_cast<UINT>(ResourceContainer::MainSRVDescriptorHeapOffsets::UAVHeapOffset)));
 
         UINT height = engineContext.GetBackbufferHeight();
         UINT width = engineContext.GetBackbufferWidth();

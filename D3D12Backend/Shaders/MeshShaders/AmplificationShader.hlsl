@@ -4,7 +4,7 @@
 void main(uint gid : SV_GroupID) 
 {
     const ObjectData objectData = GetObjectData(gid);
-    bool visible = IntersectionFrustumAABB(mainViewFrustum, objectData.boundingBox);
+    bool visible = IntersectionFrustumAABB(PerFrame.mainViewFrustum, objectData.boundingBox);
     Payload payload = (Payload)0;
     payload.meshletOffset = objectData.meshletOffset;
     payload.materialID = objectData.materialIndex;

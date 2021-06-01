@@ -4,6 +4,7 @@
 
 #include "APIWrappers/Device.h"
 #include "APIWrappers/Resources/Textures/Views/RenderTargetView.h"
+#include "BoolkaCommon/DebugHelpers/DebugProfileTimer.h"
 #include "Contexts/RenderFrameContext.h"
 #include "WindowManagement/DisplayController.h"
 
@@ -47,8 +48,9 @@ namespace Boolka
         res = m_InitializationFence.Initialize(device);
         BLK_ASSERT_VAR(res);
 
+        // TODO rewrite hardcoded value
         // Temp initial camera position for san-miguel scene
-        res = m_Camera.Initialize(0.0f, 0.0f, {6.35f, 3.46f, 1.22f, 0.0f});
+        res = m_Camera.Initialize(0.0f, 0.0f, {6.55f, 3.46f, 1.22f, 0.0f});
         BLK_ASSERT_VAR(res);
 
         m_HWND = displayController.GetHWND();
@@ -100,6 +102,24 @@ namespace Boolka
         return m_Scene;
     }
 
+    void RenderEngineContext::BindSceneResourcesGraphic(CommandList& commandList)
+    {
+        DescriptorHeap& mainDescriptorHeap =
+            m_resourceContainer.GetDescriptorHeap(ResourceContainer::DescHeap::MainHeap);
+        m_Scene.BindResourcesGraphic(
+            commandList, mainDescriptorHeap,
+            static_cast<UINT>(ResourceContainer::MainSRVDescriptorHeapOffsets::SceneSRVHeapOffset));
+    }
+
+    void RenderEngineContext::BindSceneResourcesCompute(CommandList& commandList)
+    {
+        DescriptorHeap& mainDescriptorHeap =
+            m_resourceContainer.GetDescriptorHeap(ResourceContainer::DescHeap::MainHeap);
+        m_Scene.BindResourcesCompute(
+            commandList, mainDescriptorHeap,
+            static_cast<UINT>(ResourceContainer::MainSRVDescriptorHeapOffsets::SceneSRVHeapOffset));
+    }
+
     UINT RenderEngineContext::GetBackbufferWidth() const
     {
         return m_backbufferWidth;
@@ -115,20 +135,26 @@ namespace Boolka
         return m_resourceContainer;
     }
 
-    CopyCommandListImpl& RenderEngineContext::GetInitializationCommandList()
+    GraphicCommandListImpl& RenderEngineContext::GetInitializationCommandList()
     {
-        m_InitializationCommandAllocator.Reset();
-        m_InitializationCommandAllocator.ResetCommandList(m_InitializationCommandList, nullptr);
         return m_InitializationCommandList;
     }
 
-    bool RenderEngineContext::FinishInitializationCommandList(Device& device)
+    void RenderEngineContext::ResetInitializationCommandList()
     {
+        m_InitializationCommandAllocator.Reset();
+        m_InitializationCommandAllocator.ResetCommandList(m_InitializationCommandList, nullptr);
+    }
+
+    void RenderEngineContext::ExecuteInitializationCommandList(Device& device)
+    {
+        DebugProfileTimer commandListFlushWait;
+        commandListFlushWait.Start();
         m_InitializationCommandList->Close();
-        device.GetCopyQueue().ExecuteCommandList(m_InitializationCommandList);
-        UINT64 expectedValue = m_InitializationFence.SignalGPU(device.GetCopyQueue());
-        m_InitializationFence.WaitCPU(expectedValue);
-        return true;
+        auto& commandQueue = device.GetGraphicQueue();
+        commandQueue.ExecuteCommandList(m_InitializationCommandList);
+        commandQueue.Flush();
+        commandListFlushWait.Stop(L"Initialization command list execute");
     }
 
     Camera& RenderEngineContext::GetCamera()
@@ -147,6 +173,7 @@ namespace Boolka
         BLK_ASSERT(m_Device);
         return *m_Device;
     }
+
 #endif
 
 } // namespace Boolka

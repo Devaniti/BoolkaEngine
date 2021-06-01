@@ -18,7 +18,7 @@ namespace Boolka
         BLK_ASSERT(m_file == NULL);
     }
 
-    bool FileReader::OpenFile(wchar_t* filename)
+    bool FileReader::OpenFile(const wchar_t* filename)
     {
         BLK_ASSERT(m_file == NULL);
         m_file = ::CreateFileW(filename, GENERIC_READ, 0, NULL, OPEN_EXISTING,

@@ -23,6 +23,9 @@
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
       <ShaderModel>6.5</ShaderModel>
     </FxCompile>
+    <Link>
+      <AdditionalDependencies>Pathcch.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemGroup />
 </Project>

@@ -1,8 +1,6 @@
 #include "../Color.hlsli"
 #include "../FullScreen/FullScreenCommon.hlsli"
 
-Texture2D<float4> lightBuffer : register(t3);
-
 struct PSOut
 {
     float4 color : SV_Target;
@@ -18,8 +16,6 @@ float GTTonemap(float x)
     float c = 1.33f;
     float b = 0.0f;
     float l0 = (P - m) * l / a;
-    float L0 = m - m / a;
-    float L1 = m + (1.0f - m) / a;
     float Lx = m + a * (x - m);
     float Tx = m * pow(x / m, c) + b;
     float S0 = m + l0;

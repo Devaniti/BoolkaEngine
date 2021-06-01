@@ -2,7 +2,10 @@
 
 #include "ResourceContainer.h"
 
+#include "APIWrappers/Resources/Textures/Views/UnorderedAccessView.h"
 #include "BoolkaCommon/Structures/Frustum.h"
+#include "Containers/HLSLSharedStructures.h"
+#include "Containers/Scene.h"
 #include "RenderSchedule/ResourceTracker.h"
 #include "WindowManagement/DisplayController.h"
 
@@ -16,7 +19,7 @@ namespace Boolka
     BLK_DEFINE_ENUM_OPERATORS(ResourceContainer::RootSig);
     BLK_DEFINE_ENUM_OPERATORS(ResourceContainer::DescHeap);
     BLK_DEFINE_ENUM_OPERATORS(ResourceContainer::FlipBuf);
-    BLK_DEFINE_ENUM_OPERATORS(ResourceContainer::FlipCBV);
+    BLK_DEFINE_ENUM_OPERATORS(ResourceContainer::FlipSRV);
     BLK_DEFINE_ENUM_OPERATORS(ResourceContainer::FlipUploadBuf);
     BLK_DEFINE_ENUM_OPERATORS(ResourceContainer::DefaultRootSigBindPoints);
 
@@ -38,8 +41,9 @@ namespace Boolka
             static_cast<size_t>(RTV::Count) + BLK_IN_FLIGHT_FRAMES;
         const size_t dsvHeapDescriptorCount = static_cast<size_t>(DSV::Count);
         const size_t mainHeapDescriptorCount =
-            static_cast<size_t>(SRV::Count) +
-            static_cast<size_t>(FlipBuf::Count) * BLK_IN_FLIGHT_FRAMES;
+            static_cast<size_t>(UAV::Count) + static_cast<size_t>(SRV::Count) +
+            static_cast<size_t>(FlipSRV::Count) * BLK_IN_FLIGHT_FRAMES +
+            static_cast<size_t>(Scene::SRVOffset::MaxSize);
 
         D3D12_CLEAR_VALUE rtvClearValue = {};
         rtvClearValue.Format = gbufferAlbedoFormat;
@@ -60,6 +64,10 @@ namespace Boolka
             .Initialize(device, D3D12_HEAP_TYPE_DEFAULT, width, height, 1, gbufferAlbedoFormat,
                         D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET, &rtvClearValue,
                         D3D12_RESOURCE_STATE_RENDER_TARGET);
+        GetTexture(Tex::GBufferReflections)
+            .Initialize(device, D3D12_HEAP_TYPE_DEFAULT, width, height, 1, gbufferAlbedoFormat,
+                        D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS, nullptr,
+                        D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         GetTexture(Tex::LightBuffer)
             .Initialize(device, D3D12_HEAP_TYPE_DEFAULT, width, height, 1, gbufferAlbedoFormat,
                         D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET, &rtvClearValue,
@@ -92,36 +100,49 @@ namespace Boolka
             .Initialize(device, mainHeapDescriptorCount, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
                         D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
 
-        GetSRV(SRV::GBufferAlbedo)
-            .Initialize(device, GetTexture(Tex::GBufferAlbedo),
-                        GetDescriptorHeap(DescHeap::MainHeap)
-                            .GetCPUHandle(static_cast<size_t>(SRV::GBufferAlbedo)));
-        GetSRV(SRV::GBufferNormal)
-            .Initialize(device, GetTexture(Tex::GBufferNormal),
-                        GetDescriptorHeap(DescHeap::MainHeap)
-                            .GetCPUHandle(static_cast<size_t>(SRV::GBufferNormal)));
-        GetSRV(SRV::GbufferDepth)
-            .Initialize(device, GetTexture(Tex::GbufferDepth),
-                        GetDescriptorHeap(DescHeap::MainHeap)
-                            .GetCPUHandle(static_cast<size_t>(SRV::GbufferDepth)),
-                        gbufferDepthSRVFormat);
-        GetSRV(SRV::LightBuffer)
-            .Initialize(device, GetTexture(Tex::LightBuffer),
-                        GetDescriptorHeap(DescHeap::MainHeap)
-                            .GetCPUHandle(static_cast<size_t>(SRV::LightBuffer)));
-        for (size_t i = 0; i < BLK_MAX_LIGHT_COUNT; i++)
+        const UINT uavOffset = static_cast<UINT>(MainSRVDescriptorHeapOffsets::UAVHeapOffset);
+
+        UnorderedAccessView::Initialize(
+            device, GetTexture(Tex::GBufferReflections), DXGI_FORMAT_R16G16B16A16_FLOAT,
+            GetDescriptorHeap(DescHeap::MainHeap)
+                .GetCPUHandle(uavOffset + static_cast<UINT>(SRV::GBufferAlbedo)));
+
+        const UINT srvOffset = static_cast<UINT>(MainSRVDescriptorHeapOffsets::SRVHeapOffset);
+
+        ShaderResourceView::Initialize(
+            device, GetTexture(Tex::GBufferAlbedo),
+            GetDescriptorHeap(DescHeap::MainHeap)
+                .GetCPUHandle(srvOffset + static_cast<UINT>(SRV::GBufferAlbedo)));
+        ShaderResourceView::Initialize(
+            device, GetTexture(Tex::GBufferNormal),
+            GetDescriptorHeap(DescHeap::MainHeap)
+                .GetCPUHandle(srvOffset + static_cast<UINT>(SRV::GBufferNormal)));
+        ShaderResourceView::Initialize(
+            device, GetTexture(Tex::GBufferReflections),
+            GetDescriptorHeap(DescHeap::MainHeap)
+                .GetCPUHandle(srvOffset + static_cast<UINT>(SRV::GBufferReflections)));
+        ShaderResourceView::Initialize(
+            device, GetTexture(Tex::GbufferDepth),
+            GetDescriptorHeap(DescHeap::MainHeap)
+                .GetCPUHandle(srvOffset + static_cast<UINT>(SRV::GbufferDepth)),
+            gbufferDepthSRVFormat);
+        ShaderResourceView::Initialize(
+            device, GetTexture(Tex::LightBuffer),
+            GetDescriptorHeap(DescHeap::MainHeap)
+                .GetCPUHandle(srvOffset + static_cast<UINT>(SRV::LightBuffer)));
+        for (UINT i = 0; i < BLK_MAX_LIGHT_COUNT; i++)
         {
-            GetSRV(SRV::ShadowMapCube0 + i)
-                .InitializeCube(device, GetTexture(Tex::ShadowMapCube0 + i),
-                                GetDescriptorHeap(DescHeap::MainHeap)
-                                    .GetCPUHandle(static_cast<size_t>(SRV::ShadowMapCube0 + i)),
-                                shadowMapSRVFormat);
+            ShaderResourceView::InitializeCube(
+                device, GetTexture(Tex::ShadowMapCube0 + i),
+                GetDescriptorHeap(DescHeap::MainHeap)
+                    .GetCPUHandle(srvOffset + static_cast<UINT>(SRV::ShadowMapCube0 + i)),
+                shadowMapSRVFormat);
         }
-        GetSRV(SRV::ShadowMapSun)
-            .Initialize(device, GetTexture(Tex::ShadowMapSun),
-                        GetDescriptorHeap(DescHeap::MainHeap)
-                            .GetCPUHandle(static_cast<size_t>(SRV::ShadowMapSun)),
-                        shadowMapSRVFormat);
+        ShaderResourceView::Initialize(
+            device, GetTexture(Tex::ShadowMapSun),
+            GetDescriptorHeap(DescHeap::MainHeap)
+                .GetCPUHandle(srvOffset + static_cast<size_t>(SRV::ShadowMapSun)),
+            shadowMapSRVFormat);
 
         GetRTV(RTV::GBufferAlbedo)
             .Initialize(device, GetTexture(Tex::GBufferAlbedo), gbufferAlbedoFormat,
@@ -161,7 +182,7 @@ namespace Boolka
         m_RootSigs[static_cast<size_t>(DSV::GbufferDepth)].Initialize(device, "RootSig.cso");
 
         static const UINT64 frameCbSize =
-            BLK_CEIL_TO_POWER_OF_TWO(sizeof(Matrix4x4) * 6 + sizeof(Frustum), 256);
+            BLK_CEIL_TO_POWER_OF_TWO(sizeof(HLSLShared::PerFrameConstantBuffer), 256);
         static const UINT64 deferredLightingCbSize = BLK_CEIL_TO_POWER_OF_TWO(
             sizeof(Vector4) * BLK_TEXCUBE_FACE_COUNT * 2 + sizeof(Vector4u), 256);
         static const UINT64 shadowMapCbSize =
@@ -193,12 +214,13 @@ namespace Boolka
                             D3D12_RESOURCE_FLAG_NONE,
                             D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
         for (UINT i = 0; i < BLK_IN_FLIGHT_FRAMES; ++i)
-            GetFlippableCBV(i, FlipCBV::Frame)
+            GetFlippableCBV(i, FlipSRV::Frame)
                 .Initialize(device, GetFlippableBuffer(i, FlipBuf::Frame),
                             GetDescriptorHeap(DescHeap::MainHeap)
-                                .GetCPUHandle(static_cast<size_t>(SRV::Count) +
-                                              i * static_cast<size_t>(FlipCBV::Count) +
-                                              static_cast<size_t>(FlipCBV::Frame)),
+                                .GetCPUHandle(static_cast<size_t>(
+                                                  MainSRVDescriptorHeapOffsets::FlipCBVHeapOffset) +
+                                              i * static_cast<size_t>(FlipSRV::Count) +
+                                              static_cast<size_t>(FlipSRV::Frame)),
                             frameCbSize);
         for (UINT i = 0; i < BLK_IN_FLIGHT_FRAMES; ++i)
             GetFlippableUploadBuffer(i, FlipUploadBuf::Frame).Initialize(device, frameCbSize);
@@ -213,6 +235,8 @@ namespace Boolka
                                          D3D12_RESOURCE_STATE_RENDER_TARGET);
         resourceTracker.RegisterResource(GetTexture(Tex::GBufferNormal),
                                          D3D12_RESOURCE_STATE_RENDER_TARGET);
+        resourceTracker.RegisterResource(GetTexture(Tex::GBufferReflections),
+                                         D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         resourceTracker.RegisterResource(GetTexture(Tex::LightBuffer),
                                          D3D12_RESOURCE_STATE_RENDER_TARGET);
         resourceTracker.RegisterResource(GetTexture(Tex::GbufferDepth),
@@ -232,6 +256,7 @@ namespace Boolka
 #ifdef BLK_RENDER_DEBUG
         GetTexture(Tex::GBufferAlbedo).SetDebugName(L"GBufferAlbedo");
         GetTexture(Tex::GBufferNormal).SetDebugName(L"GBufferNormal");
+        GetTexture(Tex::GBufferReflections).SetDebugName(L"GBufferReflections");
         GetTexture(Tex::LightBuffer).SetDebugName(L"LightBuffer");
         GetTexture(Tex::GbufferDepth).SetDebugName(L"GbufferDepth");
         for (size_t i = 0; i < BLK_MAX_LIGHT_COUNT; i++)
@@ -263,7 +288,6 @@ namespace Boolka
     {
         BLK_UNLOAD_ARRAY(m_textures);
         BLK_UNLOAD_ARRAY(m_descriptorHeaps);
-        BLK_UNLOAD_ARRAY(m_SRVs);
         BLK_UNLOAD_ARRAY(m_RTVs);
         BLK_UNLOAD_ARRAY(m_DSVs);
         BLK_UNLOAD_ARRAY(m_RootSigs);
@@ -289,11 +313,6 @@ namespace Boolka
     DescriptorHeap& ResourceContainer::GetDescriptorHeap(DescHeap id)
     {
         return m_descriptorHeaps[static_cast<size_t>(id)];
-    }
-
-    ShaderResourceView& ResourceContainer::GetSRV(SRV id)
-    {
-        return m_SRVs[static_cast<size_t>(id)];
     }
 
     RenderTargetView& ResourceContainer::GetRTV(RTV id)
@@ -327,7 +346,7 @@ namespace Boolka
         return m_FlippedResources[frameIndex].m_Buffer[static_cast<size_t>(id)];
     }
 
-    ConstantBufferView& ResourceContainer::GetFlippableCBV(UINT frameIndex, FlipCBV id)
+    ConstantBufferView& ResourceContainer::GetFlippableCBV(UINT frameIndex, FlipSRV id)
     {
         return m_FlippedResources[frameIndex].m_ConstantBufferView[static_cast<size_t>(id)];
     }

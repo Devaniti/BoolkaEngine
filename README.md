@@ -6,6 +6,7 @@ BoolkaEngine is DX12 rendering engine.
 
 Features
 --------
+* Perfect mirror RT reflections (single bounce)
 * HDR Rendering + Tonemapping
 * Point lights with shadows
 * Sun light with shadows
@@ -17,18 +18,24 @@ Features
 Requirements
 --------
 * Windows 10 version 2004 or newer
-* GPU with mesh shader support (NVIDIA GTX 16xx or higher, AMD RX 6xxx or higher)
+* GPU with mesh shader and DXR 1.0 support (NVIDIA GTX 16xx or higher, AMD RX 6xxx or higher)
 * SSD Recommended
 
 To build BoolkaEngine you'll also need:
 * Visual Studio 2019
 * Windows 10 SDK 10.0.19041
 
+Quick Start
+--------
+You can download and run BoolkaEngine with default scene using following command:
+
+`git clone --recurse-submodules -j8 https://github.com/Devaniti/BoolkaEngine.git && BoolkaEngine\HelperScripts\QuickStart.bat`
+
 Building
 --------
 You can just build BoolkaEngine.sln solution, but you'll also need binarized scene to run it
 
-If you want to use default scene run PrepareScene.bat, which will download and binarize San Miguel scene and default skybox
+If you want to use default scene run HelperScripts\PrepareScene.bat, which will download and binarize San Miguel scene and default skybox
 
 If you want to use another scene:
 1. Build OBJConverter project
@@ -39,7 +46,7 @@ If you want to use another scene:
 Command line parameters
 --------
 Bootstrap parameters:\
-Bootstrap.exe binarizedScenePath
+Bootstrap.exe binarizedSceneFolder
 
 OBJConverter parameters:\
-OBJConverter.exe inObjFolder inObjFile outBinarizedFile
+OBJConverter.exe inObjFolder inObjFile outBinarizedSceneFolder

@@ -16,6 +16,7 @@ namespace Boolka
     class RenderContext;
     class DisplayController;
     class ResourceTracker;
+    class RenderEngineContext;
 
     class ResourceContainer
     {
@@ -24,6 +25,7 @@ namespace Boolka
         {
             GBufferAlbedo,
             GBufferNormal,
+            GBufferReflections,
             GbufferDepth,
             LightBuffer,
             ShadowMapCube0,
@@ -35,6 +37,7 @@ namespace Boolka
         {
             GBufferAlbedo,
             GBufferNormal,
+            GBufferReflections,
             GbufferDepth,
             LightBuffer,
             ShadowMapCube0,
@@ -47,6 +50,12 @@ namespace Boolka
             GBufferAlbedo,
             GBufferNormal,
             LightBuffer,
+            Count
+        };
+
+        enum class UAV
+        {
+            GBufferReflections,
             Count
         };
 
@@ -80,7 +89,7 @@ namespace Boolka
             Count
         };
 
-        enum class FlipCBV
+        enum class FlipSRV
         {
             Frame,
             Count
@@ -96,12 +105,21 @@ namespace Boolka
 
         enum class DefaultRootSigBindPoints
         {
-            FrameConstantBuffer = 0,
-            PassConstantBuffer = 1,
-            PassRootConstant = 2,
-            RenderPassSRV = 3,
-            SceneSRV = 5,
-            SceneMeshletsSRV = 6
+            FrameConstantBuffer,
+            PassConstantBuffer,
+            PassRootConstant,
+            RenderPassSRV,
+            SceneTexturesSRV,
+            SceneResourcesSRV
+        };
+
+        enum class MainSRVDescriptorHeapOffsets
+        {
+            UAVHeapOffset = 0,
+            SRVHeapOffset = UAVHeapOffset + 1,
+            FlipCBVHeapOffset = SRVHeapOffset + static_cast<int>(SRV::Count),
+            SceneSRVHeapOffset =
+                FlipCBVHeapOffset + static_cast<int>(FlipSRV::Count) * BLK_IN_FLIGHT_FRAMES
         };
 
         ResourceContainer() = default;
@@ -113,7 +131,6 @@ namespace Boolka
 
         Texture2D& GetTexture(Tex id);
         DescriptorHeap& GetDescriptorHeap(DescHeap id);
-        ShaderResourceView& GetSRV(SRV id);
         RenderTargetView& GetRTV(RTV id);
         DepthStencilView& GetDSV(DSV id);
         RootSignature& GetRootSignature(RootSig id);
@@ -121,13 +138,12 @@ namespace Boolka
         Texture2D& GetBackBuffer(UINT frameIndex);
         RenderTargetView& GetBackBufferRTV(UINT frameIndex);
         Buffer& GetFlippableBuffer(UINT frameIndex, FlipBuf id);
-        ConstantBufferView& GetFlippableCBV(UINT frameIndex, FlipCBV id);
+        ConstantBufferView& GetFlippableCBV(UINT frameIndex, FlipSRV id);
         UploadBuffer& GetFlippableUploadBuffer(UINT frameIndex, FlipUploadBuf id);
 
     private:
         Texture2D m_textures[static_cast<size_t>(Tex::Count)];
         DescriptorHeap m_descriptorHeaps[static_cast<size_t>(DescHeap::Count)];
-        ShaderResourceView m_SRVs[static_cast<size_t>(SRV::Count)];
         RenderTargetView m_RTVs[static_cast<size_t>(RTV::Count)];
         DepthStencilView m_DSVs[static_cast<size_t>(DSV::Count)];
         RootSignature m_RootSigs[static_cast<size_t>(RootSig::Count)];
@@ -140,7 +156,7 @@ namespace Boolka
             Texture2D* m_BackBuffer;
             RenderTargetView m_BackBufferRTV;
             Buffer m_Buffer[static_cast<size_t>(FlipBuf::Count)];
-            ConstantBufferView m_ConstantBufferView[static_cast<size_t>(FlipCBV::Count)];
+            ConstantBufferView m_ConstantBufferView[static_cast<size_t>(FlipSRV::Count)];
             UploadBuffer m_ConstantUploadBuffer[static_cast<size_t>(FlipUploadBuf::Count)];
 
             FlippedResources()
@@ -157,7 +173,7 @@ namespace Boolka
     BLK_DECLARE_ENUM_OPERATORS(ResourceContainer::RootSig);
     BLK_DECLARE_ENUM_OPERATORS(ResourceContainer::DescHeap);
     BLK_DECLARE_ENUM_OPERATORS(ResourceContainer::FlipBuf);
-    BLK_DECLARE_ENUM_OPERATORS(ResourceContainer::FlipCBV);
+    BLK_DECLARE_ENUM_OPERATORS(ResourceContainer::FlipSRV);
     BLK_DECLARE_ENUM_OPERATORS(ResourceContainer::FlipUploadBuf);
     BLK_DECLARE_ENUM_OPERATORS(ResourceContainer::DefaultRootSigBindPoints);
 

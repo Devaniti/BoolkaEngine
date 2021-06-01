@@ -8,6 +8,7 @@
 #include "RenderPasses/DeferredLightingPass.h"
 #include "RenderPasses/GBufferRenderPass.h"
 #include "RenderPasses/PresentPass.h"
+#include "RenderPasses/ReflectionRenderPass.h"
 #include "RenderPasses/ShadowMapRenderPass.h"
 #include "RenderPasses/SkyBoxRenderPass.h"
 #include "RenderPasses/ToneMappingPass.h"
@@ -32,7 +33,7 @@ namespace Boolka
         bool Initialize(Device& device, DisplayController& displayController);
         void Unload();
 
-        bool LoadScene(Device& device, SceneData& sceneData);
+        bool InitializeResources(Device& device, SceneData& sceneData);
 
         bool Render(Device& device, UINT frameIndex);
 
@@ -57,6 +58,7 @@ namespace Boolka
         ZRenderPass m_ZPass;
         ShadowMapRenderPass m_ShadowMapPass;
         GBufferRenderPass m_GbufferPass;
+        ReflectionRenderPass m_ReflectionRenderPass;
         DeferredLightingPass m_DeferredLightingPass;
         SkyBoxRenderPass m_SkyBoxPass;
         TransparentRenderPass m_TransparentPass;

@@ -9,8 +9,17 @@ namespace Boolka
     class ResourceTransition
     {
     public:
-        static bool Transition(Resource& resource, CommandList& commangList,
+        static void Transition(CommandList& commangList, Resource& resource,
                                D3D12_RESOURCE_STATES srcState, D3D12_RESOURCE_STATES dstState);
+
+        static void TransitionMany(
+            CommandList& commangList,
+            std::tuple<ID3D12Resource*, D3D12_RESOURCE_STATES, D3D12_RESOURCE_STATES>* transitions,
+            size_t transitionCount);
+
+        static void TransitionMany(CommandList& commangList, Resource** resources,
+                                   D3D12_RESOURCE_STATES sharedSrcState,
+                                   D3D12_RESOURCE_STATES sharedDstState, size_t transitionCount);
 
         static bool NeedTransition(D3D12_RESOURCE_STATES srcState, D3D12_RESOURCE_STATES dstState);
 

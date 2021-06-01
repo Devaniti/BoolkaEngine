@@ -46,7 +46,7 @@ namespace Boolka
                                                        *normalRTV.GetCPUDescriptor()};
         commandList->OMSetRenderTargets(2, renderTargets, FALSE, gbufferDSV.GetCPUDescriptor());
 
-        engineContext.GetScene().BindResources(commandList);
+        engineContext.BindSceneResourcesGraphic(commandList);
 
         UINT height = engineContext.GetBackbufferHeight();
         UINT width = engineContext.GetBackbufferWidth();

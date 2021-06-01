@@ -15,7 +15,10 @@ int RealMain(int argc, wchar_t* argv[])
     loadTimer.Start();
 
     Boolka::FileReader fileReader;
-    if (!fileReader.OpenFile(argv[0]))
+    std::wstring scenePath;
+    CombinePath(argv[0], BLK_SCENE_REQUIRED_SCENE_DATA_FILENAME, scenePath);
+
+    if (!fileReader.OpenFile(scenePath.c_str()))
         return -1;
 
     Boolka::SceneData sceneData(fileReader);

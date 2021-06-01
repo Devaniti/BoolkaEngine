@@ -10,7 +10,7 @@ namespace Boolka
         FileReader();
         ~FileReader();
 
-        bool OpenFile(wchar_t* filename);
+        bool OpenFile(const wchar_t* filename);
         void CloseFile();
 
         // Returns size of file on success

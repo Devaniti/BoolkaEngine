@@ -45,7 +45,7 @@ namespace Boolka
         if (!ResourceTransition::NeedTransition(sourceState, targetState))
             return false;
         if (!ResourceTransition::CanPromote(sourceState, targetState))
-            ResourceTransition::Transition(resource, commandList, sourceState, targetState);
+            ResourceTransition::Transition(commandList, resource, sourceState, targetState);
         iterator->second = targetState;
 
         return true;

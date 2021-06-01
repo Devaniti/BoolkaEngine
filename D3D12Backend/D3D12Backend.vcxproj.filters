@@ -82,14 +82,23 @@
     <Filter Include="Shaders\MeshShaders">
       <UniqueIdentifier>{2e3e6470-d445-4998-9ec9-8697aca5b8b7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Util">
-      <UniqueIdentifier>{97859756-2d88-4f79-baff-4ee611d9c97d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Shaders\DebugMeshPass">
       <UniqueIdentifier>{b17d2e0e-2886-4e2c-ae1a-d2a1fbaa719b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Shaders\SkyBoxPass">
       <UniqueIdentifier>{b267e45c-0583-42cd-a408-c1cc05828b2d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="APIWrappers\Raytracing">
+      <UniqueIdentifier>{210f1955-947b-40a9-a10e-54318ef239fe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="APIWrappers\Raytracing\AccelerationStructure">
+      <UniqueIdentifier>{33aea394-d500-4b88-b896-0ded5261e2ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\ReflectionPass">
+      <UniqueIdentifier>{19a0dbc7-8694-4c79-a5c2-1da1f0cc5f7a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\LightingLibrary">
+      <UniqueIdentifier>{28262d4d-3c2e-4cd3-941a-3c1dedbd2af9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -290,9 +299,6 @@
     <ClInclude Include="Contexts\FrameStats.h">
       <Filter>Contexts</Filter>
     </ClInclude>
-    <ClInclude Include="RenderSchedule\ResourceContainer.h">
-      <Filter>RenderSchedule</Filter>
-    </ClInclude>
     <ClInclude Include="RenderPasses\ReferenceRenderPass.h">
       <Filter>RenderPasses</Filter>
     </ClInclude>
@@ -311,14 +317,41 @@
     <ClInclude Include="RenderPasses\DebugMeshRenderPass.h">
       <Filter>RenderPasses</Filter>
     </ClInclude>
-    <ClInclude Include="Util\d3dx12.h">
-      <Filter>Util</Filter>
-    </ClInclude>
     <ClInclude Include="RenderPasses\SkyBoxRenderPass.h">
       <Filter>RenderPasses</Filter>
     </ClInclude>
     <ClInclude Include="APIWrappers\PipelineState\PipelineStateParameters.h">
       <Filter>APIWrappers\PipelineState</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\Raytracing\AccelerationStructure\BottomLevelAS.h">
+      <Filter>APIWrappers\Raytracing\AccelerationStructure</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\Raytracing\AccelerationStructure\TopLevelAS.h">
+      <Filter>APIWrappers\Raytracing\AccelerationStructure</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\Resources\Buffers\ReadbackBuffer.h">
+      <Filter>APIWrappers\Resources\Buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderPasses\ReflectionRenderPass.h">
+      <Filter>RenderPasses</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\PipelineState\StateObject.h">
+      <Filter>APIWrappers\PipelineState</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\PipelineState\StateObjectParameters.h">
+      <Filter>APIWrappers\PipelineState</Filter>
+    </ClInclude>
+    <ClInclude Include="Containers\ShaderTable.h">
+      <Filter>Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\Resources\Textures\Views\UnorderedAccessView.h">
+      <Filter>APIWrappers\Resources\Textures\Views</Filter>
+    </ClInclude>
+    <ClInclude Include="Containers\ResourceContainer.h">
+      <Filter>Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="Containers\HLSLSharedStructures.h">
+      <Filter>Containers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -516,9 +549,6 @@
     <ClCompile Include="Contexts\FrameStats.cpp">
       <Filter>Contexts</Filter>
     </ClCompile>
-    <ClCompile Include="RenderSchedule\ResourceContainer.cpp">
-      <Filter>RenderSchedule</Filter>
-    </ClCompile>
     <ClCompile Include="RenderPasses\ReferenceRenderPass.cpp">
       <Filter>RenderPasses</Filter>
     </ClCompile>
@@ -539,6 +569,30 @@
     </ClCompile>
     <ClCompile Include="RenderPasses\SkyBoxRenderPass.cpp">
       <Filter>RenderPasses</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\Raytracing\AccelerationStructure\BottomLevelAS.cpp">
+      <Filter>APIWrappers\Raytracing\AccelerationStructure</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\Raytracing\AccelerationStructure\TopLevelAS.cpp">
+      <Filter>APIWrappers\Raytracing\AccelerationStructure</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\Resources\Buffers\ReadbackBuffer.cpp">
+      <Filter>APIWrappers\Resources\Buffers</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderPasses\ReflectionRenderPass.cpp">
+      <Filter>RenderPasses</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\PipelineState\StateObject.cpp">
+      <Filter>APIWrappers\PipelineState</Filter>
+    </ClCompile>
+    <ClCompile Include="Containers\ShaderTable.cpp">
+      <Filter>Containers</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\Resources\Textures\Views\UnorderedAccessView.cpp">
+      <Filter>APIWrappers\Resources\Textures\Views</Filter>
+    </ClCompile>
+    <ClCompile Include="Containers\ResourceContainer.cpp">
+      <Filter>Containers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -599,6 +653,9 @@
     <FxCompile Include="Shaders\SkyBoxPass\SkyBoxPassPixelShader.hlsl">
       <Filter>Shaders\SkyBoxPass</Filter>
     </FxCompile>
+    <FxCompile Include="Shaders\ReflectionPass\ReflectionPassLib.hlsl">
+      <Filter>Shaders\ReflectionPass</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\DebugPass\DebugPassShadersCommon.hlsli">
@@ -628,6 +685,15 @@
     </None>
     <None Include="Shaders\TransformCommon.hlsli">
       <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\ResourceBindings.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\CppShared.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\LightingLibrary\Lighting.hlsli">
+      <Filter>Shaders\LightingLibrary</Filter>
     </None>
   </ItemGroup>
 </Project>

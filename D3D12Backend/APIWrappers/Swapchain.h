@@ -28,6 +28,7 @@ namespace Boolka
     private:
         IDXGISwapChain4* m_Swapchain;
         bool m_IsFullscreen;
+        UINT m_PresentFlags;
     };
 
 } // namespace Boolka

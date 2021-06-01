@@ -4,6 +4,7 @@
 
 #include "APIWrappers/Resources/ResourceTransition.h"
 #include "BoolkaCommon/Structures/Frustum.h"
+#include "Containers/HLSLSharedStructures.h"
 #include "Contexts/RenderContext.h"
 #include "Contexts/RenderEngineContext.h"
 #include "Contexts/RenderFrameContext.h"
@@ -28,7 +29,7 @@ namespace Boolka
         auto& resourceContainer = engineContext.GetResourceContainer();
 
         UINT frameIndex = frameContext.GetFrameIndex();
-        Buffer& frameConstantBuffer =
+        Buffer& perFrameCbuffer =
             resourceContainer.GetFlippableBuffer(frameIndex, ResourceContainer::FlipBuf::Frame);
         UploadBuffer& currentUploadBuffer = resourceContainer.GetFlippableUploadBuffer(
             frameIndex, ResourceContainer::FlipUploadBuf::Frame);
@@ -38,46 +39,65 @@ namespace Boolka
         BLK_GPU_SCOPE(commandList.Get(), "UpdateRenderPass");
         BLK_RENDER_DEBUG_ONLY(resourceTracker.ValidateStates(commandList));
 
-        ResourceTransition::Transition(frameConstantBuffer, commandList,
+        ResourceTransition::Transition(commandList, perFrameCbuffer,
                                        D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER,
                                        D3D12_RESOURCE_STATE_COPY_DEST);
 
-        const Matrix4x4& viewMatrix = frameContext.GetViewMatrix();
-        const Matrix4x4& projMatrix = frameContext.GetProjMatrix();
-        const Matrix4x4& viewProjMatrix = frameContext.GetViewProjMatrix();
-        const Matrix4x4& invViewMatrix = frameContext.GetInvViewMatrix();
-        const Matrix4x4& invProjMatrix = frameContext.GetInvProjMatrix();
-        const Matrix4x4& invViewProjMatrix = frameContext.GetInvViewProjMatrix();
-        const Frustum mainViewFrustum(viewProjMatrix);
+        HLSLShared::PerFrameConstantBuffer perFrameCbufferData{
+            .viewProjMatrix = frameContext.GetViewProjMatrix().Transpose(),
+            .viewMatrix = frameContext.GetViewMatrix().Transpose(),
+            .projMatrix = frameContext.GetProjMatrix().Transpose(),
+            .invViewProjMatrix = frameContext.GetInvViewProjMatrix().Transpose(),
+            .invViewMatrix = frameContext.GetInvViewMatrix().Transpose(),
+            .invProjMatrix = frameContext.GetInvProjMatrix().Transpose(),
+            .mainViewFrustum = Frustum(frameContext.GetViewProjMatrix()),
+            .cameraWorldPos = frameContext.GetCameraPos(),
+            .backbufferResolutionInvBackBufferResolution =
+                Vector4(static_cast<float>(engineContext.GetBackbufferWidth()),
+                        static_cast<float>(engineContext.GetBackbufferHeight()),
+                        1.0f / engineContext.GetBackbufferWidth(),
+                        1.0f / engineContext.GetBackbufferHeight())};
 
-        unsigned char* upload = static_cast<unsigned char*>(currentUploadBuffer.Map());
-        memcpy(upload, viewProjMatrix.Transpose().GetBuffer(), sizeof(Matrix4x4));
-        upload += sizeof(Matrix4x4);
+        currentUploadBuffer.Upload(&perFrameCbufferData, sizeof(perFrameCbufferData));
 
-        memcpy(upload, viewMatrix.Transpose().GetBuffer(), sizeof(Matrix4x4));
-        upload += sizeof(Matrix4x4);
+        commandList->CopyResource(perFrameCbuffer.Get(), currentUploadBuffer.Get());
 
-        memcpy(upload, projMatrix.Transpose().GetBuffer(), sizeof(Matrix4x4));
-        upload += sizeof(Matrix4x4);
-
-        memcpy(upload, invViewProjMatrix.Transpose().GetBuffer(), sizeof(Matrix4x4));
-        upload += sizeof(Matrix4x4);
-
-        memcpy(upload, invViewMatrix.Transpose().GetBuffer(), sizeof(Matrix4x4));
-        upload += sizeof(Matrix4x4);
-
-        memcpy(upload, invProjMatrix.Transpose().GetBuffer(), sizeof(Matrix4x4));
-        upload += sizeof(Matrix4x4);
-
-        memcpy(upload, mainViewFrustum.GetBuffer(), sizeof(Frustum));
-
-        currentUploadBuffer.Unmap();
-
-        commandList->CopyResource(frameConstantBuffer.Get(), currentUploadBuffer.Get());
-
-        ResourceTransition::Transition(frameConstantBuffer, commandList,
-                                       D3D12_RESOURCE_STATE_COPY_DEST,
+        ResourceTransition::Transition(commandList, perFrameCbuffer, D3D12_RESOURCE_STATE_COPY_DEST,
                                        D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+
+        Buffer& lightingCbuffer = resourceContainer.GetFlippableBuffer(
+            frameIndex, ResourceContainer::FlipBuf::DeferredLighting);
+        UploadBuffer& lightingCbufferUploadBuffer = resourceContainer.GetFlippableUploadBuffer(
+            frameIndex, ResourceContainer::FlipUploadBuf::DeferredLighting);
+
+        // Temp lights position
+        resourceTracker.Transition(lightingCbuffer, commandList, D3D12_RESOURCE_STATE_COPY_DEST);
+
+        HLSLShared::LightingDataConstantBuffer lightingCbufferData{};
+        auto& lightContainer = frameContext.GetLightContainer();
+        auto& lights = lightContainer.GetLights();
+
+        for (size_t i = 0; i < lights.size(); ++i)
+        {
+            Vector3 viewPos = Vector4(lights[i].worldPos, 1.0f) * frameContext.GetViewMatrix();
+            lightingCbufferData.lights[i].viewPos_nearZ = Vector4(viewPos, lights[i].nearZ);
+            lightingCbufferData.lights[i].color_farZ = Vector4(lights[i].color, lights[i].farZ);
+        }
+
+        auto& sun = lightContainer.GetSun();
+        lightingCbufferData.sun.lightDirVS = -(sun.lightDir * frameContext.GetViewMatrix());
+        lightingCbufferData.sun.color = sun.color;
+        lightingCbufferData.sun.viewToShadow =
+            (frameContext.GetInvViewMatrix() * lightContainer.GetSunView() *
+             lightContainer.GetSunProj() * Matrix4x4::GetUVToTexCoord())
+                .Transpose();
+
+        lightingCbufferData.lightCount = Vector4u(static_cast<uint>(lights.size()), 0, 0, 0);
+        lightingCbufferUploadBuffer.Upload(&lightingCbufferData, sizeof(lightingCbufferData));
+        commandList->CopyResource(lightingCbuffer.Get(), lightingCbufferUploadBuffer.Get());
+
+        resourceTracker.Transition(lightingCbuffer, commandList,
+                                   D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
 
         return true;
     }

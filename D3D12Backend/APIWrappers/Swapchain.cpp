@@ -12,6 +12,7 @@ namespace Boolka
     Swapchain::Swapchain()
         : m_Swapchain(nullptr)
         , m_IsFullscreen(false)
+        , m_PresentFlags(0)
     {
     }
 
@@ -19,6 +20,7 @@ namespace Boolka
     {
         BLK_ASSERT(m_Swapchain == nullptr);
         BLK_ASSERT(m_IsFullscreen == false);
+        BLK_ASSERT(m_PresentFlags == 0);
     }
 
     IDXGISwapChain4* Swapchain::Get()
@@ -39,6 +41,10 @@ namespace Boolka
                       "DXGI_SWAP_EFFECT_FLIP_DISCARD swapchain only support 2+ "
                       "backbuffers");
 
+        BLK_ASSERT(m_Swapchain == nullptr);
+        BLK_ASSERT(m_IsFullscreen == false);
+        BLK_ASSERT(m_PresentFlags == 0);
+
         ID3D12CommandQueue* graphicQueue = device.GetGraphicQueue().Get();
         DXGI_SWAP_CHAIN_DESC1 desc = {};
         desc.Width = 0;
@@ -52,7 +58,8 @@ namespace Boolka
         desc.Scaling = DXGI_SCALING_NONE;
         desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
         desc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
-        desc.Flags = DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
+        desc.Flags =
+            DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT | DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
         IDXGISwapChain1* swapchain1 = nullptr;
         HRESULT hr = factory->CreateSwapChainForHwnd(graphicQueue, window, &desc, nullptr, nullptr,
                                                      &swapchain1);
@@ -76,6 +83,11 @@ namespace Boolka
             m_IsFullscreen = true;
         }
 
+        m_PresentFlags = 0;
+        if (windowState.presentInterval == 0 &&
+            windowState.windowMode != WindowState::WindowMode::Fullscreen)
+            m_PresentFlags |= DXGI_PRESENT_ALLOW_TEARING;
+
         return SUCCEEDED(hr);
     }
 
@@ -88,6 +100,7 @@ namespace Boolka
             m_Swapchain->SetFullscreenState(FALSE, NULL);
             m_IsFullscreen = false;
         }
+        m_PresentFlags = 0;
 
         m_Swapchain->Release();
         m_Swapchain = nullptr;
@@ -95,7 +108,7 @@ namespace Boolka
 
     bool Swapchain::Present(const WindowState& windowState)
     {
-        HRESULT hr = m_Swapchain->Present(windowState.presentInterval, 0);
+        HRESULT hr = m_Swapchain->Present(windowState.presentInterval, m_PresentFlags);
         return SUCCEEDED(hr);
     }
 

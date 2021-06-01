@@ -14,7 +14,6 @@
 #include "Contexts/RenderEngineContext.h"
 #include "Contexts/RenderFrameContext.h"
 #include "Contexts/RenderThreadContext.h"
-#include "RenderSchedule/ResourceContainer.h"
 #include "RenderSchedule/ResourceTracker.h"
 
 namespace Boolka

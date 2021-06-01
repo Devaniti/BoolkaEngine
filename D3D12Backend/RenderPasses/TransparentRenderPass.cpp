@@ -39,12 +39,7 @@ namespace Boolka
 
         commandList->OMSetRenderTargets(1, lightBufferRTV.GetCPUDescriptor(), FALSE,
                                         depthDSV.GetCPUDescriptor());
-        ID3D12DescriptorHeap* descriptorHeaps[] = {
-            engineContext.GetScene().GetSRVDescriptorHeap().Get()};
-        commandList->SetDescriptorHeaps(ARRAYSIZE(descriptorHeaps), descriptorHeaps);
-        commandList->SetGraphicsRootDescriptorTable(
-            static_cast<UINT>(ResourceContainer::DefaultRootSigBindPoints::SceneSRV),
-            engineContext.GetScene().GetSRVDescriptorHeap().GetGPUHandle(0));
+        engineContext.BindSceneResourcesGraphic(commandList);
 
         UINT height = engineContext.GetBackbufferHeight();
         UINT width = engineContext.GetBackbufferWidth();
@@ -66,7 +61,7 @@ namespace Boolka
             static_cast<UINT>(ResourceContainer::DefaultRootSigBindPoints::FrameConstantBuffer),
             frameConstantBuffer->GetGPUVirtualAddress());
 
-        engineContext.GetScene().BindResources(commandList);
+        engineContext.BindSceneResourcesGraphic(commandList);
 
         commandList->SetPipelineState(m_PSO.Get());
 

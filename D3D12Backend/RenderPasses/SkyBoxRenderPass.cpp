@@ -14,7 +14,6 @@
 #include "Contexts/RenderEngineContext.h"
 #include "Contexts/RenderFrameContext.h"
 #include "Contexts/RenderThreadContext.h"
-#include "RenderSchedule/ResourceContainer.h"
 #include "RenderSchedule/ResourceTracker.h"
 
 namespace Boolka
@@ -44,11 +43,7 @@ namespace Boolka
 
         commandList->OMSetRenderTargets(1, lightBufferRTV.GetCPUDescriptor(), FALSE,
                                         gbufferDSV.GetCPUDescriptor());
-        ID3D12DescriptorHeap* descriptorHeaps[] = {scene.GetSRVDescriptorHeap().Get()};
-        commandList->SetDescriptorHeaps(ARRAYSIZE(descriptorHeaps), descriptorHeaps);
-        commandList->SetGraphicsRootDescriptorTable(
-            static_cast<UINT>(ResourceContainer::DefaultRootSigBindPoints::RenderPassSRV),
-            scene.GetSkyBoxTable());
+        engineContext.BindSceneResourcesGraphic(commandList);
 
         UINT height = engineContext.GetBackbufferHeight();
         UINT width = engineContext.GetBackbufferWidth();

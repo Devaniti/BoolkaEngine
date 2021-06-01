@@ -123,6 +123,9 @@
     ((intValue + (powerOfTwo - 1)) & (~(powerOfTwo - 1)))
 #define BLK_FLOOR_TO_POWER_OF_TWO(intValue, powerOfTwo) (intValue & (~(powerOfTwo - 1)))
 
+#define BLK_SHIFT_LEFT_WITH_CARRY(type, intValue) ((intValue << 1) | ((i & (size_t(1) << (sizeof(i) * 8 - 1))) >> (sizeof(i) * 8 - 1)))
+#define BLK_SHIFT_RIGHT_WITH_CARRY(type, intValue) ((intValue >> 1) | ((intValue & 1) << (sizeof(intValue) * 8 - 1)))
+
 #define BLK_INITIALIZE_ARRAY(arr, ...)               \
     {                                                \
         for (auto& elem : arr)                       \
@@ -171,7 +174,7 @@ T1 ptr_static_cast(T2 value)
     return ptr_static_cast_internal<T1, T2, intermediateType>(value);
 }
 
-inline void memcpy_strided(void* dst, size_t dstStride, const void* src, size_t srcStride,
+inline void MemcpyStrided(void* dst, size_t dstStride, const void* src, size_t srcStride,
                            size_t rows)
 {
     char* currentDst = static_cast<char*>(dst);
@@ -186,7 +189,15 @@ inline void memcpy_strided(void* dst, size_t dstStride, const void* src, size_t 
     }
 }
 
-// TODO move to platform specific header
+template <typename T>
+size_t NestedVectorSize(const std::vector<std::vector<T>>& nestedVector)
+{
+    return std::transform_reduce(std::execution::seq, std::begin(nestedVector),
+                                 std::end(nestedVector), size_t(0), std::plus<size_t>(),
+                                 [](const std::vector<T>& inner)->size_t { return inner.size(); });
+}
+
+// TODO move everything below to platform specific header
 #define BLK_WINDOWS_DEFAULT_SCREEN_DPI 96
 
 inline LARGE_INTEGER operator-(LARGE_INTEGER a, LARGE_INTEGER b)
@@ -201,7 +212,7 @@ inline float operator/(LARGE_INTEGER a, LARGE_INTEGER b)
     return static_cast<float>(static_cast<double>(a.QuadPart) / static_cast<double>(b.QuadPart));
 }
 
-inline std::string utf8_encode(const std::wstring& wstr)
+inline std::string UTF8encode(const std::wstring& wstr)
 {
     if (wstr.empty())
         return std::string();
@@ -218,7 +229,7 @@ inline std::string utf8_encode(const std::wstring& wstr)
     return result;
 }
 
-inline std::wstring utf8_decode(const std::string& str)
+inline std::wstring UTF8decode(const std::string& str)
 {
     if (str.empty())
         return std::wstring();
@@ -232,4 +243,20 @@ inline std::wstring utf8_decode(const std::string& str)
     BLK_ASSERT_VAR2(written == size_needed, written);
 
     return result;
+}
+
+inline bool CombinePath(const std::wstring& source1, const std::wstring& source2,
+                         std::wstring& dest)
+{
+    wchar_t source1lastChar = source1[source1.size() - 1];
+    bool needToAddSeparator = source1lastChar != '\\' && source1lastChar != '/';
+
+    dest.reserve(source1.size() + needToAddSeparator + source2.size() + 1);
+    dest.insert(std::end(dest), std::begin(source1), std::end(source1));
+    if (needToAddSeparator)
+    {
+        dest.push_back('\\');
+    }
+    dest.insert(std::end(dest), std::begin(source2), std::end(source2));
+    return true;
 }

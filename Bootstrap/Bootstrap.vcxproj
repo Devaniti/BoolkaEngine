@@ -43,15 +43,15 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <LocalDebuggerCommandArguments>..\..\Scenes\Binarized\san-miguel-low-poly.scene</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>..\..\Scenes\Binarized\</LocalDebuggerCommandArguments>
     <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Development|x64'" Label="Configuration">
-    <LocalDebuggerCommandArguments>..\..\Scenes\Binarized\san-miguel-low-poly.scene</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>..\..\Scenes\Binarized\</LocalDebuggerCommandArguments>
     <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <LocalDebuggerCommandArguments>..\..\Scenes\Binarized\san-miguel-low-poly.scene</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>..\..\Scenes\Binarized\</LocalDebuggerCommandArguments>
     <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
   <ImportGroup Label="ExtensionSettings">

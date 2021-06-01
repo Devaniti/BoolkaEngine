@@ -1,5 +1,5 @@
-#ifndef __COLOR_HLSL__
-#define __COLOR_HLSL__
+#ifndef __COLOR_HLSLI__
+#define __COLOR_HLSLI__
 
 float LinearToSRGB(float linearColor)
 {

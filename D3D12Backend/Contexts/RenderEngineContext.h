@@ -1,6 +1,6 @@
 #pragma once
-#include "APIWrappers/CommandAllocator/CopyCommandAllocator.h"
-#include "APIWrappers/CommandList/CopyCommandListImpl.h"
+#include "APIWrappers/CommandAllocator/GraphicCommandAllocator.h"
+#include "APIWrappers/CommandList/GraphicCommandListImpl.h"
 #include "APIWrappers/DescriptorHeap.h"
 #include "APIWrappers/Fence.h"
 #include "APIWrappers/Resources/Buffers/UploadBuffer.h"
@@ -10,7 +10,6 @@
 #include "APIWrappers/RootSignature.h"
 #include "Camera.h"
 #include "Containers/Scene.h"
-#include "RenderSchedule/ResourceContainer.h"
 
 namespace Boolka
 {
@@ -18,7 +17,6 @@ namespace Boolka
     class Device;
     class DisplayController;
     class Texture2D;
-    class CopyCommandList;
     class RenderFrameContext;
 
     class RenderEngineContext
@@ -35,14 +33,17 @@ namespace Boolka
         void UnloadScene();
         Scene& GetScene();
         const Scene& GetScene() const;
+        void BindSceneResourcesGraphic(CommandList& commandList);
+        void BindSceneResourcesCompute(CommandList& commandList);
 
         UINT GetBackbufferWidth() const;
         UINT GetBackbufferHeight() const;
 
         ResourceContainer& GetResourceContainer();
 
-        CopyCommandListImpl& GetInitializationCommandList();
-        bool FinishInitializationCommandList(Device& device);
+        GraphicCommandListImpl& GetInitializationCommandList();
+        void ResetInitializationCommandList();
+        void ExecuteInitializationCommandList(Device& device);
 
         Camera& GetCamera();
 
@@ -55,8 +56,8 @@ namespace Boolka
         ResourceContainer m_resourceContainer;
         UINT m_backbufferWidth;
         UINT m_backbufferHeight;
-        CopyCommandAllocator m_InitializationCommandAllocator;
-        CopyCommandListImpl m_InitializationCommandList;
+        GraphicCommandAllocator m_InitializationCommandAllocator;
+        GraphicCommandListImpl m_InitializationCommandList;
         Fence m_InitializationFence;
         Camera m_Camera;
         Scene m_Scene;

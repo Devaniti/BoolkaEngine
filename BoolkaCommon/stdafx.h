@@ -31,6 +31,7 @@
 #define NOSERVICE
 #define NOHELP
 #include <Windows.h>
+#include <pathcch.h>
 #include <shellapi.h>
 
 // Intrinsics
@@ -41,6 +42,7 @@
 
 // Own common code
 #include "BoolkaCommon/SolutionHelpers.h"
+#include "Structures/Frustum.h"
 #include "Structures/Matrix.h"
 #include "Structures/Vector.h"
 

@@ -8,7 +8,7 @@
 namespace Boolka
 {
 
-    bool ResourceTransition::Transition(Resource& resource, CommandList& commandList,
+    void ResourceTransition::Transition(CommandList& commangList, Resource& resource,
                                         D3D12_RESOURCE_STATES srcState,
                                         D3D12_RESOURCE_STATES dstState)
     {
@@ -20,9 +20,43 @@ namespace Boolka
         resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
         resourceBarrier.Transition.StateBefore = srcState;
         resourceBarrier.Transition.StateAfter = dstState;
-        commandList->ResourceBarrier(1, &resourceBarrier);
+        commangList->ResourceBarrier(1, &resourceBarrier);
+    }
 
-        return true;
+    void ResourceTransition::TransitionMany(
+        CommandList& commangList,
+        std::tuple<ID3D12Resource*, D3D12_RESOURCE_STATES, D3D12_RESOURCE_STATES>* transitions,
+        size_t transitionCount)
+    {
+        std::vector<D3D12_RESOURCE_BARRIER> barriers(transitionCount);
+        for (size_t i = 0; i < transitionCount; ++i)
+        {
+            barriers[i].Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+            barriers[i].Transition.pResource = std::get<0>(transitions[i]);
+            barriers[i].Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+            barriers[i].Transition.StateBefore = std::get<1>(transitions[i]);
+            barriers[i].Transition.StateAfter = std::get<2>(transitions[i]);
+        }
+
+        commangList->ResourceBarrier(static_cast<UINT>(transitionCount), barriers.data());
+    }
+
+    void ResourceTransition::TransitionMany(CommandList& commangList, Resource** resources,
+                                            D3D12_RESOURCE_STATES sharedSrcState,
+                                            D3D12_RESOURCE_STATES sharedDstState,
+                                            size_t transitionCount)
+    {
+        std::vector<D3D12_RESOURCE_BARRIER> barriers(transitionCount);
+        for (size_t i = 0; i < transitionCount; ++i)
+        {
+            barriers[i].Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+            barriers[i].Transition.pResource = resources[i]->Get();
+            barriers[i].Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+            barriers[i].Transition.StateBefore = sharedSrcState;
+            barriers[i].Transition.StateAfter = sharedDstState;
+        }
+
+        commangList->ResourceBarrier(static_cast<UINT>(transitionCount), barriers.data());
     }
 
     bool ResourceTransition::NeedTransition(D3D12_RESOURCE_STATES srcState,

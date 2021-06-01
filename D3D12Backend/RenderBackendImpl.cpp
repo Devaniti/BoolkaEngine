@@ -36,6 +36,8 @@ namespace Boolka
         BLK_CRITICAL_ASSERT(res);
         res = m_FrameFence.Initialize(m_Device);
         BLK_CRITICAL_ASSERT(res);
+        res = m_RenderSchedule.Initialize(m_Device, m_DisplayController);
+        BLK_CRITICAL_ASSERT(res);
 
         return true;
     }
@@ -83,9 +85,7 @@ namespace Boolka
 
     bool RenderBackendImpl::LoadScene(SceneData& sceneData)
     {
-        bool res = m_RenderSchedule.Initialize(m_Device, m_DisplayController);
-        BLK_CRITICAL_ASSERT(res);
-        res = m_RenderSchedule.LoadScene(m_Device, sceneData);
+        bool res = m_RenderSchedule.InitializeResources(m_Device, sceneData);
         BLK_CRITICAL_ASSERT(res);
 
         return true;

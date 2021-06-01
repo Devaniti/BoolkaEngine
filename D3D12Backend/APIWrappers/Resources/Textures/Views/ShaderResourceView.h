@@ -9,32 +9,19 @@ namespace Boolka
     class ShaderResourceView
     {
     public:
-        ShaderResourceView();
-        ~ShaderResourceView();
-
-        bool Initialize(Device& device, Texture2D& texture,
-                        D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor);
-        bool Initialize(Device& device, Texture2D& texture,
-                        D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor, DXGI_FORMAT format);
-        bool Initialize(Device& device, Buffer& buffer, UINT elementCount, UINT stride,
-                        D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor);
-        bool InitializeCube(Device& device, Texture2D& texture,
-                            D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor, DXGI_FORMAT format);
-        void Unload();
-
-        static void CreateSRV(Device& device, Texture2D& texture,
-                              D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor);
-        static void CreateSRV(Device& device, Texture2D& texture,
-                              D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor, DXGI_FORMAT format);
-        static void CreateSRV(Device& device, Buffer& buffer, UINT elementCount, UINT stride,
-                              D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor);
-        static void CreateSRVCube(Device& device, Texture2D& texture,
-                                  D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor, DXGI_FORMAT format);
-
-        D3D12_CPU_DESCRIPTOR_HANDLE* GetCPUDescriptor();
-
-    private:
-        D3D12_CPU_DESCRIPTOR_HANDLE m_CPUDescriptorHandle;
+        static void Initialize(Device& device, Texture2D& texture,
+                               D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor);
+        static void Initialize(Device& device, Texture2D& texture,
+                               D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor, DXGI_FORMAT format);
+        static void Initialize(Device& device, Buffer& buffer, UINT elementCount, UINT stride,
+                               D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor);
+        static void InitializeCube(Device& device, Texture2D& texture,
+                                   D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor, DXGI_FORMAT format);
+        static void InitializeAccelerationStructure(Device& device,
+                                                    D3D12_GPU_VIRTUAL_ADDRESS tlasAddress,
+                                                    D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor);
+        static void InitializeNullDescriptorTexture2D(Device& device, DXGI_FORMAT format,
+                                                      D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor);
     };
 
 } // namespace Boolka

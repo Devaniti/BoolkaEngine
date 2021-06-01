@@ -17,15 +17,6 @@ namespace Boolka
 
     bool FeatureSupportHelper::Initialize(Device& device)
     {
-        return CheckOptions(device) && CheckShaderModel(device);
-    }
-
-    void FeatureSupportHelper::Unload()
-    {
-    }
-
-    bool FeatureSupportHelper::CheckOptions(Device& device)
-    {
         D3D12_FEATURE_DATA_D3D12_OPTIONS options{};
         HRESULT hr =
             device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS, &options, sizeof(options));
@@ -48,6 +39,16 @@ namespace Boolka
             return false;
         }
 
+        D3D12_FEATURE_DATA_D3D12_OPTIONS5 options5{};
+        hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS5, &options5, sizeof(options5));
+        if (FAILED(hr) || options5.RaytracingTier < D3D12_RAYTRACING_TIER_1_0)
+        {
+            ::MessageBoxW(0, L"Raytracing Tier 1.0 Required", L"GPU Unsupported",
+                          MB_OK | MB_ICONERROR);
+            BLK_CRITICAL_DEBUG_BREAK();
+            return false;
+        }
+
         D3D12_FEATURE_DATA_D3D12_OPTIONS7 options7{};
         hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS7, &options7, sizeof(options7));
         if (FAILED(hr) || options7.MeshShaderTier == D3D12_MESH_SHADER_TIER_NOT_SUPPORTED)
@@ -60,17 +61,8 @@ namespace Boolka
         return true;
     }
 
-    bool FeatureSupportHelper::CheckShaderModel(Device& device)
+    void FeatureSupportHelper::Unload()
     {
-        return true;
-
-        D3D12_FEATURE_DATA_SHADER_MODEL shaderModel = {D3D_SHADER_MODEL_6_0};
-        HRESULT hr = device->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL, &shaderModel,
-                                                 sizeof(shaderModel));
-        if (FAILED(hr))
-            return false;
-
-        return shaderModel.HighestShaderModel >= D3D_SHADER_MODEL_6_0;
     }
 
 } // namespace Boolka

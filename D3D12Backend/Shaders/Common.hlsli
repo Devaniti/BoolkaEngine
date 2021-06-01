@@ -1,28 +1,32 @@
-#ifndef __COMMON_HLSL__
-#define __COMMON_HLSL__
+#ifndef __COMMON_HLSLI__
+#define __COMMON_HLSLI__
 
-struct Frustum
+#include "CppShared.hlsli"
+
+ConstantBuffer<PerFrameConstantBuffer> PerFrame : register(b0);
+
+float2 GetBackbufferResolution()
 {
-    float4 planes[6];
+    return PerFrame.backbufferResolutionInvBackBufferResolution.xy;
+}
+
+float2 GetInvBackbufferResolution()
+{
+    return PerFrame.backbufferResolutionInvBackBufferResolution.zw;
+}
+
+struct VertexData1
+{
+    float3 position;
+    float texCoordX;
 };
 
-cbuffer PerFrame : register(b0)
+struct VertexData2
 {
-    float4x4 viewProjMatrix;
-    float4x4 viewMatrix;
-    float4x4 projMatrix;
-    float4x4 invViewProjMatrix;
-    float4x4 invViewMatrix;
-    float4x4 invProjMatrix;
-    Frustum mainViewFrustum;
+    float3 normal;
+    float texCoordY;
 };
 
-SamplerState pointSampler : register(s0);
-SamplerState linearSingleMipSampler : register(s1);
-SamplerState linearSampler : register(s2);
-SamplerState anisoSampler : register(s3);
-SamplerComparisonState shadowSampler : register(s4);
-
-Texture2D<float4> sceneTextures[300] : register(t0, space1);
+#include "ResourceBindings.hlsli"
 
 #endif

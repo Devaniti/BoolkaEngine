@@ -33,7 +33,7 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[])
 
     wchar_t* directory = argv[1];
     wchar_t* objFile = argv[2];
-    wchar_t* outFile = argv[3];
+    wchar_t* outFolder = argv[3];
 
     BOOL winSuccess = ::SetCurrentDirectoryW(directory);
     if (!winSuccess)
@@ -44,7 +44,7 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[])
 
     Boolka::DebugTimer timer;
     timer.Start();
-    bool res = Boolka::OBJConverter::Convert(objFile, outFile);
+    bool res = Boolka::OBJConverter::Convert(objFile, outFolder);
     float seconds = timer.Stop();
     std::cout << "Conversion took " << seconds << "s" << std::endl;
 

@@ -151,6 +151,10 @@
     <ClInclude Include="APIWrappers\PipelineState\GraphicPipelineState.h" />
     <ClInclude Include="APIWrappers\PipelineState\PipelineState.h" />
     <ClInclude Include="APIWrappers\PipelineState\PipelineStateParameters.h" />
+    <ClInclude Include="APIWrappers\PipelineState\StateObject.h" />
+    <ClInclude Include="APIWrappers\PipelineState\StateObjectParameters.h" />
+    <ClInclude Include="APIWrappers\Raytracing\AccelerationStructure\BottomLevelAS.h" />
+    <ClInclude Include="APIWrappers\Raytracing\AccelerationStructure\TopLevelAS.h" />
     <ClInclude Include="APIWrappers\RenderDebug.h" />
     <ClInclude Include="APIWrappers\DescriptorHeap.h" />
     <ClInclude Include="APIWrappers\Device.h" />
@@ -158,6 +162,7 @@
     <ClInclude Include="APIWrappers\ResourceHeap.h" />
     <ClInclude Include="APIWrappers\Resources\Buffers\Buffer.h" />
     <ClInclude Include="APIWrappers\Resources\Buffers\CommandSignature.h" />
+    <ClInclude Include="APIWrappers\Resources\Buffers\ReadbackBuffer.h" />
     <ClInclude Include="APIWrappers\Resources\Buffers\UploadBuffer.h" />
     <ClInclude Include="APIWrappers\Resources\Buffers\Views\ConstantBufferView.h" />
     <ClInclude Include="APIWrappers\Resources\Buffers\Views\IndexBufferView.h" />
@@ -169,13 +174,17 @@
     <ClInclude Include="APIWrappers\Resources\Textures\Views\DepthStencilView.h" />
     <ClInclude Include="APIWrappers\Resources\Textures\Views\RenderTargetView.h" />
     <ClInclude Include="APIWrappers\Resources\Textures\Views\ShaderResourceView.h" />
+    <ClInclude Include="APIWrappers\Resources\Textures\Views\UnorderedAccessView.h" />
     <ClInclude Include="APIWrappers\RootSignature.h" />
     <ClInclude Include="APIWrappers\StateManager.h" />
     <ClInclude Include="APIWrappers\Swapchain.h" />
     <ClInclude Include="BatchManager.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Containers\HLSLSharedStructures.h" />
     <ClInclude Include="Containers\LightContainer.h" />
+    <ClInclude Include="Containers\ResourceContainer.h" />
     <ClInclude Include="Containers\Scene.h" />
+    <ClInclude Include="Containers\ShaderTable.h" />
     <ClInclude Include="Containers\Streaming\SceneData.h" />
     <ClInclude Include="Contexts\FrameStats.h" />
     <ClInclude Include="Contexts\RenderContext.h" />
@@ -197,6 +206,7 @@
     <ClInclude Include="RenderPasses\GBufferRenderPass.h" />
     <ClInclude Include="RenderPasses\PresentPass.h" />
     <ClInclude Include="RenderPasses\ReferenceRenderPass.h" />
+    <ClInclude Include="RenderPasses\ReflectionRenderPass.h" />
     <ClInclude Include="RenderPasses\ShadowMapRenderPass.h" />
     <ClInclude Include="RenderPasses\SkyBoxRenderPass.h" />
     <ClInclude Include="RenderPasses\ToneMappingPass.h" />
@@ -204,10 +214,8 @@
     <ClInclude Include="RenderPasses\UpdateRenderPass.h" />
     <ClInclude Include="RenderPasses\ZRenderPass.h" />
     <ClInclude Include="RenderSchedule\RenderSchedule.h" />
-    <ClInclude Include="RenderSchedule\ResourceContainer.h" />
     <ClInclude Include="RenderSchedule\ResourceTracker.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="Util\d3dx12.h" />
     <ClInclude Include="WindowManagement\DisplayController.h" />
     <ClInclude Include="WindowManagement\WindowManager.h" />
     <ClInclude Include="WindowManagement\WindowState.h" />
@@ -233,6 +241,9 @@
     <ClCompile Include="APIWrappers\PipelineState\ComputePipelineState.cpp" />
     <ClCompile Include="APIWrappers\PipelineState\GraphicPipelineState.cpp" />
     <ClCompile Include="APIWrappers\PipelineState\PipelineState.cpp" />
+    <ClCompile Include="APIWrappers\PipelineState\StateObject.cpp" />
+    <ClCompile Include="APIWrappers\Raytracing\AccelerationStructure\BottomLevelAS.cpp" />
+    <ClCompile Include="APIWrappers\Raytracing\AccelerationStructure\TopLevelAS.cpp" />
     <ClCompile Include="APIWrappers\RenderDebug.cpp" />
     <ClCompile Include="APIWrappers\DescriptorHeap.cpp" />
     <ClCompile Include="APIWrappers\Device.cpp" />
@@ -240,6 +251,7 @@
     <ClCompile Include="APIWrappers\ResourceHeap.cpp" />
     <ClCompile Include="APIWrappers\Resources\Buffers\Buffer.cpp" />
     <ClCompile Include="APIWrappers\Resources\Buffers\CommandSignature.cpp" />
+    <ClCompile Include="APIWrappers\Resources\Buffers\ReadbackBuffer.cpp" />
     <ClCompile Include="APIWrappers\Resources\Buffers\UploadBuffer.cpp" />
     <ClCompile Include="APIWrappers\Resources\Buffers\Views\ConstantBufferView.cpp" />
     <ClCompile Include="APIWrappers\Resources\Buffers\Views\IndexBufferView.cpp" />
@@ -251,13 +263,16 @@
     <ClCompile Include="APIWrappers\Resources\Textures\Views\DepthStencilView.cpp" />
     <ClCompile Include="APIWrappers\Resources\Textures\Views\RenderTargetView.cpp" />
     <ClCompile Include="APIWrappers\Resources\Textures\Views\ShaderResourceView.cpp" />
+    <ClCompile Include="APIWrappers\Resources\Textures\Views\UnorderedAccessView.cpp" />
     <ClCompile Include="APIWrappers\RootSignature.cpp" />
     <ClCompile Include="APIWrappers\StateManager.cpp" />
     <ClCompile Include="APIWrappers\Swapchain.cpp" />
     <ClCompile Include="BatchManager.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Containers\LightContainer.cpp" />
+    <ClCompile Include="Containers\ResourceContainer.cpp" />
     <ClCompile Include="Containers\Scene.cpp" />
+    <ClCompile Include="Containers\ShaderTable.cpp" />
     <ClCompile Include="Containers\Streaming\SceneData.cpp" />
     <ClCompile Include="Contexts\FrameStats.cpp" />
     <ClCompile Include="Contexts\RenderContext.cpp" />
@@ -276,6 +291,7 @@
     <ClCompile Include="RenderPasses\GBufferRenderPass.cpp" />
     <ClCompile Include="RenderPasses\PresentPass.cpp" />
     <ClCompile Include="RenderPasses\ReferenceRenderPass.cpp" />
+    <ClCompile Include="RenderPasses\ReflectionRenderPass.cpp" />
     <ClCompile Include="RenderPasses\ShadowMapRenderPass.cpp" />
     <ClCompile Include="RenderPasses\SkyBoxRenderPass.cpp" />
     <ClCompile Include="RenderPasses\ToneMappingPass.cpp" />
@@ -283,7 +299,6 @@
     <ClCompile Include="RenderPasses\UpdateRenderPass.cpp" />
     <ClCompile Include="RenderPasses\ZRenderPass.cpp" />
     <ClCompile Include="RenderSchedule\RenderSchedule.cpp" />
-    <ClCompile Include="RenderSchedule\ResourceContainer.cpp" />
     <ClCompile Include="RenderSchedule\ResourceTracker.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -360,6 +375,17 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Mesh</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Mesh</ShaderType>
     </FxCompile>
+    <FxCompile Include="Shaders\ReflectionPass\ReflectionPassLib.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Library</ShaderType>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Development|x64'">
+      </EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Library</ShaderType>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Library</ShaderType>
+    </FxCompile>
     <FxCompile Include="Shaders\RootSig.hlsl">
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">RootSig</EntryPointName>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Development|x64'">RootSig</EntryPointName>
@@ -415,11 +441,14 @@
     <None Include="packages.config" />
     <None Include="Shaders\Color.hlsli" />
     <None Include="Shaders\Common.hlsli" />
+    <None Include="Shaders\CppShared.hlsli" />
     <None Include="Shaders\Debug3DPass\Debug3DPassShadersCommon.hlsli" />
     <None Include="Shaders\DebugMeshPass\DebugMeshPassShadersCommon.hlsli" />
     <None Include="Shaders\DebugPass\DebugPassShadersCommon.hlsli" />
     <None Include="Shaders\FullScreen\FullScreenCommon.hlsli" />
+    <None Include="Shaders\LightingLibrary\Lighting.hlsli" />
     <None Include="Shaders\MeshCommon.hlsli" />
+    <None Include="Shaders\ResourceBindings.hlsli" />
     <None Include="Shaders\ShadowMapPass\ShadowMapShadersCommon.hlsli" />
     <None Include="Shaders\TransformCommon.hlsli" />
   </ItemGroup>

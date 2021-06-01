@@ -5,6 +5,7 @@ namespace Boolka
 {
 
     class Device;
+    class ComputeCommandListImpl;
 
     class ComputeQueue : public CommandQueue
     {
@@ -13,6 +14,8 @@ namespace Boolka
         ~ComputeQueue() = default;
 
         bool Initialize(Device& device);
+
+        void ExecuteCommandList(ComputeCommandListImpl& commandList);
 
     private:
     };

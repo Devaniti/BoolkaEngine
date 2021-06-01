@@ -101,20 +101,16 @@ namespace Boolka
         ImGui::Begin("Stats");
         const auto& debugStats = frameContext.GetFrameStats();
         const float fps = 1.0f / debugStats.frameTime;
+        const float fpsStable = 1.0f / debugStats.frameTimeStable;
         const auto& cameraPos = frameContext.GetCameraPos();
         const auto& viewMatrix = frameContext.GetViewMatrix();
         const Vector3 viewDir{viewMatrix[0][2], viewMatrix[1][2], viewMatrix[2][2]};
-        ImGui::Text("%.1f FPS", fps);
+        ImGui::Text("%.1f FPS (avg %.1f FPS)", fps, fpsStable);
         ImGui::Text("%.2f ms (avg %.2f ms)", debugStats.frameTime * 1000.0f,
                     debugStats.frameTimeStable * 1000.0f);
         ImGui::Text("Resolution: %dx%d", engineContext.GetBackbufferWidth(),
                     engineContext.GetBackbufferHeight());
-        if (ImGui::CollapsingHeader("Batches"))
-        {
-            ImGui::Text("%llu rendered lights", debugStats.renderedLights);
-            ImGui::Text("%llu rendered light frustums", debugStats.renderedLightFrustums);
-        }
-        if (ImGui::CollapsingHeader("Camera"))
+        if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen))
         {
             ImGui::Text("Pos X:%.2f Y:%.2f Z:%.2f", cameraPos.x(), cameraPos.y(), cameraPos.z());
             ImGui::Text("Dir X:%.2f Y:%.2f Z:%.2f", viewDir.x(), viewDir.y(), viewDir.z());

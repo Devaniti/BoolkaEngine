@@ -2,6 +2,7 @@
 
 #include "ComputeQueue.h"
 
+#include "APIWrappers/CommandList/ComputeCommandListImpl.h"
 #include "APIWrappers/Device.h"
 
 namespace Boolka
@@ -20,6 +21,12 @@ namespace Boolka
             return false;
 
         return CommandQueue::Initialize(device, commandQueue);
+    }
+
+    void ComputeQueue::ExecuteCommandList(ComputeCommandListImpl& commandList)
+    {
+        ID3D12CommandList* nativeCommandList = commandList.Get();
+        m_Queue->ExecuteCommandLists(1, &nativeCommandList);
     }
 
 } // namespace Boolka

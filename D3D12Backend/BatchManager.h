@@ -26,7 +26,6 @@ namespace Boolka
         void Unload();
 
         bool PrepareBatches(const RenderFrameContext& frameContext, const Scene& scene);
-        bool NeedRender(BatchType batch) const;
 
         bool Render(CommandList& commandList, BatchType batch) const;
 
@@ -44,11 +43,7 @@ namespace Boolka
             float distance;
         };
 
-        bool IsBatchEnabled(BatchType batch, const RenderFrameContext& frameContext);
-        void CalculateRequiredBatches(const RenderFrameContext& frameContext);
-
         DrawData m_batches[static_cast<size_t>(BatchType::Count)];
-        bool m_requiredBatches[static_cast<size_t>(BatchType::Count)];
     };
 
     BLK_DECLARE_ENUM_OPERATORS(BatchManager::BatchType);

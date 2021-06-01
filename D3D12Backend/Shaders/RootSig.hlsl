@@ -6,12 +6,10 @@
     "CBV(b0), " \
     "CBV(b1), " \
     "RootConstants(num32BitConstants=2, b2), " \
-    "DescriptorTable(SRV(t0, space=0, numDescriptors = 9, flags = DATA_VOLATILE), visibility = SHADER_VISIBILITY_PIXEL ), " \
-    "DescriptorTable(CBV(b0, space=1, numDescriptors = 4), visibility = SHADER_VISIBILITY_PIXEL), " \
-    "DescriptorTable(SRV(t0, space=1, numDescriptors = unbounded, flags = DATA_STATIC), visibility = SHADER_VISIBILITY_PIXEL ), " \
-    "DescriptorTable(SRV(t0, space=2, numDescriptors = 6, flags = DATA_STATIC)), " \
-    "DescriptorTable(UAV(u0, space=1, numDescriptors = 4), visibility = SHADER_VISIBILITY_PIXEL), " \
-    "DescriptorTable(Sampler(s0, space=1, numDescriptors = 8), visibility = SHADER_VISIBILITY_PIXEL ), " \
+    "DescriptorTable(UAV(u0), " \
+                    "SRV(t0, space=0, numDescriptors = 10, flags = DATA_VOLATILE)), " \
+    "DescriptorTable(SRV(t0, space=1, numDescriptors = unbounded, flags = DATA_STATIC)), " \
+    "DescriptorTable(SRV(t0, space=2, numDescriptors = 11, flags = DATA_STATIC)), " \
     "StaticSampler(s0, " \
                   "filter = FILTER_MIN_MAG_MIP_POINT, " \
                   "addressU = TEXTURE_ADDRESS_WRAP, " \

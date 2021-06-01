@@ -2,6 +2,7 @@
 #include "APIWrappers/DescriptorHeap.h"
 #include "APIWrappers/ResourceHeap.h"
 #include "APIWrappers/Resources/Buffers/CommandSignature.h"
+#include "APIWrappers/Resources/Buffers/ReadbackBuffer.h"
 #include "APIWrappers/Resources/Buffers/Views/IndexBufferView.h"
 #include "APIWrappers/Resources/Buffers/Views/VertexBufferView.h"
 #include "APIWrappers/Resources/Textures/Texture2D.h"
@@ -18,9 +19,29 @@ namespace Boolka
     class Scene
     {
     public:
-
         Scene();
         virtual ~Scene();
+
+        enum SRVCount : UINT
+        {
+            MeshletSRVCount = 6,
+            MaterialSRVCount = 1,
+            RaytracingSRVCount = 2,
+            RaytracingASCount = 1,
+            SkyBoxSRVCount = 1,
+            MaxSceneTextureCount = 512
+        };
+
+        enum SRVOffset : UINT
+        {
+            MeshletSRVOffset = 0,
+            MaterialSRVOffset = MeshletSRVOffset + MeshletSRVCount,
+            RaytracingSRVOffset = MaterialSRVOffset + MaterialSRVCount,
+            RaytracingASOffset = RaytracingSRVOffset + RaytracingSRVCount,
+            SkyBoxSRVOffset = RaytracingASOffset + RaytracingASCount,
+            SceneSRVOffset = SkyBoxSRVOffset + SkyBoxSRVCount,
+            MaxSize = SceneSRVOffset + MaxSceneTextureCount
+        };
 
         bool Initialize(Device& device, SceneData& sceneData, RenderEngineContext& engineContext);
         void Unload();
@@ -31,28 +52,54 @@ namespace Boolka
         // transparent
         UINT GetObjectCount() const;
         UINT GetOpaqueObjectCount() const;
-        D3D12_GPU_DESCRIPTOR_HANDLE GetMeshletsTable() const;
-        D3D12_GPU_DESCRIPTOR_HANDLE GetSkyBoxTable() const;
-        D3D12_GPU_DESCRIPTOR_HANDLE GetSceneTexturesTable() const;
-        DescriptorHeap& GetSRVDescriptorHeap();
         BatchManager& GetBatchManager();
 
-        void BindResources(CommandList& commandList);
+        void BindResourcesGraphic(CommandList& commandList, DescriptorHeap& descriptorHeap,
+                                  UINT startOffset);
+        void BindResourcesCompute(CommandList& commandList, DescriptorHeap& descriptorHeap,
+                                  UINT startOffset);
 
     private:
-
-        enum SRVCount : UINT
-        {
-            MeshletSRVCount = 6,
-            SkyBoxSRVCount = 1
-        };
-
-        enum SRVOffset : UINT
-        {
-            MeshletSRVOffset = 0,
-            SkyBoxSRVOffset = MeshletSRVOffset + MeshletSRVCount,
-            SceneSRVOffset = SkyBoxSRVOffset + SkyBoxSRVCount
-        };
+        void InitializeBuffers(Device& device, const SceneData::SceneHeader& sceneHeader,
+                               size_t& uploadSize, DescriptorHeap& mainSRVHeap,
+                               UINT mainSRVHeapOffset);
+        void PrecalculateSkyBox(Device& device, const SceneData::SceneHeader& sceneHeader,
+                                size_t& uploadSize, size_t& lastTextureOffset);
+        void PrecalculateTextures(Device& device, const SceneData::SceneHeader& sceneHeader,
+                                  const SceneData::DataWrapper& dataWrapper, size_t& uploadSize,
+                                  size_t& lastTextureOffset, std::vector<size_t>& textureOffsets);
+        void PrecalculateAS(Device& device, GraphicCommandListImpl& initCommandList,
+                            const SceneData::SceneHeader& sceneHeader,
+                            const SceneData::DataWrapper& dataWrapper, Buffer& asBuildScratchBuffer,
+                            Buffer& buildBuffer, UploadBuffer& tlasParametersUploadBuffer,
+                            Buffer& tlasParametersBuffer, Buffer& postBuildDataBuffer,
+                            ReadbackBuffer& postBuildDataReadbackBuffer,
+                            std::vector<UINT64>& scratchBufferOffsets,
+                            std::vector<UINT64>& buildOffsets);
+        void InitializeSkyBox(Device& device, const SceneData::SceneHeader& sceneHeader,
+                              DescriptorHeap& mainSRVHeap, UINT mainSRVHeapOffset);
+        void InitializeTextures(Device& device, const SceneData::SceneHeader& sceneHeader,
+                                const SceneData::DataWrapper& dataWrapper,
+                                const std::vector<size_t>& textureOffsets,
+                                DescriptorHeap& mainSRVHeap, UINT mainSRVHeapOffset);
+        void UploadBuffers(GraphicCommandListImpl& initCommandList,
+                           const SceneData::SceneHeader& sceneHeader, Buffer& uploadBuffer,
+                           UINT64& uploadBufferOffset);
+        void UploadSkyBox(GraphicCommandListImpl& initCommandList,
+                          const SceneData::SceneHeader& sceneHeader, Buffer& uploadBuffer,
+                          UINT64& uploadBufferOffset);
+        void UploadTextures(GraphicCommandListImpl& initCommandList,
+                            const SceneData::SceneHeader& sceneHeader,
+                            const SceneData::DataWrapper& dataWrapper, Buffer& uploadBuffer,
+                            UINT64& uploadBufferOffset);
+        void BuildAS(GraphicCommandListImpl& initCommandList, Device& device,
+                     RenderEngineContext& engineContext, const SceneData::SceneHeader& sceneHeader,
+                     const SceneData::DataWrapper& dataWrapper, Buffer& asBuildScratchBuffer,
+                     Buffer& buildBuffer, UploadBuffer& tlasParametersUploadBuffer,
+                     Buffer& tlasParametersBuffer, Buffer& postBuildDataBuffer,
+                     ReadbackBuffer& postBuildDataReadbackBuffer,
+                     std::vector<UINT64>& scratchBufferOffsets, std::vector<UINT64>& buildOffsets,
+                     DescriptorHeap& mainSRVHeap, UINT mainSRVHeapOffset);
 
         UINT m_ObjectCount;
         UINT m_OpaqueObjectCount;
@@ -62,7 +109,10 @@ namespace Boolka
         Buffer m_IndexBuffer;
         Buffer m_MeshletBuffer;
         Buffer m_ObjectBuffer;
-        DescriptorHeap m_SRVDescriptorHeap;
+        Buffer m_MaterialsBuffer;
+        Buffer m_RTIndexBuffer;
+        Buffer m_RTObjectIndexOffsetBuffer;
+        Buffer m_ASBuffer;
         ResourceHeap m_ResourceHeap;
         BatchManager m_BatchManager;
         Texture2D m_SkyBoxCubemap;

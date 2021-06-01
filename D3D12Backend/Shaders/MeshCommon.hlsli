@@ -1,19 +1,7 @@
-#ifndef __MESH_COMMON_HLSL__
-#define __MESH_COMMON_HLSL__
+#ifndef __MESH_COMMON_HLSLI__
+#define __MESH_COMMON_HLSLI__
 
 #include "Common.hlsli"
-
-struct VertexData1
-{
-    float3 position;
-    float texCoordX;
-};
-
-struct VertexData2
-{
-    float3 normal;
-    float texCoordY;
-};
 
 struct MeshletData
 {
@@ -21,8 +9,6 @@ struct MeshletData
     uint VertOffset;
     uint PrimCount;
     uint PrimOffset;
-
-    float4 CullingData;
 };
 
 struct AABB
@@ -41,8 +27,6 @@ struct ObjectData
     uint unused;
 };
 
-StructuredBuffer<VertexData1> vertexBuffer1 : register(t0, space2);
-StructuredBuffer<VertexData2> vertexBuffer2 : register(t1, space2);
 StructuredBuffer<uint> vertexIndirectionBuffer : register(t2, space2);
 StructuredBuffer<uint> indexBuffer : register(t3, space2);
 StructuredBuffer<MeshletData> meshletBuffer : register(t4, space2);
@@ -132,8 +116,8 @@ Vertex GetVertex(in const Payload payload, in const MeshletData meshletData, in 
     VertexData2 vertexData2 = vertexBuffer2[remappedVertexIndex];
 
     Out.materialID = payload.materialID;
-    Out.position = mul(float4(vertexData1.position, 1.0f), viewProjMatrix);
-    Out.normal = normalize(mul(normalize(vertexData2.normal), (float3x3)viewMatrix));
+    Out.position = mul(float4(vertexData1.position, 1.0f), PerFrame.viewProjMatrix);
+    Out.normal = normalize(mul(normalize(vertexData2.normal), (float3x3)PerFrame.viewMatrix));
     Out.texcoord = float2(vertexData1.texCoordX, vertexData2.texCoordY);
 
     return Out;
@@ -147,7 +131,7 @@ SimpleVertex GetSimpleVertex(in const SimplePayload payload, in const MeshletDat
     uint remappedVertexIndex = vertexIndirectionBuffer[meshletData.VertOffset + vertexIndex];
     VertexData1 vertexData1 = vertexBuffer1[remappedVertexIndex];
 
-    Out.position = mul(float4(vertexData1.position, 1.0f), viewProjMatrix);
+    Out.position = mul(float4(vertexData1.position, 1.0f), PerFrame.viewProjMatrix);
 
     return Out;
 }

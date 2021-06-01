@@ -21,8 +21,6 @@ namespace Boolka
 
         m_RenderContext.Initialize(m_EngineContext, m_FrameContext, m_ThreadContext);
 
-        InitializeRenderPasses(device);
-
         return true;
     }
 
@@ -55,9 +53,11 @@ namespace Boolka
         return m_ResourceTracker;
     }
 
-    bool RenderSchedule::LoadScene(Device& device, SceneData& sceneData)
+    bool RenderSchedule::InitializeResources(Device& device, SceneData& sceneData)
     {
-        bool res = m_EngineContext.LoadScene(device, sceneData);
+        bool res = InitializeRenderPasses(device);
+        BLK_ASSERT_VAR(res);
+        res = m_EngineContext.LoadScene(device, sceneData);
         BLK_ASSERT_VAR(res);
 
         return true;
@@ -72,6 +72,8 @@ namespace Boolka
         res = m_ShadowMapPass.Initialize(device, m_RenderContext);
         BLK_ASSERT_VAR(res);
         res = m_GbufferPass.Initialize(device, m_RenderContext);
+        BLK_ASSERT_VAR(res);
+        res = m_ReflectionRenderPass.Initialize(device, m_RenderContext);
         BLK_ASSERT_VAR(res);
         res = m_DeferredLightingPass.Initialize(device, m_RenderContext);
         BLK_ASSERT_VAR(res);
@@ -97,6 +99,7 @@ namespace Boolka
         m_ZPass.Unload();
         m_ShadowMapPass.Unload();
         m_GbufferPass.Unload();
+        m_ReflectionRenderPass.Unload();
         m_DeferredLightingPass.Unload();
         m_SkyBoxPass.Unload();
         m_TransparentPass.Unload();
@@ -128,6 +131,8 @@ namespace Boolka
         res = m_ShadowMapPass.Render(m_RenderContext, m_ResourceTracker);
         BLK_ASSERT_VAR(res);
         res = m_GbufferPass.Render(m_RenderContext, m_ResourceTracker);
+        BLK_ASSERT_VAR(res);
+        res = m_ReflectionRenderPass.Render(m_RenderContext, m_ResourceTracker);
         BLK_ASSERT_VAR(res);
         res = m_DeferredLightingPass.Render(m_RenderContext, m_ResourceTracker);
         BLK_ASSERT_VAR(res);

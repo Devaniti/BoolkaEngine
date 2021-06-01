@@ -9,8 +9,6 @@ namespace Boolka
     {
         float frameTime;
         float frameTimeStable;
-        size_t renderedLights;
-        size_t renderedLightFrustums;
     };
 
 } // namespace Boolka

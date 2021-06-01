@@ -8,6 +8,7 @@
 #include "BoolkaCommon/DebugHelpers/DebugFileWriter.h"
 #include "BoolkaCommon/DebugHelpers/DebugTimer.h"
 #include "BoolkaCommon/Structures/MemoryBlock.h"
+#include "D3D12Backend/Containers/HLSLSharedStructures.h"
 #include "D3D12Backend/Containers/Streaming/SceneData.h"
 #include "ThirdParty/DirectXMesh/DirectXMesh/DirectXMesh.h"
 #include "tinyobjloader/tiny_obj_loader.h"
@@ -18,15 +19,62 @@ namespace Boolka
     static const size_t gs_PitchAlignment = D3D12_TEXTURE_DATA_PITCH_ALIGNMENT;
     static const size_t gs_CubeMapFaces = 6;
 
+    struct BoolkaMaterial
+    {
+        BoolkaMaterial()
+            : gpuMatData{} {};
+        BoolkaMaterial(const tinyobj::material_t& tinyObjMat);
+
+        std::string diffuseTexName;
+        HLSLShared::MaterialData gpuMatData;
+
+        bool operator==(const BoolkaMaterial& other) const;
+    };
+
+    BoolkaMaterial::BoolkaMaterial(const tinyobj::material_t& tinyObjMat)
+        : diffuseTexName{tinyObjMat.diffuse_texname}
+    {
+        gpuMatData.diffuse =
+            Vector4{tinyObjMat.diffuse[0], tinyObjMat.diffuse[1], tinyObjMat.diffuse[2], 1.0f};
+        gpuMatData.specular_specularExp = Vector4{tinyObjMat.specular[0], tinyObjMat.specular[1],
+                                                  tinyObjMat.specular[2], tinyObjMat.shininess};
+    }
+
+    bool BoolkaMaterial::operator==(const BoolkaMaterial& other) const
+    {
+        return diffuseTexName == other.diffuseTexName &&
+               memcmp(&gpuMatData, &other.gpuMatData, sizeof(gpuMatData)) == 0;
+    }
+
+    struct BoolkaMaterialHash
+    {
+        size_t operator()(const Boolka::BoolkaMaterial& k) const
+        {
+            size_t currentHash = std::hash<std::string>()(k.diffuseTexName);
+
+            const unsigned char* gpuMatData = ptr_static_cast<const unsigned char*>(&k.gpuMatData);
+            for (size_t i = 0; i < sizeof(Boolka::HLSLShared::MaterialData); ++i)
+            {
+                currentHash = BLK_SHIFT_LEFT_WITH_CARRY(size_t, currentHash);
+                currentHash ^= std::hash<unsigned char>()(gpuMatData[i]);
+            }
+
+            return currentHash;
+        }
+    };
+
     class ObjConverterImpl
     {
     public:
         ObjConverterImpl();
         ~ObjConverterImpl() = default;
 
-        bool Convert(std::wstring inFile, std::wstring outFile);
+        bool Convert(const std::wstring& inFile, const std::wstring& outFolder);
 
     private:
+        bool Build();
+        bool SaveRequiredSceneData(const std::wstring& outFile);
+
         void Reset();
 
         struct UniqueVertexKey
@@ -83,13 +131,19 @@ namespace Boolka
         std::vector<SceneData::ObjectHeader> m_objects;
         size_t m_opaqueObjectCount;
 
-        // Scene textures
-        std::vector<std::string> m_remappedMaterials;
-        std::unordered_map<std::string, int> m_materialsMap;
+        // Materials
+        std::vector<BoolkaMaterial> m_remappedMaterials;
+        std::vector<HLSLShared::MaterialData> m_materialData;
+        std::unordered_map<BoolkaMaterial, int, BoolkaMaterialHash> m_materialsMap;
 
         // SkyBox
         UINT m_SkyBoxTextureResolution;
         UINT m_SkyBoxMipCount;
+
+        // Raytracing data
+        std::vector<uint32_t> m_RTIndexData;
+        std::vector<uint32_t> m_RTOjbectIndexOffsetData;
+        std::vector<SceneData::CPUObjectHeader> m_cpuObjects;
     };
 
     const char* const ObjConverterImpl::ms_SkyBoxTexNames[gs_CubeMapFaces] = {
@@ -99,6 +153,82 @@ namespace Boolka
     ObjConverterImpl::ObjConverterImpl()
     {
         Reset();
+    }
+
+    bool ObjConverterImpl::Build()
+    {
+        std::wcout << "Building data" << std::endl;
+
+        std::wcout << "Processing geometry" << std::endl;
+        ProcessGeometry();
+        std::wcout << "Processing skybox" << std::endl;
+        PrepareSkyBox();
+
+        return true;
+    }
+
+    bool ObjConverterImpl::SaveRequiredSceneData(const std::wstring& outFile)
+    {
+        DebugFileWriter fileWriter;
+        bool res = fileWriter.OpenFile(outFile.c_str());
+        if (!res)
+        {
+            std::wcout << "Failed to open file " << outFile << " for writing" << std::endl;
+            return false;
+        }
+
+        WriteHeader(fileWriter);
+
+        WriteTextureHeaders(fileWriter);
+
+        WriteVector(fileWriter, m_cpuObjects, 0);
+        std::cout << "Written rt index buffer 1" << std::endl;
+
+        WriteVector(fileWriter, m_vertexData1, gs_ResourceAlignment);
+        std::cout << "Written vertex buffer 1" << std::endl;
+
+        WriteVector(fileWriter, m_vertexData2, gs_ResourceAlignment);
+        std::cout << "Written vertex buffer 2" << std::endl;
+
+        WriteVector(fileWriter, m_vertexIndirection, gs_ResourceAlignment);
+        std::cout << "Written vertex indirection buffer" << std::endl;
+
+        WriteVector(fileWriter, m_indexData, gs_ResourceAlignment);
+        std::cout << "Written index buffer" << std::endl;
+
+        WriteVector(fileWriter, m_meshlets, gs_ResourceAlignment);
+        std::cout << "Written meshlets buffer" << std::endl;
+
+        WriteVector(fileWriter, m_objects, gs_ResourceAlignment);
+        std::cout << "Written objects buffer" << std::endl;
+
+        WriteVector(fileWriter, m_materialData, gs_ResourceAlignment);
+        std::cout << "Written material buffer" << std::endl;
+
+        WriteVector(fileWriter, m_RTIndexData, gs_ResourceAlignment);
+        std::cout << "Written RT index buffer" << std::endl;
+
+        WriteVector(fileWriter, m_RTOjbectIndexOffsetData, gs_ResourceAlignment);
+        std::cout << "Written RT object index offset buffer" << std::endl;
+
+        WriteSkyBoxTextures(fileWriter);
+        std::cout << "Written skybox textures" << std::endl;
+
+        WriteSceneTextures(fileWriter);
+        std::cout << "Written scene textures" << std::endl;
+
+        res = fileWriter.Close(BLK_FILE_BLOCK_SIZE);
+        BLK_CRITICAL_ASSERT(res);
+
+        if (!res)
+        {
+            std::cout << "Failed to close file" << std::endl;
+            return false;
+        }
+
+        std::wcout << "Successfully written " << outFile << std::endl;
+
+        return true;
     }
 
     void ObjConverterImpl::Reset()
@@ -123,7 +253,7 @@ namespace Boolka
         m_materialsMap.clear();
     }
 
-    bool ObjConverterImpl::Convert(std::wstring inFile, std::wstring outFile)
+    bool ObjConverterImpl::Convert(const std::wstring& inFile, const std::wstring& outFolder)
     {
         std::wcout << "Loading file:" << inFile << std::endl;
 
@@ -134,62 +264,24 @@ namespace Boolka
         }
 
         std::wcout << inFile << " Loaded successfully" << std::endl;
-        m_opaqueObjectCount = 0;
-
-        ProcessGeometry();
-
-        PrepareSkyBox();
-
-        DebugFileWriter fileWriter;
-        bool res = fileWriter.OpenFile(outFile.c_str());
-        if (!res)
+        if (!Build())
         {
-            std::wcout << "Failed to open file " << outFile << " for writing" << std::endl;
+            std::wcout << "Failed to build" << std::endl;
             return false;
         }
 
-        WriteHeader(fileWriter);
-
-        WriteTextureHeaders(fileWriter);
-
-        WriteVector(fileWriter, m_vertexData1, gs_ResourceAlignment);
-        std::cout << "Written vertex buffer 1" << std::endl;
-
-        WriteVector(fileWriter, m_vertexData2, gs_ResourceAlignment);
-        std::cout << "Written vertex buffer 2" << std::endl;
-
-        WriteVector(fileWriter, m_vertexIndirection, gs_ResourceAlignment);
-        std::cout << "Written vertex indirection buffer" << std::endl;
-
-        WriteVector(fileWriter, m_indexData, gs_ResourceAlignment);
-        std::cout << "Written index buffer" << std::endl;
-
-        WriteVector(fileWriter, m_meshlets, gs_ResourceAlignment);
-        std::cout << "Written meshlets buffer" << std::endl;
-
-        WriteVector(fileWriter, m_objects, gs_ResourceAlignment);
-        std::cout << "Written objects buffer" << std::endl;
-
-        WriteSkyBoxTextures(fileWriter);
-        std::cout << "Written skybox textures" << std::endl;
-
-        WriteSceneTextures(fileWriter);
-        std::cout << "Written scene textures" << std::endl;
-
-        res = fileWriter.Close(BLK_FILE_BLOCK_SIZE);
-        BLK_CRITICAL_ASSERT(res);
-
-        if (!res)
+        const std::wstring requiredDataFileName = BLK_SCENE_REQUIRED_SCENE_DATA_FILENAME;
+        std::wstring outRequiredDataPath;
+        CombinePath(outFolder, requiredDataFileName, outRequiredDataPath);
+        if (!SaveRequiredSceneData(outRequiredDataPath))
         {
-            std::cout << "Failed to close file" << std::endl;
+            std::wcout << "Failed to build" << std::endl;
             return false;
         }
-
-        std::wcout << "Successfully written " << outFile << std::endl;
-
-        return true;
 
         Reset();
+
+        return true;
     }
 
     bool ObjConverterImpl::Load(std::wstring inFile)
@@ -197,7 +289,7 @@ namespace Boolka
         std::string warn;
         std::string err;
 
-        std::string inFileA = utf8_encode(inFile);
+        std::string inFileA = UTF8encode(inFile);
 
         DebugTimer timer;
         timer.Start();
@@ -205,7 +297,6 @@ namespace Boolka
                                     inFileA.c_str(), NULL, true);
         float seconds = timer.Stop();
         std::cout << "tinyobj::LoadObj tooks " << seconds << "s" << std::endl;
-
         if (!warn.empty())
         {
             std::cerr << "tinyobj warning:\n" << warn;
@@ -224,24 +315,26 @@ namespace Boolka
         RemapMaterials();
         ProcessVerticesIndices();
     }
+
     void ObjConverterImpl::RemapMaterials()
     {
-        m_materialsMap.reserve(m_materials.size() + 1);
-        m_materialsMap.insert(std::make_pair<std::string, int>("", 0));
-        int currentMaterialIndex = 1;
+        m_materialsMap.reserve(m_materials.size());
+        int currentMaterialIndex = 0;
 
-        for (auto& material : m_materials)
+        for (const auto& material : m_materials)
         {
-            if (m_materialsMap.find(material.diffuse_texname) == m_materialsMap.end())
+            if (m_materialsMap.find(material) == m_materialsMap.end())
             {
-                m_materialsMap[material.diffuse_texname] = currentMaterialIndex++;
+                m_materialsMap[material] = currentMaterialIndex++;
             }
         }
 
         m_remappedMaterials.resize(m_materialsMap.size());
-        for (auto& [textureName, materialIndex] : m_materialsMap)
+        m_materialData.resize(m_materialsMap.size());
+        for (const auto& [boolkaMaterial, materialIndex] : m_materialsMap)
         {
-            m_remappedMaterials[materialIndex] = textureName;
+            m_remappedMaterials[materialIndex] = boolkaMaterial;
+            m_materialData[materialIndex] = boolkaMaterial.gpuMatData;
         }
 
         std::cout << "Remapped materials" << std::endl;
@@ -330,26 +423,25 @@ namespace Boolka
 
         const size_t nVerts = dxVertices.size();
 
-        for (size_t processTransparent = 0; processTransparent < 2; ++processTransparent)
-        {
-            for (auto& shape : m_shapes)
-            {
-                SceneData::ObjectHeader object{};
-                object.meshletOffset = static_cast<uint32_t>(m_meshlets.size());
+        std::vector<std::vector<SceneData::MeshletData>> processedMeshlets(m_shapes.size());
+        std::vector<std::vector<uint8_t>> processedMeshletVertexIndirection(m_shapes.size());
+        std::vector<std::vector<DirectX::MeshletTriangle>> processedMeshletTriangles(
+            m_shapes.size());
+        std::vector<SceneData::ObjectHeader> processedObjects(m_shapes.size());
+        std::vector<std::vector<uint32_t>> processedRtIndicies(m_shapes.size());
+
+        // Calculating all required data
+        std::for_each(
+            std::execution::par_unseq, std::begin(m_shapes), std::end(m_shapes),
+            [&](tinyobj::shape_t& shape) {
+                size_t shapeIndex = &shape - &m_shapes[0];
+
+                SceneData::ObjectHeader& object = processedObjects[shapeIndex];
 
                 const auto& material = m_materials[shape.mesh.material_ids[0]];
 
-                bool isCurrentTransparent = IsTransparent(material);
-
-                if (static_cast<bool>(processTransparent) != isCurrentTransparent)
-                {
-                    continue;
-                }
-
-                int materialIndex = m_materialsMap[material.diffuse_texname];
+                int materialIndex = m_materialsMap[material];
                 object.materialIndex = materialIndex;
-
-                std::vector<DirectX::Meshlet> meshlets;
 
                 const auto& indices = shape.mesh.indices;
                 BLK_CRITICAL_ASSERT(indices.size() % 3 == 0);
@@ -364,42 +456,134 @@ namespace Boolka
                     dxIndices[i] = verticesMap[remappedVertexKey];
                 }
 
-                HRESULT hr = DirectX::ComputeMeshlets(
-                    dxIndices.data(), nFaces, dxVertices.data(), nVerts, nullptr, meshlets,
-                    m_vertexIndirection, m_indexData, BLK_MESHLET_MAX_VERTS, BLK_MESHLET_MAX_PRIMS);
+                std::vector<uint32_t> adjacency(nFaces * 3);
+                HRESULT hr = DirectX::GenerateAdjacencyAndPointReps(dxIndices.data(), nFaces,
+                                                                    dxVertices.data(), nVerts, 0.0f,
+                                                                    nullptr, adjacency.data());
 
                 BLK_ASSERT_VAR2(SUCCEEDED(hr), hr);
 
-                object.meshletCount = static_cast<uint32_t>(meshlets.size());
-
-                for (const auto& meshlet : meshlets)
                 {
-                    SceneData::MeshletData meshletData{};
+                    std::vector<DirectX::Meshlet> meshlets;
 
-                    meshletData.VertCount = meshlet.VertCount;
-                    meshletData.VertOffset = meshlet.VertOffset;
-                    meshletData.PrimCount = meshlet.PrimCount;
-                    meshletData.PrimOffset = meshlet.PrimOffset;
-                    meshletData.CullingData = {};
+                    HRESULT hr = DirectX::ComputeMeshlets(
+                        dxIndices.data(), nFaces, dxVertices.data(), nVerts, adjacency.data(),
+                        meshlets, processedMeshletVertexIndirection[shapeIndex],
+                        processedMeshletTriangles[shapeIndex], BLK_MESHLET_MAX_VERTS,
+                        BLK_MESHLET_MAX_PRIMS);
 
-                    m_meshlets.push_back(meshletData);
+                    BLK_ASSERT_VAR2(SUCCEEDED(hr), hr);
+
+                    object.meshletCount = static_cast<uint32_t>(meshlets.size());
+
+                    std::vector<SceneData::MeshletData>& processedMeshletVector =
+                        processedMeshlets[shapeIndex];
+
+                    processedMeshletVector.resize(meshlets.size());
+
+                    for (size_t i = 0; i < meshlets.size(); ++i)
+                    {
+                        SceneData::MeshletData& processedMeshlet = processedMeshletVector[i];
+                        const auto& dxMeshlet = meshlets[i];
+
+                        processedMeshlet.VertCount = dxMeshlet.VertCount;
+                        processedMeshlet.VertOffset = dxMeshlet.VertOffset;
+                        processedMeshlet.PrimCount = dxMeshlet.PrimCount;
+                        processedMeshlet.PrimOffset = dxMeshlet.PrimOffset;
+                    }
                 }
 
-                m_objects.push_back(object);
+                {
+                    std::vector<uint32_t> faceReorder(nFaces);
+                    HRESULT hr = DirectX::OptimizeFaces(dxIndices.data(), nFaces, adjacency.data(),
+                                                        faceReorder.data());
 
-                std::cout << "processed meshlets for shape: " << shape.name << std::endl;
+                    BLK_ASSERT_VAR2(SUCCEEDED(hr), hr);
+
+                    auto& processedRtIndiciesVector = processedRtIndicies[shapeIndex];
+                    processedRtIndiciesVector.resize(nFaces * 3);
+
+                    for (size_t i = 0; i < nFaces; ++i)
+                    {
+                        uint32_t face = faceReorder[i];
+                        processedRtIndiciesVector[3 * i] = dxIndices[3 * face];
+                        processedRtIndiciesVector[3 * i + 1] = dxIndices[3 * face + 1];
+                        processedRtIndiciesVector[3 * i + 2] = dxIndices[3 * face + 2];
+                    }
+                }
+            });
+
+        std::cout << "Processed meshlets" << std::endl;
+
+        // Flattening data to prepare it for writing to disk
+        m_meshlets.reserve(NestedVectorSize(processedMeshlets));
+        m_vertexIndirection.reserve(NestedVectorSize(processedMeshletVertexIndirection));
+        m_indexData.reserve(NestedVectorSize(processedMeshletTriangles));
+        m_objects.reserve(m_shapes.size());
+        m_RTIndexData.reserve(NestedVectorSize(processedRtIndicies));
+        m_RTOjbectIndexOffsetData.reserve(m_shapes.size());
+        m_cpuObjects.reserve(m_shapes.size());
+
+        size_t flattenedObjects = 0;
+        for (size_t processTransparent = 0; processTransparent < 2; ++processTransparent)
+        {
+            for (size_t i = 0; i < m_shapes.size(); ++i)
+            {
+                const auto& shape = m_shapes[i];
+                const auto& material = m_materials[shape.mesh.material_ids[0]];
+                bool isCurrentTransparent = IsTransparent(material);
+
+                if (isCurrentTransparent != bool(processTransparent))
+                    continue;
+
+                ++flattenedObjects;
+
+                SceneData::ObjectHeader currentObject = processedObjects[i];
+                currentObject.meshletOffset = checked_narrowing_cast<uint32_t>(m_meshlets.size());
+                m_objects.push_back(currentObject);
+
+                size_t additionalVertOffset =
+                    m_vertexIndirection.size() * sizeof(uint8_t) / sizeof(uint32_t);
+                size_t additionalPrimOffset = m_indexData.size();
+                for (const auto& meshlet : processedMeshlets[i])
+                {
+                    SceneData::MeshletData currentMeshlet = meshlet;
+                    currentMeshlet.VertOffset += static_cast<uint32_t>(additionalVertOffset);
+                    currentMeshlet.PrimOffset += static_cast<uint32_t>(additionalPrimOffset);
+
+                    m_meshlets.push_back(currentMeshlet);
+                }
+
+                SceneData::CPUObjectHeader currentCPUObject{};
+                currentCPUObject.rtIndexOffset =
+                    checked_narrowing_cast<uint32_t>(m_RTIndexData.size());
+                currentCPUObject.rtIndexCount =
+                    checked_narrowing_cast<uint32_t>(processedRtIndicies[i].size());
+                currentCPUObject.materialIndex = processedObjects[i].materialIndex;
+                m_cpuObjects.push_back(currentCPUObject);
+                m_RTOjbectIndexOffsetData.push_back(currentCPUObject.rtIndexOffset);
+
+                m_vertexIndirection.insert(std::end(m_vertexIndirection),
+                                           std::begin(processedMeshletVertexIndirection[i]),
+                                           std::end(processedMeshletVertexIndirection[i]));
+                m_indexData.insert(std::end(m_indexData), std::begin(processedMeshletTriangles[i]),
+                                   std::end(processedMeshletTriangles[i]));
+                m_RTIndexData.insert(std::end(m_RTIndexData), std::begin(processedRtIndicies[i]),
+                                     std::end(processedRtIndicies[i]));
             }
 
             if (processTransparent == 0)
             {
-                m_opaqueObjectCount = m_objects.size();
+                m_opaqueObjectCount = flattenedObjects;
             }
         }
+
+        std::cout << "Flattened geometry data" << std::endl;
     }
 
     void ObjConverterImpl::RemapVertices(std::map<UniqueVertexKey, uint32_t>& verticesMap)
     {
-        for (auto& shape : m_shapes)
+        for (const auto& shape : m_shapes)
         {
             for (unsigned char vertexesPerFace : shape.mesh.num_face_vertices)
             {
@@ -427,9 +611,9 @@ namespace Boolka
             std::cout << "Added vertices from shape: " << shape.name << std::endl;
         }
 
-        auto& positions = m_attrib.vertices;
-        auto& normals = m_attrib.normals;
-        auto& texcoords = m_attrib.texcoords;
+        const auto& positions = m_attrib.vertices;
+        const auto& normals = m_attrib.normals;
+        const auto& texcoords = m_attrib.texcoords;
 
         uint32_t vertexIndex = 0;
         for (auto& [uniqueVertex, arrayIndex] : verticesMap)
@@ -504,12 +688,18 @@ namespace Boolka
                 m_meshlets.size() * sizeof(m_meshlets[0]), gs_ResourceAlignment)),
             .objectsSize = checked_narrowing_cast<UINT>(BLK_CEIL_TO_POWER_OF_TWO(
                 m_objects.size() * sizeof(SceneData::ObjectHeader), gs_ResourceAlignment)),
+            .materialsSize = checked_narrowing_cast<UINT>(BLK_CEIL_TO_POWER_OF_TWO(
+                m_materialData.size() * sizeof(m_materialData[0]), gs_ResourceAlignment)),
+            .rtIndiciesSize = checked_narrowing_cast<UINT>(BLK_CEIL_TO_POWER_OF_TWO(
+                m_RTIndexData.size() * sizeof(m_RTIndexData[0]), gs_ResourceAlignment)),
+            .rtObjectIndexOffsetSize = checked_narrowing_cast<UINT>(BLK_CEIL_TO_POWER_OF_TWO(
+                m_RTOjbectIndexOffsetData.size() * sizeof(m_RTOjbectIndexOffsetData[0]),
+                gs_ResourceAlignment)),
             .objectCount = checked_narrowing_cast<UINT>(m_objects.size()),
             .opaqueCount = checked_narrowing_cast<UINT>(m_opaqueObjectCount),
             .skyBoxResolution = m_SkyBoxTextureResolution,
             .skyBoxMipCount = m_SkyBoxMipCount,
-            .textureCount =
-                checked_narrowing_cast<UINT>(m_remappedMaterials.size())};
+            .textureCount = checked_narrowing_cast<UINT>(m_remappedMaterials.size())};
 
         BLK_CRITICAL_ASSERT(sceneHeader.vertex1Size != 0);
         BLK_CRITICAL_ASSERT(sceneHeader.vertex2Size != 0);
@@ -517,6 +707,9 @@ namespace Boolka
         BLK_CRITICAL_ASSERT(sceneHeader.indexSize != 0);
         BLK_CRITICAL_ASSERT(sceneHeader.meshletsSize != 0);
         BLK_CRITICAL_ASSERT(sceneHeader.objectsSize != 0);
+        BLK_CRITICAL_ASSERT(sceneHeader.materialsSize != 0);
+        BLK_CRITICAL_ASSERT(sceneHeader.rtIndiciesSize != 0);
+        BLK_CRITICAL_ASSERT(sceneHeader.rtObjectIndexOffsetSize != 0);
         BLK_CRITICAL_ASSERT(sceneHeader.objectCount != 0);
         BLK_CRITICAL_ASSERT(sceneHeader.opaqueCount != 0);
         BLK_CRITICAL_ASSERT(sceneHeader.skyBoxResolution != 0);
@@ -531,39 +724,35 @@ namespace Boolka
 
     void ObjConverterImpl::WriteTextureHeaders(DebugFileWriter& fileWriter)
     {
-        // First element is always empty texture
-        BLK_CRITICAL_ASSERT(m_remappedMaterials.size() > 0);
-        BLK_CRITICAL_ASSERT(m_remappedMaterials[0].empty());
-
-        SceneData::TextureHeader firstHeader{1, 1, 1};
-        fileWriter.Write(&firstHeader, sizeof(firstHeader));
-
-        for (size_t i = 1; i < m_remappedMaterials.size(); ++i)
+        for (size_t i = 0; i < m_remappedMaterials.size(); ++i)
         {
-            auto& material = m_remappedMaterials[i];
-
-            BLK_CRITICAL_ASSERT(!material.empty())
+            const auto& material = m_remappedMaterials[i];
 
             int width, height, dummy;
 
-            int result = stbi_info(material.c_str(), &width, &height, &dummy);
-            if (result == 0)
-            {
-                throw std::runtime_error("Can't get texture info");
-            }
-
             UINT mipCount = 0;
-            int dimension = std::min(width, height);
-            while (dimension)
+
+            if (!material.diffuseTexName.empty())
             {
-                mipCount++;
-                dimension >>= 1;
+                int result = stbi_info(material.diffuseTexName.c_str(), &width, &height, &dummy);
+                BLK_CRITICAL_ASSERT(result != 0);
+
+                int dimension = std::min(width, height);
+                while (dimension)
+                {
+                    mipCount++;
+                    dimension >>= 1;
+                }
+            }
+            else
+            {
+                width = 1;
+                height = 1;
+                mipCount = 1;
             }
 
             SceneData::TextureHeader textureHeader{checked_narrowing_cast<UINT>(width),
                                                    checked_narrowing_cast<UINT>(height), mipCount};
-
-            BLK_CRITICAL_ASSERT(result != 0);
 
             fileWriter.Write(&textureHeader, sizeof(textureHeader));
 
@@ -615,33 +804,33 @@ namespace Boolka
 
     void ObjConverterImpl::WriteSceneTextures(DebugFileWriter& fileWriter)
     {
-        // First element is always empty texture
-        BLK_CRITICAL_ASSERT(m_remappedMaterials.size() > 0);
-        BLK_CRITICAL_ASSERT(m_remappedMaterials[0].empty());
-
-        // First empty texture
-        Vector<4, unsigned char> pixel;
-        WriteMIPChain<Vector<4, unsigned char>, Vector<4, unsigned int>>(fileWriter,
-                                                                         pixel.GetBuffer(), 1, 1);
-        for (size_t i = 1; i < m_remappedMaterials.size(); ++i)
+        for (size_t i = 0; i < m_remappedMaterials.size(); ++i)
         {
-            auto& material = m_remappedMaterials[i];
+            const auto& material = m_remappedMaterials[i];
 
-            BLK_CRITICAL_ASSERT(!material.empty())
+            if (!material.diffuseTexName.empty())
+            {
+                int width, height, bitsPerPixel;
 
-            int width, height, bitsPerPixel;
+                unsigned char* textureData =
+                    stbi_load(material.diffuseTexName.c_str(), &width, &height, &bitsPerPixel, 4);
 
-            unsigned char* textureData =
-                stbi_load(material.c_str(), &width, &height, &bitsPerPixel, 4);
+                BLK_CRITICAL_ASSERT(textureData);
 
-            BLK_CRITICAL_ASSERT(textureData);
+                WriteMIPChain<Vector<4, unsigned char>, Vector<4, unsigned int>>(
+                    fileWriter, textureData, width, height);
 
-            WriteMIPChain<Vector<4, unsigned char>, Vector<4, unsigned int>>(
-                fileWriter, textureData, width, height);
+                stbi_image_free(textureData);
+            }
+            else
+            {
+                Vector<4, unsigned char> pixel{1, 1, 1, 1};
+                WriteMIPChain<Vector<4, unsigned char>, Vector<4, unsigned int>>(
+                    fileWriter, pixel.GetBuffer(), 1, 1);
+            }
 
-            stbi_image_free(textureData);
-
-            std::cout << "Scene texture " << i << ":" << material << " written" << std::endl;
+            std::cout << "Scene texture " << i << ":" << material.diffuseTexName << " written"
+                      << std::endl;
         }
     }
 
@@ -659,7 +848,7 @@ namespace Boolka
 
         unsigned char* mip0Data = new unsigned char[mip0Size];
 
-        memcpy_strided(mip0Data, mip0RowPitch, textureData, srcRowPitch, height);
+        MemcpyStrided(mip0Data, mip0RowPitch, textureData, srcRowPitch, height);
 
         fileWriter.Write(mip0Data, mip0Size);
 
@@ -693,7 +882,7 @@ namespace Boolka
                     }
 
                     sumType sum{};
-                    for (auto& data : prevMipPixels)
+                    for (const auto& data : prevMipPixels)
                     {
                         sum += static_cast<sumType>(data);
                     }
@@ -727,10 +916,10 @@ namespace Boolka
         return texcoordIndex < other.texcoordIndex;
     }
 
-    bool OBJConverter::Convert(std::wstring inFile, std::wstring outFile)
+    bool OBJConverter::Convert(std::wstring inFile, std::wstring outFolder)
     {
         ObjConverterImpl converter;
-        return converter.Convert(inFile, outFile);
+        return converter.Convert(inFile, outFolder);
     }
 
 } // namespace Boolka

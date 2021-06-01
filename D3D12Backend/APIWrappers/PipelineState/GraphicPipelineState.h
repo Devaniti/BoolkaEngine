@@ -49,17 +49,6 @@ namespace Boolka
 
     private:
         bool InitializeInternal(Device& device, const D3D12_PIPELINE_STATE_STREAM_DESC& streamDesc);
-
-        static void SetRasterizerDesc(D3D12_RASTERIZER_DESC& desc, float depthBias,
-                                      float depthSlopeBias);
-        static void SetDepthStencilDesc(D3D12_DEPTH_STENCIL_DESC& desc, bool useDepthTest,
-                                        bool writeDepth, D3D12_COMPARISON_FUNC depthFunc);
-        static void SetBlendDesc(D3D12_BLEND_DESC& blend, bool useAlphaBlend);
-        static void SetRenderTargetFormats(D3D12_RT_FORMAT_ARRAY& renderTargetFormats,
-                                           UINT renderTargetCount, DXGI_FORMAT renderTargetFormat);
-
-        static INT ConvertFloatDepthBiasToDXDepthBias(float depthBias,
-                                                      size_t formatMantissaBits = FLT_MANT_DIG);
     };
 
     BLK_IS_PLAIN_DATA_ASSERT(D3D12_GRAPHICS_PIPELINE_STATE_DESC);

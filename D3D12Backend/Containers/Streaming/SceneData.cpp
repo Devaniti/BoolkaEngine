@@ -40,6 +40,9 @@ namespace Boolka
         BLK_CRITICAL_ASSERT(sceneHeader->indexSize != 0);
         BLK_CRITICAL_ASSERT(sceneHeader->meshletsSize != 0);
         BLK_CRITICAL_ASSERT(sceneHeader->objectsSize != 0);
+        BLK_CRITICAL_ASSERT(sceneHeader->materialsSize != 0);
+        BLK_CRITICAL_ASSERT(sceneHeader->rtIndiciesSize != 0);
+        BLK_CRITICAL_ASSERT(sceneHeader->rtObjectIndexOffsetSize != 0);
         BLK_CRITICAL_ASSERT(sceneHeader->objectCount != 0);
         BLK_CRITICAL_ASSERT(sceneHeader->opaqueCount != 0);
         BLK_CRITICAL_ASSERT(sceneHeader->skyBoxResolution != 0);
@@ -54,6 +57,10 @@ namespace Boolka
 
         data += sizeof(TextureHeader) * result.header.textureCount;
 
+        result.cpuObjectHeaders = ptr_static_cast<const CPUObjectHeader*>(data);
+
+        data += sizeof(CPUObjectHeader) * result.header.objectCount;
+
         result.binaryData = static_cast<const void*>(data);
 
         return result;
@@ -61,12 +68,26 @@ namespace Boolka
 
     void SceneData::PrepareTextureHeaders()
     {
-        size_t neededSize = sizeof(SceneHeader);
+        size_t neededSize = sizeof(SceneHeader) + sizeof(FormatHeader);
         const unsigned char* data = static_cast<const unsigned char*>(m_MemoryBlock.m_Data);
-        const SceneHeader* sceneHeader = ptr_static_cast<const SceneHeader*>(data);
+        const SceneHeader* sceneHeader =
+            ptr_static_cast<const SceneHeader*>(data + sizeof(FormatHeader));
 
-        size_t textureCount = sceneHeader->textureCount;
-        neededSize += textureCount * sizeof(TextureHeader);
+        neededSize += sceneHeader->textureCount * sizeof(TextureHeader);
+
+        bool res = m_FileReader.WaitData(neededSize);
+        BLK_ASSERT_VAR(res);
+    }
+
+    void SceneData::PrepareCPUObjectHeaders()
+    {
+        size_t neededSize = sizeof(SceneHeader) + sizeof(FormatHeader);
+        const unsigned char* data = static_cast<const unsigned char*>(m_MemoryBlock.m_Data);
+        const SceneHeader* sceneHeader =
+            ptr_static_cast<const SceneHeader*>(data + sizeof(FormatHeader));
+
+        neededSize += sceneHeader->textureCount * sizeof(TextureHeader);
+        neededSize += sceneHeader->objectCount * sizeof(CPUObjectHeader);
 
         bool res = m_FileReader.WaitData(neededSize);
         BLK_ASSERT_VAR(res);
@@ -90,7 +111,8 @@ namespace Boolka
 
     bool SceneData::FormatHeader::operator==(const FormatHeader& other) const
     {
-        return (memcmp(signature, other.signature, sizeof(signature)) == 0) && (formatVersion == other.formatVersion);
+        return (memcmp(signature, other.signature, sizeof(signature)) == 0) &&
+               (formatVersion == other.formatVersion);
     }
 
 } // namespace Boolka
