@@ -1,6 +1,5 @@
 @echo off
 pushd "%~dp0"
-  call Internal\FindVisualStudioInstallation.bat
-  call PrepareScene.bat
-  call BuildAndStartReleaseEngine.bat
+  call PrepareScene.bat || exit /b 1
+  call BuildAndStartReleaseEngine.bat || exit /b 1
 popd

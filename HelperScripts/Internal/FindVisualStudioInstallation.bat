@@ -1,4 +1,5 @@
 @echo off
+
 if defined InstallDir (
   exit /b 0
 )
