@@ -9,6 +9,7 @@
 #include "APIWrappers/Resources/Textures/Views/DepthStencilView.h"
 #include "APIWrappers/Resources/Textures/Views/RenderTargetView.h"
 #include "BoolkaCommon/DebugHelpers/DebugFileReader.h"
+#include "Containers/HLSLSharedStructures.h"
 #include "Contexts/RenderContext.h"
 #include "Contexts/RenderEngineContext.h"
 #include "Contexts/RenderFrameContext.h"
@@ -107,11 +108,12 @@ namespace Boolka
 
         const wchar_t* hitGroupExport = L"HitGroup";
 
-        bool res = m_PSO.Initialize(device, GlobalRootSignatureParam{defaultRootSig},
-                                    DXILLibraryParam<ARRAYSIZE(libExports)>{shaderLib, libExports},
-                                    HitGroupParam{hitGroupExport, closestHitExport},
-                                    RaytracingShaderConfigParam{sizeof(Vector4), sizeof(Vector2)},
-                                    RaytracingPipelineConfigParam{1});
+        bool res = m_PSO.Initialize(
+            device, GlobalRootSignatureParam{defaultRootSig},
+            DXILLibraryParam<ARRAYSIZE(libExports)>{shaderLib, libExports},
+            HitGroupParam{hitGroupExport, closestHitExport},
+            RaytracingShaderConfigParam{sizeof(HLSLShared::ReflectionPayload), sizeof(Vector2)},
+            RaytracingPipelineConfigParam{1});
         BLK_ASSERT_VAR(res);
 
         UINT64 shaderTableSize = ShaderTable::CalculateRequiredBufferSize(1, 1, 1);

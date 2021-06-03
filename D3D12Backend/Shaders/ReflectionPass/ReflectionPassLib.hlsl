@@ -1,11 +1,10 @@
 #include "../Common.hlsli"
 #include "../LightingLibrary/Lighting.hlsli"
+#include "../CppShared.hlsli"
 #include "../Color.hlsli"
 
-struct Payload
-{
-    float4 color;
-};
+// Configure whether we are going to do additional depth samples to select one of two neighbours along each axis
+#define BLK_HIGH_QUALITY_RAY_DIFFERENTIALS 1
 
 // Calculate rays from camera
 // Can be usefull for debugging
@@ -23,7 +22,76 @@ struct Payload
 //    direction = normalize(worldPos.xyz - origin);
 //}
 
-inline void CalculateRay(uint2 vpos, out float3 origin, out float3 direction, out bool needCast)
+RayDifferentialPart CalculateRayDifferentialPart(uint2 vpos, float3 origin, float3 direction,
+                                                 float depthVal, uint2 offset)
+{
+    RayDifferentialPart Out = (RayDifferentialPart)0;
+
+#if BLK_HIGH_QUALITY_RAY_DIFFERENTIALS
+    float depthValNeighbour[2] = 
+    {
+        depth.Load(uint3(vpos, 0) - uint3(offset, 0)),
+        depth.Load(uint3(vpos, 0) + uint3(offset, 0))
+    };
+
+    float depthValDiff[2] =
+    { 
+        abs(depthVal - depthValNeighbour[0]),
+        abs(depthVal - depthValNeighbour[1]),
+    };
+
+    float closestNeighbour = 1;
+    float depthValUsed;
+
+    if (depthValDiff[0] < depthValDiff[1])
+    {
+        float closestNeighbour = -1;
+        depthValUsed = depthValNeighbour[0];
+    }
+    else
+    {
+        float closestNeighbour = 1;
+        depthValUsed = depthValNeighbour[1];
+    }
+
+    float4 normalValUsed = normal.Load(uint3(vpos, 0) + uint3(closestNeighbour * offset, 0));
+#else
+    float closestNeighbour = 1;
+    float depthValUsed = depth.Load(uint3(vpos, 0) + uint3(offset, 0));
+    float4 normalValUsed = normal.Load(uint3(vpos, 0) + uint3(offset, 0));
+#endif
+
+    float3 normalUsed = normalValUsed.xyz;
+
+    float2 UVUsed = (float2(vpos) + closestNeighbour * offset) * GetInvBackbufferResolution();
+    float3 viewPosUsed = CalculateViewPos(UVUsed, depthValUsed);
+    float3 worldPosUsed = CalculateWorldPos(viewPosUsed);
+
+    float3 cameraWorldPos = PerFrame.cameraWorldPos.xyz;
+    float3 cameraDirectionWorldUsed = normalize(worldPosUsed - cameraWorldPos);
+    float3 worldSpaceNormalUsed = CalculateWorldSpaceNormal(normalUsed);
+    float3 reflectionVectorUsed = reflect(cameraDirectionWorldUsed, worldSpaceNormalUsed);
+
+    Out.dO = (origin - worldPosUsed) * closestNeighbour;
+    Out.dD = (direction - reflectionVectorUsed) * closestNeighbour;
+
+    return Out;
+}
+
+RayDifferential CalculateRayDifferentials(uint2 vpos, float3 origin, float3 direction,
+                                          float depthVal)
+{
+    RayDifferential Out = 
+    {
+        CalculateRayDifferentialPart(vpos, origin, direction, depthVal, uint2(1, 0)),
+        CalculateRayDifferentialPart(vpos, origin, direction, depthVal, uint2(0, 1))
+    };
+
+    return Out;
+}
+
+inline void CalculateRay(uint2 vpos, out float3 origin, out float3 direction,
+                         out RayDifferential rayDifferential, out bool needCast)
 {
     float depthVal = depth.Load(uint3(vpos, 0));
     float4 normalVal = normal.Load(uint3(vpos, 0));
@@ -60,6 +128,8 @@ inline void CalculateRay(uint2 vpos, out float3 origin, out float3 direction, ou
 
     origin = worldPos;
     direction = reflectionVector;
+
+    rayDifferential = CalculateRayDifferentials(vpos, origin, direction, depthVal);
 }
 
 [shader("raygeneration")] 
@@ -67,9 +137,10 @@ void ReflectionRayGeneration()
 { 
     float3 origin;
     float3 direction;
+    RayDifferential rayDifferential = (RayDifferential)0;
 
     bool needCast;
-    CalculateRay(DispatchRaysIndex().xy, origin, direction, needCast);
+    CalculateRay(DispatchRaysIndex().xy, origin, direction, rayDifferential, needCast);
     if (!needCast)
     {
         return;
@@ -81,7 +152,11 @@ void ReflectionRayGeneration()
     ray.TMin = 0.001;
     ray.TMax = 10000.0;
 
-    Payload payload = {float4(0, 0, 0, 0)};
+    ReflectionPayload payload = 
+    {
+        float4(0, 0, 0, 0),
+        rayDifferential
+    };
 
     TraceRay(sceneAS, RAY_FLAG_CULL_BACK_FACING_TRIANGLES, 1, 0, 0, 0, ray, payload);
 
@@ -109,16 +184,18 @@ float3 InterpolateAttribute(float3 attributes[3], BuiltInTriangleIntersectionAtt
 
 struct Vertex
 {
-    float2 UV;
+    float3 position;
     float3 normal;
+    float2 UV;
 };
 
 Vertex CombineVertexData(VertexData1 data1, VertexData2 data2) 
 {
     Vertex Out = 
     {
-        float2(data1.texCoordX, data2.texCoordY),
-        data2.normal
+        data1.position,
+        data2.normal,
+        float2(data1.texCoordX, data2.texCoordY)
     };
 
     return Out;
@@ -127,6 +204,11 @@ Vertex CombineVertexData(VertexData1 data1, VertexData2 data2)
 Vertex InterpolateVertices(Vertex verticies[3], BuiltInTriangleIntersectionAttributes attr)
 {
     Vertex Out = (Vertex)0;
+
+    Out.position = verticies[0].position +
+                   attr.barycentrics.x * (verticies[1].position - verticies[0].position) +
+                   attr.barycentrics.y * (verticies[2].position - verticies[0].position);
+
     Out.UV = verticies[0].UV + 
              attr.barycentrics.x * (verticies[1].UV - verticies[0].UV) +
              attr.barycentrics.y * (verticies[2].UV - verticies[0].UV);
@@ -138,8 +220,34 @@ Vertex InterpolateVertices(Vertex verticies[3], BuiltInTriangleIntersectionAttri
     return Out;
 }
 
+void CalculateDDXDDY(Vertex vertices[3], RayDifferential rayDifferential, out float2 ddxRes, out float2 ddyRes)
+{
+    float3 e1 = vertices[1].position - vertices[0].position;
+    float3 e2 = vertices[2].position - vertices[0].position;
+    float3 t = RayTCurrent();
+    float3 d = WorldRayDirection();
+
+    float3 cu = cross(e2, d);
+    float3 cv = cross(d, e1);
+    float3 q = rayDifferential.dx.dO + t * rayDifferential.dx.dD;
+    float3 r = rayDifferential.dy.dO + t * rayDifferential.dy.dD;
+
+    float k = dot(cross(e1, e2), d);
+
+    float dudx = dot(1.0f / k * cu, q);
+    float dudy = dot(1.0f / k * cu, r);
+    float dvdx = dot(1.0f / k * cv, q);
+    float dvdy = dot(1.0f / k * cv, r);
+
+    float2 g1 = vertices[1].UV - vertices[0].UV;
+    float2 g2 = vertices[2].UV - vertices[0].UV;
+
+    ddxRes = dudx * g1 + dvdx * g2;
+    ddyRes = dudy * g1 + dvdy * g2;
+}
+
 [shader("closesthit")]
-void ReflectionClosestHit(inout Payload payload, in BuiltInTriangleIntersectionAttributes attr) {
+void ReflectionClosestHit(inout ReflectionPayload payload, in BuiltInTriangleIntersectionAttributes attr) {
     uint materialID = InstanceID();
     uint objectIndex = InstanceIndex();
     uint primitiveIndex = PrimitiveIndex();
@@ -168,18 +276,21 @@ void ReflectionClosestHit(inout Payload payload, in BuiltInTriangleIntersectionA
         vertexBuffer2[indexes[2]]
     };
 
-    Vertex verticies[3] =
+    Vertex vertices[3] =
     {
         CombineVertexData(vertexData1[0], vertexData2[0]),
         CombineVertexData(vertexData1[1], vertexData2[1]),
         CombineVertexData(vertexData1[2], vertexData2[2]),
     };
 
-    Vertex interpolatedVertex = InterpolateVertices(verticies, attr);
+    float2 ddxRes, ddyRes;
+    CalculateDDXDDY(vertices, payload.rayDifferential, ddxRes, ddyRes);
+
+    Vertex interpolatedVertex = InterpolateVertices(vertices, attr);
 
     float3 worldPos = WorldRayOrigin() + WorldRayDirection() * RayTCurrent();
-
-    float3 albedoVal = SRGBToLinear(sceneTextures[materialID].SampleLevel(anisoSampler, interpolatedVertex.UV, 0).rgb);
+    
+    float3 albedoVal = SRGBToLinear(sceneTextures[materialID].SampleGrad(anisoSampler, interpolatedVertex.UV, ddxRes, ddyRes).rgb);
     float3 normalVal = normalize(mul(normalize(interpolatedVertex.normal), (float3x3)PerFrame.viewMatrix));
     float3 viewPos = mul(float4(worldPos, 1.0f), PerFrame.viewMatrix).xyz;
     float3 viewDir = mul(float4(WorldRayDirection(), 0.0f), PerFrame.viewMatrix).xyz;
@@ -189,7 +300,7 @@ void ReflectionClosestHit(inout Payload payload, in BuiltInTriangleIntersectionA
 }
 
 [shader("miss")]
-void ReflectionMissShader(inout Payload payload)
+void ReflectionMissShader(inout ReflectionPayload payload)
 {
     float4 skyboxVal = skyBox.SampleLevel(anisoSampler, WorldRayDirection(), 0);
     payload.color = skyboxVal;
