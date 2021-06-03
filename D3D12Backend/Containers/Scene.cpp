@@ -166,32 +166,6 @@ namespace Boolka
         return m_BatchManager;
     }
 
-    void Scene::BindResourcesGraphic(CommandList& commandList, DescriptorHeap& descriptorHeap,
-                                     UINT startOffset)
-    {
-        ID3D12DescriptorHeap* descriptorHeaps[] = {descriptorHeap.Get()};
-        commandList->SetDescriptorHeaps(ARRAYSIZE(descriptorHeaps), descriptorHeaps);
-        commandList->SetGraphicsRootDescriptorTable(
-            static_cast<UINT>(ResourceContainer::DefaultRootSigBindPoints::SceneTexturesSRV),
-            descriptorHeap.GetGPUHandle(startOffset + SceneSRVOffset));
-        commandList->SetGraphicsRootDescriptorTable(
-            static_cast<UINT>(ResourceContainer::DefaultRootSigBindPoints::SceneResourcesSRV),
-            descriptorHeap.GetGPUHandle(startOffset + MeshletSRVOffset));
-    }
-
-    void Scene::BindResourcesCompute(CommandList& commandList, DescriptorHeap& descriptorHeap,
-                                     UINT startOffset)
-    {
-        ID3D12DescriptorHeap* descriptorHeaps[] = {descriptorHeap.Get()};
-        commandList->SetDescriptorHeaps(ARRAYSIZE(descriptorHeaps), descriptorHeaps);
-        commandList->SetComputeRootDescriptorTable(
-            static_cast<UINT>(ResourceContainer::DefaultRootSigBindPoints::SceneTexturesSRV),
-            descriptorHeap.GetGPUHandle(startOffset + SceneSRVOffset));
-        commandList->SetComputeRootDescriptorTable(
-            static_cast<UINT>(ResourceContainer::DefaultRootSigBindPoints::SceneResourcesSRV),
-            descriptorHeap.GetGPUHandle(startOffset + MeshletSRVOffset));
-    }
-
     void Scene::InitializeBuffers(Device& device, const SceneData::SceneHeader& sceneHeader,
                                   size_t& uploadSize, DescriptorHeap& mainSRVHeap,
                                   UINT mainSRVHeapOffset)

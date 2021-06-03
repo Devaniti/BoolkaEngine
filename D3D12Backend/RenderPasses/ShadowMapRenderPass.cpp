@@ -34,7 +34,7 @@ namespace Boolka
         BLK_RENDER_DEBUG_ONLY(resourceTracker.ValidateStates(commandList));
 
         auto& passConstantBuffer =
-            resourceContainer.GetFlippableBuffer(frameIndex, ResourceContainer::FlipBuf::ShadowMap);
+            resourceContainer.GetBuffer(ResourceContainer::Buf::ShadowMap);
         auto& passUploadBuffer = resourceContainer.GetFlippableUploadBuffer(
             frameIndex, ResourceContainer::FlipUploadBuf::ShadowMap);
 

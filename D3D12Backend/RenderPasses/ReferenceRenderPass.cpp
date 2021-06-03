@@ -23,8 +23,7 @@ namespace Boolka
 
         UINT frameIndex = frameContext.GetFrameIndex();
 
-        Buffer& frameConstantBuffer =
-            resourceContainer.GetFlippableBuffer(frameIndex, ResourceContainer::FlipBuf::Frame);
+        Buffer& frameConstantBuffer = resourceContainer.GetBuffer(ResourceContainer::Buf::Frame);
         BLK_UNUSED_VARIABLE(frameConstantBuffer); // Remove when creating new RenderPass
 
         GraphicCommandListImpl& commandList = threadContext.GetGraphicCommandList();

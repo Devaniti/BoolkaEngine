@@ -29,10 +29,9 @@ namespace Boolka
 
         RootSignature& rootSig =
             resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default);
-        Buffer& frameConstantBuffer =
-            resourceContainer.GetFlippableBuffer(frameIndex, ResourceContainer::FlipBuf::Frame);
-        Buffer& lightingConstantBuffer = resourceContainer.GetFlippableBuffer(
-            frameIndex, ResourceContainer::FlipBuf::DeferredLighting);
+        Buffer& frameConstantBuffer = resourceContainer.GetBuffer(ResourceContainer::Buf::Frame);
+        Buffer& lightingConstantBuffer =
+            resourceContainer.GetBuffer(ResourceContainer::Buf::DeferredLighting);
         Texture2D& normal = resourceContainer.GetTexture(ResourceContainer::Tex::GBufferNormal);
         Texture2D& reflections =
             resourceContainer.GetTexture(ResourceContainer::Tex::GBufferReflections);
@@ -62,10 +61,6 @@ namespace Boolka
         commandList->SetComputeRootConstantBufferView(
             static_cast<UINT>(ResourceContainer::DefaultRootSigBindPoints::PassConstantBuffer),
             lightingConstantBuffer->GetGPUVirtualAddress());
-        commandList->SetComputeRootDescriptorTable(
-            static_cast<UINT>(ResourceContainer::DefaultRootSigBindPoints::RenderPassSRV),
-            mainDescriptorHeap.GetGPUHandle(
-                static_cast<UINT>(ResourceContainer::MainSRVDescriptorHeapOffsets::UAVHeapOffset)));
 
         D3D12_DISPATCH_RAYS_DESC dispatchRaysDesc{};
         dispatchRaysDesc.RayGenerationShaderRecord.StartAddress = m_ShaderTable.GetRayGenShader();

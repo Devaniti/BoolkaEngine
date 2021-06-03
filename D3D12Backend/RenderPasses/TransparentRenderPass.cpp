@@ -27,8 +27,7 @@ namespace Boolka
         RenderTargetView& lightBufferRTV =
             resourceContainer.GetRTV(ResourceContainer::RTV::LightBuffer);
         DepthStencilView& depthDSV = resourceContainer.GetDSV(ResourceContainer::DSV::GbufferDepth);
-        Buffer& frameConstantBuffer =
-            resourceContainer.GetFlippableBuffer(frameIndex, ResourceContainer::FlipBuf::Frame);
+        Buffer& frameConstantBuffer = resourceContainer.GetBuffer(ResourceContainer::Buf::Frame);
 
         GraphicCommandListImpl& commandList = threadContext.GetGraphicCommandList();
 

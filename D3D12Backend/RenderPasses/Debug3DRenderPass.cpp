@@ -51,8 +51,7 @@ namespace Boolka
         UINT width = renderContext.GetRenderEngineContext().GetBackbufferWidth();
         float aspectRatioCompensation = static_cast<float>(height) / width;
 
-        Buffer& frameConstantBuffer =
-            resourceContainer.GetFlippableBuffer(frameIndex, ResourceContainer::FlipBuf::Frame);
+        Buffer& frameConstantBuffer = resourceContainer.GetBuffer(ResourceContainer::Buf::Frame);
         UploadBuffer& currentUploadBuffer = resourceContainer.GetFlippableUploadBuffer(
             frameIndex, ResourceContainer::FlipUploadBuf::Frame);
 

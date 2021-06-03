@@ -30,8 +30,7 @@ namespace Boolka
             resourceContainer.GetRTV(ResourceContainer::RTV::GBufferNormal);
         DepthStencilView& gbufferDSV =
             resourceContainer.GetDSV(ResourceContainer::DSV::GbufferDepth);
-        Buffer& frameConstantBuffer =
-            resourceContainer.GetFlippableBuffer(frameIndex, ResourceContainer::FlipBuf::Frame);
+        Buffer& frameConstantBuffer = resourceContainer.GetBuffer(ResourceContainer::Buf::Frame);
 
         GraphicCommandListImpl& commandList = threadContext.GetGraphicCommandList();
 

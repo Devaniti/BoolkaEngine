@@ -30,8 +30,7 @@ namespace Boolka
         RenderTargetView& backBufferRTV = resourceContainer.GetBackBufferRTV(frameIndex);
         DescriptorHeap& mainDescriptorHeap =
             resourceContainer.GetDescriptorHeap(ResourceContainer::DescHeap::MainHeap);
-        Buffer& frameConstantBuffer =
-            resourceContainer.GetFlippableBuffer(frameIndex, ResourceContainer::FlipBuf::Frame);
+        Buffer& frameConstantBuffer = resourceContainer.GetBuffer(ResourceContainer::Buf::Frame);
 
         GraphicCommandListImpl& commandList = threadContext.GetGraphicCommandList();
 
@@ -43,11 +42,7 @@ namespace Boolka
         resourceTracker.Transition(backBuffer, commandList, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
         commandList->OMSetRenderTargets(1, backBufferRTV.GetCPUDescriptor(), FALSE, nullptr);
-        ID3D12DescriptorHeap* descriptorHeaps[] = {mainDescriptorHeap.Get()};
-        commandList->SetDescriptorHeaps(ARRAYSIZE(descriptorHeaps), descriptorHeaps);
-        commandList->SetGraphicsRootDescriptorTable(
-            static_cast<UINT>(ResourceContainer::DefaultRootSigBindPoints::RenderPassSRV),
-            mainDescriptorHeap.GetGPUHandle(0));
+        engineContext.BindSceneResourcesGraphic(commandList);
 
         UINT height = engineContext.GetBackbufferHeight();
         UINT width = engineContext.GetBackbufferWidth();

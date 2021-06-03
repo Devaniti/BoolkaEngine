@@ -29,8 +29,7 @@ namespace Boolka
         auto& resourceContainer = engineContext.GetResourceContainer();
 
         UINT frameIndex = frameContext.GetFrameIndex();
-        Buffer& perFrameCbuffer =
-            resourceContainer.GetFlippableBuffer(frameIndex, ResourceContainer::FlipBuf::Frame);
+        Buffer& perFrameCbuffer = resourceContainer.GetBuffer(ResourceContainer::Buf::Frame);
         UploadBuffer& currentUploadBuffer = resourceContainer.GetFlippableUploadBuffer(
             frameIndex, ResourceContainer::FlipUploadBuf::Frame);
 
@@ -65,8 +64,8 @@ namespace Boolka
         ResourceTransition::Transition(commandList, perFrameCbuffer, D3D12_RESOURCE_STATE_COPY_DEST,
                                        D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
 
-        Buffer& lightingCbuffer = resourceContainer.GetFlippableBuffer(
-            frameIndex, ResourceContainer::FlipBuf::DeferredLighting);
+        Buffer& lightingCbuffer =
+            resourceContainer.GetBuffer(ResourceContainer::Buf::DeferredLighting);
         UploadBuffer& lightingCbufferUploadBuffer = resourceContainer.GetFlippableUploadBuffer(
             frameIndex, ResourceContainer::FlipUploadBuf::DeferredLighting);
 

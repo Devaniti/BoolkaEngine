@@ -36,10 +36,9 @@ namespace Boolka
             resourceContainer.GetRTV(ResourceContainer::RTV::LightBuffer);
         DescriptorHeap& mainDescriptorHeap =
             resourceContainer.GetDescriptorHeap(ResourceContainer::DescHeap::MainHeap);
-        Buffer& frameConstantBuffer =
-            resourceContainer.GetFlippableBuffer(frameIndex, ResourceContainer::FlipBuf::Frame);
-        Buffer& passConstantBuffer = resourceContainer.GetFlippableBuffer(
-            frameIndex, ResourceContainer::FlipBuf::DeferredLighting);
+        Buffer& frameConstantBuffer = resourceContainer.GetBuffer(ResourceContainer::Buf::Frame);
+        Buffer& passConstantBuffer =
+            resourceContainer.GetBuffer(ResourceContainer::Buf::DeferredLighting);
         UploadBuffer& passUploadBuffer = resourceContainer.GetFlippableUploadBuffer(
             frameIndex, ResourceContainer::FlipUploadBuf::DeferredLighting);
 
@@ -67,12 +66,7 @@ namespace Boolka
         }
 
         commandList->OMSetRenderTargets(1, lightBufferRTV.GetCPUDescriptor(), FALSE, nullptr);
-        ID3D12DescriptorHeap* descriptorHeaps[] = {mainDescriptorHeap.Get()};
-        commandList->SetDescriptorHeaps(ARRAYSIZE(descriptorHeaps), descriptorHeaps);
-        commandList->SetGraphicsRootDescriptorTable(
-            static_cast<UINT>(ResourceContainer::DefaultRootSigBindPoints::RenderPassSRV),
-            mainDescriptorHeap.GetGPUHandle(
-                static_cast<UINT>(ResourceContainer::MainSRVDescriptorHeapOffsets::UAVHeapOffset)));
+        engineContext.BindSceneResourcesGraphic(commandList);
 
         UINT height = engineContext.GetBackbufferHeight();
         UINT width = engineContext.GetBackbufferWidth();

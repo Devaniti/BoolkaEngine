@@ -18,6 +18,7 @@
       <TreatWarningAsError>true</TreatWarningAsError>
       <WarningLevel>Level3</WarningLevel>
       <FloatingPointModel>Fast</FloatingPointModel>
+      <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <FxCompile>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>

@@ -54,11 +54,6 @@ namespace Boolka
         UINT GetOpaqueObjectCount() const;
         BatchManager& GetBatchManager();
 
-        void BindResourcesGraphic(CommandList& commandList, DescriptorHeap& descriptorHeap,
-                                  UINT startOffset);
-        void BindResourcesCompute(CommandList& commandList, DescriptorHeap& descriptorHeap,
-                                  UINT startOffset);
-
     private:
         void InitializeBuffers(Device& device, const SceneData::SceneHeader& sceneHeader,
                                size_t& uploadSize, DescriptorHeap& mainSRVHeap,

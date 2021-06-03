@@ -106,18 +106,22 @@ namespace Boolka
     {
         DescriptorHeap& mainDescriptorHeap =
             m_resourceContainer.GetDescriptorHeap(ResourceContainer::DescHeap::MainHeap);
-        m_Scene.BindResourcesGraphic(
-            commandList, mainDescriptorHeap,
-            static_cast<UINT>(ResourceContainer::MainSRVDescriptorHeapOffsets::SceneSRVHeapOffset));
+        ID3D12DescriptorHeap* descriptorHeaps[] = {mainDescriptorHeap.Get()};
+        commandList->SetDescriptorHeaps(ARRAYSIZE(descriptorHeaps), descriptorHeaps);
+        commandList->SetGraphicsRootDescriptorTable(
+            static_cast<UINT>(ResourceContainer::DefaultRootSigBindPoints::MainDescriptorTable),
+            mainDescriptorHeap.GetGPUHandle(0));
     }
 
     void RenderEngineContext::BindSceneResourcesCompute(CommandList& commandList)
     {
         DescriptorHeap& mainDescriptorHeap =
             m_resourceContainer.GetDescriptorHeap(ResourceContainer::DescHeap::MainHeap);
-        m_Scene.BindResourcesCompute(
-            commandList, mainDescriptorHeap,
-            static_cast<UINT>(ResourceContainer::MainSRVDescriptorHeapOffsets::SceneSRVHeapOffset));
+        ID3D12DescriptorHeap* descriptorHeaps[] = {mainDescriptorHeap.Get()};
+        commandList->SetDescriptorHeaps(ARRAYSIZE(descriptorHeaps), descriptorHeaps);
+        commandList->SetComputeRootDescriptorTable(
+            static_cast<UINT>(ResourceContainer::DefaultRootSigBindPoints::MainDescriptorTable),
+            mainDescriptorHeap.GetGPUHandle(0));
     }
 
     UINT RenderEngineContext::GetBackbufferWidth() const

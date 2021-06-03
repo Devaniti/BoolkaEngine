@@ -28,8 +28,7 @@ namespace Boolka
         Texture2D& depth = resourceContainer.GetTexture(ResourceContainer::Tex::GbufferDepth);
         RenderTargetView& lightBufferRTV =
             resourceContainer.GetRTV(ResourceContainer::RTV::LightBuffer);
-        Buffer& frameConstantBuffer =
-            resourceContainer.GetFlippableBuffer(frameIndex, ResourceContainer::FlipBuf::Frame);
+        Buffer& frameConstantBuffer = resourceContainer.GetBuffer(ResourceContainer::Buf::Frame);
         DepthStencilView& gbufferDSV =
             resourceContainer.GetDSV(ResourceContainer::DSV::GbufferDepth);
         auto& scene = engineContext.GetScene();

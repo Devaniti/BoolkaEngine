@@ -25,8 +25,7 @@ namespace Boolka
             resourceContainer.GetTexture(ResourceContainer::Tex::GbufferDepth);
         DepthStencilView& gbufferDSV =
             resourceContainer.GetDSV(ResourceContainer::DSV::GbufferDepth);
-        Buffer& frameConstantBuffer =
-            resourceContainer.GetFlippableBuffer(frameIndex, ResourceContainer::FlipBuf::Frame);
+        Buffer& frameConstantBuffer = resourceContainer.GetBuffer(ResourceContainer::Buf::Frame);
         GraphicCommandListImpl& commandList = threadContext.GetGraphicCommandList();
 
         BLK_GPU_SCOPE(commandList.Get(), "ZRenderPass");
