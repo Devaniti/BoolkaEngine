@@ -1,0 +1,17 @@
+name: Build
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
+    
+    - name: Build all and run tests
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      shell: cmd
+      run: .\HelperScripts\BuildAllAndRunTests.bat
