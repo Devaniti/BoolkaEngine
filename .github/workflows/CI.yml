@@ -1,4 +1,4 @@
-name: MSBuild
+name: Build
 
 on: [push]
 
@@ -8,6 +8,5 @@ jobs:
 
     steps:
     - name: Build all and run tests
-      working-directory: ${{github.workspace}}
       shell: cmd
-      run: HelperScripts\BuildAllAndRunTests.bat
+      run: ${{github.workspace}}\HelperScripts\BuildAllAndRunTests.bat
