@@ -9,4 +9,4 @@ jobs:
     steps:
     - name: Build all and run tests
       shell: cmd
-      run: ${{github.workspace}}\HelperScripts\BuildAllAndRunTests.bat
+      run: .\HelperScripts\BuildAllAndRunTests.bat
