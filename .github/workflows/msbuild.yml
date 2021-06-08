@@ -8,6 +8,6 @@ jobs:
 
     steps:
     - name: Build all and run tests
-      working-directory: ${{env.GITHUB_WORKSPACE}}
+      working-directory: ${{github.workspace}}
       shell: cmd
       run: HelperScripts\BuildAllAndRunTests.bat
