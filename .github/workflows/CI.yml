@@ -3,15 +3,40 @@ name: Build
 on: [push]
 
 jobs:
-  build:
+  build_and_run_tests:
     runs-on: windows-latest
-
     steps:
-    - uses: actions/checkout@v2
+    - name: Sync
+      uses: actions/checkout@v2
       with:
         submodules: 'recursive'
-    
-    - name: Build all and run tests
+        
+    - name: Build Debug configuration
       working-directory: ${{env.GITHUB_WORKSPACE}}
       shell: cmd
-      run: .\HelperScripts\BuildAllAndRunTests.bat
+      run: .\HelperScripts\Internal\BuildSolution.bat Debug
+      
+    - name: Run tests on Debug configuration
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      shell: cmd
+      run: .\HelperScripts\Internal\RunTests.bat Debug
+      
+    - name: Build Development configuration
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      shell: cmd
+      run: .\HelperScripts\Internal\BuildSolution.bat Development
+      
+    - name: Run tests on Development configuration
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      shell: cmd
+      run: .\HelperScripts\Internal\RunTests.bat Development
+      
+    - name: Build Release configuration
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      shell: cmd
+      run: .\HelperScripts\Internal\BuildSolution.bat Release
+      
+    - name: Run tests on Release configuration
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      shell: cmd
+      run: .\HelperScripts\Internal\RunTests.bat Release

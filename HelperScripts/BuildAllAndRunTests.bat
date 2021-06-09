@@ -1,11 +1,17 @@
 @echo off
 pushd "%~dp0"
-  call Internal\FindVisualStudioInstallation.bat
-  echo Building solution
-  call Internal\BuildSolution.bat Debug || exit /b 1
-  call Internal\BuildSolution.bat Development || exit /b 1
-  call Internal\BuildSolution.bat Release || exit /b 1
-  call Internal\RunTests.bat Debug || exit /b 1
-  call Internal\RunTests.bat Development || exit /b 1
-  call Internal\RunTests.bat Release || exit /b 1
+
+echo Building solution
+call Internal\BuildSolution.bat Debug || goto error
+call Internal\BuildSolution.bat Development || goto error
+call Internal\BuildSolution.bat Release || goto error
+call Internal\RunTests.bat Debug || goto error
+call Internal\RunTests.bat Development || goto error
+call Internal\RunTests.bat Release || goto error
+  
 popd
+exit /b 0
+
+:error
+popd
+exit /b 1

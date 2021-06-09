@@ -1,7 +1,7 @@
 @echo off
 
 if defined InstallDir (
-  exit /b 0
+  goto success
 )
 
 echo Searching for Visual Studio intallation
@@ -12,7 +12,13 @@ for /f "usebackq tokens=*" %%i in (`"%ProgramFiles(x86)%\Microsoft Visual Studio
 
 if %InstallDir%=="" (
   echo Visual studio not found
-  exit /b 1
+  goto error
 )
 
 echo Using Visual Studio from path: %InstallDir%
+
+:success
+exit /b 0
+
+:error
+exit /b 1
