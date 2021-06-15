@@ -43,7 +43,7 @@ namespace Boolka
         }
 
         data.m_Size = size.QuadPart;
-        data.m_Data = new char[data.m_Size];
+        data.m_Data = VirtualAlloc(NULL, data.m_Size, MEM_COMMIT, PAGE_READWRITE);
 
         BLK_ASSERT(static_cast<DWORD>(data.m_Size) == data.m_Size);
 
@@ -103,7 +103,7 @@ namespace Boolka
     {
         BLK_ASSERT(data.m_Size != 0);
         BLK_ASSERT(data.m_Data != nullptr);
-        delete[] static_cast<char*>(data.m_Data);
+        VirtualFree(data.m_Data, 0, MEM_RELEASE);
         data = {};
     }
 
