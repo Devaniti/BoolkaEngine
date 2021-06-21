@@ -69,7 +69,7 @@ namespace Boolka
 
         for (size_t i = 0; i < BLK_MAX_LIGHT_COUNT * BLK_TEXCUBE_FACE_COUNT + 1; ++i)
         {
-            uploadData.frustums[i] = Frustum(uploadData.viewProjMatricies[i]);
+            uploadData.frustums[i] = Frustum(uploadData.viewProjMatricies[i].Transpose());
         }
 
         passUploadBuffer.Upload(&uploadData, sizeof(uploadData));
@@ -176,7 +176,7 @@ namespace Boolka
         auto& defaultRootSig =
             resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default);
 
-        MemoryBlock AS = DebugFileReader::ReadFile("SimpleAmplificationShader.cso");
+        MemoryBlock AS = DebugFileReader::ReadFile("ShadowMapAmplificationShader.cso");
         MemoryBlock MS = DebugFileReader::ReadFile("ShadowMapPassMeshShader.cso");
 
         bool res =

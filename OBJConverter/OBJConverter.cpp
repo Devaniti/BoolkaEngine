@@ -456,6 +456,21 @@ namespace Boolka
                     dxIndices[i] = verticesMap[remappedVertexKey];
                 }
 
+                object.boundingBox.GetMax() = {-FLT_MAX, -FLT_MAX, -FLT_MAX, 1.0f};
+                object.boundingBox.GetMin() = {FLT_MAX, FLT_MAX, FLT_MAX, 1.0f};
+
+                auto& positions = m_attrib.vertices;
+
+                for (size_t i = 0; i < indices.size(); i++)
+                {
+                    auto& index = indices[i];
+                    int vertexIndex = index.vertex_index;
+                    Vector4 xyz = {positions[3 * vertexIndex], positions[3 * vertexIndex + 2],
+                                   positions[3 * vertexIndex + 1], 1.0f};
+                    object.boundingBox.GetMax() = Max(object.boundingBox.GetMax(), xyz);
+                    object.boundingBox.GetMin() = Min(object.boundingBox.GetMin(), xyz);
+                }
+
                 std::vector<uint32_t> adjacency(nFaces * 3);
                 HRESULT hr = DirectX::GenerateAdjacencyAndPointReps(dxIndices.data(), nFaces,
                                                                     dxVertices.data(), nVerts, 0.0f,

@@ -78,7 +78,7 @@ bool IntersectionFrustumAABB(const in Frustum currentFrustum, const in AABB boun
     {
         float4 mask = (currentFrustum.planes[i] > float4(0, 0, 0, 0));
 
-        float4 min = lerp(boundingBox.max, boundingBox.min, mask);
+        float4 min = lerp(boundingBox.min, boundingBox.max, mask);
 
         float dotMin = dot(currentFrustum.planes[i], min);
 
