@@ -100,6 +100,9 @@
     <Filter Include="Shaders\LightingLibrary">
       <UniqueIdentifier>{28262d4d-3c2e-4cd3-941a-3c1dedbd2af9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="APIWrappers\Queries">
+      <UniqueIdentifier>{84c42ea7-72a4-49a0-a159-d98b3405f0c1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WindowManagement\WindowManager.h">
@@ -353,6 +356,15 @@
     <ClInclude Include="Containers\HLSLSharedStructures.h">
       <Filter>Containers</Filter>
     </ClInclude>
+    <ClInclude Include="Containers\TimestampContainer.h">
+      <Filter>Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\Queries\QueryHeap.h">
+      <Filter>APIWrappers\Queries</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugHelpers\ImguiGraphHelper.h">
+      <Filter>DebugHelpers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WindowManagement\WindowManager.cpp">
@@ -593,6 +605,15 @@
     </ClCompile>
     <ClCompile Include="Containers\ResourceContainer.cpp">
       <Filter>Containers</Filter>
+    </ClCompile>
+    <ClCompile Include="Containers\TimestampContainer.cpp">
+      <Filter>Containers</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\Queries\QueryHeap.cpp">
+      <Filter>APIWrappers\Queries</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugHelpers\ImguiGraphHelper.cpp">
+      <Filter>DebugHelpers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

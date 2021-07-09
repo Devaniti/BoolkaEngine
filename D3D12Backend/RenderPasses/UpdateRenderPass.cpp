@@ -25,6 +25,7 @@ namespace Boolka
 
     bool UpdateRenderPass::Render(RenderContext& renderContext, ResourceTracker& resourceTracker)
     {
+        BLK_RENDER_PASS_START(UpdateRenderPass);
         auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
         auto& resourceContainer = engineContext.GetResourceContainer();
 
@@ -35,8 +36,6 @@ namespace Boolka
 
         GraphicCommandListImpl& commandList = threadContext.GetGraphicCommandList();
 
-        BLK_GPU_SCOPE(commandList.Get(), "UpdateRenderPass");
-        BLK_RENDER_DEBUG_ONLY(resourceTracker.ValidateStates(commandList));
 
         ResourceTransition::Transition(commandList, perFrameCbuffer,
                                        D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER,

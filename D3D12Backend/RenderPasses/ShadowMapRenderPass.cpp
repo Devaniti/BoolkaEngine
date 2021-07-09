@@ -21,6 +21,7 @@ namespace Boolka
 
     bool ShadowMapRenderPass::Render(RenderContext& renderContext, ResourceTracker& resourceTracker)
     {
+        BLK_RENDER_PASS_START(ShadowMapRenderPass);
         auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
         auto& resourceContainer = engineContext.GetResourceContainer();
 
@@ -29,9 +30,6 @@ namespace Boolka
         GraphicCommandListImpl& commandList = threadContext.GetGraphicCommandList();
 
         const auto& batchManager = engineContext.GetScene().GetBatchManager();
-
-        BLK_GPU_SCOPE(commandList.Get(), "ShadowMapRenderPass");
-        BLK_RENDER_DEBUG_ONLY(resourceTracker.ValidateStates(commandList));
 
         auto& passConstantBuffer =
             resourceContainer.GetBuffer(ResourceContainer::Buf::ShadowMap);

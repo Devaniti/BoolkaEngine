@@ -55,6 +55,7 @@ namespace Boolka
 
     bool DebugOverlayPass::Render(RenderContext& renderContext, ResourceTracker& resourceTracker)
     {
+        BLK_RENDER_PASS_START(DebugOverlayPass);
         const std::lock_guard<std::recursive_mutex> lock(g_imguiMutex);
 
         ImguiFlipFrame();
@@ -68,9 +69,6 @@ namespace Boolka
         RenderTargetView& backbufferRTV = resourceContainer.GetBackBufferRTV(frameIndex);
 
         GraphicCommandListImpl& commandList = threadContext.GetGraphicCommandList();
-
-        BLK_GPU_SCOPE(commandList.Get(), "DebugOverlayPass");
-        BLK_RENDER_DEBUG_ONLY(resourceTracker.ValidateStates(commandList));
 
         resourceTracker.Transition(backbuffer, commandList, D3D12_RESOURCE_STATE_RENDER_TARGET);
         commandList->OMSetRenderTargets(1, backbufferRTV.GetCPUDescriptor(), FALSE, nullptr);
@@ -105,8 +103,8 @@ namespace Boolka
         const auto& cameraPos = frameContext.GetCameraPos();
         const auto& viewMatrix = frameContext.GetViewMatrix();
         const Vector3 viewDir{viewMatrix[0][2], viewMatrix[1][2], viewMatrix[2][2]};
-        ImGui::Text("%.1f FPS (avg %.1f FPS)", fps, fpsStable);
-        ImGui::Text("%.2f ms (avg %.2f ms)", debugStats.frameTime * 1000.0f,
+        ImGui::Text("%5.1f FPS (avg %5.1f FPS)", fps, fpsStable);
+        ImGui::Text("%5.2f ms (avg %5.2f ms)", debugStats.frameTime * 1000.0f,
                     debugStats.frameTimeStable * 1000.0f);
         ImGui::Text("Resolution: %dx%d", engineContext.GetBackbufferWidth(),
                     engineContext.GetBackbufferHeight());
@@ -115,8 +113,114 @@ namespace Boolka
             ImGui::Text("Pos X:%.2f Y:%.2f Z:%.2f", cameraPos.x(), cameraPos.y(), cameraPos.z());
             ImGui::Text("Dir X:%.2f Y:%.2f Z:%.2f", viewDir.x(), viewDir.y(), viewDir.z());
         }
+        if (ImGui::CollapsingHeader("GPU Times", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            ImguiUIGPUTimes(renderContext);
+        }
+        if (ImGui::CollapsingHeader("Graphs", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            ImguiGraphs(renderContext);
+        }
         ImGui::End();
         ImGui::Render();
+    }
+
+    const char* GetMarkerName(size_t i)
+    {
+        BLK_ASSERT(i < static_cast<size_t>(TimestampContainer::Markers::Count));
+
+        TimestampContainer::Markers marker = static_cast<TimestampContainer::Markers>(i);
+        switch (marker)
+        {
+        case TimestampContainer::Markers::UpdateRenderPass:
+            return "UpdateRenderPass";
+            break;
+        case TimestampContainer::Markers::ZRenderPass:
+            return "ZRenderPass";
+            break;
+        case TimestampContainer::Markers::ShadowMapRenderPass:
+            return "ShadowMapRenderPass";
+            break;
+        case TimestampContainer::Markers::GBufferRenderPass:
+            return "GBufferRenderPass";
+            break;
+        case TimestampContainer::Markers::ReflectionRenderPass:
+            return "ReflectionRenderPass";
+            break;
+        case TimestampContainer::Markers::DeferredLightingPass:
+            return "DeferredLightingPass";
+            break;
+        case TimestampContainer::Markers::SkyBoxRenderPass:
+            return "SkyBoxRenderPass";
+            break;
+        case TimestampContainer::Markers::TransparentRenderPass:
+            return "TransparentRenderPass";
+            break;
+        case TimestampContainer::Markers::ToneMappingPass:
+            return "ToneMappingPass";
+            break;
+        case TimestampContainer::Markers::DebugOverlayPass:
+            return "DebugOverlayPass";
+            break;
+        case TimestampContainer::Markers::PresentPass:
+            return "PresentPass";
+            break;
+        case TimestampContainer::Markers::EndFrame:
+            return "Frame Time";
+            break;
+        default:
+            BLK_ASSERT(0);
+            return "ERROR";
+            break;
+        }
+    }
+
+    void DebugOverlayPass::ImguiUIGPUTimes(const RenderContext& renderContext)
+    {
+        auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
+        const auto& debugStats = frameContext.GetFrameStats();
+        const auto& gpuTimes = debugStats.gpuTimes;
+        const auto& gpuTimesStable = debugStats.gpuTimesStable;
+
+        if (ImGui::BeginTable("GPUTimes", 4, ImGuiTableFlags_SizingStretchProp))
+        {
+            for (size_t i = 0; i < ARRAYSIZE(gpuTimes.Markers); ++i)
+            {
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+                ImGui::Text(GetMarkerName(i));
+                ImGui::TableNextColumn();
+                ImGui::Text("%.2fms", 1000.0f * gpuTimes.Markers[i]);
+                ImGui::TableNextColumn();
+                ImGui::Text("%.2fms", 1000.0f * gpuTimesStable.Markers[i]);
+                ImGui::TableNextColumn();
+                m_GPUPassGraphs[i].PushValueAndRender(1000.0f * gpuTimes.Markers[i], nullptr, 300, 50);
+            }
+
+            ImGui::EndTable();
+        }
+    }
+
+    void DebugOverlayPass::ImguiGraphs(const RenderContext& renderContext)
+    {
+        auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
+
+        const auto& debugStats = frameContext.GetFrameStats();
+        const auto& gpuTimes = debugStats.gpuTimes;
+        float windowWidth = ImGui::GetWindowSize().x;
+        float graphWidth = windowWidth - 32.0f;
+        float graphHeight = 80.0f;
+
+        float currentFrameTime = debugStats.frameTime * 1000.0f; // convert to ms
+        float currentFPS = 1.0f / debugStats.frameTime;
+        float currentGPUTime =
+            gpuTimes.Markers[static_cast<size_t>(TimestampContainer::Markers::EndFrame)] *
+            1000.0f; // convert to ms
+
+        m_FPSGraph.PushValueAndRender(currentFPS, "FPS", graphWidth, graphHeight);
+        m_FrameTimeGraph.PushValueAndRender(currentFrameTime, "Frame time", graphWidth,
+                                            graphHeight);
+        m_GPUTime.PushValueAndRender(currentGPUTime, "GPU Time", graphWidth, graphHeight);
     }
 
 } // namespace Boolka

@@ -23,17 +23,20 @@ namespace Boolka
 
     bool PresentPass::Render(RenderContext& renderContext, ResourceTracker& resourceTracker)
     {
+        BLK_RENDER_PASS_START(PresentPass);
+
         auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
         auto& resourceContainer = engineContext.GetResourceContainer();
 
         GraphicCommandListImpl& commandList = threadContext.GetGraphicCommandList();
 
-        BLK_GPU_SCOPE(commandList.Get(), "PresentPass");
-        BLK_RENDER_DEBUG_ONLY(resourceTracker.ValidateStates(commandList));
-
         UINT frameIndex = frameContext.GetFrameIndex();
         resourceTracker.Transition(resourceContainer.GetBackBuffer(frameIndex), commandList,
                                    D3D12_RESOURCE_STATE_PRESENT);
+
+        engineContext.GetTimestampContainer().Mark(commandList,
+                                                   TimestampContainer::Markers::EndFrame);
+        engineContext.GetTimestampContainer().FinishFrame(commandList, renderContext, frameIndex);
 
         return true;
     }

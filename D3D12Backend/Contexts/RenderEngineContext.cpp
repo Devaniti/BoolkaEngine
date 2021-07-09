@@ -58,6 +58,11 @@ namespace Boolka
         res = m_resourceContainer.Initialize(device, *this, displayController, resourceTracker);
         BLK_ASSERT_VAR(res);
 
+        ResetInitializationCommandList();
+        res = m_timestampContainer.Initialize(device, m_InitializationCommandList);
+        BLK_ASSERT_VAR(res);
+        ExecuteInitializationCommandList(device);
+
 #ifdef BLK_RENDER_DEBUG
         m_Device = &device;
 #endif
@@ -72,6 +77,7 @@ namespace Boolka
         m_InitializationFence.Unload();
 
         m_resourceContainer.Unload();
+        m_timestampContainer.Unload();
 
         UnloadScene();
 
@@ -137,6 +143,11 @@ namespace Boolka
     ResourceContainer& RenderEngineContext::GetResourceContainer()
     {
         return m_resourceContainer;
+    }
+
+    TimestampContainer& RenderEngineContext::GetTimestampContainer()
+    {
+        return m_timestampContainer;
     }
 
     GraphicCommandListImpl& RenderEngineContext::GetInitializationCommandList()

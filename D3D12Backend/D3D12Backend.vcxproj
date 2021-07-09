@@ -153,6 +153,7 @@
     <ClInclude Include="APIWrappers\PipelineState\PipelineStateParameters.h" />
     <ClInclude Include="APIWrappers\PipelineState\StateObject.h" />
     <ClInclude Include="APIWrappers\PipelineState\StateObjectParameters.h" />
+    <ClInclude Include="APIWrappers\Queries\QueryHeap.h" />
     <ClInclude Include="APIWrappers\Raytracing\AccelerationStructure\BottomLevelAS.h" />
     <ClInclude Include="APIWrappers\Raytracing\AccelerationStructure\TopLevelAS.h" />
     <ClInclude Include="APIWrappers\RenderDebug.h" />
@@ -186,12 +187,14 @@
     <ClInclude Include="Containers\Scene.h" />
     <ClInclude Include="Containers\ShaderTable.h" />
     <ClInclude Include="Containers\Streaming\SceneData.h" />
+    <ClInclude Include="Containers\TimestampContainer.h" />
     <ClInclude Include="Contexts\FrameStats.h" />
     <ClInclude Include="Contexts\RenderContext.h" />
     <ClInclude Include="Contexts\RenderEngineContext.h" />
     <ClInclude Include="Contexts\RenderFrameContext.h" />
     <ClInclude Include="Contexts\RenderThreadContext.h" />
     <ClInclude Include="DebugHelpers\DebugRenderScope.h" />
+    <ClInclude Include="DebugHelpers\ImguiGraphHelper.h" />
     <ClInclude Include="FeatureSupportHelper.h" />
     <ClInclude Include="ProjectConfig.h" />
     <ClInclude Include="ProjectHelpers.h" />
@@ -242,6 +245,7 @@
     <ClCompile Include="APIWrappers\PipelineState\GraphicPipelineState.cpp" />
     <ClCompile Include="APIWrappers\PipelineState\PipelineState.cpp" />
     <ClCompile Include="APIWrappers\PipelineState\StateObject.cpp" />
+    <ClCompile Include="APIWrappers\Queries\QueryHeap.cpp" />
     <ClCompile Include="APIWrappers\Raytracing\AccelerationStructure\BottomLevelAS.cpp" />
     <ClCompile Include="APIWrappers\Raytracing\AccelerationStructure\TopLevelAS.cpp" />
     <ClCompile Include="APIWrappers\RenderDebug.cpp" />
@@ -274,12 +278,14 @@
     <ClCompile Include="Containers\Scene.cpp" />
     <ClCompile Include="Containers\ShaderTable.cpp" />
     <ClCompile Include="Containers\Streaming\SceneData.cpp" />
+    <ClCompile Include="Containers\TimestampContainer.cpp" />
     <ClCompile Include="Contexts\FrameStats.cpp" />
     <ClCompile Include="Contexts\RenderContext.cpp" />
     <ClCompile Include="Contexts\RenderEngineContext.cpp" />
     <ClCompile Include="Contexts\RenderFrameContext.cpp" />
     <ClCompile Include="Contexts\RenderThreadContext.cpp" />
     <ClCompile Include="DebugHelpers\DebugRenderScope.cpp" />
+    <ClCompile Include="DebugHelpers\ImguiGraphHelper.cpp" />
     <ClCompile Include="FeatureSupportHelper.cpp" />
     <ClCompile Include="RenderBackend.cpp" />
     <ClCompile Include="RenderBackendImpl.cpp" />

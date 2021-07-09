@@ -7,8 +7,8 @@
 namespace Boolka
 {
 
-    DebugRenderScope::DebugRenderScope(ID3D12GraphicsCommandList* commandList, const char* name)
-        : m_commandList(commandList)
+    DebugRenderScope::DebugRenderScope(CommandList& commandList, const char* name)
+        : m_commandList(commandList.Get())
     {
         StartEvent(name);
     }

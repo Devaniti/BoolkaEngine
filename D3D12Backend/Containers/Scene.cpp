@@ -338,7 +338,7 @@ namespace Boolka
                                std::vector<UINT64>& scratchBufferOffsets,
                                std::vector<UINT64>& buildOffsets)
     {
-        BLK_GPU_SCOPE(initCommandList.Get(), "Scene::PrecalculateAS");
+        BLK_GPU_SCOPE(initCommandList, "Scene::PrecalculateAS");
 
         const auto* objects = dataWrapper.cpuObjectHeaders;
         const UINT objectCount = sceneHeader.opaqueCount;
@@ -437,7 +437,7 @@ namespace Boolka
                              const SceneData::SceneHeader& sceneHeader, Buffer& uploadBuffer,
                              UINT64& uploadBufferOffset)
     {
-        BLK_GPU_SCOPE(initCommandList.Get(), "Scene::UploadSkyBox");
+        BLK_GPU_SCOPE(initCommandList, "Scene::UploadSkyBox");
         UINT skyBoxResolution = sceneHeader.skyBoxResolution;
         UINT skyBoxMipCount = sceneHeader.skyBoxMipCount;
         UINT bytesPerPixel = Texture2D::GetBPP(ms_SkyBoxTextureFormat) / 8;
@@ -492,7 +492,7 @@ namespace Boolka
                                const SceneData::DataWrapper& dataWrapper, Buffer& uploadBuffer,
                                UINT64& uploadBufferOffset)
     {
-        BLK_GPU_SCOPE(initCommandList.Get(), "Scene::UploadTextures");
+        BLK_GPU_SCOPE(initCommandList, "Scene::UploadTextures");
         UINT bytesPerPixel = Texture2D::GetBPP(ms_SceneTexturesFormat) / 8;
         BLK_ASSERT(bytesPerPixel != 0);
 
@@ -566,9 +566,9 @@ namespace Boolka
         UINT64 indexBufferAddress = m_RTIndexBuffer->GetGPUVirtualAddress();
         UINT64 postBuildDataAddress = postBuildDataBuffer->GetGPUVirtualAddress();
         {
-            BLK_GPU_SCOPE(initCommandList.Get(), "Scene::BuildAS");
+            BLK_GPU_SCOPE(initCommandList, "Scene::BuildAS");
             {
-                BLK_GPU_SCOPE(initCommandList.Get(), "BuildBLAS");
+                BLK_GPU_SCOPE(initCommandList, "BuildBLAS");
                 for (size_t i = 0; i < objectCount; ++i)
                 {
                     UINT64 postBuildDataOffset =
@@ -597,7 +597,7 @@ namespace Boolka
         engineContext.ExecuteInitializationCommandList(device);
         engineContext.ResetInitializationCommandList();
 
-        BLK_GPU_SCOPE(initCommandList.Get(), "Scene::BuildAS");
+        BLK_GPU_SCOPE(initCommandList, "Scene::BuildAS");
 
         void* postBuildData = postBuildDataReadbackBuffer.Map(
             0, sizeof(D3D12_RAYTRACING_ACCELERATION_STRUCTURE_POSTBUILD_INFO_COMPACTED_SIZE_DESC) *
@@ -635,7 +635,7 @@ namespace Boolka
 
         UINT64 currentBlasDestAddress = blasDestAddress;
         {
-            BLK_GPU_SCOPE(initCommandList.Get(), "CopyAndCompactBLAS");
+            BLK_GPU_SCOPE(initCommandList, "CopyAndCompactBLAS");
             for (size_t i = 0; i < objectCount; ++i)
             {
                 initCommandList->CopyRaytracingAccelerationStructure(
@@ -695,7 +695,7 @@ namespace Boolka
                               const SceneData::SceneHeader& sceneHeader, Buffer& uploadBuffer,
                               UINT64& uploadBufferOffset)
     {
-        BLK_GPU_SCOPE(initCommandList.Get(), "Scene::UploadBuffers");
+        BLK_GPU_SCOPE(initCommandList, "Scene::UploadBuffers");
         initCommandList->CopyBufferRegion(m_VertexBuffer1.Get(), 0, uploadBuffer.Get(),
                                           uploadBufferOffset, sceneHeader.vertex1Size);
         uploadBufferOffset += sceneHeader.vertex1Size;

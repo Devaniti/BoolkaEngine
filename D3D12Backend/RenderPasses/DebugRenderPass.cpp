@@ -28,6 +28,7 @@ namespace Boolka
 
     bool DebugRenderPass::Render(RenderContext& renderContext, ResourceTracker& resourceTracker)
     {
+        // BLK_RENDER_PASS_START(DebugRenderPass);
         auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
         auto& resourceContainer = engineContext.GetResourceContainer();
 
@@ -39,8 +40,6 @@ namespace Boolka
 
         GraphicCommandListImpl& commandList =
             renderContext.GetRenderThreadContext().GetGraphicCommandList();
-
-        BLK_GPU_SCOPE(commandList.Get(), "DebugRenderPass");
 
         resourceTracker.Transition(backbuffer, commandList, D3D12_RESOURCE_STATE_RENDER_TARGET);
         commandList->OMSetRenderTargets(1, backbufferRTV.GetCPUDescriptor(), FALSE, nullptr);

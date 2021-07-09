@@ -18,6 +18,10 @@ namespace Boolka
 
     bool ReferenceRenderPass::Render(RenderContext& renderContext, ResourceTracker& resourceTracker)
     {
+        // Uncomment and replace class name when creating new RenderPass
+        // Also add new class to TimestampContainer::Markers
+        //BLK_RENDER_PASS_START(ReferenceRenderPass);
+
         auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
         auto& resourceContainer = engineContext.GetResourceContainer();
 
@@ -28,9 +32,6 @@ namespace Boolka
 
         GraphicCommandListImpl& commandList = threadContext.GetGraphicCommandList();
         BLK_UNUSED_VARIABLE(commandList); // Remove when creating new RenderPass
-
-        BLK_GPU_SCOPE(commandList.Get(), "ReferenceRenderPass");
-        BLK_RENDER_DEBUG_ONLY(resourceTracker.ValidateStates(commandList));
 
         return true;
     }
