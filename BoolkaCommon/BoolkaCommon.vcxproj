@@ -121,6 +121,7 @@
     <ClInclude Include="Structures\Frustum.h" />
     <ClInclude Include="Structures\Matrix.h" />
     <ClInclude Include="Structures\MemoryBlock.h" />
+    <ClInclude Include="Structures\Sphere.h" />
     <ClInclude Include="Structures\Vector.h" />
     <ClInclude Include="Structures\VectorSSE.h" />
   </ItemGroup>
@@ -138,6 +139,7 @@
     <ClCompile Include="Structures\AABB.cpp" />
     <ClCompile Include="Structures\Frustum.cpp" />
     <ClCompile Include="Structures\Matrix.cpp" />
+    <ClCompile Include="Structures\Sphere.cpp" />
     <ClCompile Include="Structures\VectorSSE.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

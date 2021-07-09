@@ -10,7 +10,7 @@ namespace Boolka
     {
     public:
         Buffer() = default;
-        ~Buffer();
+        ~Buffer() = default;
 
         bool Initialize(Device& device, UINT64 size, D3D12_HEAP_TYPE heapType,
                         D3D12_RESOURCE_FLAGS resourceFlags, D3D12_RESOURCE_STATES initialState);

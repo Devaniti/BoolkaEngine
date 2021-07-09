@@ -24,7 +24,7 @@ float VectorToDepth(float3 vec, float n, float f)
 
 float CalculatePointLightShadow(uint lightIndex, float3 lightVector)
 {
-    float4 samplePos = mul(float4(-lightVector, 0.0f), PerFrame.invViewMatrix);
+    float4 samplePos = mul(float4(-lightVector, 0.0f), Frame.invViewMatrix);
     float comparisonValue =
         VectorToDepth(samplePos.xyz, LightingData.lights[lightIndex].viewPos_nearZ.w,
                       LightingData.lights[lightIndex].color_farZ.w);

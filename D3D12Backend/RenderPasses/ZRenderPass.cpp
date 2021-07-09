@@ -11,6 +11,7 @@
 #include "Contexts/RenderFrameContext.h"
 #include "Contexts/RenderThreadContext.h"
 #include "RenderSchedule/ResourceTracker.h"
+#include "APIWrappers/RenderDebug.h"
 
 namespace Boolka
 {
@@ -61,8 +62,8 @@ namespace Boolka
 
         commandList->SetPipelineState(m_PSO.Get());
 
-        engineContext.GetScene().GetBatchManager().Render(commandList,
-                                                          BatchManager::BatchType::Opaque);
+        //engineContext.GetScene().GetBatchManager().Render(commandList, renderContext,
+        //                                                  BatchManager::BatchType::Opaque);
 
         return true;
     }
@@ -85,6 +86,7 @@ namespace Boolka
             ASParam{AS}, MSParam{MS}, RenderTargetParam{0}, DepthStencilParam{true, true},
             DepthFormatParam{});
         BLK_ASSERT_VAR(res);
+        RenderDebug::SetDebugName(m_PSO.Get(), L"ZRenderPass::m_PSO");
 
         return true;
     }

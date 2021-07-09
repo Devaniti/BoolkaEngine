@@ -2,16 +2,6 @@
 
 #include "GBufferRenderPass.h"
 
-#include "APIWrappers/CommandList/GraphicCommandListImpl.h"
-#include "APIWrappers/InputLayout.h"
-#include "APIWrappers/Resources/Textures/Texture2D.h"
-#include "BoolkaCommon/DebugHelpers/DebugFileReader.h"
-#include "Contexts/RenderContext.h"
-#include "Contexts/RenderEngineContext.h"
-#include "Contexts/RenderFrameContext.h"
-#include "Contexts/RenderThreadContext.h"
-#include "RenderSchedule/ResourceTracker.h"
-
 namespace Boolka
 {
 
@@ -73,7 +63,7 @@ namespace Boolka
 
         commandList->SetPipelineState(m_PSO.Get());
 
-        engineContext.GetScene().GetBatchManager().Render(commandList,
+        engineContext.GetScene().GetBatchManager().Render(commandList, renderContext,
                                                           BatchManager::BatchType::Opaque);
 
         return true;
@@ -97,7 +87,7 @@ namespace Boolka
             device, resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default),
             ASParam(AS), MSParam(MS), PSParam(PS),
             RenderTargetParam{2, DXGI_FORMAT_R16G16B16A16_FLOAT},
-            DepthStencilParam{true, false, D3D12_COMPARISON_FUNC_LESS_EQUAL}, DepthFormatParam{});
+            DepthStencilParam{true, true, D3D12_COMPARISON_FUNC_LESS_EQUAL}, DepthFormatParam{});
         BLK_ASSERT_VAR(res);
 
         return true;

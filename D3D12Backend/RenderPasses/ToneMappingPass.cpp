@@ -98,6 +98,7 @@ namespace Boolka
                                     DepthFormatParam{});
         BLK_RENDER_DEBUG_ONLY(device.RemoveLastMessageFilter());
         BLK_ASSERT_VAR(res);
+        RenderDebug::SetDebugName(m_PSO.Get(), L"ToneMappingPass::m_PSO");
 
         inputLayout.Unload();
 

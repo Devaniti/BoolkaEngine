@@ -15,6 +15,7 @@ namespace Boolka
         ID3D12PipelineState* state = nullptr;
 
         HRESULT hr = device->CreatePipelineState(&streamDesc, IID_PPV_ARGS(&state));
+        BLK_ASSERT(SUCCEEDED(hr));
         if (FAILED(hr))
             return false;
 

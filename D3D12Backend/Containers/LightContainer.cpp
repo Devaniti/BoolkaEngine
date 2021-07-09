@@ -52,6 +52,11 @@ namespace Boolka
         return m_SunProj;
     }
 
+    const Matrix4x4& LightContainer::GetSunViewProj() const
+    {
+        return m_SunViewProj;
+    }
+
     void LightContainer::Update(float deltaTime)
     {
         m_CurrentRotation += deltaTime * 0.25f;
@@ -93,6 +98,18 @@ namespace Boolka
                 m_ViewMatrices[i][j] = Matrix4x4::CalculateCubeMapView(j, worldPos);
                 m_ProjMatrices[i][j] = proj;
                 m_ViewProjMatrices[i][j] = m_ViewMatrices[i][j] * proj;
+
+                Frustum testFrustum = Frustum(m_ViewProjMatrices[i][j]);
+
+                static const Vector3 forward[6] = {
+                    {1.0f, 0.0f, 0.0f},  {-1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f},
+                    {0.0f, -1.0f, 0.0f}, {0.0f, 0.0f, 1.0f},  {0.0f, 0.0f, -1.0f},
+                };
+
+                Vector4 testPoint = Vector4(worldPos + forward[j], 1.0f);
+
+                bool test = testFrustum.CheckPoint(testPoint);
+                BLK_ASSERT(test);
             }
         }
     }
@@ -119,6 +136,7 @@ namespace Boolka
 
         m_SunView = view;
         m_SunProj = proj;
+        m_SunViewProj = view * proj;
     }
 
 } // namespace Boolka

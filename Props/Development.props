@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
-  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Label="UserMacros">
+    <VcpkgConfiguration>Debug</VcpkgConfiguration>
+  </PropertyGroup>
   <PropertyGroup>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
@@ -9,11 +11,18 @@
     <ClCompile>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <PreprocessorDefinitions>BLK_FLAG_DEBUG;_ITERATOR_DEBUG_LEVEL=0;_UNICODE;UNICODE</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BLK_CONFIGURATION_DEVELOPMENT;_ITERATOR_DEBUG_LEVEL=0;_UNICODE;UNICODE</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
+    <FxCompile>
+      <DisableOptimizations>false</DisableOptimizations>
+    </FxCompile>
   </ItemDefinitionGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <BuildMacro Include="VcpkgConfiguration">
+      <Value>$(VcpkgConfiguration)</Value>
+    </BuildMacro>
+  </ItemGroup>
 </Project>

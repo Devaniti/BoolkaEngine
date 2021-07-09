@@ -6,22 +6,6 @@
 // Configure whether we are going to do additional depth samples to select one of two neighbours along each axis
 #define BLK_HIGH_QUALITY_RAY_DIFFERENTIALS 1
 
-// Calculate rays from camera
-// Can be usefull for debugging
-//inline void CalculateRay(uint2 vpos, out float3 origin, out float3 direction, out bool needCast)
-//{
-//    needCast = true;
-//
-//    float2 UV = vpos * GetInvBackbufferResolution();
-//    float4 viewProjPos = float4(UV.x * 2.0f - 1.0f, UV.y * -2.0f + 1.0f, 0.0f, 1.0f);
-//
-//    float4 worldPos = mul(viewProjPos, PerFrame.invViewProjMatrix);
-//
-//    worldPos.xyz /= worldPos.w;
-//    origin = PerFrame.cameraWorldPos.xyz;
-//    direction = normalize(worldPos.xyz - origin);
-//}
-
 RayDifferentialPart CalculateRayDifferentialPart(uint2 vpos, float3 origin, float3 direction,
                                                  float depthVal, uint2 offset)
 {
@@ -67,7 +51,7 @@ RayDifferentialPart CalculateRayDifferentialPart(uint2 vpos, float3 origin, floa
     float3 viewPosUsed = CalculateViewPos(UVUsed, depthValUsed);
     float3 worldPosUsed = CalculateWorldPos(viewPosUsed);
 
-    float3 cameraWorldPos = PerFrame.cameraWorldPos.xyz;
+    float3 cameraWorldPos = Frame.cameraWorldPos.xyz;
     float3 cameraDirectionWorldUsed = normalize(worldPosUsed - cameraWorldPos);
     float3 worldSpaceNormalUsed = CalculateWorldSpaceNormal(normalUsed);
     float3 reflectionVectorUsed = reflect(cameraDirectionWorldUsed, worldSpaceNormalUsed);
@@ -89,6 +73,38 @@ RayDifferential CalculateRayDifferentials(uint2 vpos, float3 origin, float3 dire
 
     return Out;
 }
+
+// Calculate rays from camera
+// Can be usefull for debugging
+//inline void CalculateRayCamera(uint2 vpos, out float3 origin, out float3 direction)
+//{
+//    float2 UV = vpos * GetInvBackbufferResolution();
+//    float4 viewProjPos = float4(UV.x * 2.0f - 1.0f, UV.y * -2.0f + 1.0f, 0.0f, 1.0f);
+//
+//    float4 worldPos = mul(viewProjPos, Frame.invViewProjMatrix);
+//
+//    worldPos.xyz /= worldPos.w;
+//    origin = Frame.cameraWorldPos.xyz;
+//    direction = normalize(worldPos.xyz - origin);
+//}
+//
+//inline void CalculateRay(uint2 vpos, out float3 origin, out float3 direction,
+//                         out RayDifferential rayDifferential, out bool needCast)
+//{
+//    needCast = true;
+//
+//    CalculateRayCamera(vpos, origin, direction);
+//
+//    float3 originX, directionX;
+//    CalculateRayCamera(vpos + uint2(1, 0), originX, directionX);
+//    rayDifferential.dx.dO = originX - origin;
+//    rayDifferential.dx.dD = directionX - direction;
+//
+//    float3 originY, directionY;
+//    CalculateRayCamera(vpos + uint2(0, 1), originY, directionY);
+//    rayDifferential.dy.dO = originY - origin;
+//    rayDifferential.dy.dD = directionY - direction;
+//}
 
 inline void CalculateRay(uint2 vpos, out float3 origin, out float3 direction,
                          out RayDifferential rayDifferential, out bool needCast)
@@ -121,7 +137,7 @@ inline void CalculateRay(uint2 vpos, out float3 origin, out float3 direction,
     float3 viewPos = CalculateViewPos(UV, depthVal);
     float3 worldPos = CalculateWorldPos(viewPos);
 
-    float3 cameraWorldPos = PerFrame.cameraWorldPos.xyz;
+    float3 cameraWorldPos = Frame.cameraWorldPos.xyz;
     float3 cameraDirectionWorld = normalize(worldPos - cameraWorldPos);
     float3 worldSpaceNormal = CalculateWorldSpaceNormal(normal);
     float3 reflectionVector = reflect(cameraDirectionWorld, worldSpaceNormal);
@@ -149,8 +165,8 @@ void ReflectionRayGeneration()
     RayDesc ray;
     ray.Origin = origin;
     ray.Direction = direction;
-    ray.TMin = 0.001;
-    ray.TMax = 10000.0;
+    ray.TMin = 0.01f;
+    ray.TMax = 10000.0f;
 
     ReflectionPayload payload = 
     {
@@ -291,9 +307,9 @@ void ReflectionClosestHit(inout ReflectionPayload payload, in BuiltInTriangleInt
     float3 worldPos = WorldRayOrigin() + WorldRayDirection() * RayTCurrent();
     
     float3 albedoVal = SRGBToLinear(sceneTextures[materialID].SampleGrad(anisoSampler, interpolatedVertex.UV, ddxRes, ddyRes).rgb);
-    float3 normalVal = normalize(mul(normalize(interpolatedVertex.normal), (float3x3)PerFrame.viewMatrix));
-    float3 viewPos = mul(float4(worldPos, 1.0f), PerFrame.viewMatrix).xyz;
-    float3 viewDir = mul(float4(WorldRayDirection(), 0.0f), PerFrame.viewMatrix).xyz;
+    float3 normalVal = normalize(mul(normalize(interpolatedVertex.normal), (float3x3)Frame.viewMatrix));
+    float3 viewPos = mul(float4(worldPos, 1.0f), Frame.viewMatrix).xyz;
+    float3 viewDir = mul(float4(WorldRayDirection(), 0.0f), Frame.viewMatrix).xyz;
 
     MaterialData matData = materialsData[materialID];
     payload.color = float4(CalculateLighting(matData, albedoVal, albedoVal, normalVal, viewPos, viewDir), 0.0f);

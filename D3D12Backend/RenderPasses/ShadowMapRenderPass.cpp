@@ -28,55 +28,13 @@ namespace Boolka
 
         GraphicCommandListImpl& commandList = threadContext.GetGraphicCommandList();
 
-        const auto& batchManager = engineContext.GetScene().GetBatchManager();
+        auto& batchManager = engineContext.GetScene().GetBatchManager();
 
         BLK_GPU_SCOPE(commandList.Get(), "ShadowMapRenderPass");
         BLK_RENDER_DEBUG_ONLY(resourceTracker.ValidateStates(commandList));
 
-        auto& passConstantBuffer =
-            resourceContainer.GetBuffer(ResourceContainer::Buf::ShadowMap);
-        auto& passUploadBuffer = resourceContainer.GetFlippableUploadBuffer(
-            frameIndex, ResourceContainer::FlipUploadBuf::ShadowMap);
-
-        resourceTracker.Transition(passConstantBuffer, commandList, D3D12_RESOURCE_STATE_COPY_DEST);
-
-        struct UploadData
-        {
-            Frustum frustums[BLK_MAX_LIGHT_COUNT * BLK_TEXCUBE_FACE_COUNT + 1];
-            Matrix4x4 viewProjMatricies[BLK_MAX_LIGHT_COUNT * BLK_TEXCUBE_FACE_COUNT + 1];
-        } uploadData;
-
-        // Point lights
         auto& lightContainer = frameContext.GetLightContainer();
         auto& lights = lightContainer.GetLights();
-        for (size_t lightIndex = 0; lightIndex < lights.size(); ++lightIndex)
-        {
-            auto& shadowMap =
-                resourceContainer.GetTexture(ResourceContainer::Tex::ShadowMapCube0 + lightIndex);
-            resourceTracker.Transition(shadowMap, commandList, D3D12_RESOURCE_STATE_DEPTH_WRITE);
-
-            for (size_t faceIndex = 0; faceIndex < BLK_TEXCUBE_FACE_COUNT; ++faceIndex)
-            {
-                size_t resourceIndex = lightIndex * BLK_TEXCUBE_FACE_COUNT + faceIndex;
-                uploadData.viewProjMatricies[resourceIndex] =
-                    lightContainer.GetViewProjMatrices()[lightIndex][faceIndex].Transpose();
-            }
-        }
-
-        // Sun light
-        uploadData.viewProjMatricies[BLK_MAX_LIGHT_COUNT * BLK_TEXCUBE_FACE_COUNT] =
-            (lightContainer.GetSunView() * lightContainer.GetSunProj()).Transpose();
-
-        for (size_t i = 0; i < BLK_MAX_LIGHT_COUNT * BLK_TEXCUBE_FACE_COUNT + 1; ++i)
-        {
-            uploadData.frustums[i] = Frustum(uploadData.viewProjMatricies[i]);
-        }
-
-        passUploadBuffer.Upload(&uploadData, sizeof(uploadData));
-        commandList->CopyResource(passConstantBuffer.Get(), passUploadBuffer.Get());
-
-        resourceTracker.Transition(passConstantBuffer, commandList,
-                                   D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
 
         UINT height = BLK_LIGHT_SHADOWMAP_SIZE;
         UINT width = BLK_LIGHT_SHADOWMAP_SIZE;
@@ -97,34 +55,52 @@ namespace Boolka
         engineContext.BindSceneResourcesGraphic(commandList);
         commandList->SetPipelineState(m_PSO.Get());
 
-        commandList->SetGraphicsRootConstantBufferView(
-            static_cast<UINT>(ResourceContainer::DefaultRootSigBindPoints::PassConstantBuffer),
-            passConstantBuffer->GetGPUVirtualAddress());
-
-        // Point lights
+        // Transition all shadowmaps to DEPTH_WRITE
         for (size_t lightIndex = 0; lightIndex < lights.size(); ++lightIndex)
         {
             auto& shadowMap =
                 resourceContainer.GetTexture(ResourceContainer::Tex::ShadowMapCube0 + lightIndex);
             resourceTracker.Transition(shadowMap, commandList, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+        }
+        {
+            auto& shadowMap = resourceContainer.GetTexture(ResourceContainer::Tex::ShadowMapSun);
+            resourceTracker.Transition(shadowMap, commandList, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+        }
 
+        // Clear shadowmaps
+        for (size_t resourceIndex = 0; resourceIndex < lights.size() * BLK_TEXCUBE_FACE_COUNT;
+             ++resourceIndex)
+        {
+            auto& shadowMapDSV =
+                resourceContainer.GetDSV(ResourceContainer::DSV::ShadowMapLight0 + resourceIndex);
+            commandList->ClearDepthStencilView(*shadowMapDSV.GetCPUDescriptor(),
+                                               D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+        }
+        {
+            auto& sunShadowMapDSV = resourceContainer.GetDSV(ResourceContainer::DSV::ShadowMapSun);
+            commandList->ClearDepthStencilView(*sunShadowMapDSV.GetCPUDescriptor(),
+                                               D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+        }
+
+        return true;
+
+        // Render shadowmaps
+        for (size_t lightIndex = 0; lightIndex < lights.size(); ++lightIndex)
+        {
             for (size_t faceIndex = 0; faceIndex < BLK_TEXCUBE_FACE_COUNT; ++faceIndex)
             {
                 size_t resourceIndex = lightIndex * BLK_TEXCUBE_FACE_COUNT + faceIndex;
 
-                auto& shadowMapDSV =
-                    resourceContainer.GetDSV(ResourceContainer::DSV::ShadowMapLight0 +
-                                             lightIndex * BLK_TEXCUBE_FACE_COUNT + faceIndex);
+                auto& shadowMapDSV = resourceContainer.GetDSV(
+                    ResourceContainer::DSV::ShadowMapLight0 + resourceIndex);
 
-                commandList->ClearDepthStencilView(*shadowMapDSV.GetCPUDescriptor(),
-                                                   D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
                 commandList->OMSetRenderTargets(0, nullptr, FALSE, shadowMapDSV.GetCPUDescriptor());
                 commandList->SetGraphicsRoot32BitConstant(
                     static_cast<UINT>(
                         ResourceContainer::DefaultRootSigBindPoints::PassRootConstant),
-                    static_cast<UINT>(resourceIndex), 1);
+                    static_cast<UINT>(BatchManager::ViewType::ShadowMapLight0 + resourceIndex), 0);
 
-                batchManager.Render(commandList,
+                batchManager.Render(commandList, renderContext,
                                     BatchManager::BatchType::ShadowMapLight0 + resourceIndex);
             }
         }
@@ -146,19 +122,15 @@ namespace Boolka
 
             commandList->RSSetScissorRects(1, &scissorRect);
 
-            auto& shadowMap = resourceContainer.GetTexture(ResourceContainer::Tex::ShadowMapSun);
-            resourceTracker.Transition(shadowMap, commandList, D3D12_RESOURCE_STATE_DEPTH_WRITE);
             auto& shadowMapDSV = resourceContainer.GetDSV(ResourceContainer::DSV::ShadowMapSun);
 
-            commandList->ClearDepthStencilView(*shadowMapDSV.GetCPUDescriptor(),
-                                               D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
             commandList->OMSetRenderTargets(0, nullptr, FALSE, shadowMapDSV.GetCPUDescriptor());
             commandList->SetGraphicsRoot32BitConstant(
                 static_cast<UINT>(ResourceContainer::DefaultRootSigBindPoints::PassRootConstant),
-                static_cast<UINT>(BLK_MAX_LIGHT_COUNT * BLK_TEXCUBE_FACE_COUNT), 1);
+                static_cast<UINT>(BatchManager::ViewType::ShadowMapSun), 0);
 
             engineContext.GetScene().GetBatchManager().Render(
-                commandList, BatchManager::BatchType::ShadowMapSun);
+                commandList, renderContext, BatchManager::BatchType::ShadowMapSun);
         }
 
         return true;
@@ -176,13 +148,14 @@ namespace Boolka
         auto& defaultRootSig =
             resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default);
 
-        MemoryBlock AS = DebugFileReader::ReadFile("SimpleAmplificationShader.cso");
+        MemoryBlock AS = DebugFileReader::ReadFile("ShadowMapAmplificationShader.cso");
         MemoryBlock MS = DebugFileReader::ReadFile("ShadowMapPassMeshShader.cso");
 
         bool res =
             m_PSO.Initialize(device, defaultRootSig, ASParam{AS}, MSParam{MS}, RenderTargetParam{0},
                              DepthStencilParam{true, true, D3D12_COMPARISON_FUNC_LESS},
                              DepthFormatParam{}, RasterizerParam{0.001f, 0.0f});
+        RenderDebug::SetDebugName(m_PSO.Get(), L"ShadowMapRenderPass::m_PSO");
         BLK_ASSERT_VAR(res);
 
         return true;

@@ -8,8 +8,9 @@
 #include "BoolkaCommon/DebugHelpers/DebugFileWriter.h"
 #include "BoolkaCommon/DebugHelpers/DebugTimer.h"
 #include "BoolkaCommon/Structures/MemoryBlock.h"
-#include "D3D12Backend/Containers/HLSLSharedStructures.h"
+#include "BoolkaCommon/Structures/Sphere.h"
 #include "D3D12Backend/Containers/Streaming/SceneData.h"
+#include "D3D12Backend/HLSLShared.h"
 #include "ThirdParty/DirectXMesh/DirectXMesh/DirectXMesh.h"
 #include "tinyobjloader/tiny_obj_loader.h"
 
@@ -122,13 +123,14 @@ namespace Boolka
         std::vector<tinyobj::material_t> m_materials;
 
         // Geometry
-        std::vector<SceneData::VertexData1> m_vertexData1;
-        std::vector<SceneData::VertexData2> m_vertexData2;
+        std::vector<HLSLShared::VertexData1> m_vertexData1;
+        std::vector<HLSLShared::VertexData2> m_vertexData2;
         // Contains uint32_t data, but declared as uint8_t since DirectXMesh requires uint8_t vector
         std::vector<uint8_t> m_vertexIndirection;
         std::vector<DirectX::MeshletTriangle> m_indexData;
-        std::vector<SceneData::MeshletData> m_meshlets;
-        std::vector<SceneData::ObjectHeader> m_objects;
+        std::vector<HLSLShared::MeshletData> m_meshlets;
+        std::vector<HLSLShared::MeshletCullData> m_meshletsCull;
+        std::vector<HLSLShared::ObjectData> m_objects;
         size_t m_opaqueObjectCount;
 
         // Materials
@@ -198,6 +200,9 @@ namespace Boolka
 
         WriteVector(fileWriter, m_meshlets, gs_ResourceAlignment);
         std::cout << "Written meshlets buffer" << std::endl;
+
+        WriteVector(fileWriter, m_meshletsCull, gs_ResourceAlignment);
+        std::cout << "Written meshlets cull buffer" << std::endl;
 
         WriteVector(fileWriter, m_objects, gs_ResourceAlignment);
         std::cout << "Written objects buffer" << std::endl;
@@ -412,22 +417,22 @@ namespace Boolka
 
         dxVertices.resize(verticesMap.size());
 
-        auto verticesIter = verticesMap.begin();
-        for (size_t i = 0; i < dxVertices.size(); ++i)
+        for (auto& [uniqueVertex, arrayIndex] : verticesMap)
         {
-            const auto& remappedVertex = *verticesIter;
-            int posIndex = remappedVertex.first.vertexIndex;
-            dxVertices[i] = DirectX::XMFLOAT3{vertices[3 * posIndex], vertices[3 * posIndex + 1],
-                                              vertices[3 * posIndex + 2]};
+            int posIndex = uniqueVertex.vertexIndex;
+            dxVertices[arrayIndex] = DirectX::XMFLOAT3{
+                vertices[3 * posIndex], vertices[3 * posIndex + 2], vertices[3 * posIndex + 1]};
         }
 
         const size_t nVerts = dxVertices.size();
 
-        std::vector<std::vector<SceneData::MeshletData>> processedMeshlets(m_shapes.size());
+        std::vector<std::vector<HLSLShared::MeshletData>> processedMeshlets(m_shapes.size());
+        std::vector<std::vector<HLSLShared::MeshletCullData>> processedMeshletsCull(
+            m_shapes.size());
         std::vector<std::vector<uint8_t>> processedMeshletVertexIndirection(m_shapes.size());
         std::vector<std::vector<DirectX::MeshletTriangle>> processedMeshletTriangles(
             m_shapes.size());
-        std::vector<SceneData::ObjectHeader> processedObjects(m_shapes.size());
+        std::vector<HLSLShared::ObjectData> processedObjects(m_shapes.size());
         std::vector<std::vector<uint32_t>> processedRtIndicies(m_shapes.size());
 
         // Calculating all required data
@@ -436,12 +441,11 @@ namespace Boolka
             [&](tinyobj::shape_t& shape) {
                 size_t shapeIndex = &shape - &m_shapes[0];
 
-                SceneData::ObjectHeader& object = processedObjects[shapeIndex];
+                HLSLShared::ObjectData& object = processedObjects[shapeIndex];
 
                 const auto& material = m_materials[shape.mesh.material_ids[0]];
 
                 int materialIndex = m_materialsMap[material];
-                object.materialIndex = materialIndex;
 
                 const auto& indices = shape.mesh.indices;
                 BLK_CRITICAL_ASSERT(indices.size() % 3 == 0);
@@ -454,6 +458,21 @@ namespace Boolka
                     UniqueVertexKey remappedVertexKey = {index.vertex_index, index.normal_index,
                                                          index.texcoord_index};
                     dxIndices[i] = verticesMap[remappedVertexKey];
+                }
+
+                object.boundingBox.GetMax() = {-FLT_MAX, -FLT_MAX, -FLT_MAX, 1.0f};
+                object.boundingBox.GetMin() = {FLT_MAX, FLT_MAX, FLT_MAX, 1.0f};
+
+                auto& positions = m_attrib.vertices;
+
+                for (size_t i = 0; i < indices.size(); i++)
+                {
+                    auto& index = indices[i];
+                    int vertexIndex = index.vertex_index;
+                    Vector4 xyz = {positions[3 * vertexIndex], positions[3 * vertexIndex + 2],
+                                   positions[3 * vertexIndex + 1], 1.0f};
+                    object.boundingBox.GetMax() = Max(object.boundingBox.GetMax(), xyz);
+                    object.boundingBox.GetMin() = Min(object.boundingBox.GetMin(), xyz);
                 }
 
                 std::vector<uint32_t> adjacency(nFaces * 3);
@@ -472,24 +491,55 @@ namespace Boolka
                         processedMeshletTriangles[shapeIndex], BLK_MESHLET_MAX_VERTS,
                         BLK_MESHLET_MAX_PRIMS);
 
+                    BLK_ASSERT(SUCCEEDED(hr));
+
+                    std::vector<DirectX::CullData> cullDataVector(meshlets.size());
+
+                    hr = DirectX::ComputeCullData(
+                        dxVertices.data(), nVerts, meshlets.data(), meshlets.size(),
+                        ptr_static_cast<uint32_t*>(
+                            processedMeshletVertexIndirection[shapeIndex].data()),
+                        processedMeshletVertexIndirection[shapeIndex].size() /
+                            (sizeof(uint32_t) / sizeof(uint8_t)),
+                        processedMeshletTriangles[shapeIndex].data(),
+                        processedMeshletTriangles[shapeIndex].size(), cullDataVector.data());
+
                     BLK_ASSERT_VAR2(SUCCEEDED(hr), hr);
 
                     object.meshletCount = static_cast<uint32_t>(meshlets.size());
 
-                    std::vector<SceneData::MeshletData>& processedMeshletVector =
+                    std::vector<HLSLShared::MeshletData>& processedMeshletVector =
                         processedMeshlets[shapeIndex];
+                    std::vector<HLSLShared::MeshletCullData>& processedMeshletCullVector =
+                        processedMeshletsCull[shapeIndex];
 
                     processedMeshletVector.resize(meshlets.size());
+                    processedMeshletCullVector.resize(meshlets.size());
 
                     for (size_t i = 0; i < meshlets.size(); ++i)
                     {
-                        SceneData::MeshletData& processedMeshlet = processedMeshletVector[i];
+                        HLSLShared::MeshletData& processedMeshlet = processedMeshletVector[i];
                         const auto& dxMeshlet = meshlets[i];
 
-                        processedMeshlet.VertCount = dxMeshlet.VertCount;
+                        processedMeshlet.MaterialID =
+                            checked_narrowing_cast<uint16_t>(materialIndex);
+                        processedMeshlet.VertCount =
+                            checked_narrowing_cast<uint16_t>(dxMeshlet.VertCount);
                         processedMeshlet.VertOffset = dxMeshlet.VertOffset;
-                        processedMeshlet.PrimCount = dxMeshlet.PrimCount;
+                        processedMeshlet.PrimCount =
+                            checked_narrowing_cast<uint16_t>(dxMeshlet.PrimCount);
                         processedMeshlet.PrimOffset = dxMeshlet.PrimOffset;
+
+                        HLSLShared::MeshletCullData& processedMeshletCull =
+                            processedMeshletCullVector[i];
+                        const DirectX::CullData& cullData = cullDataVector[i];
+
+                        processedMeshletCull.BoundingSphere = Vector4(
+                            cullData.BoundingSphere.Center.x, cullData.BoundingSphere.Center.y,
+                            cullData.BoundingSphere.Center.z, cullData.BoundingSphere.Radius);
+                        processedMeshletCull.NormalCone = cullData.NormalCone.v;
+                        processedMeshletCull.ApexOffset = cullData.ApexOffset;
+
                     }
                 }
 
@@ -516,7 +566,9 @@ namespace Boolka
         std::cout << "Processed meshlets" << std::endl;
 
         // Flattening data to prepare it for writing to disk
-        m_meshlets.reserve(NestedVectorSize(processedMeshlets));
+        const size_t totalMeshletCount = NestedVectorSize(processedMeshlets);
+        m_meshlets.reserve(totalMeshletCount);
+        m_meshletsCull.reserve(totalMeshletCount);
         m_vertexIndirection.reserve(NestedVectorSize(processedMeshletVertexIndirection));
         m_indexData.reserve(NestedVectorSize(processedMeshletTriangles));
         m_objects.reserve(m_shapes.size());
@@ -538,7 +590,7 @@ namespace Boolka
 
                 ++flattenedObjects;
 
-                SceneData::ObjectHeader currentObject = processedObjects[i];
+                HLSLShared::ObjectData currentObject = processedObjects[i];
                 currentObject.meshletOffset = checked_narrowing_cast<uint32_t>(m_meshlets.size());
                 m_objects.push_back(currentObject);
 
@@ -547,11 +599,16 @@ namespace Boolka
                 size_t additionalPrimOffset = m_indexData.size();
                 for (const auto& meshlet : processedMeshlets[i])
                 {
-                    SceneData::MeshletData currentMeshlet = meshlet;
+                    HLSLShared::MeshletData currentMeshlet = meshlet;
                     currentMeshlet.VertOffset += static_cast<uint32_t>(additionalVertOffset);
                     currentMeshlet.PrimOffset += static_cast<uint32_t>(additionalPrimOffset);
 
                     m_meshlets.push_back(currentMeshlet);
+                }
+
+                for (const auto& meshletCull : processedMeshletsCull[i])
+                {
+                    m_meshletsCull.push_back(meshletCull);
                 }
 
                 SceneData::CPUObjectHeader currentCPUObject{};
@@ -559,7 +616,8 @@ namespace Boolka
                     checked_narrowing_cast<uint32_t>(m_RTIndexData.size());
                 currentCPUObject.rtIndexCount =
                     checked_narrowing_cast<uint32_t>(processedRtIndicies[i].size());
-                currentCPUObject.materialIndex = processedObjects[i].materialIndex;
+                int materialIndex = m_materialsMap[material];
+                currentCPUObject.materialIndex = materialIndex;
                 m_cpuObjects.push_back(currentCPUObject);
                 m_RTOjbectIndexOffsetData.push_back(currentCPUObject.rtIndexOffset);
 
@@ -618,22 +676,20 @@ namespace Boolka
         uint32_t vertexIndex = 0;
         for (auto& [uniqueVertex, arrayIndex] : verticesMap)
         {
-            SceneData::VertexData1 vertexData1{};
-            SceneData::VertexData2 vertexData2{};
-
-            float empty[3] = {};
+            HLSLShared::VertexData1 vertexData1{};
+            HLSLShared::VertexData2 vertexData2{};
 
             if (uniqueVertex.vertexIndex >= 0)
             {
                 // Swap y and z
                 // In OBJ y is up, and in Boolka Engine z is up
-                vertexData1.position[0] = positions[3ll * uniqueVertex.vertexIndex];
-                vertexData1.position[1] = positions[3ll * uniqueVertex.vertexIndex + 2];
-                vertexData1.position[2] = positions[3ll * uniqueVertex.vertexIndex + 1];
+                vertexData1.position = {positions[3ll * uniqueVertex.vertexIndex],
+                                        positions[3ll * uniqueVertex.vertexIndex + 2],
+                                        positions[3ll * uniqueVertex.vertexIndex + 1]};
             }
             else
             {
-                memcpy(vertexData1.position, empty, sizeof(vertexData1.position));
+                vertexData1.position = Vector3{};
             }
 
             if (uniqueVertex.normalIndex >= 0)
@@ -646,20 +702,20 @@ namespace Boolka
             }
             else
             {
-                memcpy(vertexData2.normal, empty, sizeof(vertexData2.normal));
+                vertexData2.normal = Vector3{};
             }
 
             if (uniqueVertex.texcoordIndex >= 0)
             {
                 // Flip y coordinate
                 // In obj, y = 0 is bottom and in DirectX y = 0 is top
-                vertexData1.textureCoordX = texcoords[2ll * uniqueVertex.texcoordIndex];
-                vertexData2.textureCoordY = 1 - texcoords[2ll * uniqueVertex.texcoordIndex + 1];
+                vertexData1.texCoordX = texcoords[2ll * uniqueVertex.texcoordIndex];
+                vertexData2.texCoordY = 1 - texcoords[2ll * uniqueVertex.texcoordIndex + 1];
             }
             else
             {
-                vertexData1.textureCoordX = 0.0f;
-                vertexData2.textureCoordY = 0.0f;
+                vertexData1.texCoordX = 0.0f;
+                vertexData2.texCoordY = 0.0f;
             }
 
             m_vertexData1.push_back(vertexData1);
@@ -686,8 +742,10 @@ namespace Boolka
                 m_indexData.size() * sizeof(m_indexData[0]), gs_ResourceAlignment)),
             .meshletsSize = checked_narrowing_cast<UINT>(BLK_CEIL_TO_POWER_OF_TWO(
                 m_meshlets.size() * sizeof(m_meshlets[0]), gs_ResourceAlignment)),
+            .meshletsCullSize = checked_narrowing_cast<UINT>(BLK_CEIL_TO_POWER_OF_TWO(
+                m_meshletsCull.size() * sizeof(m_meshletsCull[0]), gs_ResourceAlignment)),
             .objectsSize = checked_narrowing_cast<UINT>(BLK_CEIL_TO_POWER_OF_TWO(
-                m_objects.size() * sizeof(SceneData::ObjectHeader), gs_ResourceAlignment)),
+                m_objects.size() * sizeof(m_objects[0]), gs_ResourceAlignment)),
             .materialsSize = checked_narrowing_cast<UINT>(BLK_CEIL_TO_POWER_OF_TWO(
                 m_materialData.size() * sizeof(m_materialData[0]), gs_ResourceAlignment)),
             .rtIndiciesSize = checked_narrowing_cast<UINT>(BLK_CEIL_TO_POWER_OF_TWO(

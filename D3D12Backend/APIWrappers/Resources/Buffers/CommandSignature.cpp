@@ -29,20 +29,19 @@ namespace Boolka
         return Get();
     }
 
-    bool CommandSignature::Initialize(Device& device)
+    bool CommandSignature::Initialize(Device& device, ID3D12RootSignature* rootSig,
+                                      UINT commandStride, UINT argumentCount,
+                                      const D3D12_INDIRECT_ARGUMENT_DESC* arguments)
     {
         BLK_ASSERT(m_CommandSignature == nullptr);
 
-        D3D12_INDIRECT_ARGUMENT_DESC args[1];
-        args[0].Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED;
-
         D3D12_COMMAND_SIGNATURE_DESC desc = {};
-        desc.ByteStride = 32;
-        desc.NumArgumentDescs = 1;
-        desc.pArgumentDescs = args;
+        desc.ByteStride = commandStride;
+        desc.NumArgumentDescs = argumentCount;
+        desc.pArgumentDescs = arguments;
 
         HRESULT hr =
-            device->CreateCommandSignature(&desc, nullptr, IID_PPV_ARGS(&m_CommandSignature));
+            device->CreateCommandSignature(&desc, rootSig, IID_PPV_ARGS(&m_CommandSignature));
 
         return SUCCEEDED(hr);
     }

@@ -3,13 +3,13 @@
 #include "ReflectionRenderPass.h"
 
 #include "APIWrappers/CommandList/GraphicCommandListImpl.h"
+#include "APIWrappers/RenderDebug.h"
 #include "APIWrappers/Resources/Buffers/Buffer.h"
 #include "APIWrappers/Resources/ResourceTransition.h"
 #include "APIWrappers/Resources/Textures/Texture2D.h"
 #include "APIWrappers/Resources/Textures/Views/DepthStencilView.h"
 #include "APIWrappers/Resources/Textures/Views/RenderTargetView.h"
 #include "BoolkaCommon/DebugHelpers/DebugFileReader.h"
-#include "Containers/HLSLSharedStructures.h"
 #include "Contexts/RenderContext.h"
 #include "Contexts/RenderEngineContext.h"
 #include "Contexts/RenderFrameContext.h"
@@ -109,14 +109,15 @@ namespace Boolka
             HitGroupParam{hitGroupExport, closestHitExport},
             RaytracingShaderConfigParam{sizeof(HLSLShared::ReflectionPayload), sizeof(Vector2)},
             RaytracingPipelineConfigParam{1});
+        RenderDebug::SetDebugName(m_PSO.Get(), L"ReflectionRenderPass::m_PSO");
         BLK_ASSERT_VAR(res);
 
         UINT64 shaderTableSize = ShaderTable::CalculateRequiredBufferSize(1, 1, 1);
 
         m_ShaderTableBuffer.Initialize(device, shaderTableSize, D3D12_HEAP_TYPE_DEFAULT,
                                        D3D12_RESOURCE_FLAG_NONE, D3D12_RESOURCE_STATE_COPY_DEST);
-        BLK_RENDER_DEBUG_ONLY(
-            m_ShaderTableBuffer.SetDebugName(L"ReflectionRenderPass::m_ShaderTableBuffer"));
+        BLK_RENDER_DEBUG_ONLY(RenderDebug::SetDebugName(
+            m_ShaderTableBuffer.Get(), L"ReflectionRenderPass::m_ShaderTableBuffer"));
 
         UploadBuffer shaderTableUploadBuffer;
         shaderTableUploadBuffer.Initialize(device, shaderTableSize);

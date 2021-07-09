@@ -49,6 +49,7 @@ namespace Boolka
         if (FAILED(hr))
             return false;
 
+        BLK_RENDER_PROFILING_ONLY(InitializeProfiling());
         BLK_RENDER_DEBUG_ONLY(InitializeDebug());
 
         if (!m_FeatureSupportHelper.Initialize(*this))
@@ -95,6 +96,35 @@ namespace Boolka
 
         Fence::WaitCPUMultiple(3, fences, values);
     }
+
+    void Device::CheckIsDeviceAlive()
+    {
+        HRESULT hr = m_Device->GetDeviceRemovedReason();
+        if (FAILED(hr))
+        {
+            wchar_t errorMessage[1024] = L"";
+            DWORD res = FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                                       nullptr, hr, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                                       errorMessage, ARRAYSIZE(errorMessage), nullptr);
+            if (res == 0)
+            {
+                g_WDebugOutput << L"Encountered error while processing error: 0x" << std::hex << hr
+                               << L" GetLastError() == 0x" << std::hex << GetLastError()
+                               << std::endl;
+                BLK_CRITICAL_ASSERT(0);
+            }
+            g_WDebugOutput << L"Device Removed. Error code: 0x" << std::hex << hr << L". " << errorMessage
+                           << std::endl;
+            BLK_CRITICAL_ASSERT(0);
+        }
+    }
+
+#ifdef BLK_RENDER_PROFILING
+    void Device::InitializeProfiling()
+    {
+        m_Device->SetStablePowerState(TRUE);
+    }
+#endif
 
 #ifdef BLK_RENDER_DEBUG
     void Device::InitializeDebug()

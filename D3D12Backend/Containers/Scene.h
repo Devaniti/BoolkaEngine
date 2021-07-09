@@ -9,6 +9,7 @@
 #include "APIWrappers/Resources/Textures/Views/ShaderResourceView.h"
 #include "BatchManager.h"
 #include "Containers/Streaming/SceneData.h"
+#include "HLSLShared.h"
 
 namespace Boolka
 {
@@ -24,12 +25,18 @@ namespace Boolka
 
         enum SRVCount : UINT
         {
-            MeshletSRVCount = 6,
+            MeshletSRVCount = 7,
             MaterialSRVCount = 1,
             RaytracingSRVCount = 2,
             RaytracingASCount = 1,
-            SkyBoxSRVCount = 1,
-            MaxSceneTextureCount = 512
+            SkyBoxSRVCount = 1
+        };
+
+        enum Limits : UINT
+        {
+            MaxSceneTextureCount = BLK_MAX_SCENE_TEXTURE_COUNT,
+            MaxObjectCount = 2048,
+            MaxMeshlets = 262144
         };
 
         enum SRVOffset : UINT
@@ -103,6 +110,7 @@ namespace Boolka
         Buffer m_VertexIndirectionBuffer;
         Buffer m_IndexBuffer;
         Buffer m_MeshletBuffer;
+        Buffer m_MeshletCullBuffer;
         Buffer m_ObjectBuffer;
         Buffer m_MaterialsBuffer;
         Buffer m_RTIndexBuffer;

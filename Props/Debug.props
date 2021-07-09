@@ -5,8 +5,11 @@
   <PropertyGroup />
   <ItemDefinitionGroup>
     <ClCompile>
-      <PreprocessorDefinitions>_DEBUG;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BLK_CONFIGURATION_DEBUG;_DEBUG;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <FxCompile>
+      <AdditionalOptions>-Qembed_debug -HV 2018 -enable-16bit-types</AdditionalOptions>
+    </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup />
 </Project>

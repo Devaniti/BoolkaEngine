@@ -32,6 +32,7 @@ namespace Boolka
         const Sun& GetSun() const;
         const Matrix4x4& GetSunView() const;
         const Matrix4x4& GetSunProj() const;
+        const Matrix4x4& GetSunViewProj() const;
 
         void Update(float deltaTime);
 
@@ -46,6 +47,7 @@ namespace Boolka
         Sun m_Sun;
         Matrix4x4 m_SunView;
         Matrix4x4 m_SunProj;
+        Matrix4x4 m_SunViewProj;
         float m_CurrentRotation;
     };
 

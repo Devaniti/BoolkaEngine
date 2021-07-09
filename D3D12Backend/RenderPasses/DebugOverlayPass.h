@@ -22,6 +22,8 @@ namespace Boolka
     private:
         void ImguiFlipFrame();
         void ImguiUIManagement(const RenderContext& renderContext);
+        void ImguiCullingTable(const RenderContext& renderContext);
+        void ImguiGPUDebugMarkers(const RenderContext& renderContext);
 
         DescriptorHeap m_ImguiDescriptorHeap;
     };

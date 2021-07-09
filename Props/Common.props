@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
-  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Label="UserMacros">
+    <PATH>%PATH%;C:\Projects\BoolkaEngine\ThirdParty\DXC</PATH>
+  </PropertyGroup>
   <PropertyGroup>
     <EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
     <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
@@ -21,12 +23,17 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <FxCompile>
-      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-HV 2018 -enable-16bit-types</AdditionalOptions>
       <ShaderModel>6.5</ShaderModel>
     </FxCompile>
     <Link>
       <AdditionalDependencies>Pathcch.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <BuildMacro Include="PATH">
+      <Value>$(PATH)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+  </ItemGroup>
 </Project>
