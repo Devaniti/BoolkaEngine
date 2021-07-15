@@ -21,6 +21,7 @@ namespace Boolka
 
     bool ToneMappingPass::Render(RenderContext& renderContext, ResourceTracker& resourceTracker)
     {
+        BLK_RENDER_PASS_START(ToneMappingPass);
         auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
         auto& resourceContainer = engineContext.GetResourceContainer();
 
@@ -33,9 +34,6 @@ namespace Boolka
         Buffer& frameConstantBuffer = resourceContainer.GetBuffer(ResourceContainer::Buf::Frame);
 
         GraphicCommandListImpl& commandList = threadContext.GetGraphicCommandList();
-
-        BLK_GPU_SCOPE(commandList.Get(), "ToneMappingPass");
-        BLK_RENDER_DEBUG_ONLY(resourceTracker.ValidateStates(commandList));
 
         resourceTracker.Transition(lightBuffer, commandList,
                                    D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);

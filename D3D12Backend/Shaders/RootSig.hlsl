@@ -13,7 +13,7 @@
                     "SRV(t0, space=1, numDescriptors = 8, flags = DATA_STATIC), " /* Meshlet data */ \
                     "SRV(t0, space=2, numDescriptors = 3, flags = DATA_STATIC), " /* RT data */  \
                     "SRV(t0, space=3, numDescriptors = 1, flags = DATA_STATIC), " /* Sky box */ \
-                    "SRV(t0, space=4, numDescriptors = unbounded, flags = DATA_STATIC)), " /* Scene textures */  \
+                    "SRV(t0, space=4, numDescriptors = 512, flags = DATA_STATIC)), " /* Scene textures */  \
     "StaticSampler(s0, " \
                   "filter = FILTER_MIN_MAG_MIP_POINT, " \
                   "addressU = TEXTURE_ADDRESS_WRAP, " \

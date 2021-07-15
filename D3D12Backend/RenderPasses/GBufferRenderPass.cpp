@@ -7,6 +7,8 @@ namespace Boolka
 
     bool GBufferRenderPass::Render(RenderContext& renderContext, ResourceTracker& resourceTracker)
     {
+        BLK_RENDER_PASS_START(GBufferRenderPass);
+
         auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
         auto& resourceContainer = engineContext.GetResourceContainer();
 
@@ -23,9 +25,6 @@ namespace Boolka
         Buffer& frameConstantBuffer = resourceContainer.GetBuffer(ResourceContainer::Buf::Frame);
 
         GraphicCommandListImpl& commandList = threadContext.GetGraphicCommandList();
-
-        BLK_GPU_SCOPE(commandList.Get(), "GBufferRenderPass");
-        BLK_RENDER_DEBUG_ONLY(resourceTracker.ValidateStates(commandList));
 
         resourceTracker.Transition(albedo, commandList, D3D12_RESOURCE_STATE_RENDER_TARGET);
         resourceTracker.Transition(normal, commandList, D3D12_RESOURCE_STATE_RENDER_TARGET);
@@ -87,7 +86,7 @@ namespace Boolka
             device, resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default),
             ASParam(AS), MSParam(MS), PSParam(PS),
             RenderTargetParam{2, DXGI_FORMAT_R16G16B16A16_FLOAT},
-            DepthStencilParam{true, true, D3D12_COMPARISON_FUNC_LESS_EQUAL}, DepthFormatParam{});
+            DepthStencilParam{true, false, D3D12_COMPARISON_FUNC_LESS_EQUAL}, DepthFormatParam{});
         BLK_ASSERT_VAR(res);
 
         return true;

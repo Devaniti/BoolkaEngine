@@ -100,6 +100,9 @@
     <Filter Include="Shaders\LightingLibrary">
       <UniqueIdentifier>{28262d4d-3c2e-4cd3-941a-3c1dedbd2af9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="APIWrappers\Queries">
+      <UniqueIdentifier>{84c42ea7-72a4-49a0-a159-d98b3405f0c1}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Shaders\CullingPass">
       <UniqueIdentifier>{f5894ced-045a-45da-8087-b355e08740b0}</UniqueIdentifier>
     </Filter>
@@ -359,6 +362,15 @@
     <ClInclude Include="APIWrappers\Resources\UAVBarrier.h">
       <Filter>APIWrappers\Resources</Filter>
     </ClInclude>
+    <ClInclude Include="Containers\TimestampContainer.h">
+      <Filter>Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\Queries\QueryHeap.h">
+      <Filter>APIWrappers\Queries</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugHelpers\ImguiGraphHelper.h">
+      <Filter>DebugHelpers</Filter>
+    </ClInclude>
     <ClInclude Include="HLSLShared.h" />
   </ItemGroup>
   <ItemGroup>
@@ -600,6 +612,15 @@
     </ClCompile>
     <ClCompile Include="Containers\ResourceContainer.cpp">
       <Filter>Containers</Filter>
+    </ClCompile>
+    <ClCompile Include="Containers\TimestampContainer.cpp">
+      <Filter>Containers</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\Queries\QueryHeap.cpp">
+      <Filter>APIWrappers\Queries</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugHelpers\ImguiGraphHelper.cpp">
+      <Filter>DebugHelpers</Filter>
     </ClCompile>
     <ClCompile Include="RenderPasses\GPUCullingRenderPass.cpp">
       <Filter>RenderPasses</Filter>

@@ -12,6 +12,16 @@
 namespace Boolka
 {
 
+    DebugOverlayPass::DebugOverlayPass()
+        : m_ScaleFactor(0.0f)
+    {
+    }
+
+    DebugOverlayPass::~DebugOverlayPass()
+    {
+        BLK_ASSERT(m_ScaleFactor == 0.0f);
+    }
+
     bool DebugOverlayPass::Initialize(Device& device, RenderContext& renderContext)
     {
         m_ImguiDescriptorHeap.Initialize(device, 1, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
@@ -24,10 +34,10 @@ namespace Boolka
 
         // DPI Scaling
         UINT dpi = ::GetDpiForWindow(renderContext.GetRenderEngineContext().GetHWND());
-        float scaleFactor = static_cast<float>(dpi) / BLK_WINDOWS_DEFAULT_SCREEN_DPI;
-        ImGui::GetStyle().ScaleAllSizes(scaleFactor);
+        m_ScaleFactor = static_cast<float>(dpi) / BLK_WINDOWS_DEFAULT_SCREEN_DPI;
+        ImGui::GetStyle().ScaleAllSizes(m_ScaleFactor);
         ImFontConfig fontConfig{};
-        fontConfig.SizePixels = 13.0f * scaleFactor;
+        fontConfig.SizePixels = 13.0f * m_ScaleFactor;
         ImGui::GetIO().Fonts->AddFontDefault(&fontConfig);
 
         ImGui_ImplWin32_Init(renderContext.GetRenderEngineContext().GetHWND());
@@ -45,10 +55,12 @@ namespace Boolka
         ImGui_ImplWin32_Shutdown();
         ImGui::DestroyContext();
         m_ImguiDescriptorHeap.Unload();
+        m_ScaleFactor = 0.0f;
     }
 
     bool DebugOverlayPass::Render(RenderContext& renderContext, ResourceTracker& resourceTracker)
     {
+        BLK_RENDER_PASS_START(DebugOverlayPass);
         const std::lock_guard<std::recursive_mutex> lock(g_imguiMutex);
 
         ImguiFlipFrame();
@@ -62,9 +74,6 @@ namespace Boolka
         RenderTargetView& backbufferRTV = resourceContainer.GetBackBufferRTV(frameIndex);
 
         GraphicCommandListImpl& commandList = threadContext.GetGraphicCommandList();
-
-        BLK_GPU_SCOPE(commandList.Get(), "DebugOverlayPass");
-        BLK_RENDER_DEBUG_ONLY(resourceTracker.ValidateStates(commandList));
 
         resourceTracker.Transition(backbuffer, commandList, D3D12_RESOURCE_STATE_RENDER_TARGET);
         commandList->OMSetRenderTargets(1, backbufferRTV.GetCPUDescriptor(), FALSE, nullptr);
@@ -120,19 +129,29 @@ namespace Boolka
         const auto& cameraPos = frameContext.GetCameraPos();
         const auto& viewMatrix = frameContext.GetViewMatrix();
         const Vector3 viewDir{viewMatrix[0][2], viewMatrix[1][2], viewMatrix[2][2]};
-        ImGui::Text("%.1f FPS (avg %.1f FPS)", fps, fpsStable);
-        ImGui::Text("%.2f ms (avg %.2f ms)", debugStats.frameTime * 1000.0f,
+        ImGui::Text("%5.1f FPS (avg %5.1f FPS)", fps, fpsStable);
+        ImGui::Text("%5.2f ms (avg %5.2f ms)", debugStats.frameTime * 1000.0f,
                     debugStats.frameTimeStable * 1000.0f);
         ImGui::Text("Resolution: %dx%d", engineContext.GetBackbufferWidth(),
                     engineContext.GetBackbufferHeight());
+        if (ImGui::CollapsingHeader("Culling", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            ImguiCullingTable(renderContext);
+        }
+        if (ImGui::CollapsingHeader("GPU Times", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            ImguiUIGPUTimes(renderContext);
+        }
+        if (ImGui::CollapsingHeader("Graphs", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            ImguiGraphs(renderContext);
+        }
+        ImGui::End();
+        ImGui::Begin("Debug");
         if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen))
         {
             ImGui::Text("Pos X:%.2f Y:%.2f Z:%.2f", cameraPos.x(), cameraPos.y(), cameraPos.z());
             ImGui::Text("Dir X:%.2f Y:%.2f Z:%.2f", viewDir.x(), viewDir.y(), viewDir.z());
-        }
-        if (ImGui::CollapsingHeader("Culling", ImGuiTreeNodeFlags_DefaultOpen))
-        {
-            ImguiCullingTable(renderContext);
         }
         if (ImGui::CollapsingHeader("GPU Debug Markers", ImGuiTreeNodeFlags_DefaultOpen))
         {
@@ -142,6 +161,178 @@ namespace Boolka
         ImGui::Render();
     }
 
+    const char* GetMarkerName(size_t i)
+    {
+        BLK_ASSERT(i < static_cast<size_t>(TimestampContainer::Markers::Count));
+
+        TimestampContainer::Markers marker = static_cast<TimestampContainer::Markers>(i);
+        switch (marker)
+        {
+        case TimestampContainer::Markers::UpdateRenderPass:
+            return "UpdateRenderPass";
+            break;
+        case TimestampContainer::Markers::GPUCullingRenderPass:
+            return "GPUCullingRenderPass";
+            break;
+        case TimestampContainer::Markers::ZRenderPass:
+            return "ZRenderPass";
+            break;
+        case TimestampContainer::Markers::ShadowMapRenderPass:
+            return "ShadowMapRenderPass";
+            break;
+        case TimestampContainer::Markers::GBufferRenderPass:
+            return "GBufferRenderPass";
+            break;
+        case TimestampContainer::Markers::ReflectionRenderPass:
+            return "ReflectionRenderPass";
+            break;
+        case TimestampContainer::Markers::DeferredLightingPass:
+            return "DeferredLightingPass";
+            break;
+        case TimestampContainer::Markers::SkyBoxRenderPass:
+            return "SkyBoxRenderPass";
+            break;
+        case TimestampContainer::Markers::TransparentRenderPass:
+            return "TransparentRenderPass";
+            break;
+        case TimestampContainer::Markers::ToneMappingPass:
+            return "ToneMappingPass";
+            break;
+        case TimestampContainer::Markers::DebugOverlayPass:
+            return "DebugOverlayPass";
+            break;
+        case TimestampContainer::Markers::PresentPass:
+            return "PresentPass";
+            break;
+        case TimestampContainer::Markers::EndFrame:
+            return "Frame Time";
+            break;
+        default:
+            BLK_ASSERT(0);
+            return "ERROR";
+            break;
+        }
+    }
+
+    void DebugOverlayPass::ImguiUIGPUTimes(const RenderContext& renderContext)
+    {
+        auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
+        const auto& debugStats = frameContext.GetFrameStats();
+        const auto& gpuTimes = debugStats.gpuTimes;
+        const auto& gpuTimesStable = debugStats.gpuTimesStable;
+
+        const float graphWidth = 150.0f * m_ScaleFactor;
+        const float graphHeight = 25.0f * m_ScaleFactor;
+
+        if (ImGui::BeginTable("GPUTimes", 5,
+                              ImGuiTableFlags_Sortable | ImGuiTableFlags_SizingFixedFit))
+        {
+            ImGui::TableSetupColumn("Idx", ImGuiTableColumnFlags_NoSortDescending);
+            ImGui::TableSetupColumn("Marker", ImGuiTableColumnFlags_NoSort);
+            ImGui::TableSetupColumn("Time");
+            ImGui::TableSetupColumn("Stable Time");
+            ImGui::TableSetupColumn("Graph", ImGuiTableColumnFlags_NoSort);
+            ImGui::TableHeadersRow();
+
+            size_t markerIndicies[ARRAYSIZE(gpuTimes.Markers)];
+            for (size_t i = 0; i < ARRAYSIZE(gpuTimes.Markers); ++i)
+            {
+                markerIndicies[i] = i;
+            }
+
+            // Sort rows if needed
+            const ImGuiTableSortSpecs* sortSpecs = ImGui::TableGetSortSpecs();
+            BLK_ASSERT(sortSpecs->SpecsCount <= 1);
+
+            if (sortSpecs->SpecsCount > 0)
+            {
+                size_t columnIndex = sortSpecs->Specs[0].ColumnIndex;
+                bool reversed = sortSpecs->Specs[0].SortDirection != ImGuiSortDirection_Ascending;
+
+                switch (columnIndex)
+                {
+                case 0: // NOOP, array already sorted by index
+                    break;
+                case 2:
+                    std::ranges::sort(markerIndicies,
+                                      [reversed, &gpuTimes](size_t a, size_t b) -> bool {
+                                          if (reversed)
+                                          {
+                                              return gpuTimes.Markers[a] > gpuTimes.Markers[b];
+                                          }
+                                          return gpuTimes.Markers[a] < gpuTimes.Markers[b];
+                                      });
+                    break;
+                case 3:
+                    std::ranges::sort(
+                        markerIndicies, [reversed, &gpuTimesStable](size_t a, size_t b) -> bool {
+                            if (reversed)
+                            {
+                                return gpuTimesStable.Markers[a] > gpuTimesStable.Markers[b];
+                            }
+                            return gpuTimesStable.Markers[a] < gpuTimesStable.Markers[b];
+                        });
+                    break;
+                }
+            }
+
+            for (size_t i = 0; i < ARRAYSIZE(gpuTimes.Markers); ++i)
+            {
+                size_t index = markerIndicies[i];
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+                ImGui::Text("%d", index);
+                ImGui::TableNextColumn();
+                ImGui::Text(GetMarkerName(index));
+                ImGui::TableNextColumn();
+                ImGui::Text("%5.2fms", 1000.0f * gpuTimes.Markers[index]);
+                ImGui::TableNextColumn();
+                ImGui::Text("%5.2fms", 1000.0f * gpuTimesStable.Markers[index]);
+                ImGui::TableNextColumn();
+                m_GPUPassGraphs[index].PushValueAndRender(1000.0f * gpuTimes.Markers[index],
+                                                          nullptr, graphWidth, graphHeight);
+            }
+
+            ImGui::EndTable();
+        }
+    }
+
+    void DebugOverlayPass::ImguiGraphs(const RenderContext& renderContext)
+    {
+        auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
+
+        const auto& debugStats = frameContext.GetFrameStats();
+        const auto& gpuTimes = debugStats.gpuTimes;
+        float windowWidth = ImGui::GetWindowSize().x;
+        float graphWidth = windowWidth - 16.0f * m_ScaleFactor;
+        float graphHeight = 40.0f * m_ScaleFactor;
+
+        float currentFrameTime = debugStats.frameTime * 1000.0f; // convert to ms
+        float currentFPS = 1.0f / debugStats.frameTime;
+        float currentGPUTime =
+            gpuTimes.Markers[static_cast<size_t>(TimestampContainer::Markers::EndFrame)] *
+            1000.0f; // convert to ms
+
+        m_FPSGraph.PushValueAndRender(currentFPS, "FPS", graphWidth, graphHeight);
+        m_FrameTimeGraph.PushValueAndRender(currentFrameTime, "Frame time", graphWidth,
+                                            graphHeight);
+        m_GPUTime.PushValueAndRender(currentGPUTime, "GPU Time", graphWidth, graphHeight);
+    }
+
+    template <size_t tupleIndex, typename TupleType>
+    struct TupleSorter
+    {
+        bool reversed;
+        bool operator()(const TupleType& a, const TupleType& b) const
+        {
+            if (reversed)
+            {
+                return std::get<tupleIndex>(a) > std::get<tupleIndex>(b);
+            }
+            return std::get<tupleIndex>(a) < std::get<tupleIndex>(b);
+        }
+    };
+
     void DebugOverlayPass::ImguiCullingTable(const RenderContext& renderContext)
     {
         auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
@@ -149,8 +340,8 @@ namespace Boolka
         if (ImGui::BeginTable("Visible objects", 4,
                               ImGuiTableFlags_Sortable | ImGuiTableFlags_SizingFixedFit))
         {
-            ImGui::TableSetupColumn("Index");
-            ImGui::TableSetupColumn("View name");
+            ImGui::TableSetupColumn("Idx", ImGuiTableColumnFlags_NoSortDescending);
+            ImGui::TableSetupColumn("View name", ImGuiTableColumnFlags_NoSort);
             ImGui::TableSetupColumn("Objects");
             ImGui::TableSetupColumn("Meshlets");
             ImGui::TableHeadersRow();
@@ -177,40 +368,13 @@ namespace Boolka
                 switch (columnIndex)
                 {
                 case 0:
-                    std::ranges::sort(rows, [reversed](const rowType& a, const rowType& b) -> bool {
-                        if (reversed)
-                        {
-                            return std::get<0>(a) < std::get<0>(b);
-                        }
-                        return std::get<0>(a) > std::get<0>(b);
-                    });
-                    break;
-                case 1:
-                    std::ranges::sort(rows, [reversed](const rowType& a, const rowType& b) -> bool {
-                        if (reversed)
-                        {
-                            return strcmp(std::get<1>(a), std::get<1>(b)) > 0;
-                        }
-                        return strcmp(std::get<1>(a), std::get<1>(b)) < 0;
-                    });
+                    std::ranges::sort(rows, TupleSorter<0, rowType>{reversed});
                     break;
                 case 2:
-                    std::ranges::sort(rows, [reversed](const rowType& a, const rowType& b) -> bool {
-                        if (reversed)
-                        {
-                            return std::get<2>(a) > std::get<2>(b);
-                        }
-                        return std::get<2>(a) < std::get<2>(b);
-                    });
+                    std::ranges::sort(rows, TupleSorter<2, rowType>{reversed});
                     break;
                 case 3:
-                    std::ranges::sort(rows, [reversed](const rowType& a, const rowType& b) -> bool {
-                        if (reversed)
-                        {
-                            return std::get<3>(a) > std::get<3>(b);
-                        }
-                        return std::get<3>(a) < std::get<3>(b);
-                    });
+                    std::ranges::sort(rows, TupleSorter<3, rowType>{reversed});
                     break;
                 }
             }
@@ -250,7 +414,8 @@ namespace Boolka
                 }
                 else
                 {
-                    ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "%d ", debugStats.gpuDebugMarkers[i * elementsPerLine + j]);
+                    ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "%d ",
+                                       debugStats.gpuDebugMarkers[i * elementsPerLine + j]);
                 }
                 ImGui::SameLine();
             }

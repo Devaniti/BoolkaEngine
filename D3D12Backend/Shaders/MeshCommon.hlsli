@@ -66,8 +66,6 @@ Vertex GetVertex(in const Payload payload, in const MeshletData meshletData, in 
     Out.normal = normalize(mul(normalize(vertexData2.normal), (float3x3)Frame.viewMatrix));
     Out.texcoord = float2(vertexData1.texCoordX, vertexData2.texCoordY);
 
-    float3 projPos = Out.position.xyz / Out.position.w;
-
     return Out;
 }
 

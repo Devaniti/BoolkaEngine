@@ -21,6 +21,8 @@ namespace Boolka
 
     bool ShadowMapRenderPass::Render(RenderContext& renderContext, ResourceTracker& resourceTracker)
     {
+        BLK_RENDER_PASS_START(ShadowMapRenderPass);
+
         auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
         auto& resourceContainer = engineContext.GetResourceContainer();
 
@@ -29,9 +31,6 @@ namespace Boolka
         GraphicCommandListImpl& commandList = threadContext.GetGraphicCommandList();
 
         auto& batchManager = engineContext.GetScene().GetBatchManager();
-
-        BLK_GPU_SCOPE(commandList.Get(), "ShadowMapRenderPass");
-        BLK_RENDER_DEBUG_ONLY(resourceTracker.ValidateStates(commandList));
 
         auto& lightContainer = frameContext.GetLightContainer();
         auto& lights = lightContainer.GetLights();
@@ -81,8 +80,6 @@ namespace Boolka
             commandList->ClearDepthStencilView(*sunShadowMapDSV.GetCPUDescriptor(),
                                                D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
         }
-
-        return true;
 
         // Render shadowmaps
         for (size_t lightIndex = 0; lightIndex < lights.size(); ++lightIndex)

@@ -18,6 +18,7 @@ namespace Boolka
     bool TransparentRenderPass::Render(RenderContext& renderContext,
                                        ResourceTracker& resourceTracker)
     {
+        BLK_RENDER_PASS_START(TransparentRenderPass);
         return true; // Temporary disabled
         auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
         auto& resourceContainer = engineContext.GetResourceContainer();
@@ -30,9 +31,6 @@ namespace Boolka
         Buffer& frameConstantBuffer = resourceContainer.GetBuffer(ResourceContainer::Buf::Frame);
 
         GraphicCommandListImpl& commandList = threadContext.GetGraphicCommandList();
-
-        BLK_GPU_SCOPE(commandList.Get(), "TransparentRenderPass");
-        BLK_RENDER_DEBUG_ONLY(resourceTracker.ValidateStates(commandList));
 
         resourceTracker.Transition(depth, commandList, D3D12_RESOURCE_STATE_DEPTH_READ);
 

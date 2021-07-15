@@ -10,6 +10,7 @@
 #include "APIWrappers/RootSignature.h"
 #include "Camera.h"
 #include "Containers/Scene.h"
+#include "Containers/TimestampContainer.h"
 
 namespace Boolka
 {
@@ -40,6 +41,7 @@ namespace Boolka
         UINT GetBackbufferHeight() const;
 
         ResourceContainer& GetResourceContainer();
+        TimestampContainer& GetTimestampContainer();
 
         GraphicCommandListImpl& GetInitializationCommandList();
         void ResetInitializationCommandList();
@@ -54,6 +56,7 @@ namespace Boolka
 #endif
     private:
         ResourceContainer m_resourceContainer;
+        TimestampContainer m_timestampContainer;
         UINT m_backbufferWidth;
         UINT m_backbufferHeight;
         GraphicCommandAllocator m_InitializationCommandAllocator;

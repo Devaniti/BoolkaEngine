@@ -22,6 +22,8 @@ namespace Boolka
     bool ReflectionRenderPass::Render(RenderContext& renderContext,
                                       ResourceTracker& resourceTracker)
     {
+        BLK_RENDER_PASS_START(ReflectionRenderPass);
+
         auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
         auto& resourceContainer = engineContext.GetResourceContainer();
 
@@ -40,9 +42,6 @@ namespace Boolka
             resourceContainer.GetDescriptorHeap(ResourceContainer::DescHeap::MainHeap);
 
         GraphicCommandListImpl& commandList = threadContext.GetGraphicCommandList();
-
-        BLK_GPU_SCOPE(commandList.Get(), "ReflectionRenderPass");
-        BLK_RENDER_DEBUG_ONLY(resourceTracker.ValidateStates(commandList));
 
         resourceTracker.Transition(reflections, commandList, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         resourceTracker.Transition(normal, commandList,

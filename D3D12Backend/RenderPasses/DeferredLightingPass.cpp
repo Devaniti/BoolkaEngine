@@ -8,6 +8,7 @@ namespace Boolka
     bool DeferredLightingPass::Render(RenderContext& renderContext,
                                       ResourceTracker& resourceTracker)
     {
+        BLK_RENDER_PASS_START(DeferredLightingPass);
         auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
         auto& resourceContainer = engineContext.GetResourceContainer();
 
@@ -29,9 +30,6 @@ namespace Boolka
             frameIndex, ResourceContainer::FlipUploadBuf::DeferredLighting);
 
         GraphicCommandListImpl& commandList = threadContext.GetGraphicCommandList();
-
-        BLK_GPU_SCOPE(commandList.Get(), "DeferredLightingPass");
-        BLK_RENDER_DEBUG_ONLY(resourceTracker.ValidateStates(commandList));
 
         auto& lightContainer = frameContext.GetLightContainer();
         auto& lights = lightContainer.GetLights();

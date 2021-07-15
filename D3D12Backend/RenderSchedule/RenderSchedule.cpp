@@ -138,7 +138,7 @@ namespace Boolka
         BLK_ASSERT_VAR(res);
         res = m_GbufferPass.Render(m_RenderContext, m_ResourceTracker);
         BLK_ASSERT_VAR(res);
-        //res = m_ReflectionRenderPass.Render(m_RenderContext, m_ResourceTracker);
+        res = m_ReflectionRenderPass.Render(m_RenderContext, m_ResourceTracker);
         BLK_ASSERT_VAR(res);
         res = m_DeferredLightingPass.Render(m_RenderContext, m_ResourceTracker);
         BLK_ASSERT_VAR(res);

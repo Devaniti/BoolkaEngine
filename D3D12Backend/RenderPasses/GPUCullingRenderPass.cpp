@@ -10,6 +10,8 @@ namespace Boolka
     bool GPUCullingRenderPass::Render(RenderContext& renderContext,
                                       ResourceTracker& resourceTracker)
     {
+        BLK_RENDER_PASS_START(GPUCullingRenderPass);
+        
         auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
         auto& resourceContainer = engineContext.GetResourceContainer();
 
@@ -37,9 +39,6 @@ namespace Boolka
             resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default);
 
         GraphicCommandListImpl& commandList = threadContext.GetGraphicCommandList();
-
-        BLK_GPU_SCOPE(commandList.Get(), "GPUCullingRenderPass");
-        BLK_RENDER_DEBUG_ONLY(resourceTracker.ValidateStates(commandList));
 
         resourceTracker.Transition(gpuCullingCommmandBuf, commandList,
                                    D3D12_RESOURCE_STATE_UNORDERED_ACCESS);

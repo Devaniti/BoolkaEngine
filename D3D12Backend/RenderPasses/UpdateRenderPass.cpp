@@ -26,15 +26,13 @@ namespace Boolka
 
     bool UpdateRenderPass::Render(RenderContext& renderContext, ResourceTracker& resourceTracker)
     {
+        BLK_RENDER_PASS_START(UpdateRenderPass);
         auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
         auto& resourceContainer = engineContext.GetResourceContainer();
 
         UINT frameIndex = frameContext.GetFrameIndex();
 
         GraphicCommandListImpl& commandList = threadContext.GetGraphicCommandList();
-
-        BLK_GPU_SCOPE(commandList.Get(), "UpdateRenderPass");
-        BLK_RENDER_DEBUG_ONLY(resourceTracker.ValidateStates(commandList));
 
         UploadFrameConstantBuffer(renderContext, resourceTracker);
         UploadLightingConstantBuffer(renderContext, resourceTracker);
@@ -213,6 +211,10 @@ namespace Boolka
         commandList->CopyResource(m_ReadbackBuffers[frameIndex].Get(), markersBuf.Get());
 
         resourceTracker.Transition(markersBuf, commandList, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+
+        ID3D12DescriptorHeap* descriptorHeap =
+            resourceContainer.GetDescriptorHeap(ResourceContainer::DescHeap::MainHeap).Get();
+        commandList->SetDescriptorHeaps(1, &descriptorHeap);
 
         const UINT clearValues[4] = {};
         commandList->ClearUnorderedAccessViewUint(

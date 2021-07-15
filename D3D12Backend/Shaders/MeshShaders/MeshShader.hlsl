@@ -11,12 +11,12 @@ void main(uint gtid : SV_GroupThreadID,
     MeshletData meshletData = GetMeshletData(payload, gid);
 
     SetMeshOutputCounts(meshletData.VertCount, meshletData.PrimCount);
-
+    
     if (gtid < meshletData.VertCount)
     {
         vertices[gtid] = GetVertex(payload, meshletData, gtid);
     }
-
+    
     if (gtid < meshletData.PrimCount)
     {
         triangles[gtid] = GetPrimitive(payload, meshletData, gtid);

@@ -493,6 +493,12 @@ namespace Boolka
 
                     BLK_ASSERT(SUCCEEDED(hr));
 
+                    for (const auto& meshlet : meshlets)
+                    {
+                        BLK_CRITICAL_ASSERT(meshlet.PrimCount <= BLK_MESHLET_MAX_PRIMS &&
+                                            meshlet.VertCount <= BLK_MESHLET_MAX_VERTS);
+                    }
+
                     std::vector<DirectX::CullData> cullDataVector(meshlets.size());
 
                     hr = DirectX::ComputeCullData(
@@ -503,6 +509,10 @@ namespace Boolka
                             (sizeof(uint32_t) / sizeof(uint8_t)),
                         processedMeshletTriangles[shapeIndex].data(),
                         processedMeshletTriangles[shapeIndex].size(), cullDataVector.data());
+
+                    size_t roundedSize = BLK_CEIL_TO_POWER_OF_TWO(meshlets.size(), 32);
+                    meshlets.resize(roundedSize);
+                    cullDataVector.resize(roundedSize);
 
                     BLK_ASSERT_VAR2(SUCCEEDED(hr), hr);
 
