@@ -9,7 +9,7 @@ void main(uint DTiD : SV_DispatchThreadID, uint GTiD : SV_GroupThreadID)
     uint groupOffset = GTiD;
 
     uint mehsletIndex = gpuCullingMeshletIndiciesUAV[meshletIndirectionOffset + meshletOffset];
-    bool isMeshletVisible = IsMeshletVisible(mehsletIndex, 1);
+    bool isMeshletVisible = IsMeshletVisible(mehsletIndex, 0);
 
     if (isMeshletVisible)
     {

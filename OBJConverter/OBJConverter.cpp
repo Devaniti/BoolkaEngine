@@ -258,6 +258,93 @@ namespace Boolka
         m_materialsMap.clear();
     }
 
+#ifdef BLK_DEBUG
+    void ValidateMeshlet(const DirectX::Meshlet& meshlet, const DirectX::CullData& cullData,
+                         const DirectX::XMFLOAT3* verticies, const uint32_t* vertexIndirection,
+                         const DirectX::MeshletTriangle* meshletTriangles)
+    {
+        BLK_ASSERT(meshlet.PrimCount <= BLK_MESHLET_MAX_PRIMS &&
+                   meshlet.VertCount <= BLK_MESHLET_MAX_VERTS);
+
+        for (size_t j = 0; j < meshlet.PrimCount; ++j)
+        {
+            size_t primIndex = meshlet.PrimOffset + j;
+            const auto& triangle = meshletTriangles[primIndex];
+
+            BLK_ASSERT(triangle.i0 < BLK_MESHLET_MAX_VERTS);
+            BLK_ASSERT(triangle.i1 < BLK_MESHLET_MAX_VERTS);
+            BLK_ASSERT(triangle.i2 < BLK_MESHLET_MAX_VERTS);
+        }
+
+        if (((cullData.NormalCone.v >> 24) & 0xFF) == 0xFF)
+            return;
+
+        Vector4 center = Vector4(cullData.BoundingSphere.Center.x, cullData.BoundingSphere.Center.y,
+                                 cullData.BoundingSphere.Center.z, 1.0f);
+
+        Vector4 axis;
+        float angle;
+        axis.x() = float((cullData.NormalCone.v >> 0) & 0xFF);
+        axis.y() = float((cullData.NormalCone.v >> 8) & 0xFF);
+        axis.z() = float((cullData.NormalCone.v >> 16) & 0xFF);
+        angle = float(((cullData.NormalCone.v >> 24) & 0xFF));
+
+        axis /= 255.0f;
+        angle /= 255.0f;
+
+        axis = axis * 2.0f - Vector4(1.0f, 1.0f, 1.0f, 0.0f);
+
+        Vector4 apex = center - axis * cullData.ApexOffset;
+
+        DirectX::XMFLOAT3 localVertices[BLK_MESHLET_MAX_VERTS]{};
+
+        for (size_t i = 0; i < meshlet.VertCount; ++i)
+        {
+            size_t index = vertexIndirection[meshlet.VertOffset + i];
+            localVertices[i] = verticies[index];
+        }
+
+        for (size_t j = 0; j < meshlet.PrimCount; ++j)
+        {
+            size_t primIndex = meshlet.PrimOffset + j;
+            const auto& triangle = meshletTriangles[primIndex];
+
+            DirectX::XMFLOAT3 verts[3] = {
+                localVertices[triangle.i0],
+                localVertices[triangle.i1],
+                localVertices[triangle.i2],
+            };
+
+            for (const auto& vert : verts)
+            {
+                Vector4 vertex = Vector4(vert.x, vert.y, vert.z, 1.0f);
+                float dist = (center - vertex).LengthSlow() - 1e-5f;
+                BLK_ASSERT(dist < cullData.BoundingSphere.Radius);
+            }
+
+            Vector4 blkVerticies[3] = {
+                {verts[0].x, verts[0].y, verts[0].z, 0.0f},
+                {verts[1].x, verts[1].y, verts[1].z, 0.0f},
+                {verts[2].x, verts[2].y, verts[2].z, 0.0f},
+            };
+
+            Vector4 vectors[2] = {blkVerticies[0] - blkVerticies[1],
+                                  blkVerticies[0] - blkVerticies[2]};
+
+            Vector4 normal = vectors[0].Cross(vectors[1]).Normalize();
+            Vector4 viewDir = normal;
+
+            float calculatedAngle = viewDir.Dot(-axis);
+            BLK_ASSERT(calculatedAngle <= angle);
+        }
+    }
+#else
+
+    void ValidateMeshlet(const DirectX::Meshlet& meshlet, const DirectX::CullData& cullData,
+                         const DirectX::XMFLOAT3* verticies, const uint32_t* vertexIndirection,
+                         const DirectX::MeshletTriangle* meshletTriangles){};
+#endif
+
     bool ObjConverterImpl::Convert(const std::wstring& inFile, const std::wstring& outFolder)
     {
         std::wcout << "Loading file:" << inFile << std::endl;
@@ -493,12 +580,6 @@ namespace Boolka
 
                     BLK_ASSERT(SUCCEEDED(hr));
 
-                    for (const auto& meshlet : meshlets)
-                    {
-                        BLK_CRITICAL_ASSERT(meshlet.PrimCount <= BLK_MESHLET_MAX_PRIMS &&
-                                            meshlet.VertCount <= BLK_MESHLET_MAX_VERTS);
-                    }
-
                     std::vector<DirectX::CullData> cullDataVector(meshlets.size());
 
                     hr = DirectX::ComputeCullData(
@@ -509,6 +590,20 @@ namespace Boolka
                             (sizeof(uint32_t) / sizeof(uint8_t)),
                         processedMeshletTriangles[shapeIndex].data(),
                         processedMeshletTriangles[shapeIndex].size(), cullDataVector.data());
+
+                    uint32_t* vertexIndirection2 = reinterpret_cast<uint32_t*>(
+                        processedMeshletVertexIndirection[shapeIndex].data());
+
+                    for (size_t i = 0; i < meshlets.size(); i++)
+                    {
+                        const auto& meshlet = meshlets[i];
+                        const auto& cullData = cullDataVector[i];
+
+                        ValidateMeshlet(meshlet, cullData, dxVertices.data(),
+                                        ptr_static_cast<uint32_t*>(
+                                            processedMeshletVertexIndirection[shapeIndex].data()),
+                                        processedMeshletTriangles[shapeIndex].data());
+                    }
 
                     size_t roundedSize = BLK_CEIL_TO_POWER_OF_TWO(meshlets.size(), 32);
                     meshlets.resize(roundedSize);
@@ -549,7 +644,6 @@ namespace Boolka
                             cullData.BoundingSphere.Center.z, cullData.BoundingSphere.Radius);
                         processedMeshletCull.NormalCone = cullData.NormalCone.v;
                         processedMeshletCull.ApexOffset = cullData.ApexOffset;
-
                     }
                 }
 
@@ -684,6 +778,8 @@ namespace Boolka
         const auto& texcoords = m_attrib.texcoords;
 
         uint32_t vertexIndex = 0;
+        m_vertexData1.reserve(verticesMap.size());
+        m_vertexData2.reserve(verticesMap.size());
         for (auto& [uniqueVertex, arrayIndex] : verticesMap)
         {
             HLSLShared::VertexData1 vertexData1{};

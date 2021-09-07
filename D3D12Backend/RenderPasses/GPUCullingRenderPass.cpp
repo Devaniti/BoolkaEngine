@@ -44,7 +44,6 @@ namespace Boolka
                                    D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
         commandList->SetComputeRootSignature(defaultRootSig.Get());
-        commandList->SetPipelineState(m_ObjectCullingPSO.Get());
         engineContext.BindSceneResourcesCompute(commandList);
         commandList->SetComputeRootConstantBufferView(
             static_cast<UINT>(ResourceContainer::DefaultRootSigBindPoints::FrameConstantBuffer),
@@ -59,26 +58,27 @@ namespace Boolka
             BLK_TEXCUBE_FACE_COUNT * static_cast<UINT>(lightContainer.GetLights().size());
         UINT objectCount = engineContext.GetScene().GetOpaqueObjectCount();
 
-        UAVBarrier::BarrierAll(commandList);
         const UINT clearValues[4] = {};
+
+        UAVBarrier::Barrier(commandList, gpuCullingUAVBuf);
         commandList->ClearUnorderedAccessViewUint(gpuCullingUAVBufGPUDescriptor,
                                                   gpuCullingUAVBufCPUDescriptor,
                                                   gpuCullingUAVBuf.Get(), clearValues, 0, nullptr);
         commandList->ClearUnorderedAccessViewUint(
             gpuCullingCommandUINTUAVBufGPUDescriptor, gpuCullingCommandUAVBufCPUDescriptor,
             gpuCullingCommmandBuf.Get(), clearValues, 0, nullptr);
-        UAVBarrier::BarrierAll(commandList);
+
+        UAVBarrier::Barrier(commandList, gpuCullingUAVBuf);
+        commandList->SetPipelineState(m_ObjectCullingPSO.Get());
         commandList->Dispatch(BLK_INT_DIVIDE_CEIL(objectCount, 32), viewCount, 1);
 
         UAVBarrier::Barrier(commandList, gpuCullingUAVBuf);
-        UAVBarrier::BarrierAll(commandList);
+        UAVBarrier::Barrier(commandList, gpuCullingCommmandBuf);
         commandList->SetPipelineState(m_CommandBufferGenerationPSO.Get());
         commandList->Dispatch(BLK_INT_DIVIDE_CEIL(objectCount, 32), viewCount, 1);
 
-        UAVBarrier::BarrierAll(commandList);
         resourceTracker.Transition(gpuCullingCommmandBuf, commandList,
                                    D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT);
-        UAVBarrier::BarrierAll(commandList);
 
 #ifdef BLK_ENABLE_STATS
 

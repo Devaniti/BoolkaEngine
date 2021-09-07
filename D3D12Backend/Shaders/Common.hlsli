@@ -43,18 +43,15 @@ bool IntersectionFrustumSphere(const in Frustum currentFrustum, const in float4 
     return true;
 }
 
-enum DebugMarker
-{
-    DebugMarker_Test0,
-    DebugMarker_Test1,
-    DebugMarker_Test2,
-    DebugMarker_Test3,
-};
-
-void MarkDebugEvent(DebugMarker marker)
+void DebugIncrementCounter(uint marker)
 {
     uint dummy;
     InterlockedAdd(debugMarkers[marker], 1, dummy);
+}
+
+void DebugSetData(uint marker, uint data)
+{
+    debugMarkers[marker] = data;
 }
 
 #include "ResourceBindings.hlsli"

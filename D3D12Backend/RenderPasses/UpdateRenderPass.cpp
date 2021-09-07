@@ -158,6 +158,8 @@ namespace Boolka
             Frustum(frameContext.GetViewProjMatrix());
         cullingCbufferData.viewProjMatrix[static_cast<size_t>(BatchManager::ViewType::MainView)] =
             frameContext.GetViewProjMatrix().Transpose();
+        cullingCbufferData.cameraPos[static_cast<size_t>(BatchManager::ViewType::MainView)] =
+            frameContext.GetCameraPos();
 
         const auto& lightContainer = frameContext.GetLightContainer();
         cullingCbufferData.views[static_cast<size_t>(BatchManager::ViewType::ShadowMapSun)] =
@@ -165,6 +167,7 @@ namespace Boolka
         cullingCbufferData
             .viewProjMatrix[static_cast<size_t>(BatchManager::ViewType::ShadowMapSun)] =
             lightContainer.GetSunViewProj().Transpose();
+        frameContext.GetCameraPos() - lightContainer.GetSun().lightDir * 1000000.0f;
 
         size_t lightCount = lightContainer.GetLights().size();
         const auto& lightViewProjMatricies = lightContainer.GetViewProjMatrices();
@@ -176,6 +179,11 @@ namespace Boolka
                 cullingCbufferData
                     .views[static_cast<size_t>(BatchManager::ViewType::ShadowMapLight0) +
                            i * BLK_TEXCUBE_FACE_COUNT + j] = Frustum(lightViewProjMatricies[i][j]);
+
+                cullingCbufferData
+                    .cameraPos[static_cast<size_t>(BatchManager::ViewType::ShadowMapLight0) +
+                               i * BLK_TEXCUBE_FACE_COUNT + j] =
+                    lightContainer.GetLights()[i].worldPos;
             }
 
         for (size_t i = 0; i < lightCount; ++i)

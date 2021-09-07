@@ -404,22 +404,21 @@ namespace Boolka
 
         static const size_t elementsPerLine = 16;
 
-        for (size_t i = 0; i < 256 / elementsPerLine; ++i)
+        bool anyFlagsFound = false;
+
+        for (size_t i = 0; i < 256; ++i)
         {
-            for (size_t j = 0; j < elementsPerLine; ++j)
+            uint markerValue = debugStats.gpuDebugMarkers[i];
+            if (markerValue)
             {
-                if (debugStats.gpuDebugMarkers[i * elementsPerLine + j] == 0)
-                {
-                    ImGui::TextUnformatted("0 ");
-                }
-                else
-                {
-                    ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "%d ",
-                                       debugStats.gpuDebugMarkers[i * elementsPerLine + j]);
-                }
-                ImGui::SameLine();
+                anyFlagsFound = true;
+                ImGui::Text("Flag %d - data %d", i, markerValue);
             }
-            ImGui::TextUnformatted("");
+        }
+
+        if (!anyFlagsFound)
+        {
+            ImGui::TextUnformatted("No flags set");
         }
     }
 

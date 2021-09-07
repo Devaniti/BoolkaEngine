@@ -70,6 +70,7 @@ struct CullingDataConstantBuffer
     uint4 objectCount;
     Frustum views[BLK_RENDER_VIEW_COUNT];
     float4x4 viewProjMatrix[BLK_RENDER_VIEW_COUNT];
+    float4 cameraPos[BLK_RENDER_VIEW_COUNT];
 };
 
 struct MaterialData
