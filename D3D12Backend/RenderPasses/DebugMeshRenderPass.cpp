@@ -2,15 +2,6 @@
 
 #include "DebugMeshRenderPass.h"
 
-#include "APIWrappers/CommandList/GraphicCommandListImpl.h"
-#include "APIWrappers/Resources/Textures/Texture2D.h"
-#include "BoolkaCommon/DebugHelpers/DebugFileReader.h"
-#include "Contexts/RenderContext.h"
-#include "Contexts/RenderEngineContext.h"
-#include "Contexts/RenderFrameContext.h"
-#include "Contexts/RenderThreadContext.h"
-#include "RenderSchedule/ResourceTracker.h"
-
 namespace Boolka
 {
 
@@ -117,6 +108,7 @@ namespace Boolka
             device, resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default),
             ASParam{AS}, MSParam{MS}, PSParam{PS});
         BLK_ASSERT_VAR(res);
+        RenderDebug::SetDebugName(m_PSO.Get(), L"DebugMeshRenderPass::m_PSO");
 
         return true;
     }

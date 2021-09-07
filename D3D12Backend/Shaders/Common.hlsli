@@ -2,30 +2,57 @@
 #define __COMMON_HLSLI__
 
 #include "CppShared.hlsli"
-
-ConstantBuffer<PerFrameConstantBuffer> PerFrame : register(b0);
+#include "ResourceBindings.hlsli"
 
 float2 GetBackbufferResolution()
 {
-    return PerFrame.backbufferResolutionInvBackBufferResolution.xy;
+    return Frame.backbufferResolutionInvBackBufferResolution.xy;
 }
 
 float2 GetInvBackbufferResolution()
 {
-    return PerFrame.backbufferResolutionInvBackBufferResolution.zw;
+    return Frame.backbufferResolutionInvBackBufferResolution.zw;
 }
 
-struct VertexData1
+bool IntersectionFrustumAABB(const in Frustum currentFrustum, const in AABB boundingBox)
 {
-    float3 position;
-    float texCoordX;
-};
+    [unroll(6)] for (int i = 0; i < 6; ++i)
+    {
+        float4 mask = (currentFrustum.planes[i] > float4(0, 0, 0, 0));
+        float4 min = lerp(boundingBox.min, boundingBox.max, mask);
+        float dotMin = dot(currentFrustum.planes[i], min);
 
-struct VertexData2
+        if (dotMin < 0)
+            return false;
+    };
+
+    return true;
+}
+
+bool IntersectionFrustumSphere(const in Frustum currentFrustum, const in float4 sphere)
 {
-    float3 normal;
-    float texCoordY;
-};
+    float4 center = float4(sphere.xyz, 1.0f);
+    float radius = sphere.w;
+
+    [unroll(6)] for (int i = 0; i < 6; ++i)
+    {
+        if (dot(currentFrustum.planes[i], center) < -radius)
+            return false;
+    };
+
+    return true;
+}
+
+void DebugIncrementCounter(uint marker)
+{
+    uint dummy;
+    InterlockedAdd(debugMarkers[marker], 1, dummy);
+}
+
+void DebugSetData(uint marker, uint data)
+{
+    debugMarkers[marker] = data;
+}
 
 #include "ResourceBindings.hlsli"
 

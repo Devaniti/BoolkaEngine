@@ -45,6 +45,9 @@
     <ClInclude Include="Structures\VectorSSE.h">
       <Filter>Structures</Filter>
     </ClInclude>
+    <ClInclude Include="Structures\Sphere.h">
+      <Filter>Structures</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -73,6 +76,9 @@
       <Filter>Structures</Filter>
     </ClCompile>
     <ClCompile Include="Structures\VectorSSE.cpp">
+      <Filter>Structures</Filter>
+    </ClCompile>
+    <ClCompile Include="Structures\Sphere.cpp">
       <Filter>Structures</Filter>
     </ClCompile>
   </ItemGroup>

@@ -3,14 +3,17 @@
                "DENY_HULL_SHADER_ROOT_ACCESS | " \
                "DENY_DOMAIN_SHADER_ROOT_ACCESS | " \
                "DENY_GEOMETRY_SHADER_ROOT_ACCESS), " \
-    "CBV(b0), " \
-    "CBV(b1), " \
-    "RootConstants(num32BitConstants=2, b2), " \
-    "DescriptorTable(CBV(b0, space=999, numDescriptors = 3, flags = DATA_VOLATILE)," \
-                    "UAV(u0), " \
-                    "SRV(t0, space=0, numDescriptors = 10, flags = DATA_VOLATILE), " \
-                    "SRV(t0, space=2, numDescriptors = 11, flags = DATA_STATIC), " \
-                    "SRV(t0, space=1, numDescriptors = unbounded, flags = DATA_STATIC)), " \
+    "CBV(b0), " /* Frame CBV */ \
+    "CBV(b1), " /* Pass specific CBVs */ \
+    "RootConstants(num32BitConstants=1, b2), " /* CPU constant */ \
+    "RootConstants(num32BitConstants=1, b3), " /* GPU indirect constant */ \
+    "DescriptorTable(CBV(b0, space=1, numDescriptors = 3, flags = DATA_VOLATILE)," /* CBVs */ \
+                    "UAV(u0, numDescriptors = 7, flags = DESCRIPTORS_VOLATILE | DATA_VOLATILE), " /* UAVs */  \
+                    "SRV(t0, space=0, numDescriptors = 11, flags = DATA_VOLATILE), " /* Dynamic resources */ \
+                    "SRV(t0, space=1, numDescriptors = 8, flags = DATA_STATIC), " /* Meshlet data */ \
+                    "SRV(t0, space=2, numDescriptors = 3, flags = DATA_STATIC), " /* RT data */  \
+                    "SRV(t0, space=3, numDescriptors = 1, flags = DATA_STATIC), " /* Sky box */ \
+                    "SRV(t0, space=4, numDescriptors = 512, flags = DATA_STATIC)), " /* Scene textures */  \
     "StaticSampler(s0, " \
                   "filter = FILTER_MIN_MAG_MIP_POINT, " \
                   "addressU = TEXTURE_ADDRESS_WRAP, " \

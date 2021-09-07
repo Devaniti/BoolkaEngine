@@ -15,7 +15,8 @@ namespace Boolka
         ID3D12CommandSignature* Get();
         ID3D12CommandSignature* operator->();
 
-        bool Initialize(Device& device);
+        bool Initialize(Device& device, ID3D12RootSignature* rootSig, UINT commandStride,
+                        UINT argumentCount, const D3D12_INDIRECT_ARGUMENT_DESC* arguments);
         void Unload();
 
     private:

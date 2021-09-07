@@ -123,6 +123,8 @@
     ((intValue + (powerOfTwo - 1)) & (~(powerOfTwo - 1)))
 #define BLK_FLOOR_TO_POWER_OF_TWO(intValue, powerOfTwo) (intValue & (~(powerOfTwo - 1)))
 
+#define BLK_INT_DIVIDE_CEIL(numerator, denominator) ((numerator + denominator - 1) / denominator)
+
 #define BLK_SHIFT_LEFT_WITH_CARRY(type, intValue) ((intValue << 1) | ((i & (size_t(1) << (sizeof(i) * 8 - 1))) >> (sizeof(i) * 8 - 1)))
 #define BLK_SHIFT_RIGHT_WITH_CARRY(type, intValue) ((intValue >> 1) | ((intValue & 1) << (sizeof(intValue) * 8 - 1)))
 
@@ -145,7 +147,8 @@
 #define BLK_DEG_TO_RAD(deg) (deg * BLK_FLOAT_PI / 180.0f)
 #define BLK_RAD_TO_DEG(rad) (rad * 180.0f / BLK_FLOAT_PI)
 
-using uint = unsigned int;
+using uint = uint32_t;
+using byte = uint8_t;
 
 template <typename TypeToFind, typename... List>
 struct has_type : std::disjunction<std::is_same<TypeToFind, List>...>

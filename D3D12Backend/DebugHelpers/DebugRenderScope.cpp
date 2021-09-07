@@ -2,7 +2,7 @@
 
 #include "DebugRenderScope.h"
 
-#ifdef BLK_RENDER_DEBUG
+#ifdef BLK_USE_PIX_MARKERS
 
 namespace Boolka
 {

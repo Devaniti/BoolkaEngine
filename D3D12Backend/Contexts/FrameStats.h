@@ -20,6 +20,14 @@ namespace Boolka
 
         GPUTimes gpuTimes;
         GPUTimes gpuTimesStable;
+
+        struct
+        {
+            uint visibleObjectCount;
+            uint visibleMeshletCount;
+        } visiblePerFrustum[BLK_RENDER_VIEW_COUNT];
+
+        uint gpuDebugMarkers[256];
     };
 
 } // namespace Boolka

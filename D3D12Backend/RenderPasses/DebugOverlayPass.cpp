@@ -4,12 +4,6 @@
 
 #ifdef BLK_ENABLE_STATS
 
-#include "APIWrappers/Device.h"
-#include "Contexts/RenderContext.h"
-#include "Contexts/RenderEngineContext.h"
-#include "Contexts/RenderFrameContext.h"
-#include "Contexts/RenderThreadContext.h"
-#include "RenderSchedule/ResourceTracker.h"
 #include "ThirdParty/imgui/backends/imgui_impl_dx12.h"
 #include "ThirdParty/imgui/backends/imgui_impl_win32.h"
 #include "ThirdParty/imgui/imgui.h"
@@ -17,6 +11,16 @@
 
 namespace Boolka
 {
+
+    DebugOverlayPass::DebugOverlayPass()
+        : m_ScaleFactor(0.0f)
+    {
+    }
+
+    DebugOverlayPass::~DebugOverlayPass()
+    {
+        BLK_ASSERT(m_ScaleFactor == 0.0f);
+    }
 
     bool DebugOverlayPass::Initialize(Device& device, RenderContext& renderContext)
     {
@@ -30,10 +34,10 @@ namespace Boolka
 
         // DPI Scaling
         UINT dpi = ::GetDpiForWindow(renderContext.GetRenderEngineContext().GetHWND());
-        float scaleFactor = static_cast<float>(dpi) / BLK_WINDOWS_DEFAULT_SCREEN_DPI;
-        ImGui::GetStyle().ScaleAllSizes(scaleFactor);
+        m_ScaleFactor = static_cast<float>(dpi) / BLK_WINDOWS_DEFAULT_SCREEN_DPI;
+        ImGui::GetStyle().ScaleAllSizes(m_ScaleFactor);
         ImFontConfig fontConfig{};
-        fontConfig.SizePixels = 13.0f * scaleFactor;
+        fontConfig.SizePixels = 13.0f * m_ScaleFactor;
         ImGui::GetIO().Fonts->AddFontDefault(&fontConfig);
 
         ImGui_ImplWin32_Init(renderContext.GetRenderEngineContext().GetHWND());
@@ -51,6 +55,7 @@ namespace Boolka
         ImGui_ImplWin32_Shutdown();
         ImGui::DestroyContext();
         m_ImguiDescriptorHeap.Unload();
+        m_ScaleFactor = 0.0f;
     }
 
     bool DebugOverlayPass::Render(RenderContext& renderContext, ResourceTracker& resourceTracker)
@@ -92,6 +97,27 @@ namespace Boolka
         ImGui::NewFrame();
     }
 
+    const char* GetViewName(size_t viewIndex)
+    {
+        const char* names[BLK_RENDER_VIEW_COUNT] = {
+            "Camera",         "Sun Shadowmap",  "Light 0 Face 0", "Light 0 Face 1",
+            "Light 0 Face 2", "Light 0 Face 3", "Light 0 Face 4", "Light 0 Face 5",
+            "Light 1 Face 0", "Light 1 Face 1", "Light 1 Face 2", "Light 1 Face 3",
+            "Light 1 Face 4", "Light 1 Face 5", "Light 2 Face 0", "Light 2 Face 1",
+            "Light 2 Face 2", "Light 2 Face 3", "Light 2 Face 4", "Light 2 Face 5",
+            "Light 3 Face 0", "Light 3 Face 1", "Light 3 Face 2", "Light 3 Face 3",
+            "Light 3 Face 4", "Light 3 Face 5",
+        };
+
+        if (viewIndex < BLK_RENDER_VIEW_COUNT)
+        {
+            return names[viewIndex];
+        }
+
+        BLK_ASSERT(0);
+        return "";
+    }
+
     void DebugOverlayPass::ImguiUIManagement(const RenderContext& renderContext)
     {
         auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
@@ -108,10 +134,9 @@ namespace Boolka
                     debugStats.frameTimeStable * 1000.0f);
         ImGui::Text("Resolution: %dx%d", engineContext.GetBackbufferWidth(),
                     engineContext.GetBackbufferHeight());
-        if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen))
+        if (ImGui::CollapsingHeader("Culling", ImGuiTreeNodeFlags_DefaultOpen))
         {
-            ImGui::Text("Pos X:%.2f Y:%.2f Z:%.2f", cameraPos.x(), cameraPos.y(), cameraPos.z());
-            ImGui::Text("Dir X:%.2f Y:%.2f Z:%.2f", viewDir.x(), viewDir.y(), viewDir.z());
+            ImguiCullingTable(renderContext);
         }
         if (ImGui::CollapsingHeader("GPU Times", ImGuiTreeNodeFlags_DefaultOpen))
         {
@@ -120,6 +145,17 @@ namespace Boolka
         if (ImGui::CollapsingHeader("Graphs", ImGuiTreeNodeFlags_DefaultOpen))
         {
             ImguiGraphs(renderContext);
+        }
+        ImGui::End();
+        ImGui::Begin("Debug");
+        if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            ImGui::Text("Pos X:%.2f Y:%.2f Z:%.2f", cameraPos.x(), cameraPos.y(), cameraPos.z());
+            ImGui::Text("Dir X:%.2f Y:%.2f Z:%.2f", viewDir.x(), viewDir.y(), viewDir.z());
+        }
+        if (ImGui::CollapsingHeader("GPU Debug Markers", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            ImguiGPUDebugMarkers(renderContext);
         }
         ImGui::End();
         ImGui::Render();
@@ -134,6 +170,9 @@ namespace Boolka
         {
         case TimestampContainer::Markers::UpdateRenderPass:
             return "UpdateRenderPass";
+            break;
+        case TimestampContainer::Markers::GPUCullingRenderPass:
+            return "GPUCullingRenderPass";
             break;
         case TimestampContainer::Markers::ZRenderPass:
             return "ZRenderPass";
@@ -182,19 +221,76 @@ namespace Boolka
         const auto& gpuTimes = debugStats.gpuTimes;
         const auto& gpuTimesStable = debugStats.gpuTimesStable;
 
-        if (ImGui::BeginTable("GPUTimes", 4, ImGuiTableFlags_SizingStretchProp))
+        const float graphWidth = 150.0f * m_ScaleFactor;
+        const float graphHeight = 25.0f * m_ScaleFactor;
+
+        if (ImGui::BeginTable("GPUTimes", 5,
+                              ImGuiTableFlags_Sortable | ImGuiTableFlags_SizingFixedFit))
         {
+            ImGui::TableSetupColumn("Idx", ImGuiTableColumnFlags_NoSortDescending);
+            ImGui::TableSetupColumn("Marker", ImGuiTableColumnFlags_NoSort);
+            ImGui::TableSetupColumn("Time");
+            ImGui::TableSetupColumn("Stable Time");
+            ImGui::TableSetupColumn("Graph", ImGuiTableColumnFlags_NoSort);
+            ImGui::TableHeadersRow();
+
+            size_t markerIndicies[ARRAYSIZE(gpuTimes.Markers)];
             for (size_t i = 0; i < ARRAYSIZE(gpuTimes.Markers); ++i)
             {
+                markerIndicies[i] = i;
+            }
+
+            // Sort rows if needed
+            const ImGuiTableSortSpecs* sortSpecs = ImGui::TableGetSortSpecs();
+            BLK_ASSERT(sortSpecs->SpecsCount <= 1);
+
+            if (sortSpecs->SpecsCount > 0)
+            {
+                size_t columnIndex = sortSpecs->Specs[0].ColumnIndex;
+                bool reversed = sortSpecs->Specs[0].SortDirection != ImGuiSortDirection_Ascending;
+
+                switch (columnIndex)
+                {
+                case 0: // NOOP, array already sorted by index
+                    break;
+                case 2:
+                    std::ranges::sort(markerIndicies,
+                                      [reversed, &gpuTimes](size_t a, size_t b) -> bool {
+                                          if (reversed)
+                                          {
+                                              return gpuTimes.Markers[a] > gpuTimes.Markers[b];
+                                          }
+                                          return gpuTimes.Markers[a] < gpuTimes.Markers[b];
+                                      });
+                    break;
+                case 3:
+                    std::ranges::sort(
+                        markerIndicies, [reversed, &gpuTimesStable](size_t a, size_t b) -> bool {
+                            if (reversed)
+                            {
+                                return gpuTimesStable.Markers[a] > gpuTimesStable.Markers[b];
+                            }
+                            return gpuTimesStable.Markers[a] < gpuTimesStable.Markers[b];
+                        });
+                    break;
+                }
+            }
+
+            for (size_t i = 0; i < ARRAYSIZE(gpuTimes.Markers); ++i)
+            {
+                size_t index = markerIndicies[i];
                 ImGui::TableNextRow();
                 ImGui::TableNextColumn();
-                ImGui::Text(GetMarkerName(i));
+                ImGui::Text("%d", index);
                 ImGui::TableNextColumn();
-                ImGui::Text("%.2fms", 1000.0f * gpuTimes.Markers[i]);
+                ImGui::Text(GetMarkerName(index));
                 ImGui::TableNextColumn();
-                ImGui::Text("%.2fms", 1000.0f * gpuTimesStable.Markers[i]);
+                ImGui::Text("%5.2fms", 1000.0f * gpuTimes.Markers[index]);
                 ImGui::TableNextColumn();
-                m_GPUPassGraphs[i].PushValueAndRender(1000.0f * gpuTimes.Markers[i], nullptr, 300, 50);
+                ImGui::Text("%5.2fms", 1000.0f * gpuTimesStable.Markers[index]);
+                ImGui::TableNextColumn();
+                m_GPUPassGraphs[index].PushValueAndRender(1000.0f * gpuTimes.Markers[index],
+                                                          nullptr, graphWidth, graphHeight);
             }
 
             ImGui::EndTable();
@@ -208,8 +304,8 @@ namespace Boolka
         const auto& debugStats = frameContext.GetFrameStats();
         const auto& gpuTimes = debugStats.gpuTimes;
         float windowWidth = ImGui::GetWindowSize().x;
-        float graphWidth = windowWidth - 32.0f;
-        float graphHeight = 80.0f;
+        float graphWidth = windowWidth - 16.0f * m_ScaleFactor;
+        float graphHeight = 40.0f * m_ScaleFactor;
 
         float currentFrameTime = debugStats.frameTime * 1000.0f; // convert to ms
         float currentFPS = 1.0f / debugStats.frameTime;
@@ -221,6 +317,109 @@ namespace Boolka
         m_FrameTimeGraph.PushValueAndRender(currentFrameTime, "Frame time", graphWidth,
                                             graphHeight);
         m_GPUTime.PushValueAndRender(currentGPUTime, "GPU Time", graphWidth, graphHeight);
+    }
+
+    template <size_t tupleIndex, typename TupleType>
+    struct TupleSorter
+    {
+        bool reversed;
+        bool operator()(const TupleType& a, const TupleType& b) const
+        {
+            if (reversed)
+            {
+                return std::get<tupleIndex>(a) > std::get<tupleIndex>(b);
+            }
+            return std::get<tupleIndex>(a) < std::get<tupleIndex>(b);
+        }
+    };
+
+    void DebugOverlayPass::ImguiCullingTable(const RenderContext& renderContext)
+    {
+        auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
+        const auto& debugStats = frameContext.GetFrameStats();
+        if (ImGui::BeginTable("Visible objects", 4,
+                              ImGuiTableFlags_Sortable | ImGuiTableFlags_SizingFixedFit))
+        {
+            ImGui::TableSetupColumn("Idx", ImGuiTableColumnFlags_NoSortDescending);
+            ImGui::TableSetupColumn("View name", ImGuiTableColumnFlags_NoSort);
+            ImGui::TableSetupColumn("Objects");
+            ImGui::TableSetupColumn("Meshlets");
+            ImGui::TableHeadersRow();
+
+            using rowType = std::tuple<size_t, const char*, uint, uint>;
+            rowType rows[BLK_RENDER_VIEW_COUNT];
+
+            // fill rows with data
+            for (size_t i = 0; i < BLK_RENDER_VIEW_COUNT; ++i)
+            {
+                rows[i] = {i, GetViewName(i), debugStats.visiblePerFrustum[i].visibleObjectCount,
+                           debugStats.visiblePerFrustum[i].visibleMeshletCount};
+            }
+
+            // Sort rows if needed
+            const ImGuiTableSortSpecs* sortSpecs = ImGui::TableGetSortSpecs();
+            BLK_ASSERT(sortSpecs->SpecsCount <= 1);
+
+            if (sortSpecs->SpecsCount > 0)
+            {
+                size_t columnIndex = sortSpecs->Specs[0].ColumnIndex;
+                bool reversed = sortSpecs->Specs[0].SortDirection != ImGuiSortDirection_Ascending;
+
+                switch (columnIndex)
+                {
+                case 0:
+                    std::ranges::sort(rows, TupleSorter<0, rowType>{reversed});
+                    break;
+                case 2:
+                    std::ranges::sort(rows, TupleSorter<2, rowType>{reversed});
+                    break;
+                case 3:
+                    std::ranges::sort(rows, TupleSorter<3, rowType>{reversed});
+                    break;
+                }
+            }
+
+            // Output rows
+            for (size_t i = 0; i < BLK_RENDER_VIEW_COUNT; ++i)
+            {
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+                ImGui::Text("%d", std::get<0>(rows[i]));
+                ImGui::TableNextColumn();
+                ImGui::TextUnformatted(std::get<1>(rows[i]));
+                ImGui::TableNextColumn();
+                ImGui::Text("%d", std::get<2>(rows[i]));
+                ImGui::TableNextColumn();
+                ImGui::Text("%d", std::get<3>(rows[i]));
+            }
+
+            ImGui::EndTable();
+        }
+    }
+
+    void DebugOverlayPass::ImguiGPUDebugMarkers(const RenderContext& renderContext)
+    {
+        auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
+        const auto& debugStats = frameContext.GetFrameStats();
+
+        static const size_t elementsPerLine = 16;
+
+        bool anyFlagsFound = false;
+
+        for (size_t i = 0; i < 256; ++i)
+        {
+            uint markerValue = debugStats.gpuDebugMarkers[i];
+            if (markerValue)
+            {
+                anyFlagsFound = true;
+                ImGui::Text("Flag %d - data %d", i, markerValue);
+            }
+        }
+
+        if (!anyFlagsFound)
+        {
+            ImGui::TextUnformatted("No flags set");
+        }
     }
 
 } // namespace Boolka

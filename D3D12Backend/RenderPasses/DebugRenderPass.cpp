@@ -2,17 +2,6 @@
 
 #include "DebugRenderPass.h"
 
-#include "APIWrappers/CommandList/GraphicCommandListImpl.h"
-#include "APIWrappers/InputLayout.h"
-#include "APIWrappers/Resources/ResourceTransition.h"
-#include "APIWrappers/Resources/Textures/Texture2D.h"
-#include "BoolkaCommon/DebugHelpers/DebugFileReader.h"
-#include "Contexts/RenderContext.h"
-#include "Contexts/RenderEngineContext.h"
-#include "Contexts/RenderFrameContext.h"
-#include "Contexts/RenderThreadContext.h"
-#include "RenderSchedule/ResourceTracker.h"
-
 namespace Boolka
 {
 
@@ -162,6 +151,7 @@ namespace Boolka
             device, resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default),
             inputLayout, VSParam{VS}, PSParam{PS});
         BLK_ASSERT_VAR(res);
+        RenderDebug::SetDebugName(m_PSO.Get(), L"DebugRenderPass::m_PSO");
 
         inputLayout.Unload();
 

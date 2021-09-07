@@ -10,7 +10,7 @@ namespace Boolka
 
     bool RenderSchedule::Initialize(Device& device, DisplayController& displayController)
     {
-        m_ResourceTracker.Initialize(device, 10);
+        m_ResourceTracker.Initialize(device, 20);
 
         bool res = m_EngineContext.Initialize(device, displayController, m_ResourceTracker);
         BLK_ASSERT_VAR(res);
@@ -35,11 +35,12 @@ namespace Boolka
 
         m_ResourceTracker.Unload();
     }
-
     bool RenderSchedule::Render(Device& device, UINT frameIndex)
     {
         m_FrameContext.FlipFrame(m_EngineContext, frameIndex);
         m_ThreadContext.FlipFrame(frameIndex);
+
+        device.CheckIsDeviceAlive();
 
         PrepareFrame();
         bool res = RenderFrame(device);
@@ -66,6 +67,8 @@ namespace Boolka
     bool RenderSchedule::InitializeRenderPasses(Device& device)
     {
         bool res = m_UpdatePass.Initialize(device, m_RenderContext);
+        BLK_ASSERT_VAR(res);
+        res = m_GPUCullingPass.Initialize(device, m_RenderContext);
         BLK_ASSERT_VAR(res);
         res = m_ZPass.Initialize(device, m_RenderContext);
         BLK_ASSERT_VAR(res);
@@ -96,6 +99,7 @@ namespace Boolka
     void RenderSchedule::UnloadRenderPasses()
     {
         m_UpdatePass.Unload();
+        m_GPUCullingPass.Unload();
         m_ZPass.Unload();
         m_ShadowMapPass.Unload();
         m_GbufferPass.Unload();
@@ -125,6 +129,8 @@ namespace Boolka
         PrepareCommandList(currentCommandList);
 
         bool res = m_UpdatePass.Render(m_RenderContext, m_ResourceTracker);
+        BLK_ASSERT_VAR(res);
+        res = m_GPUCullingPass.Render(m_RenderContext, m_ResourceTracker);
         BLK_ASSERT_VAR(res);
         res = m_ZPass.Render(m_RenderContext, m_ResourceTracker);
         BLK_ASSERT_VAR(res);

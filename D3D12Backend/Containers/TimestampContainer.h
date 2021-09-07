@@ -14,6 +14,7 @@ namespace Boolka
         {
             UpdateRenderPass,
             BeginFrame = UpdateRenderPass,
+            GPUCullingRenderPass,
             ZRenderPass,
             ShadowMapRenderPass,
             GBufferRenderPass,

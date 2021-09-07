@@ -96,6 +96,7 @@ namespace Boolka
             DepthStencilParam{true, false, D3D12_COMPARISON_FUNC_EQUAL}, DepthFormatParam{});
         BLK_RENDER_DEBUG_ONLY(device.RemoveLastMessageFilter());
         BLK_ASSERT_VAR(res);
+        RenderDebug::SetDebugName(m_PSO.Get(), L"SkyBoxRenderPass::m_PSO");
 
         inputLayout.Unload();
 

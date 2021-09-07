@@ -4,6 +4,7 @@ on: [push]
 
 jobs:
   build_and_run_tests:
+    name: Build and run tests
     runs-on: windows-latest
     steps:
     - name: Sync

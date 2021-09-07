@@ -1,6 +1,8 @@
 #include "BoolkaCommon/stdafx.h"
 
 #include <iostream>
+#include <chrono>
+#include <thread>
 
 #include "BoolkaCommon/DebugHelpers/DebugProfileTimer.h"
 #include "D3D12Backend/Containers/Streaming/SceneData.h"
@@ -25,6 +27,11 @@ int RealMain(int argc, wchar_t* argv[])
 
     if (!fileReader.StartStreaming(sceneData.GetMemory()))
         return -1;
+
+    // TODO remove when moving to DirectStorate
+    // It's faster on my machine with added sleep for some reason
+    // Not gonna investigate until move to DirectStorage
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
     Boolka::DebugProfileTimer renderInitTimer;
     renderInitTimer.Start();

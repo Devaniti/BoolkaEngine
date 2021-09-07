@@ -20,7 +20,8 @@ namespace Boolka
 
         void FlipFrame(UINT frameIndex);
 
-    private:
+        //TODO revert
+    //private:
         GraphicCommandAllocator* m_CurrentGraphicCommandAllocator;
         GraphicCommandListImpl* m_CurrentGraphicCommandList;
         GraphicCommandAllocator m_GraphicCommandAllocator[BLK_IN_FLIGHT_FRAMES];

@@ -1,11 +1,23 @@
-#include "ShadowMapShadersCommon.hlsli"
+#include "../MeshCommon.hlsli"
 
-[numthreads(1, 1, 1)] void main(uint gid : SV_GroupID)
+groupshared Payload payload;
+
+[numthreads(32, 1, 1)] 
+void main(uint DTiD : SV_DispatchThreadID, uint GTiD : SV_GroupThreadID)
 {
-    const ObjectData objectData = GetObjectData(gid);
-    uint viewIndex = extraPassParam;
-    bool visible = IntersectionFrustumAABB(shadowFrustum[viewIndex], objectData.boundingBox);
-    SimplePayload payload = (SimplePayload)0;
-    payload.meshletOffset = objectData.meshletOffset;
-    DispatchMesh(objectData.meshletCount * visible, 1, 1, payload);
+    uint meshletOffset = DTiD;
+    uint groupOffset = GTiD;
+    uint viewIndex = viewIndexParam;
+    uint mehsletIndex = gpuCullingMeshletIndiciesUAV[meshletIndirectionOffset + meshletOffset];
+
+    bool isMeshletVisible = IsMeshletVisible(mehsletIndex, viewIndex);
+
+    if (isMeshletVisible)
+    {
+        uint groupVisibleIndex = WavePrefixCountBits(isMeshletVisible);
+        payload.meshletIndicies[groupVisibleIndex] = mehsletIndex;
+    }
+
+    uint visibleCount = WaveActiveCountBits(isMeshletVisible);
+    DispatchMesh(visibleCount, 1, 1, payload);
 }

@@ -2,17 +2,6 @@
 
 #include "Debug3DRenderPass.h"
 
-#include "APIWrappers/CommandList/GraphicCommandListImpl.h"
-#include "APIWrappers/InputLayout.h"
-#include "APIWrappers/Resources/ResourceTransition.h"
-#include "APIWrappers/Resources/Textures/Texture2D.h"
-#include "BoolkaCommon/DebugHelpers/DebugFileReader.h"
-#include "Contexts/RenderContext.h"
-#include "Contexts/RenderEngineContext.h"
-#include "Contexts/RenderFrameContext.h"
-#include "Contexts/RenderThreadContext.h"
-#include "RenderSchedule/ResourceTracker.h"
-
 namespace Boolka
 {
 
@@ -233,6 +222,7 @@ namespace Boolka
             inputLayout, VSParam{VS}, PSParam{PS}, DepthStencilParam{true, true},
             DepthFormatParam{});
         BLK_ASSERT_VAR(res);
+        RenderDebug::SetDebugName(m_PSO.Get(), L"Debug3DRenderPass::m_PSO");
 
         inputLayout.Unload();
 

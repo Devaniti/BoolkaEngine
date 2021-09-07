@@ -7,6 +7,22 @@
 namespace Boolka
 {
 
+    static_assert(sizeof(HLSLShared::VertexData1) % 16 == 0,
+                  "This struct is used in structured buffer, so for performance reasons its "
+                  "size should be multiple of float4");
+
+    static_assert(sizeof(HLSLShared::VertexData2) % 16 == 0,
+                  "This struct is used in structured buffer, so for performance reasons its "
+                  "size should be multiple of float4");
+
+    static_assert(sizeof(HLSLShared::ObjectData) % 16 == 0,
+                  "This struct is used in structured buffer, so for performance reasons its "
+                  "size should be multiple of float4");
+
+    static_assert(sizeof(HLSLShared::MeshletData) % 16 == 0,
+                  "This struct is used in structured buffer, so for performance reasons its "
+                  "size should be multiple of float4");
+
     SceneData::SceneData(FileReader& fileReader)
         : m_MemoryBlock{}
         , m_FileReader(fileReader)
@@ -25,20 +41,21 @@ namespace Boolka
 
         m_FileReader.WaitData(sizeof(FormatHeader) + sizeof(SceneHeader));
 
-        const unsigned char* data = static_cast<const unsigned char*>(m_MemoryBlock.m_Data);
+        unsigned char* data = static_cast<unsigned char*>(m_MemoryBlock.m_Data);
 
         const FormatHeader* formatHeader = ptr_static_cast<const FormatHeader*>(data);
         const FormatHeader correctHeader{};
         BLK_CRITICAL_ASSERT(*formatHeader == correctHeader);
         data += sizeof(FormatHeader);
 
-        const SceneHeader* sceneHeader = ptr_static_cast<const SceneHeader*>(data);
+        SceneHeader* sceneHeader = ptr_static_cast<SceneHeader*>(data);
 
         BLK_CRITICAL_ASSERT(sceneHeader->vertex1Size != 0);
         BLK_CRITICAL_ASSERT(sceneHeader->vertex2Size != 0);
         BLK_CRITICAL_ASSERT(sceneHeader->vertexIndirectionSize != 0);
         BLK_CRITICAL_ASSERT(sceneHeader->indexSize != 0);
         BLK_CRITICAL_ASSERT(sceneHeader->meshletsSize != 0);
+        BLK_CRITICAL_ASSERT(sceneHeader->meshletsCullSize != 0);
         BLK_CRITICAL_ASSERT(sceneHeader->objectsSize != 0);
         BLK_CRITICAL_ASSERT(sceneHeader->materialsSize != 0);
         BLK_CRITICAL_ASSERT(sceneHeader->rtIndiciesSize != 0);
@@ -48,6 +65,8 @@ namespace Boolka
         BLK_CRITICAL_ASSERT(sceneHeader->skyBoxResolution != 0);
         BLK_CRITICAL_ASSERT(sceneHeader->skyBoxMipCount != 0);
         BLK_CRITICAL_ASSERT(sceneHeader->textureCount != 0);
+
+        BLK_CRITICAL_ASSERT(sceneHeader->objectCount < Scene::MaxObjectCount);
 
         result.header = *sceneHeader;
 

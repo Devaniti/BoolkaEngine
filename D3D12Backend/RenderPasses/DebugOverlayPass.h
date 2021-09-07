@@ -12,8 +12,8 @@ namespace Boolka
     class DebugOverlayPass : public RenderPass
     {
     public:
-        DebugOverlayPass() = default;
-        ~DebugOverlayPass() = default;
+        DebugOverlayPass();
+        ~DebugOverlayPass();
 
         bool Initialize(Device& device, RenderContext& renderContext) final;
         void Unload() final;
@@ -24,10 +24,15 @@ namespace Boolka
     private:
         void ImguiFlipFrame();
         void ImguiUIManagement(const RenderContext& renderContext);
+        void ImguiCullingTable(const RenderContext& renderContext);
+        void ImguiGPUDebugMarkers(const RenderContext& renderContext);
         void ImguiUIGPUTimes(const RenderContext& renderContext);
         void ImguiGraphs(const RenderContext& renderContext);
 
         DescriptorHeap m_ImguiDescriptorHeap;
+
+        float m_ScaleFactor;
+
         ImguiGraphHelper m_FPSGraph;
         ImguiGraphHelper m_FrameTimeGraph;
         ImguiGraphHelper m_GPUTime;

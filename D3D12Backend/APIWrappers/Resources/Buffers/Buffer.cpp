@@ -7,11 +7,6 @@
 namespace Boolka
 {
 
-    Buffer::~Buffer()
-    {
-        BLK_ASSERT(m_Resource == nullptr);
-    }
-
     bool Buffer::Initialize(Device& device, UINT64 size, D3D12_HEAP_TYPE heapType,
                             D3D12_RESOURCE_FLAGS resourceFlags, D3D12_RESOURCE_STATES initialState)
     {

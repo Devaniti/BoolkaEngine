@@ -7,6 +7,7 @@
 #include "RenderPasses/DebugOverlayPass.h"
 #include "RenderPasses/DeferredLightingPass.h"
 #include "RenderPasses/GBufferRenderPass.h"
+#include "RenderPasses/GPUCullingRenderPass.h"
 #include "RenderPasses/PresentPass.h"
 #include "RenderPasses/ReflectionRenderPass.h"
 #include "RenderPasses/ShadowMapRenderPass.h"
@@ -54,7 +55,9 @@ namespace Boolka
         RenderThreadContext m_ThreadContext;
         RenderContext m_RenderContext;
         ResourceTracker m_ResourceTracker;
+
         UpdateRenderPass m_UpdatePass;
+        GPUCullingRenderPass m_GPUCullingPass;
         ZRenderPass m_ZPass;
         ShadowMapRenderPass m_ShadowMapPass;
         GBufferRenderPass m_GbufferPass;

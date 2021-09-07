@@ -15,6 +15,8 @@ namespace Boolka
                                D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor, DXGI_FORMAT format);
         static void Initialize(Device& device, Buffer& buffer, UINT elementCount, UINT stride,
                                D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor);
+        static void Initialize(Device& device, Buffer& buffer, UINT elementCount,
+                               DXGI_FORMAT format, D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor);
         static void InitializeCube(Device& device, Texture2D& texture,
                                    D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor, DXGI_FORMAT format);
         static void InitializeAccelerationStructure(Device& device,
@@ -22,6 +24,10 @@ namespace Boolka
                                                     D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor);
         static void InitializeNullDescriptorTexture2D(Device& device, DXGI_FORMAT format,
                                                       D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor);
+
+    private:
+        static void Initialize(Device& device, Buffer& buffer, UINT elementCount, UINT stride,
+                               DXGI_FORMAT format, D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor);
     };
 
 } // namespace Boolka

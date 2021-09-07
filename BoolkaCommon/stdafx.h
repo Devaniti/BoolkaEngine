@@ -45,6 +45,7 @@
 #include "Structures/Frustum.h"
 #include "Structures/Matrix.h"
 #include "Structures/Vector.h"
+#include "Structures/AABB.h"
 
 #ifdef BLK_DEBUG
 #include "DebugHelpers/DebugOutputStream.h"

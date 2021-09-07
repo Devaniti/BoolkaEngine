@@ -37,7 +37,12 @@ namespace Boolka
         {
             Frame,
             DeferredLighting,
-            ShadowMap,
+            GPUCullingCB,
+            GPUCulling,
+            GPUCullingDebugReadback,
+            GPUCullingCommand,
+            GPUCullingMeshletIndices,
+            DebugMarkers,
             Count
         };
 
@@ -48,6 +53,7 @@ namespace Boolka
             GBufferReflections,
             GbufferDepth,
             LightBuffer,
+            GPUCulling,
             ShadowMapCube0,
             ShadowMapSun = ShadowMapCube0 + BLK_MAX_LIGHT_COUNT,
             Count
@@ -57,7 +63,7 @@ namespace Boolka
         {
             Frame,
             DeferredLighting,
-            ShadowMap,
+            GPUCulling,
             Count
         };
 
@@ -72,6 +78,12 @@ namespace Boolka
         enum class UAV
         {
             GBufferReflections,
+            GPUCulling,
+            GPUCullingDebugReadback,
+            GPUCullingCommand,
+            GPUCullingCommandUINT,
+            GPUCullingMeshletIndices,
+            DebugMarkers,
             Count
         };
 
@@ -94,6 +106,7 @@ namespace Boolka
             RTVHeap,
             DSVHeap,
             MainHeap,
+            MainCPUVisibleHeap,
             Count
         };
 
@@ -107,7 +120,7 @@ namespace Boolka
         {
             Frame,
             DeferredLighting,
-            ShadowMap,
+            GPUCulling,
             Count
         };
 
@@ -116,6 +129,7 @@ namespace Boolka
             FrameConstantBuffer,
             PassConstantBuffer,
             PassRootConstant,
+            IndirectRootConstant,
             MainDescriptorTable,
         };
 
@@ -125,6 +139,14 @@ namespace Boolka
             UAVHeapOffset = CBVHeapOffset + static_cast<int>(CBV::Count),
             SRVHeapOffset = UAVHeapOffset + static_cast<int>(UAV::Count),
             SceneSRVHeapOffset = SRVHeapOffset + static_cast<int>(SRV::Count)
+        };
+
+        enum class CPUVisibleDescriptorHeap
+        {
+            GPUCulling,
+            GPUCullingCommandUINT,
+            DebugMarkers,
+            Count
         };
 
         ResourceContainer() = default;
@@ -145,7 +167,13 @@ namespace Boolka
         RenderTargetView& GetBackBufferRTV(UINT frameIndex);
         UploadBuffer& GetFlippableUploadBuffer(UINT frameIndex, FlipUploadBuf id);
 
+        D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptor(Buf id);
+        D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptor(Buf id);
+        D3D12_CPU_DESCRIPTOR_HANDLE GetCPUVisibleCPUDescriptor(Buf id);
+
     private:
+        UINT GetDescriptorHeapOffset(Buf id);
+
         Texture2D m_textures[static_cast<size_t>(Tex::Count)];
         Buffer m_buffers[static_cast<size_t>(Buf::Count)];
         DescriptorHeap m_descriptorHeaps[static_cast<size_t>(DescHeap::Count)];

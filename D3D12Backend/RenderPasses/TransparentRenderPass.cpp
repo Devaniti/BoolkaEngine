@@ -62,8 +62,8 @@ namespace Boolka
 
         commandList->SetPipelineState(m_PSO.Get());
 
-        engineContext.GetScene().GetBatchManager().Render(commandList,
-                                                          BatchManager::BatchType::Transparent);
+        //engineContext.GetScene().GetBatchManager().Render(commandList, renderContext,
+        //                                                  BatchManager::BatchType::Transparent);
 
         return true;
     }
@@ -88,6 +88,7 @@ namespace Boolka
             RenderTargetParam{1, DXGI_FORMAT_R16G16B16A16_FLOAT}, BlendParam{true},
             DepthFormatParam{});
         BLK_ASSERT_VAR(res);
+        RenderDebug::SetDebugName(m_PSO.Get(), L"TransparentRenderPass::m_PSO");
 
         return true;
     }

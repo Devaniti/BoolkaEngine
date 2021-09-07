@@ -103,6 +103,9 @@
     <Filter Include="APIWrappers\Queries">
       <UniqueIdentifier>{84c42ea7-72a4-49a0-a159-d98b3405f0c1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\CullingPass">
+      <UniqueIdentifier>{f5894ced-045a-45da-8087-b355e08740b0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WindowManagement\WindowManager.h">
@@ -353,8 +356,11 @@
     <ClInclude Include="Containers\ResourceContainer.h">
       <Filter>Containers</Filter>
     </ClInclude>
-    <ClInclude Include="Containers\HLSLSharedStructures.h">
-      <Filter>Containers</Filter>
+    <ClInclude Include="RenderPasses\GPUCullingRenderPass.h">
+      <Filter>RenderPasses</Filter>
+    </ClInclude>
+    <ClInclude Include="APIWrappers\Resources\UAVBarrier.h">
+      <Filter>APIWrappers\Resources</Filter>
     </ClInclude>
     <ClInclude Include="Containers\TimestampContainer.h">
       <Filter>Containers</Filter>
@@ -365,6 +371,7 @@
     <ClInclude Include="DebugHelpers\ImguiGraphHelper.h">
       <Filter>DebugHelpers</Filter>
     </ClInclude>
+    <ClInclude Include="HLSLShared.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WindowManagement\WindowManager.cpp">
@@ -615,6 +622,12 @@
     <ClCompile Include="DebugHelpers\ImguiGraphHelper.cpp">
       <Filter>DebugHelpers</Filter>
     </ClCompile>
+    <ClCompile Include="RenderPasses\GPUCullingRenderPass.cpp">
+      <Filter>RenderPasses</Filter>
+    </ClCompile>
+    <ClCompile Include="APIWrappers\Resources\UAVBarrier.cpp">
+      <Filter>APIWrappers\Resources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\RootSig.hlsl">
@@ -647,12 +660,6 @@
     <FxCompile Include="Shaders\ToneMappingPass\ToneMappingPassPS.hlsl">
       <Filter>Shaders\ToneMappingPass</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\MeshShaders\SimpleMeshShader.hlsl">
-      <Filter>Shaders\MeshShaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\MeshShaders\SimpleAmplificationShader.hlsl">
-      <Filter>Shaders\MeshShaders</Filter>
-    </FxCompile>
     <FxCompile Include="Shaders\ShadowMapPass\ShadowMapPassMeshShader.hlsl">
       <Filter>Shaders\ShadowMapPass</Filter>
     </FxCompile>
@@ -677,6 +684,15 @@
     <FxCompile Include="Shaders\ReflectionPass\ReflectionPassLib.hlsl">
       <Filter>Shaders\ReflectionPass</Filter>
     </FxCompile>
+    <FxCompile Include="Shaders\CullingPass\ObjectCullingComputeShader.hlsl">
+      <Filter>Shaders\CullingPass</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\CullingPass\CullingDebugReadbackComputeShader.hlsl">
+      <Filter>Shaders\CullingPass</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\CullingPass\CullingCommandBufferGenerateComputeShader.hlsl">
+      <Filter>Shaders\CullingPass</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\DebugPass\DebugPassShadersCommon.hlsli">
@@ -700,9 +716,6 @@
     </None>
     <None Include="Shaders\DebugMeshPass\DebugMeshPassShadersCommon.hlsli">
       <Filter>Shaders\DebugMeshPass</Filter>
-    </None>
-    <None Include="Shaders\ShadowMapPass\ShadowMapShadersCommon.hlsli">
-      <Filter>Shaders\ShadowMapPass</Filter>
     </None>
     <None Include="Shaders\TransformCommon.hlsli">
       <Filter>Shaders</Filter>

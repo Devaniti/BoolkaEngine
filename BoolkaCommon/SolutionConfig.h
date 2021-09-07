@@ -3,10 +3,11 @@
 // Only defines to change different stuff in the project allowed here
 // Included first in ALL files
 
-#if defined(_DEBUG) || defined(BLK_FLAG_DEBUG)
+#if defined(BLK_CONFIGURATION_DEBUG) || defined(BLK_CONFIGURATION_DEVELOPMENT)
 #define BLK_DEBUG
 #else
-
+#define BLK_DEBUG
+// No debug
 #endif
 
 #define BLK_ENABLE_STATS

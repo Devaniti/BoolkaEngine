@@ -5,8 +5,9 @@
 // Data that always needed to be loaded for rendering
 #define BLK_SCENE_REQUIRED_SCENE_DATA_FILENAME L"RequiredSceneData.blkeng"
 // TODO
-// Built acceleration strucres, invalidated on source geometry/hardware/driver version change
+// Serialize built acceleration structures, invalidated on source geometry/hardware/driver version change
 #define BLK_SCENE_RAYTRACING_CACHE_FILENAME L"RaytracingCache.blktmp"
+#define BLK_SCENE_VERSION 1
 
 namespace Boolka
 {
@@ -26,62 +27,6 @@ namespace Boolka
             UINT mipCount;
         };
 
-        struct VertexData1
-        {
-            float position[3];
-            float textureCoordX;
-        };
-
-        static_assert(sizeof(VertexData1) % 16 == 0,
-                      "This struct is used in structured buffer, so for performance reasons its "
-                      "size should be multiple of float4");
-
-        struct VertexData2
-        {
-            float normal[3];
-            float textureCoordY;
-        };
-
-        static_assert(sizeof(VertexData2) % 16 == 0,
-                      "This struct is used in structured buffer, so for performance reasons its "
-                      "size should be multiple of float4");
-
-        struct ObjectHeader
-        {
-            AABB boundingBox;
-            uint32_t materialIndex;
-            uint32_t meshletOffset;
-            uint32_t meshletCount;
-            uint32_t unused;
-        };
-
-        static_assert(sizeof(ObjectHeader) % 16 == 0,
-                      "This struct is used in structured buffer, so for performance reasons its "
-                      "size should be multiple of float4");
-
-        struct MeshletData
-        {
-            uint32_t VertCount;
-            uint32_t VertOffset;
-            uint32_t PrimCount;
-            uint32_t PrimOffset;
-        };
-
-        static_assert(sizeof(MeshletData) % 16 == 0,
-                      "This struct is used in structured buffer, so for performance reasons its "
-                      "size should be multiple of float4");
-
-        struct RTVertexAdditionalData
-        {
-            Vector3 normal;
-            Vector2 UV;
-            Vector3 padding;
-        };
-
-        static_assert(sizeof(RTVertexAdditionalData) % 16 == 0,
-                      "This struct is used in structured buffer, so for performance reasons its "
-                      "size should be multiple of float4");
-
         struct CPUObjectHeader
         {
             uint32_t rtIndexOffset;
@@ -92,8 +37,8 @@ namespace Boolka
         static const UINT ms_SceneVersion = 0;
         struct FormatHeader
         {
-            char signature[24] = "BoolkaEngineSceneFormat";
-            UINT formatVersion = ms_SceneVersion;
+            const char signature[24] = "BoolkaEngineSceneFormat";
+            const UINT formatVersion = BLK_SCENE_VERSION;
 
             bool operator==(const FormatHeader& other) const;
         };
@@ -105,6 +50,7 @@ namespace Boolka
             UINT vertexIndirectionSize;
             UINT indexSize;
             UINT meshletsSize;
+            UINT meshletsCullSize;
             UINT objectsSize;
             UINT materialsSize;
             UINT rtIndiciesSize;

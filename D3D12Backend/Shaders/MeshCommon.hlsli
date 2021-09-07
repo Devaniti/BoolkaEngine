@@ -3,39 +3,14 @@
 
 #include "Common.hlsli"
 
-struct MeshletData
+cbuffer PassConstData : register(b2)
 {
-    uint VertCount;
-    uint VertOffset;
-    uint PrimCount;
-    uint PrimOffset;
+    uint viewIndexParam;
 };
 
-struct AABB
+cbuffer IndirectConstData : register(b3)
 {
-    float4 min;
-    float4 max;
-};
-
-struct ObjectData
-{
-    AABB boundingBox;
-
-    uint materialIndex;
-    uint meshletOffset;
-    uint meshletCount;
-    uint unused;
-};
-
-StructuredBuffer<uint> vertexIndirectionBuffer : register(t2, space2);
-StructuredBuffer<uint> indexBuffer : register(t3, space2);
-StructuredBuffer<MeshletData> meshletBuffer : register(t4, space2);
-StructuredBuffer<ObjectData> objectBuffer : register(t5, space2);
-
-cbuffer MeshletPassData : register(b2)
-{
-    uint objectOffset;
-    uint extraPassParam;
+    uint meshletIndirectionOffset;
 };
 
 struct Vertex
@@ -46,63 +21,87 @@ struct Vertex
     float2 texcoord : TEXCOORD;
 };
 
-struct SimpleVertex
-{
-    float4 position : SV_Position;
-};
-
 struct Payload
 {
-    uint meshletOffset;
-    uint materialID;
+    uint meshletIndicies[32];
 };
 
-struct SimplePayload
+bool IsConeDegenerate(MeshletCullData cullData)
 {
-    uint meshletOffset;
-};
-
-ObjectData GetObjectData(in uint objectIndex)
-{
-    ObjectData Out = (ObjectData)0;
-
-    Out = objectBuffer[objectOffset + objectIndex];
-
-    return Out;
+    return (cullData.NormalCone >> 24) == 0xff;
 }
 
-bool IntersectionFrustumAABB(const in Frustum currentFrustum, const in AABB boundingBox)
+float4 UnpackCone(uint normalCone)
 {
-    // Batch by 2 planes
-    [unroll(6)] for (int i = 0; i < 6; ++i)
+    float4 result;
+    result.x = float((normalCone >> 0) & 0xFF);
+    result.y = float((normalCone >> 8) & 0xFF);
+    result.z = float((normalCone >> 16) & 0xFF);
+    result.w = float((normalCone >> 24) & 0xFF);
+
+    result = result / 255.0f;
+
+    result.xyz = result.xyz * 2.0f - 1.0f;
+
+    return result;
+}
+
+bool IsMeshletVisible(in uint meshletIndex, in uint viewIndex)
+{
+    if (meshletIndex == -1)
     {
-        float4 mask = (currentFrustum.planes[i] > float4(0, 0, 0, 0));
+        return false;
+    }
 
-        float4 min = lerp(boundingBox.min, boundingBox.max, mask);
+    MeshletCullData cullData = meshletCullBuffer[meshletIndex];
+    Frustum viewFrustum = GPUCulling.views[viewIndex];
+    float3 cameraPos = GPUCulling.cameraPos[viewIndex].xyz;
+    float4 boundingSphere = cullData.BoundingSphere;
 
-        float dotMin = dot(currentFrustum.planes[i], min);
+    // Only empty meshlets should have such bounding sphere
+    // And we currently have empty meshlets as padding
+    if (all(boundingSphere == float4(0.0f, 0.0f, 0.0f, 1.0f)))
+    {
+        return false;
+    }
 
-        if (dotMin < 0)
-            return false;
-    };
+    // Frustum culling
+    if (!IntersectionFrustumSphere(viewFrustum, boundingSphere))
+    {
+        return false;
+    }
+
+    // Backface culling
+    // Cull whole meshlet if there are no triangles that are front facing
+    if (IsConeDegenerate(cullData))
+        return true;
+
+    float4 normalCone = UnpackCone(cullData.NormalCone);
+    float3 axis = normalCone.xyz;
+    float angle = normalCone.w;
+
+    float3 sphereCenter = boundingSphere.xyz;
+    float3 apex = sphereCenter - axis * cullData.ApexOffset;
+    float3 view = normalize(sphereCenter - cameraPos);
+
+    // The normal cone w-component stores -cos(angle + 90 deg)
+    // This is the min dot product along the inverted axis from which all the meshlet's triangles
+    // are backface
+    if (dot(view, -axis) > angle)
+    {
+        return false;
+    }
 
     return true;
 }
 
-MeshletData GetMeshletData(in const Payload payload, in uint meshletIndex)
+MeshletData GetMeshletData(in const Payload payload, in uint groupID)
 {
     MeshletData Out = (MeshletData)0;
 
-    Out = meshletBuffer[payload.meshletOffset + meshletIndex];
+    uint meshletIndex = payload.meshletIndicies[groupID];
 
-    return Out;
-}
-
-MeshletData GetMeshletData(in const SimplePayload payload, in uint meshletIndex)
-{
-    MeshletData Out = (MeshletData)0;
-
-    Out = meshletBuffer[payload.meshletOffset + meshletIndex];
+    Out = meshletBuffer[meshletIndex];
 
     return Out;
 }
@@ -115,23 +114,10 @@ Vertex GetVertex(in const Payload payload, in const MeshletData meshletData, in 
     VertexData1 vertexData1 = vertexBuffer1[remappedVertexIndex];
     VertexData2 vertexData2 = vertexBuffer2[remappedVertexIndex];
 
-    Out.materialID = payload.materialID;
-    Out.position = mul(float4(vertexData1.position, 1.0f), PerFrame.viewProjMatrix);
-    Out.normal = normalize(mul(normalize(vertexData2.normal), (float3x3)PerFrame.viewMatrix));
+    Out.materialID = meshletData.MaterialID;
+    Out.position = mul(float4(vertexData1.position, 1.0f), Frame.viewProjMatrix);
+    Out.normal = normalize(mul(normalize(vertexData2.normal), (float3x3)Frame.viewMatrix));
     Out.texcoord = float2(vertexData1.texCoordX, vertexData2.texCoordY);
-
-    return Out;
-}
-
-SimpleVertex GetSimpleVertex(in const SimplePayload payload, in const MeshletData meshletData,
-                             in uint vertexIndex)
-{
-    SimpleVertex Out = (SimpleVertex)0;
-
-    uint remappedVertexIndex = vertexIndirectionBuffer[meshletData.VertOffset + vertexIndex];
-    VertexData1 vertexData1 = vertexBuffer1[remappedVertexIndex];
-
-    Out.position = mul(float4(vertexData1.position, 1.0f), PerFrame.viewProjMatrix);
 
     return Out;
 }
@@ -139,12 +125,6 @@ SimpleVertex GetSimpleVertex(in const SimplePayload payload, in const MeshletDat
 uint3 UnpackPrimitive(uint primitive)
 {
     return uint3(primitive & 0x3FF, (primitive >> 10) & 0x3FF, (primitive >> 20) & 0x3FF);
-}
-
-uint3 GetPrimitive(in const SimplePayload payload, in const MeshletData meshletData,
-                   in uint primitiveIndex)
-{
-    return UnpackPrimitive(indexBuffer[meshletData.PrimOffset + primitiveIndex]);
 }
 
 uint3 GetPrimitive(in const Payload payload, in const MeshletData meshletData,
