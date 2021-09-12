@@ -107,7 +107,7 @@ namespace Boolka
             DXILLibraryParam<ARRAYSIZE(libExports)>{shaderLib, libExports},
             HitGroupParam{hitGroupExport, closestHitExport},
             RaytracingShaderConfigParam{sizeof(HLSLShared::ReflectionPayload), sizeof(Vector2)},
-            RaytracingPipelineConfigParam{1});
+            RaytracingPipelineConfigParam{BLK_REFLECTION_RT_MAX_RECURSION_DEPTH});
         RenderDebug::SetDebugName(m_PSO.Get(), L"ReflectionRenderPass::m_PSO");
         BLK_ASSERT_VAR(res);
 

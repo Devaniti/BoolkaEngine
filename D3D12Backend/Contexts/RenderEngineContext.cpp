@@ -50,7 +50,7 @@ namespace Boolka
 
         // TODO rewrite hardcoded value
         // Temp initial camera position for san-miguel scene
-        res = m_Camera.Initialize(0.0f, 0.0f, {6.55f, 3.46f, 1.22f, 0.0f});
+        res = m_Camera.Initialize(0.0f, 0.0f, BLK_DEG_TO_RAD(30.0f), {6.55f, 3.46f, 1.22f, 0.0f});
         BLK_ASSERT_VAR(res);
 
         m_HWND = displayController.GetHWND();

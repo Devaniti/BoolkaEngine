@@ -9,7 +9,7 @@ namespace Boolka
         Camera();
         ~Camera();
 
-        bool Initialize(float rotationYaw, float rotationPitch, const Vector4& cameraPos);
+        bool Initialize(float rotationYaw, float rotationPitch, float fieldOfView, const Vector4& cameraPos);
         void Unload();
 
         bool Update(float deltaTime, float aspectRatio, Matrix4x4& outViewMatrix,
@@ -23,6 +23,7 @@ namespace Boolka
                             Matrix4x4& outProjMatrix);
         float m_RotationYaw;
         float m_RotationPitch;
+        float m_FieldOfView;
         Vector4 m_CameraPos;
     };
 

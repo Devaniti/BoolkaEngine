@@ -2,12 +2,15 @@
 
 #include "Camera.h"
 
+#include "BoolkaCommon/DebugHelpers/DebugClipboardManager.h"
+
 namespace Boolka
 {
 
     Camera::Camera()
         : m_RotationYaw(0.0f)
         , m_RotationPitch(0.0f)
+        , m_FieldOfView(0.0f)
         , m_CameraPos{}
     {
     }
@@ -19,10 +22,12 @@ namespace Boolka
         BLK_ASSERT(m_CameraPos == Vector4{});
     }
 
-    bool Camera::Initialize(float rotationYaw, float rotationPitch, const Vector4& cameraPos)
+    bool Camera::Initialize(float rotationYaw, float rotationPitch, float fieldOfView,
+                            const Vector4& cameraPos)
     {
         m_RotationYaw = rotationYaw;
         m_RotationPitch = rotationPitch;
+        m_FieldOfView = fieldOfView;
         m_CameraPos = cameraPos;
 
         return true;
@@ -55,7 +60,7 @@ namespace Boolka
                              const Vector4& forward)
     {
         static const float defaultMoveSpeed = 15.0f;
-        static const float defaultRotationSpeed = BLK_DEG_TO_RAD(60.0f);
+        const float defaultRotationSpeed = m_FieldOfView * 2.0f;
 
         float speedMult = 1.0f;
         float angleSpeedMult = 1.0f;
@@ -109,6 +114,31 @@ namespace Boolka
         {
             m_CameraPos += forward * (moveDelta * forwardBackwardChange);
         }
+
+        bool TPressed = static_cast<bool>(::GetAsyncKeyState('T'));
+        bool RPressed = static_cast<bool>(::GetAsyncKeyState('R'));
+        int fiedOfViewChange = static_cast<int>(TPressed) - static_cast<int>(RPressed);
+        if (fiedOfViewChange != 0)
+        {
+            m_FieldOfView *= 1.0f + rotationDelta * fiedOfViewChange;
+            m_FieldOfView = std::clamp(m_FieldOfView, BLK_DEG_TO_RAD(1.0f), BLK_DEG_TO_RAD(90.0f));
+        }
+
+        bool OPressed = static_cast<bool>(::GetAsyncKeyState('O'));
+        if (OPressed)
+        {
+            DebugClipboardManager::SerializeToClipboard(
+                L"%f %f %f %f %f %f", m_RotationPitch, m_RotationYaw, m_FieldOfView,
+                m_CameraPos.x(), m_CameraPos.y(), m_CameraPos.z());
+        }
+
+        bool LPressed = static_cast<bool>(::GetAsyncKeyState('L'));
+        if (LPressed)
+        {
+            DebugClipboardManager::DeserializeFromClipboard(
+                L"%f %f %f %f %f %f", &m_RotationPitch, &m_RotationYaw, &m_FieldOfView,
+                &m_CameraPos.x(), &m_CameraPos.y(), &m_CameraPos.z());
+        }
     }
 
     void Camera::UpdateMatrices(float aspectRatio, const Vector4& right, const Vector4& up,
@@ -119,7 +149,7 @@ namespace Boolka
         float farZ = 1000.0f;
 
         outProjMatrix =
-            Matrix4x4::CalculateProjPerspective(nearZ, farZ, aspectRatio, BLK_DEG_TO_RAD(30.0f));
+            Matrix4x4::CalculateProjPerspective(nearZ, farZ, aspectRatio, m_FieldOfView);
         outViewMatrix = Matrix4x4::CalculateView(right, up, forward, m_CameraPos);
     }
 

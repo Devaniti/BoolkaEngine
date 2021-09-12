@@ -48,6 +48,9 @@
     <ClInclude Include="Structures\Sphere.h">
       <Filter>Structures</Filter>
     </ClInclude>
+    <ClInclude Include="DebugHelpers\DebugClipboardManager.h">
+      <Filter>DebugHelpers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -80,6 +83,9 @@
     </ClCompile>
     <ClCompile Include="Structures\Sphere.cpp">
       <Filter>Structures</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugHelpers\DebugClipboardManager.cpp">
+      <Filter>DebugHelpers</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -32,6 +32,8 @@ struct AABB
 #define BLK_MAX_OBJECT_COUNT 2048
 #define BLK_MAX_MESHLETS 262144
 
+#define BLK_REFLECTION_RT_MAX_RECURSION_DEPTH 4
+
 struct FrameConstantBuffer
 {
     float4x4 viewProjMatrix;
@@ -93,7 +95,8 @@ struct RayDifferential
 
 struct ReflectionPayload
 {
-    float4 color;
+    float3 light;
+    uint recursionDepth;
     RayDifferential rayDifferential;
 };
 

@@ -6,7 +6,7 @@
 // Configure whether we are going to do additional depth samples to select one of two neighbours along each axis
 #define BLK_HIGH_QUALITY_RAY_DIFFERENTIALS 1
 
-RayDifferentialPart CalculateRayDifferentialPart(uint2 vpos, float3 origin, float3 direction,
+RayDifferentialPart CalculateRayDifferentialGBPart(uint2 vpos, float3 origin, float3 direction,
                                                  float depthVal, uint2 offset)
 {
     RayDifferentialPart Out = (RayDifferentialPart)0;
@@ -62,51 +62,19 @@ RayDifferentialPart CalculateRayDifferentialPart(uint2 vpos, float3 origin, floa
     return Out;
 }
 
-RayDifferential CalculateRayDifferentials(uint2 vpos, float3 origin, float3 direction,
+RayDifferential CalculateRayDifferentialsGB(uint2 vpos, float3 origin, float3 direction,
                                           float depthVal)
 {
     RayDifferential Out = 
     {
-        CalculateRayDifferentialPart(vpos, origin, direction, depthVal, uint2(1, 0)),
-        CalculateRayDifferentialPart(vpos, origin, direction, depthVal, uint2(0, 1))
+        CalculateRayDifferentialGBPart(vpos, origin, direction, depthVal, uint2(1, 0)),
+        CalculateRayDifferentialGBPart(vpos, origin, direction, depthVal, uint2(0, 1))
     };
 
     return Out;
 }
 
-// Calculate rays from camera
-// Can be usefull for debugging
-//inline void CalculateRayCamera(uint2 vpos, out float3 origin, out float3 direction)
-//{
-//    float2 UV = vpos * GetInvBackbufferResolution();
-//    float4 viewProjPos = float4(UV.x * 2.0f - 1.0f, UV.y * -2.0f + 1.0f, 0.0f, 1.0f);
-//
-//    float4 worldPos = mul(viewProjPos, Frame.invViewProjMatrix);
-//
-//    worldPos.xyz /= worldPos.w;
-//    origin = Frame.cameraWorldPos.xyz;
-//    direction = normalize(worldPos.xyz - origin);
-//}
-//
-//inline void CalculateRay(uint2 vpos, out float3 origin, out float3 direction,
-//                         out RayDifferential rayDifferential, out bool needCast)
-//{
-//    needCast = true;
-//
-//    CalculateRayCamera(vpos, origin, direction);
-//
-//    float3 originX, directionX;
-//    CalculateRayCamera(vpos + uint2(1, 0), originX, directionX);
-//    rayDifferential.dx.dO = originX - origin;
-//    rayDifferential.dx.dD = directionX - direction;
-//
-//    float3 originY, directionY;
-//    CalculateRayCamera(vpos + uint2(0, 1), originY, directionY);
-//    rayDifferential.dy.dO = originY - origin;
-//    rayDifferential.dy.dD = directionY - direction;
-//}
-
-inline void CalculateRay(uint2 vpos, out float3 origin, out float3 direction,
+inline void CalculateRayGB(uint2 vpos, out float3 origin, out float3 direction,
                          out RayDifferential rayDifferential, out bool needCast)
 {
     float depthVal = depth.Load(uint3(vpos, 0));
@@ -133,7 +101,6 @@ inline void CalculateRay(uint2 vpos, out float3 origin, out float3 direction,
 
     needCast = true;
 
-
     float3 viewPos = CalculateViewPos(UV, depthVal);
     float3 worldPos = CalculateWorldPos(viewPos);
 
@@ -145,7 +112,7 @@ inline void CalculateRay(uint2 vpos, out float3 origin, out float3 direction,
     origin = worldPos;
     direction = reflectionVector;
 
-    rayDifferential = CalculateRayDifferentials(vpos, origin, direction, depthVal);
+    rayDifferential = CalculateRayDifferentialsGB(vpos, origin, direction, depthVal);
 }
 
 [shader("raygeneration")] 
@@ -156,7 +123,7 @@ void ReflectionRayGeneration()
     RayDifferential rayDifferential = (RayDifferential)0;
 
     bool needCast;
-    CalculateRay(DispatchRaysIndex().xy, origin, direction, rayDifferential, needCast);
+    CalculateRayGB(DispatchRaysIndex().xy, origin, direction, rayDifferential, needCast);
     if (!needCast)
     {
         return;
@@ -170,13 +137,14 @@ void ReflectionRayGeneration()
 
     ReflectionPayload payload = 
     {
-        float4(0, 0, 0, 0),
+        float3(0, 0, 0),
+        0,
         rayDifferential
     };
 
-    TraceRay(sceneAS, RAY_FLAG_CULL_BACK_FACING_TRIANGLES, 1, 0, 0, 0, ray, payload);
+    TraceRay(sceneAS, RAY_FLAG_NONE, 1, 0, 0, 0, ray, payload);
 
-    reflectionUAV[DispatchRaysIndex().xy] = payload.color;
+    reflectionUAV[DispatchRaysIndex().xy] = float4(payload.light, 0.0f);
 }
 
 float InterpolateAttribute(float attributes[3], BuiltInTriangleIntersectionAttributes weights)
@@ -217,29 +185,29 @@ Vertex CombineVertexData(VertexData1 data1, VertexData2 data2)
     return Out;
 }
 
-Vertex InterpolateVertices(Vertex verticies[3], BuiltInTriangleIntersectionAttributes attr)
+// Interpolates vertex, calculated ddx/ddy, updates RayDifferential for next reflection bounce
+// RayDifferentials reference here http://www.realtimerendering.com/raytracinggems/unofficial_RayTracingGems_v1.9.pdf chapter 20
+void CalculateRTHit(in const Vertex verticies[3],
+                       in const BuiltInTriangleIntersectionAttributes attr,
+                       inout RayDifferential rayDifferential, out Vertex outVertex,
+                       out float2 ddxRes, out float2 ddyRes)
 {
-    Vertex Out = (Vertex)0;
+    // Calculating differences for barycentric coordinate interpolation
+    float3 e1 = verticies[1].position - verticies[0].position;
+    float3 e2 = verticies[2].position - verticies[0].position;
 
-    Out.position = verticies[0].position +
-                   attr.barycentrics.x * (verticies[1].position - verticies[0].position) +
-                   attr.barycentrics.y * (verticies[2].position - verticies[0].position);
+    float2 g1 = verticies[1].UV - verticies[0].UV;
+    float2 g2 = verticies[2].UV - verticies[0].UV;
 
-    Out.UV = verticies[0].UV + 
-             attr.barycentrics.x * (verticies[1].UV - verticies[0].UV) +
-             attr.barycentrics.y * (verticies[2].UV - verticies[0].UV);
+    float3 n1 = verticies[1].normal - verticies[0].normal;
+    float3 n2 = verticies[2].normal - verticies[0].normal;
 
-    Out.normal = verticies[0].normal +
-                 attr.barycentrics.x * (verticies[1].normal - verticies[0].normal) +
-                 attr.barycentrics.y * (verticies[2].normal - verticies[0].normal);
+    // Interpolating hit triangle verticies
+    outVertex.position = verticies[0].position + attr.barycentrics.x * e1 + attr.barycentrics.y * e2;
+    outVertex.UV = verticies[0].UV + attr.barycentrics.x * g1 + attr.barycentrics.y * g2;
+    outVertex.normal = verticies[0].normal + attr.barycentrics.x * n1 + attr.barycentrics.y * n2;
 
-    return Out;
-}
-
-void CalculateDDXDDY(Vertex vertices[3], RayDifferential rayDifferential, out float2 ddxRes, out float2 ddyRes)
-{
-    float3 e1 = vertices[1].position - vertices[0].position;
-    float3 e2 = vertices[2].position - vertices[0].position;
+    // Calculating ddx/ddy for texture sampling
     float3 t = RayTCurrent();
     float3 d = WorldRayDirection();
 
@@ -255,11 +223,29 @@ void CalculateDDXDDY(Vertex vertices[3], RayDifferential rayDifferential, out fl
     float dvdx = dot(1.0f / k * cv, q);
     float dvdy = dot(1.0f / k * cv, r);
 
-    float2 g1 = vertices[1].UV - vertices[0].UV;
-    float2 g2 = vertices[2].UV - vertices[0].UV;
-
     ddxRes = dudx * g1 + dvdx * g2;
     ddyRes = dudy * g1 + dvdy * g2;
+
+    // Updating ray differentials for recursive reflection ray trace
+    rayDifferential.dx.dO = dudx * e1 + dvdx * e2;
+    rayDifferential.dy.dO = dudy * e1 + dvdy * e2;
+
+    // This part is not documented in raytracing gems
+    // First ray direction derivative gets reflected
+    // That would have been enough if hit surface was perfectly flat
+    rayDifferential.dx.dD = reflect(rayDifferential.dx.dD, outVertex.normal);
+    rayDifferential.dy.dD = reflect(rayDifferential.dy.dD, outVertex.normal);
+
+    // Calculating differential of normals same way we calculated differential of texcoords
+    // both will be 0 in case of perfectly flat surface
+    float3 dndx = dudx * n1 + dvdx * n2;
+    float3 dndy = dudy * n1 + dvdy * n2;
+
+    // Updated ray direction differential approximately equal to
+    // sum of ray differential for flat surface case plus double normal differential
+    // this is because if you rotate surface by N degrees your reflection ray will rotate by 2*N degrees
+    rayDifferential.dx.dD += 2 * dndx;
+    rayDifferential.dy.dD += 2 * dndy;
 }
 
 [shader("closesthit")]
@@ -299,10 +285,9 @@ void ReflectionClosestHit(inout ReflectionPayload payload, in BuiltInTriangleInt
         CombineVertexData(vertexData1[2], vertexData2[2]),
     };
 
+    Vertex interpolatedVertex = (Vertex)0;
     float2 ddxRes, ddyRes;
-    CalculateDDXDDY(vertices, payload.rayDifferential, ddxRes, ddyRes);
-
-    Vertex interpolatedVertex = InterpolateVertices(vertices, attr);
+    CalculateRTHit(vertices, attr, payload.rayDifferential, interpolatedVertex, ddxRes, ddyRes);
 
     float3 worldPos = WorldRayOrigin() + WorldRayDirection() * RayTCurrent();
     
@@ -312,12 +297,28 @@ void ReflectionClosestHit(inout ReflectionPayload payload, in BuiltInTriangleInt
     float3 viewDir = mul(float4(WorldRayDirection(), 0.0f), Frame.viewMatrix).xyz;
 
     MaterialData matData = materialsData[materialID];
-    payload.color = float4(CalculateLighting(matData, albedoVal, albedoVal, normalVal, viewPos, viewDir), 0.0f);
+    payload.light += CalculateLighting(matData, albedoVal, albedoVal, normalVal, viewPos, viewDir);
+
+    if (payload.recursionDepth < BLK_REFLECTION_RT_MAX_RECURSION_DEPTH - 1)
+    {
+        if (matData.specular_specularExp.a > 200.0f)
+        {
+            payload.recursionDepth++;
+
+            RayDesc ray;
+            ray.Origin = worldPos;
+            ray.Direction = reflect(WorldRayDirection(), normalize(interpolatedVertex.normal));
+            ray.TMin = 0.01f;
+            ray.TMax = 10000.0f;
+
+            TraceRay(sceneAS, RAY_FLAG_NONE, 1, 0, 0, 0, ray, payload);
+        }
+    }
 }
 
 [shader("miss")]
 void ReflectionMissShader(inout ReflectionPayload payload)
 {
-    float4 skyboxVal = skyBox.SampleLevel(anisoSampler, WorldRayDirection(), 0);
-    payload.color = skyboxVal;
+    float3 skyboxVal = skyBox.SampleLevel(anisoSampler, WorldRayDirection(), 0).xyz;
+    payload.light += skyboxVal;
 }

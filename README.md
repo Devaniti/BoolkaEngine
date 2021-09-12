@@ -6,12 +6,12 @@ BoolkaEngine is DX12 rendering engine.
 
 Features
 --------
-* Perfect mirror RT reflections (single bounce)
+* Perfect mirror RT reflections (multi bounce) with ray differentials LOD calculation
 * HDR Rendering + Tonemapping
 * Point lights with shadows
 * Sun light with shadows
 * GPU Frustum culling using mesh shaders
-* Fast loading using custom binary format (including converted from obj format)
+* Fast loading using custom binary format (including converter from obj format)
 * Skybox
 * ImGui debug output
 
@@ -30,6 +30,14 @@ Quick Start
 You can download and run BoolkaEngine with default scene using following command:
 
 `git clone --recurse-submodules -j8 https://github.com/Devaniti/BoolkaEngine.git && BoolkaEngine\HelperScripts\QuickStart.bat`
+
+Controls
+--------
+`WASD` - Camera movement
+`↑←↓→` - Camera rotation
+`RT` - Decrease and Increase FOV
+`OL` - Output to and Load from clipboard current camera position (overwrites your clipboard on O)
+`Esc` - Exit
 
 Building
 --------
