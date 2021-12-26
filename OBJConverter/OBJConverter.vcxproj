@@ -19,25 +19,25 @@
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{4096a9bb-1875-4054-9add-02a0eb4333be}</ProjectGuid>
     <RootNamespace>OBJConverter</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.22000.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Development|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -153,7 +153,7 @@
     <ProjectReference Include="..\BoolkaCommon\BoolkaCommon.vcxproj">
       <Project>{697976e7-6ba1-41ae-8d09-7deaa73fb838}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\ThirdParty\DirectXMesh\DirectXMesh\DirectXMesh_Desktop_2019_Win10.vcxproj">
+    <ProjectReference Include="..\ThirdParty\DirectXMesh\DirectXMesh\DirectXMesh_Desktop_2022.vcxproj">
       <Project>{6857f086-f6fe-4150-9ed7-7446f1c1c220}</Project>
     </ProjectReference>
   </ItemGroup>

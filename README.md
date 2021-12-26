@@ -22,8 +22,8 @@ Requirements
 * SSD Recommended
 
 To build BoolkaEngine you'll also need:
-* Visual Studio 2019
-* Windows 11 SDK 10.0.22000
+* Visual Studio 2022
+* Windows 10 SDK 19041 or later
 
 Quick Start
 --------
