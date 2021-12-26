@@ -15,8 +15,8 @@ namespace Boolka
         UINT frameIndex = frameContext.GetFrameIndex();
         Texture2D& albedo = resourceContainer.GetTexture(ResourceContainer::Tex::GBufferAlbedo);
         Texture2D& normal = resourceContainer.GetTexture(ResourceContainer::Tex::GBufferNormal);
-        Texture2D& reflections =
-            resourceContainer.GetTexture(ResourceContainer::Tex::GBufferReflections);
+        Texture2D& raytraceResults =
+            resourceContainer.GetTexture(ResourceContainer::Tex::GBufferRaytraceResults);
         Texture2D& depth = resourceContainer.GetTexture(ResourceContainer::Tex::GbufferDepth);
         Texture2D& lightBuffer = resourceContainer.GetTexture(ResourceContainer::Tex::LightBuffer);
         RenderTargetView& lightBufferRTV =
@@ -36,7 +36,7 @@ namespace Boolka
 
         resourceTracker.Transition(albedo, commandList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
         resourceTracker.Transition(normal, commandList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-        resourceTracker.Transition(reflections, commandList,
+        resourceTracker.Transition(raytraceResults, commandList,
                                    D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
         resourceTracker.Transition(depth, commandList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
         resourceTracker.Transition(lightBuffer, commandList, D3D12_RESOURCE_STATE_RENDER_TARGET);

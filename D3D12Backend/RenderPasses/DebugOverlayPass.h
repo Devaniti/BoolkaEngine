@@ -28,10 +28,12 @@ namespace Boolka
         void ImguiGPUDebugMarkers(const RenderContext& renderContext);
         void ImguiUIGPUTimes(const RenderContext& renderContext);
         void ImguiGraphs(const RenderContext& renderContext);
+        void ImguiHelpWindow(const RenderContext& renderContext);
 
         DescriptorHeap m_ImguiDescriptorHeap;
 
         float m_ScaleFactor;
+        bool m_IsEnabled;
 
         ImguiGraphHelper m_FPSGraph;
         ImguiGraphHelper m_FrameTimeGraph;

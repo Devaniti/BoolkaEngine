@@ -21,6 +21,7 @@
       <WarningLevel>Level3</WarningLevel>
       <FloatingPointModel>Fast</FloatingPointModel>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <FxCompile>
       <AdditionalOptions>-HV 2018 -enable-16bit-types</AdditionalOptions>

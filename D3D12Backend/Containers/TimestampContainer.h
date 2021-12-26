@@ -18,7 +18,7 @@ namespace Boolka
             ZRenderPass,
             ShadowMapRenderPass,
             GBufferRenderPass,
-            ReflectionRenderPass,
+            RaytraceRenderPass,
             DeferredLightingPass,
             SkyBoxRenderPass,
             TransparentRenderPass,

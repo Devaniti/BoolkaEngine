@@ -14,6 +14,7 @@ namespace Boolka
 
     DebugOverlayPass::DebugOverlayPass()
         : m_ScaleFactor(0.0f)
+        , m_IsEnabled(true)
     {
     }
 
@@ -62,6 +63,26 @@ namespace Boolka
     {
         BLK_RENDER_PASS_START(DebugOverlayPass);
         const std::lock_guard<std::recursive_mutex> lock(g_imguiMutex);
+
+        // TODO implement proper input when GDK GameInput releases
+        static bool isF1Pressed = false;
+        if (::GetAsyncKeyState(VK_F1))
+        {
+            if (!isF1Pressed)
+            {
+                m_IsEnabled = !m_IsEnabled;
+                isF1Pressed = true;
+            }
+        }
+        else
+        {        
+            isF1Pressed = false;
+        }
+
+        if (!m_IsEnabled)
+        {
+            return true;
+        }
 
         ImguiFlipFrame();
         ImguiUIManagement(renderContext);
@@ -128,7 +149,12 @@ namespace Boolka
         const float fpsStable = 1.0f / debugStats.frameTimeStable;
         const auto& cameraPos = frameContext.GetCameraPos();
         const auto& viewMatrix = frameContext.GetViewMatrix();
+        const auto& projMatrix = frameContext.GetProjMatrix();
+
         const Vector3 viewDir{viewMatrix[0][2], viewMatrix[1][2], viewMatrix[2][2]};
+        // FOV along Y axis
+        const float fov = BLK_RAD_TO_DEG(2.0f * std::atan(1.0f / projMatrix[1][1]));
+
         ImGui::Text("%5.1f FPS (avg %5.1f FPS)", fps, fpsStable);
         ImGui::Text("%5.2f ms (avg %5.2f ms)", debugStats.frameTime * 1000.0f,
                     debugStats.frameTimeStable * 1000.0f);
@@ -152,11 +178,15 @@ namespace Boolka
         {
             ImGui::Text("Pos X:%.2f Y:%.2f Z:%.2f", cameraPos.x(), cameraPos.y(), cameraPos.z());
             ImGui::Text("Dir X:%.2f Y:%.2f Z:%.2f", viewDir.x(), viewDir.y(), viewDir.z());
+            ImGui::Text("FOV %.2f degrees", fov);
         }
         if (ImGui::CollapsingHeader("GPU Debug Markers", ImGuiTreeNodeFlags_DefaultOpen))
         {
             ImguiGPUDebugMarkers(renderContext);
         }
+        ImGui::End();
+        ImGui::Begin("Help");
+        ImguiHelpWindow(renderContext);
         ImGui::End();
         ImGui::Render();
     }
@@ -183,8 +213,8 @@ namespace Boolka
         case TimestampContainer::Markers::GBufferRenderPass:
             return "GBufferRenderPass";
             break;
-        case TimestampContainer::Markers::ReflectionRenderPass:
-            return "ReflectionRenderPass";
+        case TimestampContainer::Markers::RaytraceRenderPass:
+            return "RaytraceRenderPass";
             break;
         case TimestampContainer::Markers::DeferredLightingPass:
             return "DeferredLightingPass";
@@ -319,6 +349,21 @@ namespace Boolka
         m_GPUTime.PushValueAndRender(currentGPUTime, "GPU Time", graphWidth, graphHeight);
     }
 
+    void DebugOverlayPass::ImguiHelpWindow(const RenderContext& renderContext)
+    {
+        if (ImGui::CollapsingHeader("Controls", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            ImGui::Text("WASD - Camera movement");
+            ImGui::Text("Arrows - Camera rotation");
+            ImGui::Text("T - Increase FOV");
+            ImGui::Text("R - Decrease FOV");
+            ImGui::Text("F1 - Hide/Show UI");
+            ImGui::Text("O - Output camera position to clipboard");
+            ImGui::Text("L - Load camera position from clipboard");
+            ImGui::Text("Esc - Exit");
+        }
+    }
+
     template <size_t tupleIndex, typename TupleType>
     struct TupleSorter
     {
@@ -406,13 +451,23 @@ namespace Boolka
 
         bool anyFlagsFound = false;
 
+        static bool interpretAsFloat = false;
+        ImGui::Checkbox("Interpret values as float", &interpretAsFloat);
+
         for (size_t i = 0; i < 256; ++i)
         {
             uint markerValue = debugStats.gpuDebugMarkers[i];
             if (markerValue)
             {
                 anyFlagsFound = true;
-                ImGui::Text("Flag %d - data %d", i, markerValue);
+                if (interpretAsFloat)
+                {
+                    ImGui::Text("Flag %d - data %f", i, asfloat(markerValue));
+                }
+                else
+                {
+                    ImGui::Text("Flag %d - data %d", i, markerValue);
+                }
             }
         }
 

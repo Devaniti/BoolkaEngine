@@ -95,9 +95,19 @@ namespace Boolka
         return m_InvViewProjMatrix;
     }
 
+    const Vector4* RenderFrameContext::GetEyeRayCoeficients() const
+    {
+        return m_EyeRayCoeficients;
+    }
+
     const Vector4& RenderFrameContext::GetCameraPos() const
     {
         return m_CameraPos;
+    }
+
+    Vector4* RenderFrameContext::GetEyeRayCoeficients()
+    {
+        return m_EyeRayCoeficients;
     }
 
     Vector4& RenderFrameContext::GetCameraPos()
@@ -168,7 +178,10 @@ namespace Boolka
         float aspectRatio = static_cast<float>(width) / height;
 
         engineContext.GetCamera().Update(m_DeltaTime, aspectRatio, m_ViewMatrix, m_ProjMatrix,
-                                         m_CameraPos);
+                                         m_CameraPos, m_EyeRayCoeficients);
+
+        m_EyeRayCoeficients[3] = m_EyeRayCoeficients[0] * 2.0f / static_cast<float>(width);
+        m_EyeRayCoeficients[4] = m_EyeRayCoeficients[1] * 2.0f / static_cast<float>(height);
 
         m_ViewProjMatrix = m_ViewMatrix * m_ProjMatrix;
         bool isSuccessfull;

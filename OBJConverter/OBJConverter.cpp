@@ -36,9 +36,12 @@ namespace Boolka
         : diffuseTexName{tinyObjMat.diffuse_texname}
     {
         gpuMatData.diffuse =
-            Vector4{tinyObjMat.diffuse[0], tinyObjMat.diffuse[1], tinyObjMat.diffuse[2], 1.0f};
-        gpuMatData.specular_specularExp = Vector4{tinyObjMat.specular[0], tinyObjMat.specular[1],
-                                                  tinyObjMat.specular[2], tinyObjMat.shininess};
+            Vector3{tinyObjMat.diffuse[0], tinyObjMat.diffuse[1], tinyObjMat.diffuse[2]};
+        gpuMatData.transparency = tinyObjMat.dissolve;
+        gpuMatData.specular =
+            Vector3{tinyObjMat.specular[0], tinyObjMat.specular[1], tinyObjMat.specular[2]};
+        gpuMatData.specularExp = tinyObjMat.shininess;
+        gpuMatData.indexOfRefraction = tinyObjMat.ior;
     }
 
     bool BoolkaMaterial::operator==(const BoolkaMaterial& other) const

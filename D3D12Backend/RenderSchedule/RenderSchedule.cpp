@@ -76,7 +76,7 @@ namespace Boolka
         BLK_ASSERT_VAR(res);
         res = m_GbufferPass.Initialize(device, m_RenderContext);
         BLK_ASSERT_VAR(res);
-        res = m_ReflectionRenderPass.Initialize(device, m_RenderContext);
+        res = m_RaytraceRenderPass.Initialize(device, m_RenderContext);
         BLK_ASSERT_VAR(res);
         res = m_DeferredLightingPass.Initialize(device, m_RenderContext);
         BLK_ASSERT_VAR(res);
@@ -103,7 +103,7 @@ namespace Boolka
         m_ZPass.Unload();
         m_ShadowMapPass.Unload();
         m_GbufferPass.Unload();
-        m_ReflectionRenderPass.Unload();
+        m_RaytraceRenderPass.Unload();
         m_DeferredLightingPass.Unload();
         m_SkyBoxPass.Unload();
         m_TransparentPass.Unload();
@@ -138,7 +138,7 @@ namespace Boolka
         BLK_ASSERT_VAR(res);
         res = m_GbufferPass.Render(m_RenderContext, m_ResourceTracker);
         BLK_ASSERT_VAR(res);
-        res = m_ReflectionRenderPass.Render(m_RenderContext, m_ResourceTracker);
+        res = m_RaytraceRenderPass.Render(m_RenderContext, m_ResourceTracker);
         BLK_ASSERT_VAR(res);
         res = m_DeferredLightingPass.Render(m_RenderContext, m_ResourceTracker);
         BLK_ASSERT_VAR(res);

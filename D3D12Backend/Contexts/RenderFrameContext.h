@@ -31,6 +31,7 @@ namespace Boolka
         Matrix4x4& GetInvViewMatrix();
         Matrix4x4& GetInvProjMatrix();
         Matrix4x4& GetInvViewProjMatrix();
+        Vector4* GetEyeRayCoeficients();
         Vector4& GetCameraPos();
 
         const Matrix4x4& GetViewMatrix() const;
@@ -39,6 +40,7 @@ namespace Boolka
         const Matrix4x4& GetInvViewMatrix() const;
         const Matrix4x4& GetInvProjMatrix() const;
         const Matrix4x4& GetInvViewProjMatrix() const;
+        const Vector4* GetEyeRayCoeficients() const;
         const Vector4& GetCameraPos() const;
 
 #ifdef BLK_ENABLE_STATS
@@ -55,6 +57,7 @@ namespace Boolka
         Matrix4x4 m_InvViewMatrix;
         Matrix4x4 m_InvProjMatrix;
         Matrix4x4 m_InvViewProjMatrix;
+        Vector4 m_EyeRayCoeficients[5];
         Vector4 m_CameraPos;
 
         float m_DeltaTime;

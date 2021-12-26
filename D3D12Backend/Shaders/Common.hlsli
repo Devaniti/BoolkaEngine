@@ -4,16 +4,6 @@
 #include "CppShared.hlsli"
 #include "ResourceBindings.hlsli"
 
-float2 GetBackbufferResolution()
-{
-    return Frame.backbufferResolutionInvBackBufferResolution.xy;
-}
-
-float2 GetInvBackbufferResolution()
-{
-    return Frame.backbufferResolutionInvBackBufferResolution.zw;
-}
-
 bool IntersectionFrustumAABB(const in Frustum currentFrustum, const in AABB boundingBox)
 {
     [unroll(6)] for (int i = 0; i < 6; ++i)
@@ -52,6 +42,11 @@ void DebugIncrementCounter(uint marker)
 void DebugSetData(uint marker, uint data)
 {
     debugMarkers[marker] = data;
+}
+
+void DebugSetData(uint marker, float data)
+{
+    debugMarkers[marker] = asuint(data);
 }
 
 #include "ResourceBindings.hlsli"

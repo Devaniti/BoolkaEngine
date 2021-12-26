@@ -32,7 +32,7 @@ struct AABB
 #define BLK_MAX_OBJECT_COUNT 2048
 #define BLK_MAX_MESHLETS 262144
 
-#define BLK_REFLECTION_RT_MAX_RECURSION_DEPTH 4
+#define BLK_RT_MAX_RECURSION_DEPTH 4
 
 struct FrameConstantBuffer
 {
@@ -43,14 +43,21 @@ struct FrameConstantBuffer
     float4x4 invViewMatrix;
     float4x4 invProjMatrix;
     Frustum mainViewFrustum;
+    // Coeficients explained in Raytracing Gems 1 in 20.3.2.1 EYE RAY SETUP
+    // 0-2 - r u v
+    // 3-4 - rd ud
+    float4 eyeRayCoeficients[5];
     float4 cameraWorldPos;
-    float4 backbufferResolutionInvBackBufferResolution;
+    float2 backbufferResolution;
+    float2 invBackBufferResolution;
 };
 
 struct LightData
 {
-    float4 viewPos_nearZ;
-    float4 color_farZ;
+    float3 viewPos;
+    float nearZ;
+    float3 color;
+    float farZ;
 };
 
 struct SunData
@@ -77,8 +84,12 @@ struct CullingDataConstantBuffer
 
 struct MaterialData
 {
-    float4 diffuse;
-    float4 specular_specularExp;
+    float3 diffuse;
+    float transparency;
+    float3 specular;
+    float specularExp;
+    float indexOfRefraction;
+    float3 padding;
 };
 
 struct RayDifferentialPart
@@ -93,10 +104,12 @@ struct RayDifferential
     RayDifferentialPart dy;
 };
 
-struct ReflectionPayload
+struct RaytracePayload
 {
     float3 light;
     uint recursionDepth;
+    float3 color;
+    uint unused;
     RayDifferential rayDifferential;
 };
 

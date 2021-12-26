@@ -23,21 +23,13 @@ Requirements
 
 To build BoolkaEngine you'll also need:
 * Visual Studio 2019
-* Windows 10 SDK 10.0.19041
+* Windows 11 SDK 10.0.22000
 
 Quick Start
 --------
 You can download and run BoolkaEngine with default scene using following command:
 
 `git clone --recurse-submodules -j8 https://github.com/Devaniti/BoolkaEngine.git && BoolkaEngine\HelperScripts\QuickStart.bat`
-
-Controls
---------
-`WASD` - Camera movement
-`↑←↓→` - Camera rotation
-`RT` - Decrease and Increase FOV
-`OL` - Output to and Load from clipboard current camera position (overwrites your clipboard on O)
-`Esc` - Exit
 
 Building
 --------

@@ -72,12 +72,15 @@ namespace Boolka
             .invViewMatrix = frameContext.GetInvViewMatrix().Transpose(),
             .invProjMatrix = frameContext.GetInvProjMatrix().Transpose(),
             .mainViewFrustum = Frustum(frameContext.GetViewProjMatrix()),
+            .eyeRayCoeficients = {},
             .cameraWorldPos = frameContext.GetCameraPos(),
-            .backbufferResolutionInvBackBufferResolution =
-                Vector4(static_cast<float>(engineContext.GetBackbufferWidth()),
-                        static_cast<float>(engineContext.GetBackbufferHeight()),
-                        1.0f / engineContext.GetBackbufferWidth(),
-                        1.0f / engineContext.GetBackbufferHeight())};
+            .backbufferResolution =
+                Vector2(static_cast<float>(engineContext.GetBackbufferWidth()),
+                        static_cast<float>(engineContext.GetBackbufferHeight())),
+            .invBackBufferResolution = Vector2(1.0f / engineContext.GetBackbufferWidth(),
+                                               1.0f / engineContext.GetBackbufferHeight())};
+        memcpy(&frameCbufferData.eyeRayCoeficients, frameContext.GetEyeRayCoeficients(),
+               sizeof(frameCbufferData.eyeRayCoeficients));
 
         currentUploadBuffer.Upload(&frameCbufferData, sizeof(frameCbufferData));
 
@@ -111,8 +114,10 @@ namespace Boolka
         for (size_t i = 0; i < lights.size(); ++i)
         {
             Vector3 viewPos = Vector4(lights[i].worldPos, 1.0f) * frameContext.GetViewMatrix();
-            lightingCbufferData.lights[i].viewPos_nearZ = Vector4(viewPos, lights[i].nearZ);
-            lightingCbufferData.lights[i].color_farZ = Vector4(lights[i].color, lights[i].farZ);
+            lightingCbufferData.lights[i].viewPos = viewPos;
+            lightingCbufferData.lights[i].nearZ = lights[i].nearZ;
+            lightingCbufferData.lights[i].color = lights[i].color;
+            lightingCbufferData.lights[i].farZ = lights[i].farZ;
         }
 
         auto& sun = lightContainer.GetSun();

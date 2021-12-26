@@ -177,6 +177,18 @@ T1 ptr_static_cast(T2 value)
     return ptr_static_cast_internal<T1, T2, intermediateType>(value);
 }
 
+// TODO move inline functions to cpp file
+
+inline float asfloat(uint value)
+{
+    return *reinterpret_cast<float*>(&value);
+}
+
+inline uint asuint(float value)
+{
+    return *reinterpret_cast<uint*>(&value);
+}
+
 inline void MemcpyStrided(void* dst, size_t dstStride, const void* src, size_t srcStride,
                            size_t rows)
 {

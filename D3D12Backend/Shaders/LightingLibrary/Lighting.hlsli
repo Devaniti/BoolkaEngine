@@ -10,7 +10,7 @@ static const float ambientLight = 0.1f;
 
 float3 CalculateAmbient(MaterialData matData, float3 albedoVal)
 {
-    return albedoVal * ambientLight * matData.diffuse.rgb;
+    return albedoVal * ambientLight * matData.diffuse * matData.transparency;
 }
 
 float VectorToDepth(float3 vec, float n, float f)
@@ -26,8 +26,8 @@ float CalculatePointLightShadow(uint lightIndex, float3 lightVector)
 {
     float4 samplePos = mul(float4(-lightVector, 0.0f), Frame.invViewMatrix);
     float comparisonValue =
-        VectorToDepth(samplePos.xyz, LightingData.lights[lightIndex].viewPos_nearZ.w,
-                      LightingData.lights[lightIndex].color_farZ.w);
+        VectorToDepth(samplePos.xyz, LightingData.lights[lightIndex].nearZ,
+                      LightingData.lights[lightIndex].farZ);
     return shadowMapCube[lightIndex].SampleCmpLevelZero(shadowSampler, samplePos.xyz,
                                                         comparisonValue);
 }
@@ -38,11 +38,11 @@ float3 CalculatePointLight(MaterialData matData, uint lightIndex, float3 albedoV
 {
     float3 result = 0.0f;
 
-    float3 lightVector = LightingData.lights[lightIndex].viewPos_nearZ.xyz - viewPos;
+    float3 lightVector = LightingData.lights[lightIndex].viewPos - viewPos;
     float3 lightDir = normalize(lightVector);
     float3 lightVectorSqr = lightVector * lightVector;
     float distSqr = lightVectorSqr.x + lightVectorSqr.y + lightVectorSqr.z;
-    float farZ = LightingData.lights[lightIndex].color_farZ.w;
+    float farZ = LightingData.lights[lightIndex].farZ;
     // Non physically correct attenuation
     // This is needed to limit light radius
     float distanceAttenuation = (1.0f - distSqr / (farZ * farZ)) / distSqr;
@@ -55,15 +55,15 @@ float3 CalculatePointLight(MaterialData matData, uint lightIndex, float3 albedoV
         return 0.0;
 
     // Diffuse
-    result += albedoVal * NdotL * matData.diffuse.rgb;
+    result += albedoVal * NdotL * matData.diffuse;
 
     float3 reflectedLightVector = reflect(viewDir, normalVal);
     float specularRefl =
-        pow(saturate(dot(reflectedLightVector, lightDir)), matData.specular_specularExp.a);
+        pow(saturate(dot(reflectedLightVector, lightDir)), matData.specularExp);
     // Specular
-    result += specularVal * specularRefl * matData.specular_specularExp.rgb;
+    result += specularVal * specularRefl * matData.specular;
 
-    result *= LightingData.lights[lightIndex].color_farZ.rgb * shadowFactor * distanceAttenuation;
+    result *= LightingData.lights[lightIndex].color * shadowFactor * distanceAttenuation;
     return result;
 }
 
@@ -91,13 +91,13 @@ float3 CalculateSun(MaterialData matData, float3 albedoVal, float3 specularVal, 
         return 0.0f;
 
     // Diffuse
-    result += albedoVal * NdotL * matData.diffuse.rgb;
+    result += albedoVal * NdotL * matData.diffuse * matData.transparency;
 
     float3 reflectedLightVector = reflect(viewDir, normalVal);
     float specularRefl =
-        pow(saturate(dot(reflectedLightVector, lightDir)), matData.specular_specularExp.a);
+        pow(saturate(dot(reflectedLightVector, lightDir)), matData.specularExp);
     // Specular
-    result += specularVal * specularRefl * matData.specular_specularExp.rgb;
+    result += specularVal * specularRefl * matData.specular;
 
     result *= LightingData.sun.color.rgb * shadowFactor;
     return result;

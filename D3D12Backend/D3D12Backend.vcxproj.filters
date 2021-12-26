@@ -94,9 +94,6 @@
     <Filter Include="APIWrappers\Raytracing\AccelerationStructure">
       <UniqueIdentifier>{33aea394-d500-4b88-b896-0ded5261e2ad}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Shaders\ReflectionPass">
-      <UniqueIdentifier>{19a0dbc7-8694-4c79-a5c2-1da1f0cc5f7a}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Shaders\LightingLibrary">
       <UniqueIdentifier>{28262d4d-3c2e-4cd3-941a-3c1dedbd2af9}</UniqueIdentifier>
     </Filter>
@@ -105,6 +102,9 @@
     </Filter>
     <Filter Include="Shaders\CullingPass">
       <UniqueIdentifier>{f5894ced-045a-45da-8087-b355e08740b0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\RaytracePass">
+      <UniqueIdentifier>{00c14bb2-55f6-4d63-acbd-f9a145a78b4f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -338,7 +338,7 @@
     <ClInclude Include="APIWrappers\Resources\Buffers\ReadbackBuffer.h">
       <Filter>APIWrappers\Resources\Buffers</Filter>
     </ClInclude>
-    <ClInclude Include="RenderPasses\ReflectionRenderPass.h">
+    <ClInclude Include="RenderPasses\RaytraceRenderPass.h">
       <Filter>RenderPasses</Filter>
     </ClInclude>
     <ClInclude Include="APIWrappers\PipelineState\StateObject.h">
@@ -598,7 +598,7 @@
     <ClCompile Include="APIWrappers\Resources\Buffers\ReadbackBuffer.cpp">
       <Filter>APIWrappers\Resources\Buffers</Filter>
     </ClCompile>
-    <ClCompile Include="RenderPasses\ReflectionRenderPass.cpp">
+    <ClCompile Include="RenderPasses\RaytraceRenderPass.cpp">
       <Filter>RenderPasses</Filter>
     </ClCompile>
     <ClCompile Include="APIWrappers\PipelineState\StateObject.cpp">
@@ -681,9 +681,6 @@
     <FxCompile Include="Shaders\SkyBoxPass\SkyBoxPassPixelShader.hlsl">
       <Filter>Shaders\SkyBoxPass</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\ReflectionPass\ReflectionPassLib.hlsl">
-      <Filter>Shaders\ReflectionPass</Filter>
-    </FxCompile>
     <FxCompile Include="Shaders\CullingPass\ObjectCullingComputeShader.hlsl">
       <Filter>Shaders\CullingPass</Filter>
     </FxCompile>
@@ -692,6 +689,9 @@
     </FxCompile>
     <FxCompile Include="Shaders\CullingPass\CullingCommandBufferGenerateComputeShader.hlsl">
       <Filter>Shaders\CullingPass</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\RaytracePass\RaytracePassLib.hlsl">
+      <Filter>Shaders\RaytracePass</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

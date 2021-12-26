@@ -66,7 +66,7 @@ namespace Boolka
             .Initialize(device, D3D12_HEAP_TYPE_DEFAULT, width, height, 1, gbufferAlbedoFormat,
                         D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET, &rtvClearValue,
                         D3D12_RESOURCE_STATE_RENDER_TARGET);
-        GetTexture(Tex::GBufferReflections)
+        GetTexture(Tex::GBufferRaytraceResults)
             .Initialize(device, D3D12_HEAP_TYPE_DEFAULT, width, height, 1, gbufferAlbedoFormat,
                         D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS, nullptr,
                         D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
@@ -176,7 +176,7 @@ namespace Boolka
         const UINT uavOffset = static_cast<UINT>(MainSRVDescriptorHeapOffsets::UAVHeapOffset);
 
         UnorderedAccessView::Initialize(
-            device, GetTexture(Tex::GBufferReflections), DXGI_FORMAT_R16G16B16A16_FLOAT,
+            device, GetTexture(Tex::GBufferRaytraceResults), DXGI_FORMAT_R16G16B16A16_FLOAT,
             GetDescriptorHeap(DescHeap::MainHeap)
                 .GetCPUHandle(uavOffset + static_cast<UINT>(SRV::GBufferAlbedo)));
 
@@ -191,9 +191,9 @@ namespace Boolka
             GetDescriptorHeap(DescHeap::MainHeap)
                 .GetCPUHandle(srvOffset + static_cast<UINT>(SRV::GBufferNormal)));
         ShaderResourceView::Initialize(
-            device, GetTexture(Tex::GBufferReflections),
+            device, GetTexture(Tex::GBufferRaytraceResults),
             GetDescriptorHeap(DescHeap::MainHeap)
-                .GetCPUHandle(srvOffset + static_cast<UINT>(SRV::GBufferReflections)));
+                .GetCPUHandle(srvOffset + static_cast<UINT>(SRV::GBufferRaytraceResults)));
         ShaderResourceView::Initialize(
             device, GetTexture(Tex::GbufferDepth),
             GetDescriptorHeap(DescHeap::MainHeap)
@@ -320,7 +320,7 @@ namespace Boolka
                                          D3D12_RESOURCE_STATE_RENDER_TARGET);
         resourceTracker.RegisterResource(GetTexture(Tex::GBufferNormal),
                                          D3D12_RESOURCE_STATE_RENDER_TARGET);
-        resourceTracker.RegisterResource(GetTexture(Tex::GBufferReflections),
+        resourceTracker.RegisterResource(GetTexture(Tex::GBufferRaytraceResults),
                                          D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         resourceTracker.RegisterResource(GetTexture(Tex::LightBuffer),
                                          D3D12_RESOURCE_STATE_RENDER_TARGET);
@@ -353,7 +353,7 @@ namespace Boolka
 #ifdef BLK_RENDER_DEBUG
         RenderDebug::SetDebugName(GetTexture(Tex::GBufferAlbedo).Get(), L"GBufferAlbedo");
         RenderDebug::SetDebugName(GetTexture(Tex::GBufferNormal).Get(), L"GBufferNormal");
-        RenderDebug::SetDebugName(GetTexture(Tex::GBufferReflections).Get(), L"GBufferReflections");
+        RenderDebug::SetDebugName(GetTexture(Tex::GBufferRaytraceResults).Get(), L"GBufferRaytraceResults");
         RenderDebug::SetDebugName(GetTexture(Tex::LightBuffer).Get(), L"LightBuffer");
         RenderDebug::SetDebugName(GetTexture(Tex::GbufferDepth).Get(), L"GbufferDepth");
         for (size_t i = 0; i < BLK_MAX_LIGHT_COUNT; i++)

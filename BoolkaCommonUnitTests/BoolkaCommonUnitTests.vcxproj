@@ -19,7 +19,7 @@
     <ProjectGuid>{8AEC4E61-9CAC-4BEE-8285-EF15AC53404C}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>BoolkaCommonUnitTests</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.22000.0</WindowsTargetPlatformVersion>
     <ProjectSubType>NativeUnitTestProject</ProjectSubType>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

@@ -25,7 +25,7 @@ namespace Boolka
         {
             GBufferAlbedo,
             GBufferNormal,
-            GBufferReflections,
+            GBufferRaytraceResults,
             GbufferDepth,
             LightBuffer,
             ShadowMapCube0,
@@ -50,7 +50,7 @@ namespace Boolka
         {
             GBufferAlbedo,
             GBufferNormal,
-            GBufferReflections,
+            GBufferRaytraceResults,
             GbufferDepth,
             LightBuffer,
             GPUCulling,
@@ -77,7 +77,7 @@ namespace Boolka
 
         enum class UAV
         {
-            GBufferReflections,
+            GBufferRaytraceResults,
             GPUCulling,
             GPUCullingDebugReadback,
             GPUCullingCommand,

@@ -69,15 +69,15 @@ namespace Boolka
         static const float nearZ = 0.1f;
         static const float farZ = 7.0f;
 
-        static const float intensity = 11.0f;
+        static const float intensity = 9.0f;
 
         Vector3 center = {14.0f, 6.5f, 2.0f};
         float distance = 6.0f;
         Vector4 colors[BLK_MAX_LIGHT_COUNT] = {
             Vector4{1.0f, 1.0f, 1.0f, 0.0f} * intensity,
-            Vector4{1.0f, 0.0f, 0.0f, 0.0f} * intensity,
-            Vector4{0.0f, 1.0f, 0.0f, 0.0f} * intensity,
-            Vector4{0.0f, 0.0f, 1.0f, 0.0f} * intensity,
+            Vector4{1.0f, 0.7f, 0.7f, 0.0f} * intensity,
+            Vector4{0.7f, 1.0f, 0.7f, 0.0f} * intensity,
+            Vector4{0.7f, 0.7f, 1.0f, 0.0f} * intensity,
         };
 
         Matrix4x4 proj =
@@ -117,7 +117,7 @@ namespace Boolka
     void LightContainer::UpdateSun()
     {
         static const float nearZ = 0.1f;
-        static const float farZ = 25.0f;
+        static const float farZ = 40.0f;
         static const float worldWidth = 100.0f;
         static const Vector4 color{0.45f, 0.45f, 0.25f};
         static const Vector4 lightDir = Vector4{-0.1f, -0.4f, -1.0f}.Normalize();

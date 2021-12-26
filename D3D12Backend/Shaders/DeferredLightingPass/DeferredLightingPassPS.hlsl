@@ -16,7 +16,7 @@ PSOut main(VSOut In)
     uint2 vpos = uint2(In.position.xy);
     float3 albedoVal = SRGBToLinear(albedo.Load(uint3(vpos, 0)).rgb);
     float4 normalVal = normal.Load(uint3(vpos, 0));
-    float3 reflectionVal = reflections.Load(uint3(vpos, 0)).rgb;
+    float3 rtVal = raytraceResults.Load(uint3(vpos, 0)).rgb;
     float depthVal = depth.Load(uint3(vpos, 0));
 
     float3 normal = normalVal.xyz;
@@ -30,8 +30,8 @@ PSOut main(VSOut In)
 
     MaterialData matData = materialsData[materialID];
     Out.light = float4(CalculateLighting(matData, albedoVal, albedoVal, normal, viewPos, viewDir), 0.0f);
-    if (matData.specular_specularExp.a > 200.0f)
-        Out.light += float4(reflectionVal * matData.specular_specularExp.rgb, 0.0f);
+    if (matData.specularExp > 200.0f)
+        Out.light += float4(rtVal, 0.0f);
 
     return Out;
 }
