@@ -5,7 +5,7 @@ on: [push]
 jobs:
   build_and_run_tests:
     name: Build and run tests
-    runs-on: windows-latest
+    runs-on: windows-2022
     steps:
     - name: Sync
       uses: actions/checkout@v2
