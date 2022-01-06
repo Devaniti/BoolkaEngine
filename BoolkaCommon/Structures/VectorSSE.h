@@ -6,7 +6,7 @@ namespace Boolka
 {
 
     template <>
-    class Vector<4, float>
+    class [[nodiscard]] Vector<4, float>
     {
     public:
         using thisType = Vector<4, float>;
@@ -36,83 +36,83 @@ namespace Boolka
         template <typename... Args>
         Vector(float first, Args... args);
 
-        __m128& GetInternal();
-        const __m128 GetInternal() const;
+        [[nodiscard]] __m128& GetInternal();
+        [[nodiscard]] const __m128 GetInternal() const;
 
-        float x() const;
-        float y() const;
-        float z() const;
-        float w() const;
+        [[nodiscard]] float x() const;
+        [[nodiscard]] float y() const;
+        [[nodiscard]] float z() const;
+        [[nodiscard]] float w() const;
 
-        float& x();
-        float& y();
-        float& z();
-        float& w();
+        [[nodiscard]] float& x();
+        [[nodiscard]] float& y();
+        [[nodiscard]] float& z();
+        [[nodiscard]] float& w();
 
-        float r() const;
-        float g() const;
-        float b() const;
-        float a() const;
+        [[nodiscard]] float r() const;
+        [[nodiscard]] float g() const;
+        [[nodiscard]] float b() const;
+        [[nodiscard]] float a() const;
 
-        float& r();
-        float& g();
-        float& b();
-        float& a();
+        [[nodiscard]] float& r();
+        [[nodiscard]] float& g();
+        [[nodiscard]] float& b();
+        [[nodiscard]] float& a();
 
-        float& operator[](size_t i);
-        const float& operator[](size_t i) const;
+        [[nodiscard]] float& operator[](size_t i);
+        [[nodiscard]] const float& operator[](size_t i) const;
 
-        float* GetBuffer();
-        const float* GetBuffer() const;
+        [[nodiscard]] float* GetBuffer();
+        [[nodiscard]] const float* GetBuffer() const;
 
-        float* begin();
-        float* end();
-        const float* begin() const;
-        const float* end() const;
+        [[nodiscard]] float* begin();
+        [[nodiscard]] float* end();
+        [[nodiscard]] const float* begin() const;
+        [[nodiscard]] const float* end() const;
 
-        size_t size() const;
+        [[nodiscard]] size_t size() const;
 
-        float Dot(const thisType& other) const;
-        thisType Cross(const thisType& other) const;
+        [[nodiscard]] float Dot(const thisType& other) const;
+        [[nodiscard]] thisType Cross(const thisType& other) const;
 
-        float LengthSlow() const;
-        float LengthSqr() const;
-        thisType Normalize() const;
+        [[nodiscard]] float LengthSlow() const;
+        [[nodiscard]] float LengthSqr() const;
+        [[nodiscard]] thisType Normalize() const;
 
-        float Length3Slow() const;
-        float Length3Sqr() const;
-        thisType Normalize3() const;
+        [[nodiscard]] float Length3Slow() const;
+        [[nodiscard]] float Length3Sqr() const;
+        [[nodiscard]] thisType Normalize3() const;
 
-        thisType Min(const thisType& other) const;
-        thisType Max(const thisType& other) const;
+        [[nodiscard]] thisType Min(const thisType& other) const;
+        [[nodiscard]] thisType Max(const thisType& other) const;
 
-        thisType Select(const thisType& other, const thisType& mask) const;
+        [[nodiscard]] thisType Select(const thisType& other, const thisType& mask) const;
 
-        thisType operator-() const;
+        [[nodiscard]] thisType operator-() const;
 
         thisType& operator*=(float other);
         thisType& operator/=(float other);
-        thisType operator*(float other) const;
-        thisType operator/(float other) const;
+        [[nodiscard]] thisType operator*(float other) const;
+        [[nodiscard]] thisType operator/(float other) const;
 
         thisType& operator*=(const thisType& other);
         thisType& operator/=(const thisType& other);
         thisType& operator+=(const thisType& other);
         thisType& operator-=(const thisType& other);
-        thisType operator*(const thisType& other) const;
-        thisType operator/(const thisType& other) const;
-        thisType operator+(const thisType& other) const;
-        thisType operator-(const thisType& other) const;
+        [[nodiscard]] thisType operator*(const thisType& other) const;
+        [[nodiscard]] thisType operator/(const thisType& other) const;
+        [[nodiscard]] thisType operator+(const thisType& other) const;
+        [[nodiscard]] thisType operator-(const thisType& other) const;
 
-        bool operator==(const thisType& other) const;
-        bool operator!=(const thisType& other) const;
+        [[nodiscard]] bool operator==(const thisType& other) const;
+        [[nodiscard]] bool operator!=(const thisType& other) const;
 
-        thisType operator>(const thisType& other) const;
-        thisType operator<(const thisType& other) const;
-        thisType operator>=(const thisType& other) const;
-        thisType operator<=(const thisType& other) const;
-        thisType EqualMask(const thisType& other) const;
-        thisType NotEqualMask(const thisType& other) const;
+        [[nodiscard]] thisType operator>(const thisType& other) const;
+        [[nodiscard]] thisType operator<(const thisType& other) const;
+        [[nodiscard]] thisType operator>=(const thisType& other) const;
+        [[nodiscard]] thisType operator<=(const thisType& other) const;
+        [[nodiscard]] thisType EqualMask(const thisType& other) const;
+        [[nodiscard]] thisType NotEqualMask(const thisType& other) const;
 
     protected:
         union {

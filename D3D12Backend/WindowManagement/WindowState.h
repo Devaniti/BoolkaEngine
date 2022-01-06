@@ -3,7 +3,7 @@
 namespace Boolka
 {
 
-    struct WindowState
+    struct [[nodiscard]] WindowState
     {
         enum class WindowMode
         {
@@ -19,7 +19,7 @@ namespace Boolka
         int presentInterval; // aka VSYNC
         WindowMode windowMode;
 
-        static WindowState GetDefault();
+        [[nodiscard]] static WindowState GetDefault();
     };
 
     BLK_IS_PLAIN_DATA_ASSERT(WindowState);

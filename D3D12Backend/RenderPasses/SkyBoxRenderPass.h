@@ -7,7 +7,7 @@
 namespace Boolka
 {
 
-    class SkyBoxRenderPass : public RenderPass
+    class [[nodiscard]] SkyBoxRenderPass : public RenderPass
     {
     public:
         SkyBoxRenderPass() = default;

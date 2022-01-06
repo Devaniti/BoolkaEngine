@@ -3,17 +3,17 @@
 namespace Boolka
 {
 
-    class PipelineState
+    class [[nodiscard]] PipelineState
     {
     protected:
         PipelineState();
         ~PipelineState();
 
-        bool Initialize(ID3D12PipelineState* pipelineState);
+        void Initialize(ID3D12PipelineState* pipelineState);
 
     public:
-        ID3D12PipelineState* Get();
-        ID3D12PipelineState* operator->();
+        [[nodiscard]] ID3D12PipelineState* Get();
+        [[nodiscard]] ID3D12PipelineState* operator->();
 
         void Unload();
 

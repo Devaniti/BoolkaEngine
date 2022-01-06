@@ -83,9 +83,9 @@ namespace Boolka
         MemoryBlock MS = DebugFileReader::ReadFile("MeshShader.cso");
 
         bool res = m_PSO.Initialize(
-            device, resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default),
-            ASParam(AS), MSParam(MS), PSParam(PS),
-            RenderTargetParam{2, DXGI_FORMAT_R16G16B16A16_FLOAT},
+            device, L"GBufferRenderPass::m_PSO",
+            resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default), ASParam(AS),
+            MSParam(MS), PSParam(PS), RenderTargetParam{2, DXGI_FORMAT_R16G16B16A16_FLOAT},
             DepthStencilParam{true, false, D3D12_COMPARISON_FUNC_LESS_EQUAL}, DepthFormatParam{});
         BLK_ASSERT_VAR(res);
 

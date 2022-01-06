@@ -4,7 +4,7 @@
 namespace Boolka
 {
 
-    class AABB
+    class [[nodiscard]] AABB
     {
     public:
         AABB() = default;
@@ -12,10 +12,10 @@ namespace Boolka
 
         AABB(Vector4 min, Vector4 max);
 
-        Vector4& GetMin();
-        const Vector4& GetMin() const;
-        Vector4& GetMax();
-        const Vector4& GetMax() const;
+        [[nodiscard]] Vector4& GetMin();
+        [[nodiscard]] const Vector4& GetMin() const;
+        [[nodiscard]] Vector4& GetMax();
+        [[nodiscard]] const Vector4& GetMax() const;
 
     private:
         Vector4 m_min;

@@ -7,13 +7,13 @@ namespace Boolka
     class Device;
     class RootSignature;
 
-    class ComputePipelineState : public PipelineState
+    class [[nodiscard]] ComputePipelineState : public PipelineState
     {
     public:
         ComputePipelineState() = default;
         ~ComputePipelineState() = default;
 
-        bool Initialize(Device& device, RootSignature& rootSig,
+        bool Initialize(Device& device, const wchar_t* name, RootSignature& rootSig,
                         const MemoryBlock& computeShaderBytecode);
     };
 

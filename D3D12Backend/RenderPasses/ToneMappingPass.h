@@ -5,7 +5,7 @@
 namespace Boolka
 {
 
-    class ToneMappingPass : public RenderPass
+    class [[nodiscard]] ToneMappingPass : public RenderPass
     {
     public:
         ToneMappingPass() = default;

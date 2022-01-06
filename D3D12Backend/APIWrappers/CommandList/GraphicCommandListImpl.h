@@ -5,7 +5,7 @@ namespace Boolka
 {
     class Device;
 
-    class GraphicCommandListImpl : public GraphicCommandList
+    class [[nodiscard]] GraphicCommandListImpl : public GraphicCommandList
     {
     public:
         GraphicCommandListImpl() = default;

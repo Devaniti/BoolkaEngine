@@ -7,7 +7,7 @@ namespace Boolka
     class RenderFrameContext;
     class RenderThreadContext;
 
-    class RenderContext
+    class [[nodiscard]] RenderContext
     {
     public:
         RenderContext();
@@ -17,17 +17,18 @@ namespace Boolka
                         RenderThreadContext& threadContext);
         void Unload();
 
-        RenderEngineContext& GetRenderEngineContext();
-        RenderFrameContext& GetRenderFrameContext();
-        RenderThreadContext& GetRenderThreadContext();
+        [[nodiscard]] RenderEngineContext& GetRenderEngineContext();
+        [[nodiscard]] RenderFrameContext& GetRenderFrameContext();
+        [[nodiscard]] RenderThreadContext& GetRenderThreadContext();
 
-        const RenderEngineContext& GetRenderEngineContext() const;
-        const RenderFrameContext& GetRenderFrameContext() const;
-        const RenderThreadContext& GetRenderThreadContext() const;
+        [[nodiscard]] const RenderEngineContext& GetRenderEngineContext() const;
+        [[nodiscard]] const RenderFrameContext& GetRenderFrameContext() const;
+        [[nodiscard]] const RenderThreadContext& GetRenderThreadContext() const;
 
-        std::tuple<RenderEngineContext&, RenderFrameContext&, RenderThreadContext&> GetContexts();
-        std::tuple<const RenderEngineContext&, const RenderFrameContext&,
-                   const RenderThreadContext&>
+        [[nodiscard]] std::tuple<RenderEngineContext&, RenderFrameContext&, RenderThreadContext&>
+        GetContexts();
+        [[nodiscard]] std::tuple<const RenderEngineContext&, const RenderFrameContext&,
+                                 const RenderThreadContext&>
         GetContexts() const;
 
     private:

@@ -6,7 +6,7 @@
 namespace Boolka
 {
 
-    class ReferenceRenderPass : public RenderPass
+    class [[nodiscard]] ReferenceRenderPass : public RenderPass
     {
     public:
         ReferenceRenderPass() = default;

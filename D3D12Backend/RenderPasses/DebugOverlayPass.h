@@ -9,7 +9,7 @@
 namespace Boolka
 {
 
-    class DebugOverlayPass : public RenderPass
+    class [[nodiscard]] DebugOverlayPass : public RenderPass
     {
     public:
         DebugOverlayPass();

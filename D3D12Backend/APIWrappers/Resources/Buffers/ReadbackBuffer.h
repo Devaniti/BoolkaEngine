@@ -6,7 +6,7 @@ namespace Boolka
 
     class Device;
 
-    class ReadbackBuffer : public Buffer
+    class [[nodiscard]] ReadbackBuffer : public Buffer
     {
     public:
         ReadbackBuffer() = default;
@@ -15,7 +15,7 @@ namespace Boolka
         bool Initialize(Device& device, UINT64 size);
         void Unload();
 
-        void* Map(UINT64 readRangeBegin, UINT64 readRangeEnd);
+        [[nodiscard]] void* Map(UINT64 readRangeBegin, UINT64 readRangeEnd);
         void Unmap();
 
         void Readback(void* data, UINT64 size);

@@ -4,7 +4,7 @@
 namespace Boolka
 {
 
-    class CopyCommandList : public CommandList
+    class [[nodiscard]] CopyCommandList : public CommandList
     {
     protected:
         CopyCommandList() = default;

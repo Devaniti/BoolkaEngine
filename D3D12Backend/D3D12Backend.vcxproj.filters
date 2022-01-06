@@ -123,9 +123,6 @@
     <ClInclude Include="FeatureSupportHelper.h">
       <Filter>APIWrappers</Filter>
     </ClInclude>
-    <ClInclude Include="APIWrappers\StateManager.h">
-      <Filter>APIWrappers</Filter>
-    </ClInclude>
     <ClInclude Include="APIWrappers\DescriptorHeap.h">
       <Filter>APIWrappers</Filter>
     </ClInclude>
@@ -372,6 +369,8 @@
       <Filter>DebugHelpers</Filter>
     </ClInclude>
     <ClInclude Include="HLSLShared.h" />
+    <ClInclude Include="APIWrappers\PipelineState\PipelineStateLibrary.h" />
+    <ClInclude Include="Containers\RenderCacheContainer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WindowManagement\WindowManager.cpp">
@@ -387,9 +386,6 @@
       <Filter>WindowManagement</Filter>
     </ClCompile>
     <ClCompile Include="FeatureSupportHelper.cpp">
-      <Filter>APIWrappers</Filter>
-    </ClCompile>
-    <ClCompile Include="APIWrappers\StateManager.cpp">
       <Filter>APIWrappers</Filter>
     </ClCompile>
     <ClCompile Include="APIWrappers\DescriptorHeap.cpp">
@@ -628,6 +624,8 @@
     <ClCompile Include="APIWrappers\Resources\UAVBarrier.cpp">
       <Filter>APIWrappers\Resources</Filter>
     </ClCompile>
+    <ClCompile Include="APIWrappers\PipelineState\PipelineStateLibrary.cpp" />
+    <ClCompile Include="Containers\RenderCacheContainer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\RootSig.hlsl">

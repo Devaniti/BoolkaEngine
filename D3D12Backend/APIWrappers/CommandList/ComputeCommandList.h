@@ -4,7 +4,7 @@
 namespace Boolka
 {
 
-    class ComputeCommandList : public CopyCommandList
+    class [[nodiscard]] ComputeCommandList : public CopyCommandList
     {
     protected:
         ComputeCommandList() = default;

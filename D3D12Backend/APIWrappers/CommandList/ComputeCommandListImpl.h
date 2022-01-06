@@ -6,7 +6,7 @@ namespace Boolka
 
     class Device;
 
-    class ComputeCommandListImpl : public ComputeCommandList
+    class [[nodiscard]] ComputeCommandListImpl : public ComputeCommandList
     {
     public:
         ComputeCommandListImpl() = default;

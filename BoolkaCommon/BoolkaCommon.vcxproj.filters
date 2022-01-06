@@ -7,6 +7,9 @@
     <Filter Include="Structures">
       <UniqueIdentifier>{15a5f86e-cc39-49bf-87b6-616d2b1f5f63}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Algorithms">
+      <UniqueIdentifier>{a7687b76-6a5f-4fe7-872d-f10e57b88a66}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Structures\MemoryBlock.h">
@@ -51,6 +54,9 @@
     <ClInclude Include="DebugHelpers\DebugClipboardManager.h">
       <Filter>DebugHelpers</Filter>
     </ClInclude>
+    <ClInclude Include="Algorithms\Hashing.h">
+      <Filter>Algorithms</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -86,6 +92,9 @@
     </ClCompile>
     <ClCompile Include="DebugHelpers\DebugClipboardManager.cpp">
       <Filter>DebugHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithms\Hashing.cpp">
+      <Filter>Algorithms</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -7,10 +7,10 @@ namespace Boolka
 {
 
     template <typename argumentType>
-    struct alignas(void*) PipelineStateArgumentConvertor;
+    struct alignas(void*) [[nodiscard]] PipelineStateArgumentConvertor;
 
     template <>
-    struct alignas(void*) PipelineStateArgumentConvertor<D3D12_PIPELINE_STATE_FLAGS>
+    struct alignas(void*) [[nodiscard]] PipelineStateArgumentConvertor<D3D12_PIPELINE_STATE_FLAGS>
     {
         PipelineStateArgumentConvertor() = delete;
         PipelineStateArgumentConvertor(D3D12_PIPELINE_STATE_FLAGS flags)
@@ -26,7 +26,7 @@ namespace Boolka
     };
 
     template <>
-    struct alignas(void*) PipelineStateArgumentConvertor<NodeMaskPipelineStateParam>
+    struct alignas(void*) [[nodiscard]] PipelineStateArgumentConvertor<NodeMaskPipelineStateParam>
     {
         PipelineStateArgumentConvertor() = delete;
         PipelineStateArgumentConvertor(NodeMaskPipelineStateParam nodeMaskParam)
@@ -37,7 +37,7 @@ namespace Boolka
     };
 
     template <>
-    struct alignas(void*) PipelineStateArgumentConvertor<RootSignature>
+    struct alignas(void*) [[nodiscard]] PipelineStateArgumentConvertor<RootSignature>
     {
         PipelineStateArgumentConvertor() = delete;
         PipelineStateArgumentConvertor(const RootSignature& rootSig)
@@ -49,7 +49,7 @@ namespace Boolka
     };
 
     template <>
-    struct alignas(void*) PipelineStateArgumentConvertor<InputLayout>
+    struct alignas(void*) [[nodiscard]] PipelineStateArgumentConvertor<InputLayout>
     {
         PipelineStateArgumentConvertor() = delete;
         PipelineStateArgumentConvertor(const InputLayout& inputLayout)
@@ -62,7 +62,8 @@ namespace Boolka
     };
 
     template <>
-    struct alignas(void*) PipelineStateArgumentConvertor<D3D12_INDEX_BUFFER_STRIP_CUT_VALUE>
+    struct alignas(void*)
+        [[nodiscard]] PipelineStateArgumentConvertor<D3D12_INDEX_BUFFER_STRIP_CUT_VALUE>
     {
         PipelineStateArgumentConvertor() = delete;
         PipelineStateArgumentConvertor(D3D12_INDEX_BUFFER_STRIP_CUT_VALUE ibStripCutValue)
@@ -74,7 +75,8 @@ namespace Boolka
     };
 
     template <>
-    struct alignas(void*) PipelineStateArgumentConvertor<D3D12_PRIMITIVE_TOPOLOGY_TYPE>
+    struct alignas(void*)
+        [[nodiscard]] PipelineStateArgumentConvertor<D3D12_PRIMITIVE_TOPOLOGY_TYPE>
     {
         PipelineStateArgumentConvertor() = delete;
         PipelineStateArgumentConvertor(D3D12_PRIMITIVE_TOPOLOGY_TYPE topologyType)
@@ -97,7 +99,7 @@ namespace Boolka
     };
 
     template <>
-    struct alignas(void*) PipelineStateArgumentConvertor<VSParam>
+    struct alignas(void*) [[nodiscard]] PipelineStateArgumentConvertor<VSParam>
     {
         PipelineStateArgumentConvertor() = delete;
         PipelineStateArgumentConvertor(const VSParam& shaderBytecode)
@@ -112,7 +114,7 @@ namespace Boolka
     };
 
     template <>
-    struct alignas(void*) PipelineStateArgumentConvertor<GSParam>
+    struct alignas(void*) [[nodiscard]] PipelineStateArgumentConvertor<GSParam>
     {
         PipelineStateArgumentConvertor() = delete;
         PipelineStateArgumentConvertor(const GSParam& shaderBytecode)
@@ -127,7 +129,7 @@ namespace Boolka
     };
 
     template <>
-    struct alignas(void*) PipelineStateArgumentConvertor<HSParam>
+    struct alignas(void*) [[nodiscard]] PipelineStateArgumentConvertor<HSParam>
     {
         PipelineStateArgumentConvertor() = delete;
         PipelineStateArgumentConvertor(const HSParam& shaderBytecode)
@@ -142,7 +144,7 @@ namespace Boolka
     };
 
     template <>
-    struct alignas(void*) PipelineStateArgumentConvertor<DSParam>
+    struct alignas(void*) [[nodiscard]] PipelineStateArgumentConvertor<DSParam>
     {
         PipelineStateArgumentConvertor() = delete;
         PipelineStateArgumentConvertor(const DSParam& shaderBytecode)
@@ -157,7 +159,7 @@ namespace Boolka
     };
 
     template <>
-    struct alignas(void*) PipelineStateArgumentConvertor<PSParam>
+    struct alignas(void*) [[nodiscard]] PipelineStateArgumentConvertor<PSParam>
     {
         PipelineStateArgumentConvertor() = delete;
         PipelineStateArgumentConvertor(const PSParam& shaderBytecode)
@@ -172,7 +174,7 @@ namespace Boolka
     };
 
     template <>
-    struct alignas(void*) PipelineStateArgumentConvertor<ASParam>
+    struct alignas(void*) [[nodiscard]] PipelineStateArgumentConvertor<ASParam>
     {
         PipelineStateArgumentConvertor() = delete;
         PipelineStateArgumentConvertor(const ASParam& shaderBytecode)
@@ -187,7 +189,7 @@ namespace Boolka
     };
 
     template <>
-    struct alignas(void*) PipelineStateArgumentConvertor<MSParam>
+    struct alignas(void*) [[nodiscard]] PipelineStateArgumentConvertor<MSParam>
     {
         PipelineStateArgumentConvertor() = delete;
         PipelineStateArgumentConvertor(const MSParam& shaderBytecode)
@@ -202,7 +204,7 @@ namespace Boolka
     };
 
     template <>
-    struct alignas(void*) PipelineStateArgumentConvertor<CSParam>
+    struct alignas(void*) [[nodiscard]] PipelineStateArgumentConvertor<CSParam>
     {
         PipelineStateArgumentConvertor() = delete;
         PipelineStateArgumentConvertor(const CSParam& shaderBytecode)
@@ -213,7 +215,7 @@ namespace Boolka
     };
 
     template <>
-    struct alignas(void*) PipelineStateArgumentConvertor<D3D12_STREAM_OUTPUT_DESC>
+    struct alignas(void*) [[nodiscard]] PipelineStateArgumentConvertor<D3D12_STREAM_OUTPUT_DESC>
     {
         PipelineStateArgumentConvertor() = delete;
         PipelineStateArgumentConvertor(const D3D12_STREAM_OUTPUT_DESC& streamOut)
@@ -230,7 +232,7 @@ namespace Boolka
     };
 
     template <>
-    struct alignas(void*) PipelineStateArgumentConvertor<BlendParam>
+    struct alignas(void*) [[nodiscard]] PipelineStateArgumentConvertor<BlendParam>
     {
         PipelineStateArgumentConvertor() = delete;
         PipelineStateArgumentConvertor(const BlendParam& blendDesc)
@@ -273,7 +275,7 @@ namespace Boolka
     };
 
     template <>
-    struct alignas(void*) PipelineStateArgumentConvertor<DepthStencilParam>
+    struct alignas(void*) [[nodiscard]] PipelineStateArgumentConvertor<DepthStencilParam>
     {
         PipelineStateArgumentConvertor() = delete;
         PipelineStateArgumentConvertor(const DepthStencilParam& params)
@@ -315,7 +317,7 @@ namespace Boolka
     };
 
     template <>
-    struct alignas(void*) PipelineStateArgumentConvertor<DepthFormatParam>
+    struct alignas(void*) [[nodiscard]] PipelineStateArgumentConvertor<DepthFormatParam>
     {
         PipelineStateArgumentConvertor() = delete;
         PipelineStateArgumentConvertor(DepthFormatParam depthFormatParam)
@@ -343,7 +345,7 @@ namespace Boolka
     };
 
     template <>
-    struct alignas(void*) PipelineStateArgumentConvertor<RasterizerParam>
+    struct alignas(void*) [[nodiscard]] PipelineStateArgumentConvertor<RasterizerParam>
     {
         PipelineStateArgumentConvertor() = delete;
         PipelineStateArgumentConvertor(const RasterizerParam& rasterizerParam)
@@ -375,7 +377,7 @@ namespace Boolka
     };
 
     template <>
-    struct alignas(void*) PipelineStateArgumentConvertor<RenderTargetParam>
+    struct alignas(void*) [[nodiscard]] PipelineStateArgumentConvertor<RenderTargetParam>
     {
         PipelineStateArgumentConvertor() = delete;
         PipelineStateArgumentConvertor(const RenderTargetParam& renderTargetParam)
@@ -394,7 +396,7 @@ namespace Boolka
     };
 
     template <>
-    struct alignas(void*) PipelineStateArgumentConvertor<DXGI_SAMPLE_DESC>
+    struct alignas(void*) [[nodiscard]] PipelineStateArgumentConvertor<DXGI_SAMPLE_DESC>
     {
         PipelineStateArgumentConvertor() = delete;
         PipelineStateArgumentConvertor(const DXGI_SAMPLE_DESC& sampleDesc)
@@ -408,13 +410,13 @@ namespace Boolka
 
     // Converts list of wrappers to DX12 readable struct with correct memory layout
     template <typename FirstParam, typename... ArgsType>
-    struct alignas(void*) PipelineStateStream
+    struct alignas(void*) [[nodiscard]] PipelineStateStream
     {
         PipelineStateStream() = delete;
         PipelineStateStream(const FirstParam& firstParam, const ArgsType&... args)
             : Data(firstParam, args...){};
 
-        struct Wrapper1
+        struct [[nodiscard]] Wrapper1
         {
             PipelineStateArgumentConvertor<FirstParam> FirstParamValue;
             PipelineStateStream<ArgsType...> Tail;
@@ -423,7 +425,7 @@ namespace Boolka
                 : FirstParamValue(firstParam)
                 , Tail(args...){};
         };
-        struct Wrapper2
+        struct [[nodiscard]] Wrapper2
         {
             PipelineStateArgumentConvertor<FirstParam> FirstParamValue;
 

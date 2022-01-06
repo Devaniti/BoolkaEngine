@@ -25,15 +25,15 @@ namespace Boolka
         {
             auto& batchData = m_Batches[static_cast<size_t>(batch)];
 
-            //switch (batch)
+            // switch (batch)
             //{
-            //case BatchType::Transparent:
-            //    batchData.objectCount = trasparentCount;
-            //    batchData.objectOffset = transparentOffset;
-            //    break;
-            //default:
-                batchData.objectCount = opaqueCount;
-                batchData.objectOffset = opaqueOffset;
+            // case BatchType::Transparent:
+            //     batchData.objectCount = trasparentCount;
+            //     batchData.objectOffset = transparentOffset;
+            //     break;
+            // default:
+            batchData.objectCount = opaqueCount;
+            batchData.objectOffset = opaqueOffset;
             //    break;
             //}
         }
@@ -53,7 +53,8 @@ namespace Boolka
                 .GetRootSignature(ResourceContainer::RootSig::Default)
                 .Get();
 
-        bool result = m_CommandSignature.Initialize(device, mainRootSig, 16, ARRAYSIZE(arguments), arguments);
+        bool result =
+            m_CommandSignature.Initialize(device, mainRootSig, 16, ARRAYSIZE(arguments), arguments);
         BLK_ASSERT(result);
 
         return true;
@@ -69,7 +70,8 @@ namespace Boolka
         return true;
     }
 
-    bool BatchManager::Render(CommandList& commandList, RenderContext& renderContext, BatchType batch)
+    bool BatchManager::Render(CommandList& commandList, RenderContext& renderContext,
+                              BatchType batch)
     {
         auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
 
@@ -78,15 +80,16 @@ namespace Boolka
         const auto& batchData = m_Batches[static_cast<size_t>(batch)];
 
         auto& resourceContainer = engineContext.GetResourceContainer();
-        auto& commandBuffer = resourceContainer.GetBuffer(ResourceContainer::Buf::GPUCullingCommand);
+        auto& commandBuffer =
+            resourceContainer.GetBuffer(ResourceContainer::Buf::GPUCullingCommand);
         UINT64 viewIndex = static_cast<UINT64>(batch);
         UINT64 commandBufferOffset = (((Scene::Limits::MaxObjectCount + 31) / 32) * viewIndex) *
                                      sizeof(HLSLShared::CullingCommandSignature);
         UINT objectCount = engineContext.GetScene().GetOpaqueObjectCount();
         UINT callCount = BLK_INT_DIVIDE_CEIL(objectCount, 32);
 
-        commandList->ExecuteIndirect(m_CommandSignature.Get(), callCount,
-                                     commandBuffer.Get(), commandBufferOffset, nullptr, 0);
+        commandList->ExecuteIndirect(m_CommandSignature.Get(), callCount, commandBuffer.Get(),
+                                     commandBufferOffset, nullptr, 0);
 
         return true;
     }

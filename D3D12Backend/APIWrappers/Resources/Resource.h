@@ -3,11 +3,11 @@
 namespace Boolka
 {
 
-    class Resource
+    class [[nodiscard]] Resource
     {
     public:
-        ID3D12Resource* Get();
-        ID3D12Resource* operator->();
+        [[nodiscard]] ID3D12Resource* Get();
+        [[nodiscard]] ID3D12Resource* operator->();
 
     protected:
         Resource();

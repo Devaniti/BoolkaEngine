@@ -7,22 +7,22 @@ namespace Boolka
 
     class Device;
 
-    class CommandQueue
+    class [[nodiscard]] CommandQueue
     {
     public:
-        ID3D12CommandQueue* Get();
-        ID3D12CommandQueue* operator->();
+        [[nodiscard]] ID3D12CommandQueue* Get();
+        [[nodiscard]] ID3D12CommandQueue* operator->();
 
         void Unload();
 
-        UINT64 SignalCPU();
-        UINT64 SignalGPU();
+        [[nodiscard]] UINT64 SignalCPU();
+        [[nodiscard]] UINT64 SignalGPU();
         void WaitCPU(UINT64 value);
         void WaitGPU(UINT64 value);
 
         void Flush();
 
-        Fence& GetFence();
+        [[nodiscard]] Fence& GetFence();
 
     protected:
         CommandQueue();

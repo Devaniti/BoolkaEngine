@@ -8,10 +8,10 @@ namespace Boolka
 {
 
     template <typename argumentType>
-    struct alignas(void*) StateObjectArgumentConvertor;
+    struct alignas(void*) [[nodiscard]] StateObjectArgumentConvertor;
 
     template <>
-    struct StateObjectArgumentConvertor<D3D12_STATE_OBJECT_FLAGS>
+    struct [[nodiscard]] StateObjectArgumentConvertor<D3D12_STATE_OBJECT_FLAGS>
     {
         StateObjectArgumentConvertor() = delete;
         StateObjectArgumentConvertor(D3D12_STATE_SUBOBJECT* currentSubobject,
@@ -27,13 +27,13 @@ namespace Boolka
         D3D12_STATE_OBJECT_CONFIG stateObjectConfig;
     };
 
-    struct GlobalRootSignatureParam
+    struct [[nodiscard]] GlobalRootSignatureParam
     {
         const RootSignature& RootSig;
     };
 
     template <>
-    struct StateObjectArgumentConvertor<GlobalRootSignatureParam>
+    struct [[nodiscard]] StateObjectArgumentConvertor<GlobalRootSignatureParam>
     {
         StateObjectArgumentConvertor() = delete;
         StateObjectArgumentConvertor(D3D12_STATE_SUBOBJECT* currentSubobject,
@@ -49,13 +49,13 @@ namespace Boolka
         D3D12_GLOBAL_ROOT_SIGNATURE GlobalRootSig;
     };
 
-    struct LocalRootSignatureParam
+    struct [[nodiscard]] LocalRootSignatureParam
     {
         const RootSignature& RootSig;
     };
 
     template <>
-    struct StateObjectArgumentConvertor<LocalRootSignatureParam>
+    struct [[nodiscard]] StateObjectArgumentConvertor<LocalRootSignatureParam>
     {
         StateObjectArgumentConvertor() = delete;
         StateObjectArgumentConvertor(D3D12_STATE_SUBOBJECT* currentSubobject,
@@ -71,13 +71,13 @@ namespace Boolka
         D3D12_LOCAL_ROOT_SIGNATURE LocalRootSig;
     };
 
-    struct NodeMaskStateObjectParam
+    struct [[nodiscard]] NodeMaskStateObjectParam
     {
         UINT NodeMask;
     };
 
     template <>
-    struct StateObjectArgumentConvertor<NodeMaskStateObjectParam>
+    struct [[nodiscard]] StateObjectArgumentConvertor<NodeMaskStateObjectParam>
     {
         StateObjectArgumentConvertor() = delete;
         StateObjectArgumentConvertor(D3D12_STATE_SUBOBJECT* currentSubobject,
@@ -94,14 +94,14 @@ namespace Boolka
     };
 
     template <UINT exportCount>
-    struct DXILLibraryParam
+    struct [[nodiscard]] DXILLibraryParam
     {
         MemoryBlock DXLILib;
         const wchar_t** ExportNames;
     };
 
     template <UINT exportCount>
-    struct StateObjectArgumentConvertor<DXILLibraryParam<exportCount>>
+    struct [[nodiscard]] StateObjectArgumentConvertor<DXILLibraryParam<exportCount>>
     {
         StateObjectArgumentConvertor() = delete;
         StateObjectArgumentConvertor(D3D12_STATE_SUBOBJECT* currentSubobject,
@@ -129,14 +129,14 @@ namespace Boolka
         D3D12_EXPORT_DESC Exports[exportCount];
     };
 
-    struct RaytracingShaderConfigParam
+    struct [[nodiscard]] RaytracingShaderConfigParam
     {
         UINT MaxPayloadSizeInBytes;
         UINT MaxAttributeSizeInBytes;
     };
 
     template <>
-    struct StateObjectArgumentConvertor<RaytracingShaderConfigParam>
+    struct [[nodiscard]] StateObjectArgumentConvertor<RaytracingShaderConfigParam>
     {
         StateObjectArgumentConvertor() = delete;
         StateObjectArgumentConvertor(D3D12_STATE_SUBOBJECT* currentSubobject,
@@ -153,13 +153,13 @@ namespace Boolka
         D3D12_RAYTRACING_SHADER_CONFIG RTShaderConfig;
     };
 
-    struct RaytracingPipelineConfigParam
+    struct [[nodiscard]] RaytracingPipelineConfigParam
     {
         UINT MaxTraceRecursionDepth;
     };
 
     template <>
-    struct StateObjectArgumentConvertor<RaytracingPipelineConfigParam>
+    struct [[nodiscard]] StateObjectArgumentConvertor<RaytracingPipelineConfigParam>
     {
         StateObjectArgumentConvertor() = delete;
         StateObjectArgumentConvertor(D3D12_STATE_SUBOBJECT* currentSubobject,
@@ -175,7 +175,7 @@ namespace Boolka
         D3D12_RAYTRACING_PIPELINE_CONFIG RTPipelineConfig;
     };
 
-    struct HitGroupParam
+    struct [[nodiscard]] HitGroupParam
     {
         const wchar_t* HitGroupExport;
         const wchar_t* ClosestHitShaderImport;
@@ -183,7 +183,7 @@ namespace Boolka
     };
 
     template <>
-    struct StateObjectArgumentConvertor<HitGroupParam>
+    struct [[nodiscard]] StateObjectArgumentConvertor<HitGroupParam>
     {
         StateObjectArgumentConvertor() = delete;
         StateObjectArgumentConvertor(D3D12_STATE_SUBOBJECT* currentSubobject,
@@ -202,16 +202,16 @@ namespace Boolka
         D3D12_HIT_GROUP_DESC HitGroupDesc;
     };
 
-    // Converts list of wrappers to DX12 readable struct with correct memory layout
+    // Converts list of wrappers to DX12 readable struct [[nodiscard]] with correct memory layout
     template <typename FirstParam, typename... ArgsType>
-    struct alignas(void*) StateObjectStream
+    struct alignas(void*) [[nodiscard]] StateObjectStream
     {
         StateObjectStream() = delete;
         StateObjectStream(D3D12_STATE_SUBOBJECT* currentSubobject, const FirstParam& firstParam,
                           const ArgsType&... args)
             : Data(currentSubobject, firstParam, args...){};
 
-        struct Wrapper1
+        struct [[nodiscard]] Wrapper1
         {
             StateObjectArgumentConvertor<FirstParam> FirstParamValue;
             StateObjectStream<ArgsType...> Tail;
@@ -221,7 +221,7 @@ namespace Boolka
                 : FirstParamValue(currentSubobject, firstParam)
                 , Tail(currentSubobject + 1, args...){};
         };
-        struct Wrapper2
+        struct [[nodiscard]] Wrapper2
         {
             StateObjectArgumentConvertor<FirstParam> FirstParamValue;
 

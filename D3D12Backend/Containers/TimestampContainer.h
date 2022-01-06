@@ -3,8 +3,8 @@
 
 namespace Boolka
 {
-    // Temp container for lights
-    class TimestampContainer
+    // Temp container for timestamps
+    class [[nodiscard]] TimestampContainer
     {
     public:
         TimestampContainer();

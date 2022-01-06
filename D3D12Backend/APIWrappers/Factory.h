@@ -3,14 +3,14 @@
 namespace Boolka
 {
 
-    class Factory
+    class [[nodiscard]] Factory
     {
     public:
         Factory();
         ~Factory();
 
-        IDXGIFactory7* Get();
-        IDXGIFactory7* operator->();
+        [[nodiscard]] IDXGIFactory7* Get();
+        [[nodiscard]] IDXGIFactory7* operator->();
 
         bool Initialize();
         void Unload();

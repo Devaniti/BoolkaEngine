@@ -7,7 +7,7 @@ namespace Boolka
     class Scene;
     class RenderFrameContext;
 
-    class BatchManager
+    class [[nodiscard]] BatchManager
     {
     public:
         enum class BatchType
@@ -38,14 +38,14 @@ namespace Boolka
         bool Render(CommandList& commandList, RenderContext& renderContext, BatchType batch);
 
     private:
-        struct DrawData
+        struct [[nodiscard]] DrawData
         {
             UINT objectOffset;
             UINT objectCount;
         };
 
         // used to sort objects by distance
-        struct SortingData
+        struct [[nodiscard]] SortingData
         {
             UINT objectIndex;
             float distance;

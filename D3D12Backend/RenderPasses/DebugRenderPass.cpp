@@ -148,10 +148,10 @@ namespace Boolka
         BLK_ASSERT_VAR(res);
 
         res = m_PSO.Initialize(
-            device, resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default),
-            inputLayout, VSParam{VS}, PSParam{PS});
+            device, L"DebugRenderPass::m_PSO",
+            resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default), inputLayout,
+            VSParam{VS}, PSParam{PS});
         BLK_ASSERT_VAR(res);
-        RenderDebug::SetDebugName(m_PSO.Get(), L"DebugRenderPass::m_PSO");
 
         inputLayout.Unload();
 

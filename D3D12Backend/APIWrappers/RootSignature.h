@@ -2,16 +2,17 @@
 
 namespace Boolka
 {
+
     class Device;
 
-    class RootSignature
+    class [[nodiscard]] RootSignature
     {
     public:
         RootSignature();
         ~RootSignature();
 
-        ID3D12RootSignature* Get() const;
-        ID3D12RootSignature* operator->() const;
+        [[nodiscard]] ID3D12RootSignature* Get() const;
+        [[nodiscard]] ID3D12RootSignature* operator->() const;
 
         bool Initialize(Device& device, const char* filename);
         void Unload();

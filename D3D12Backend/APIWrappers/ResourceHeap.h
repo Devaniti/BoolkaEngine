@@ -5,14 +5,14 @@ namespace Boolka
 
     class Device;
 
-    class ResourceHeap
+    class [[nodiscard]] ResourceHeap
     {
     public:
         ResourceHeap();
         ~ResourceHeap();
 
-        ID3D12Heap* Get();
-        ID3D12Heap* operator->();
+        [[nodiscard]] ID3D12Heap* Get();
+        [[nodiscard]] ID3D12Heap* operator->();
 
         bool Initialize(Device& device, size_t size, D3D12_HEAP_TYPE heapType,
                         D3D12_HEAP_FLAGS heapFlags);

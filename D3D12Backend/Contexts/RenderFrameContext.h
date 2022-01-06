@@ -10,7 +10,7 @@ namespace Boolka
     class Device;
     class RenderEngineContext;
 
-    class RenderFrameContext
+    class [[nodiscard]] RenderFrameContext
     {
     public:
         RenderFrameContext();
@@ -19,32 +19,32 @@ namespace Boolka
         bool Initialize(Device& device);
         void Unload();
 
-        LightContainer& GetLightContainer();
-        const LightContainer& GetLightContainer() const;
+        [[nodiscard]] LightContainer& GetLightContainer();
+        [[nodiscard]] const LightContainer& GetLightContainer() const;
 
-        float GetDeltaTime() const;
-        UINT GetFrameIndex() const;
+        [[nodiscard]] float GetDeltaTime() const;
+        [[nodiscard]] UINT GetFrameIndex() const;
 
-        Matrix4x4& GetViewMatrix();
-        Matrix4x4& GetProjMatrix();
-        Matrix4x4& GetViewProjMatrix();
-        Matrix4x4& GetInvViewMatrix();
-        Matrix4x4& GetInvProjMatrix();
-        Matrix4x4& GetInvViewProjMatrix();
-        Vector4* GetEyeRayCoeficients();
-        Vector4& GetCameraPos();
+        [[nodiscard]] Matrix4x4& GetViewMatrix();
+        [[nodiscard]] Matrix4x4& GetProjMatrix();
+        [[nodiscard]] Matrix4x4& GetViewProjMatrix();
+        [[nodiscard]] Matrix4x4& GetInvViewMatrix();
+        [[nodiscard]] Matrix4x4& GetInvProjMatrix();
+        [[nodiscard]] Matrix4x4& GetInvViewProjMatrix();
+        [[nodiscard]] Vector4* GetEyeRayCoeficients();
+        [[nodiscard]] Vector4& GetCameraPos();
 
-        const Matrix4x4& GetViewMatrix() const;
-        const Matrix4x4& GetProjMatrix() const;
-        const Matrix4x4& GetViewProjMatrix() const;
-        const Matrix4x4& GetInvViewMatrix() const;
-        const Matrix4x4& GetInvProjMatrix() const;
-        const Matrix4x4& GetInvViewProjMatrix() const;
-        const Vector4* GetEyeRayCoeficients() const;
-        const Vector4& GetCameraPos() const;
+        [[nodiscard]] const Matrix4x4& GetViewMatrix() const;
+        [[nodiscard]] const Matrix4x4& GetProjMatrix() const;
+        [[nodiscard]] const Matrix4x4& GetViewProjMatrix() const;
+        [[nodiscard]] const Matrix4x4& GetInvViewMatrix() const;
+        [[nodiscard]] const Matrix4x4& GetInvProjMatrix() const;
+        [[nodiscard]] const Matrix4x4& GetInvViewProjMatrix() const;
+        [[nodiscard]] const Vector4* GetEyeRayCoeficients() const;
+        [[nodiscard]] const Vector4& GetCameraPos() const;
 
 #ifdef BLK_ENABLE_STATS
-        FrameStats& GetFrameStats() const;
+        [[nodiscard]] FrameStats& GetFrameStats() const;
 #endif
 
         void FlipFrame(RenderEngineContext& engineContext, UINT frameIndex);

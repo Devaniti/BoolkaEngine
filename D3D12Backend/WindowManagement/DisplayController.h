@@ -9,7 +9,7 @@ namespace Boolka
     class Factory;
     class Device;
 
-    class DisplayController
+    class [[nodiscard]] DisplayController
     {
     public:
         DisplayController();
@@ -18,17 +18,17 @@ namespace Boolka
         bool Initialize(Device& device, Factory& factory);
         void Unload();
 
-        bool Present();
+        [[nodiscard]] bool Present();
 
         // returns true if something was updated, or false otherwise
         bool Update(Device& device);
         bool SetWindowState(const WindowState& newWindowState);
 
-        Texture2D& GetBuffer(UINT index);
-        UINT GetCurrentFrameIndex();
+        [[nodiscard]] Texture2D& GetBuffer(UINT index);
+        [[nodiscard]] UINT GetCurrentFrameIndex();
 
-        const WindowState& GetWindowState();
-        HWND GetHWND() const;
+        [[nodiscard]] const WindowState& GetWindowState();
+        [[nodiscard]] HWND GetHWND() const;
 
     private:
         WindowManager m_Window;

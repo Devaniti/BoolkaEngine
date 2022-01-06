@@ -17,7 +17,7 @@ namespace Boolka
     class SceneData;
     class RenderEngineContext;
 
-    class Scene
+    class [[nodiscard]] Scene
     {
     public:
         Scene();
@@ -57,9 +57,9 @@ namespace Boolka
         // So objects in range [0, m_OpaqueObjectCount) - are opaque
         // And objects in range [m_OpaqueObjectCount, m_ObjectCount) - are
         // transparent
-        UINT GetObjectCount() const;
-        UINT GetOpaqueObjectCount() const;
-        BatchManager& GetBatchManager();
+        [[nodiscard]] UINT GetObjectCount() const;
+        [[nodiscard]] UINT GetOpaqueObjectCount() const;
+        [[nodiscard]] BatchManager& GetBatchManager();
 
     private:
         void InitializeBuffers(Device& device, const SceneData::SceneHeader& sceneHeader,

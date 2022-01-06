@@ -148,11 +148,10 @@ namespace Boolka
         MemoryBlock AS = DebugFileReader::ReadFile("ShadowMapAmplificationShader.cso");
         MemoryBlock MS = DebugFileReader::ReadFile("ShadowMapPassMeshShader.cso");
 
-        bool res =
-            m_PSO.Initialize(device, defaultRootSig, ASParam{AS}, MSParam{MS}, RenderTargetParam{0},
-                             DepthStencilParam{true, true, D3D12_COMPARISON_FUNC_LESS},
-                             DepthFormatParam{}, RasterizerParam{0.001f, 0.0f});
-        RenderDebug::SetDebugName(m_PSO.Get(), L"ShadowMapRenderPass::m_PSO");
+        bool res = m_PSO.Initialize(device, L"ShadowMapRenderPass::m_PSO", defaultRootSig,
+                                    ASParam{AS}, MSParam{MS}, RenderTargetParam{0},
+                                    DepthStencilParam{true, true, D3D12_COMPARISON_FUNC_LESS},
+                                    DepthFormatParam{}, RasterizerParam{0.001f, 0.0f});
         BLK_ASSERT_VAR(res);
 
         return true;

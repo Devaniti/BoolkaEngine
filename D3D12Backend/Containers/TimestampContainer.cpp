@@ -76,7 +76,7 @@ namespace Boolka
         gpuTimes.Markers[static_cast<size_t>(Markers::Count) - 1] =
             static_cast<float>((markers[static_cast<size_t>(Markers::EndFrame)] -
                                 markers[static_cast<size_t>(Markers::BeginFrame)]) /
-            static_cast<double>(m_timestampFrequency));
+                               static_cast<double>(m_timestampFrequency));
 
         frameStats.gpuTimes = gpuTimes;
         frameStats.gpuTimesStable = frameStats.gpuTimesStable * 0.95f + gpuTimes * 0.05f;

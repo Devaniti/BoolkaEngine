@@ -6,7 +6,7 @@ namespace Boolka
 {
     class Device;
 
-    class GraphicCommandAllocator : public CommandAllocator
+    class [[nodiscard]] GraphicCommandAllocator : public CommandAllocator
     {
     public:
         GraphicCommandAllocator() = default;

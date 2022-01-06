@@ -6,7 +6,7 @@
 namespace Boolka
 {
 
-    class GBufferRenderPass : public RenderPass
+    class [[nodiscard]] GBufferRenderPass : public RenderPass
     {
     public:
         GBufferRenderPass() = default;

@@ -7,7 +7,7 @@ namespace Boolka
     class Device;
     class ComputeCommandListImpl;
 
-    class ComputeQueue : public CommandQueue
+    class [[nodiscard]] ComputeQueue : public CommandQueue
     {
     public:
         ComputeQueue() = default;

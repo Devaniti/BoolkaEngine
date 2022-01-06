@@ -20,7 +20,7 @@ namespace Boolka
     static const size_t gs_PitchAlignment = D3D12_TEXTURE_DATA_PITCH_ALIGNMENT;
     static const size_t gs_CubeMapFaces = 6;
 
-    struct BoolkaMaterial
+    struct [[nodiscard]] BoolkaMaterial
     {
         BoolkaMaterial()
             : gpuMatData{} {};
@@ -50,7 +50,7 @@ namespace Boolka
                memcmp(&gpuMatData, &other.gpuMatData, sizeof(gpuMatData)) == 0;
     }
 
-    struct BoolkaMaterialHash
+    struct [[nodiscard]] BoolkaMaterialHash
     {
         size_t operator()(const Boolka::BoolkaMaterial& k) const
         {
@@ -67,7 +67,7 @@ namespace Boolka
         }
     };
 
-    class ObjConverterImpl
+    class [[nodiscard]] ObjConverterImpl
     {
     public:
         ObjConverterImpl();
@@ -100,7 +100,7 @@ namespace Boolka
 
         // Parses textures
         void RemapMaterials();
-        bool IsTransparent(const tinyobj::material_t& material);
+        [[nodiscard]] bool IsTransparent(const tinyobj::material_t& material);
 
         // SkyBox
         void PrepareSkyBox();

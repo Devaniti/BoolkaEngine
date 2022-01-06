@@ -49,7 +49,8 @@ namespace Boolka
                          ImVec2(width, height));
     }
 
-    void ImguiGraphHelper::PushValueAndRender(float value, const char* header, float width, float height)
+    void ImguiGraphHelper::PushValueAndRender(float value, const char* header, float width,
+                                              float height)
     {
         PushValue(value);
         float minValue, maxValue, avgValue;

@@ -19,7 +19,7 @@ namespace Boolka
         BLK_ASSERT(m_FrameID == 0);
     }
 
-    bool RenderBackendImpl::Initialize()
+    bool RenderBackendImpl::Initialize(RenderCacheContainer& renderCache)
     {
         BLK_ASSERT(m_FrameID == 0);
 
@@ -30,7 +30,7 @@ namespace Boolka
         BLK_CRITICAL_ASSERT(res);
         res = m_Factory.Initialize();
         BLK_CRITICAL_ASSERT(res);
-        res = m_Device.Initialize(m_Factory);
+        res = m_Device.Initialize(m_Factory, renderCache);
         BLK_CRITICAL_ASSERT(res);
         res = m_DisplayController.Initialize(m_Device, m_Factory);
         BLK_CRITICAL_ASSERT(res);

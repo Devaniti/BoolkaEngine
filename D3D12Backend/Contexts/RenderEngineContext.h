@@ -20,7 +20,7 @@ namespace Boolka
     class Texture2D;
     class RenderFrameContext;
 
-    class RenderEngineContext
+    class [[nodiscard]] RenderEngineContext
     {
     public:
         RenderEngineContext();
@@ -32,27 +32,27 @@ namespace Boolka
 
         bool LoadScene(Device& device, SceneData& sceneData);
         void UnloadScene();
-        Scene& GetScene();
-        const Scene& GetScene() const;
+        [[nodiscard]] Scene& GetScene();
+        [[nodiscard]] const Scene& GetScene() const;
         void BindSceneResourcesGraphic(CommandList& commandList);
         void BindSceneResourcesCompute(CommandList& commandList);
 
-        UINT GetBackbufferWidth() const;
-        UINT GetBackbufferHeight() const;
+        [[nodiscard]] UINT GetBackbufferWidth() const;
+        [[nodiscard]] UINT GetBackbufferHeight() const;
 
-        ResourceContainer& GetResourceContainer();
-        TimestampContainer& GetTimestampContainer();
+        [[nodiscard]] ResourceContainer& GetResourceContainer();
+        [[nodiscard]] TimestampContainer& GetTimestampContainer();
 
-        GraphicCommandListImpl& GetInitializationCommandList();
+        [[nodiscard]] GraphicCommandListImpl& GetInitializationCommandList();
         void ResetInitializationCommandList();
         void ExecuteInitializationCommandList(Device& device);
 
-        Camera& GetCamera();
+        [[nodiscard]] Camera& GetCamera();
 
-        HWND GetHWND() const;
+        [[nodiscard]] HWND GetHWND() const;
 
 #ifdef BLK_RENDER_DEBUG
-        Device& GetDevice();
+        [[nodiscard]] Device& GetDevice();
 #endif
     private:
         ResourceContainer m_resourceContainer;

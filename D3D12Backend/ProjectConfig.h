@@ -20,6 +20,23 @@
 #define USE_PIX
 #endif
 
+// Temporary disabled loading and saving pipeline library
+// due to what seems to be Nvidia driver bug
+//#define BLK_ENABLE_PIPELINE_LIBRARY_LOAD_FROM_DISK
+//#define BLK_ENABLE_PIPELINE_LIBRARY_WRITE_TO_DISK
+
+#define BLK_ENABLE_PIPELINE_LIBRARY
+
+// Under pipeline library related flags if pipeline library itself is not enabled
+#ifndef BLK_ENABLE_PIPELINE_LIBRARY
+#ifdef BLK_ENABLE_PIPELINE_LIBRARY_LOAD_FROM_DISK
+#undef BLK_ENABLE_PIPELINE_LIBRARY_LOAD_FROM_DISK
+#endif
+#ifdef BLK_ENABLE_PIPELINE_LIBRARY_WRITE_TO_DISK
+#undef BLK_ENABLE_PIPELINE_LIBRARY_WRITE_TO_DISK
+#endif
+#endif
+
 // Concatenates BLK_ENGINE_NAME which is a string with " Window Class"
 #define BLK_WINDOW_CLASS_NAME (BLK_ENGINE_NAME L" Window Class")
 

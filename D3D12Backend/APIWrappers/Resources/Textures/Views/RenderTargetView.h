@@ -5,7 +5,7 @@ namespace Boolka
     class Device;
     class Texture2D;
 
-    class RenderTargetView
+    class [[nodiscard]] RenderTargetView
     {
     public:
         RenderTargetView();
@@ -15,7 +15,7 @@ namespace Boolka
                         D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor);
         void Unload();
 
-        D3D12_CPU_DESCRIPTOR_HANDLE* GetCPUDescriptor();
+        [[nodiscard]] D3D12_CPU_DESCRIPTOR_HANDLE* GetCPUDescriptor();
 
     private:
         D3D12_CPU_DESCRIPTOR_HANDLE m_CPUDescriptorHandle;

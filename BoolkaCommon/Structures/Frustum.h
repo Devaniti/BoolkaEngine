@@ -7,7 +7,7 @@ namespace Boolka
 
     class AABB;
 
-    class Frustum
+    class [[nodiscard]] Frustum
     {
     public:
         enum TestResult
@@ -22,22 +22,23 @@ namespace Boolka
 
         Frustum(const Matrix4x4& viewProj);
 
-        bool CheckPoint(const Vector4& point) const;
-        TestResult CheckSphere(const Vector4& center, float radius) const;
-        TestResult CheckAABB(const AABB& boundingBox) const;
-        TestResult CheckFrustum(const Matrix4x4& invViewMatrix,
-                                const Matrix4x4 invProjMatrix) const;
+        [[nodiscard]] bool CheckPoint(const Vector4& point) const;
+        [[nodiscard]] TestResult CheckSphere(const Vector4& center, float radius) const;
+        [[nodiscard]] TestResult CheckAABB(const AABB& boundingBox) const;
+        [[nodiscard]] TestResult CheckFrustum(const Matrix4x4& invViewMatrix,
+                                              const Matrix4x4 invProjMatrix) const;
 
         // Fast variants return false if tested geometry is completely outside frustum, and true
         // otherwise
         // Faster since we don't need to distinguish between fully inside and intersection cases
 
-        bool CheckAABBFast(const AABB& boundingBox) const;
-        bool CheckSphereFast(const Vector4& center, float radius) const;
-        bool CheckFrustumFast(const Matrix4x4& invViewMatrix, const Matrix4x4 invProjMatrix) const;
+        [[nodiscard]] bool CheckAABBFast(const AABB& boundingBox) const;
+        [[nodiscard]] bool CheckSphereFast(const Vector4& center, float radius) const;
+        [[nodiscard]] bool CheckFrustumFast(const Matrix4x4& invViewMatrix,
+                                            const Matrix4x4 invProjMatrix) const;
 
-        float* GetBuffer();
-        const float* GetBuffer() const;
+        [[nodiscard]] float* GetBuffer();
+        [[nodiscard]] const float* GetBuffer() const;
 
     private:
         // 6 Planes of frustum in next order

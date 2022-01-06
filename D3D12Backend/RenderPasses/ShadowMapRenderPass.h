@@ -5,7 +5,7 @@
 namespace Boolka
 {
 
-    class ShadowMapRenderPass : public RenderPass
+    class [[nodiscard]] ShadowMapRenderPass : public RenderPass
     {
     public:
         ShadowMapRenderPass() = default;

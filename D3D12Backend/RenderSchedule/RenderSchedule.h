@@ -25,7 +25,7 @@ namespace Boolka
     class DisplayController;
     class SceneData;
 
-    class RenderSchedule
+    class [[nodiscard]] RenderSchedule
     {
     public:
         RenderSchedule() = default;
@@ -38,7 +38,7 @@ namespace Boolka
 
         bool Render(Device& device, UINT frameIndex);
 
-        ResourceTracker& GetResourceTracker();
+        [[nodiscard]] ResourceTracker& GetResourceTracker();
 
     private:
         bool InitializeRenderPasses(Device& device);

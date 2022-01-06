@@ -353,7 +353,8 @@ namespace Boolka
 #ifdef BLK_RENDER_DEBUG
         RenderDebug::SetDebugName(GetTexture(Tex::GBufferAlbedo).Get(), L"GBufferAlbedo");
         RenderDebug::SetDebugName(GetTexture(Tex::GBufferNormal).Get(), L"GBufferNormal");
-        RenderDebug::SetDebugName(GetTexture(Tex::GBufferRaytraceResults).Get(), L"GBufferRaytraceResults");
+        RenderDebug::SetDebugName(GetTexture(Tex::GBufferRaytraceResults).Get(),
+                                  L"GBufferRaytraceResults");
         RenderDebug::SetDebugName(GetTexture(Tex::LightBuffer).Get(), L"LightBuffer");
         RenderDebug::SetDebugName(GetTexture(Tex::GbufferDepth).Get(), L"GbufferDepth");
         for (size_t i = 0; i < BLK_MAX_LIGHT_COUNT; i++)

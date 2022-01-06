@@ -4,7 +4,7 @@
 namespace Boolka
 {
 
-    class GraphicCommandList : public ComputeCommandList
+    class [[nodiscard]] GraphicCommandList : public ComputeCommandList
     {
     protected:
         GraphicCommandList() = default;

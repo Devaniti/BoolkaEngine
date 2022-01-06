@@ -5,7 +5,7 @@
 namespace Boolka
 {
 
-    class ZRenderPass : public RenderPass
+    class [[nodiscard]] ZRenderPass : public RenderPass
     {
     public:
         ZRenderPass() = default;

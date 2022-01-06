@@ -7,18 +7,19 @@ namespace Boolka
     class Factory;
     struct WindowState;
 
-    class Swapchain
+    class [[nodiscard]] Swapchain
     {
     public:
         Swapchain();
         ~Swapchain();
 
-        IDXGISwapChain4* Get();
-        IDXGISwapChain4* operator->();
+        [[nodiscard]] IDXGISwapChain4* Get();
+        [[nodiscard]] IDXGISwapChain4* operator->();
 
-        bool Present(const WindowState& windowState);
-        ID3D12Resource* GetBuffer(UINT index);
-        UINT GetCurrentFrameIndex();
+        // Present CAN fail, have to check return code
+        [[nodiscard]] bool Present(const WindowState& windowState);
+        [[nodiscard]] ID3D12Resource* GetBuffer(UINT index);
+        [[nodiscard]] UINT GetCurrentFrameIndex();
 
         bool Initialize(Device& device, Factory& factory, HWND window, WindowState& windowState);
         void Unload();

@@ -125,8 +125,10 @@
 
 #define BLK_INT_DIVIDE_CEIL(numerator, denominator) ((numerator + denominator - 1) / denominator)
 
-#define BLK_SHIFT_LEFT_WITH_CARRY(type, intValue) ((intValue << 1) | ((i & (size_t(1) << (sizeof(i) * 8 - 1))) >> (sizeof(i) * 8 - 1)))
-#define BLK_SHIFT_RIGHT_WITH_CARRY(type, intValue) ((intValue >> 1) | ((intValue & 1) << (sizeof(intValue) * 8 - 1)))
+#define BLK_SHIFT_LEFT_WITH_CARRY(type, intValue) \
+    ((intValue << 1) | ((i & (size_t(1) << (sizeof(i) * 8 - 1))) >> (sizeof(i) * 8 - 1)))
+#define BLK_SHIFT_RIGHT_WITH_CARRY(type, intValue) \
+    ((intValue >> 1) | ((intValue & 1) << (sizeof(intValue) * 8 - 1)))
 
 #define BLK_INITIALIZE_ARRAY(arr, ...)               \
     {                                                \
@@ -190,7 +192,7 @@ inline uint asuint(float value)
 }
 
 inline void MemcpyStrided(void* dst, size_t dstStride, const void* src, size_t srcStride,
-                           size_t rows)
+                          size_t rows)
 {
     char* currentDst = static_cast<char*>(dst);
     const char* currentSrc = static_cast<const char*>(src);
@@ -207,9 +209,9 @@ inline void MemcpyStrided(void* dst, size_t dstStride, const void* src, size_t s
 template <typename T>
 size_t NestedVectorSize(const std::vector<std::vector<T>>& nestedVector)
 {
-    return std::transform_reduce(std::execution::seq, std::begin(nestedVector),
-                                 std::end(nestedVector), size_t(0), std::plus<size_t>(),
-                                 [](const std::vector<T>& inner)->size_t { return inner.size(); });
+    return std::transform_reduce(
+        std::execution::seq, std::begin(nestedVector), std::end(nestedVector), size_t(0),
+        std::plus<size_t>(), [](const std::vector<T>& inner) -> size_t { return inner.size(); });
 }
 
 // TODO move everything below to platform specific header
@@ -261,7 +263,7 @@ inline std::wstring UTF8decode(const std::string& str)
 }
 
 inline bool CombinePath(const std::wstring& source1, const std::wstring& source2,
-                         std::wstring& dest)
+                        std::wstring& dest)
 {
     wchar_t source1lastChar = source1[source1.size() - 1];
     bool needToAddSeparator = source1lastChar != '\\' && source1lastChar != '/';

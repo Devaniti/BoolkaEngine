@@ -65,7 +65,7 @@ namespace Boolka
         commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
         commandList->SetPipelineState(m_PSO.Get());
 
-        commandList->DrawInstanced(3, 1, 0, 0);
+        commandList->DrawInstanced(3, 1, 0, 2);
 
         return true;
     }
@@ -91,12 +91,12 @@ namespace Boolka
         // quad without Vertex/Index buffers
         BLK_RENDER_DEBUG_ONLY(
             device.FilterMessage(D3D12_MESSAGE_ID_CREATEINPUTLAYOUT_EMPTY_LAYOUT));
-        bool res = m_PSO.Initialize(device, defaultRootSig, inputLayout, VSParam{VS}, PSParam{PS},
+        bool res = m_PSO.Initialize(device, L"ToneMappingPass::m_PSO", defaultRootSig, inputLayout,
+                                    VSParam{VS}, PSParam{PS},
                                     DepthStencilParam{false, false, D3D12_COMPARISON_FUNC_ALWAYS},
                                     DepthFormatParam{});
         BLK_RENDER_DEBUG_ONLY(device.RemoveLastMessageFilter());
         BLK_ASSERT_VAR(res);
-        RenderDebug::SetDebugName(m_PSO.Get(), L"ToneMappingPass::m_PSO");
 
         inputLayout.Unload();
 

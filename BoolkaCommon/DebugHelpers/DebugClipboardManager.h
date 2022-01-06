@@ -14,7 +14,7 @@ namespace Boolka
         static void DeserializeFromClipboard(const wchar_t* format, ...);
 
     private:
-        class ClipboardWrapper
+        class [[nodiscard]] ClipboardWrapper
         {
         public:
             ClipboardWrapper();

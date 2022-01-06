@@ -6,7 +6,7 @@ namespace Boolka
     class Device;
     class CommandQueue;
 
-    class Fence
+    class [[nodiscard]] Fence
     {
     public:
         Fence();
@@ -15,8 +15,8 @@ namespace Boolka
         bool Initialize(Device& device);
         void Unload();
 
-        UINT64 SignalCPU();
-        UINT64 SignalGPU(CommandQueue& commandQueue);
+        [[nodiscard]] UINT64 SignalCPU();
+        [[nodiscard]] UINT64 SignalGPU(CommandQueue& commandQueue);
 
         void SignalCPUWithValue(UINT64 value);
         void SignalGPUWithValue(UINT64 value, CommandQueue& commandQueue);

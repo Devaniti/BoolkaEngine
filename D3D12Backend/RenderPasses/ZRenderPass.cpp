@@ -4,6 +4,7 @@
 
 #include "APIWrappers/CommandList/GraphicCommandListImpl.h"
 #include "APIWrappers/InputLayout.h"
+#include "APIWrappers/RenderDebug.h"
 #include "APIWrappers/Resources/Textures/Texture2D.h"
 #include "BoolkaCommon/DebugHelpers/DebugFileReader.h"
 #include "Contexts/RenderContext.h"
@@ -11,7 +12,6 @@
 #include "Contexts/RenderFrameContext.h"
 #include "Contexts/RenderThreadContext.h"
 #include "RenderSchedule/ResourceTracker.h"
-#include "APIWrappers/RenderDebug.h"
 
 namespace Boolka
 {
@@ -80,11 +80,10 @@ namespace Boolka
         MemoryBlock MS = DebugFileReader::ReadFile("MeshShader.cso");
 
         bool res = m_PSO.Initialize(
-            device, resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default),
-            ASParam{AS}, MSParam{MS}, RenderTargetParam{0}, DepthStencilParam{true, true},
-            DepthFormatParam{});
+            device, L"ZRenderPass::m_PSO",
+            resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default), ASParam{AS},
+            MSParam{MS}, RenderTargetParam{0}, DepthStencilParam{true, true}, DepthFormatParam{});
         BLK_ASSERT_VAR(res);
-        RenderDebug::SetDebugName(m_PSO.Get(), L"ZRenderPass::m_PSO");
 
         return true;
     }

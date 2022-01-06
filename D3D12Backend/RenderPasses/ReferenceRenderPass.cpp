@@ -9,7 +9,7 @@ namespace Boolka
     {
         // Uncomment and replace class name when creating new RenderPass
         // Also add new class to TimestampContainer::Markers
-        //BLK_RENDER_PASS_START(ReferenceRenderPass);
+        // BLK_RENDER_PASS_START(ReferenceRenderPass);
 
         auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
         auto& resourceContainer = engineContext.GetResourceContainer();

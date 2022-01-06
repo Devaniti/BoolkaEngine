@@ -9,13 +9,13 @@
 namespace Boolka
 {
 
-    class RenderBackendImpl : public RenderBackend
+    class [[nodiscard]] RenderBackendImpl : public RenderBackend
     {
     public:
         RenderBackendImpl();
         ~RenderBackendImpl();
 
-        bool Initialize() final;
+        bool Initialize(RenderCacheContainer& renderCache) final;
         void Unload() final;
         bool Present() final;
         bool RenderFrame() final;

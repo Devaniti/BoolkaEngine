@@ -5,12 +5,12 @@
 namespace Boolka
 {
 
-    struct FrameStats
+    struct [[nodiscard]] FrameStats
     {
         float frameTime;
         float frameTimeStable;
 
-        struct GPUTimes
+        struct [[nodiscard]] GPUTimes
         {
             float Markers[static_cast<size_t>(TimestampContainer::Markers::Count)];
 

@@ -4,7 +4,7 @@
 namespace Boolka
 {
 
-    class PresentPass : public RenderPass
+    class [[nodiscard]] PresentPass : public RenderPass
     {
     public:
         PresentPass() = default;

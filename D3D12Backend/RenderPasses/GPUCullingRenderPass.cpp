@@ -11,7 +11,7 @@ namespace Boolka
                                       ResourceTracker& resourceTracker)
     {
         BLK_RENDER_PASS_START(GPUCullingRenderPass);
-        
+
         auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
         auto& resourceContainer = engineContext.GetResourceContainer();
 
@@ -31,7 +31,8 @@ namespace Boolka
             resourceContainer.GetCPUVisibleCPUDescriptor(ResourceContainer::Buf::GPUCulling);
         D3D12_GPU_DESCRIPTOR_HANDLE gpuCullingCommandUINTUAVBufGPUDescriptor =
             resourceContainer.GetDescriptorHeap(ResourceContainer::DescHeap::MainHeap)
-                .GetGPUHandle(static_cast<size_t>(ResourceContainer::MainSRVDescriptorHeapOffsets::UAVHeapOffset) +
+                .GetGPUHandle(static_cast<size_t>(
+                                  ResourceContainer::MainSRVDescriptorHeapOffsets::UAVHeapOffset) +
                               static_cast<size_t>(ResourceContainer::UAV::GPUCullingCommandUINT));
         D3D12_CPU_DESCRIPTOR_HANDLE gpuCullingCommandUAVBufCPUDescriptor =
             resourceContainer.GetCPUVisibleCPUDescriptor(ResourceContainer::Buf::GPUCullingCommand);
@@ -121,17 +122,17 @@ namespace Boolka
         MemoryBlock CommandBufferGenerationCS =
             DebugFileReader::ReadFile("CullingCommandBufferGenerateComputeShader.cso");
 
-        m_ObjectCullingPSO.Initialize(device, defaultRootSig, ObjectCullingCS);
-        RenderDebug::SetDebugName(m_ObjectCullingPSO.Get(),
-                                  L"GPUCullingRenderPass::m_ObjectCullingPSO");
-        m_CommandBufferGenerationPSO.Initialize(device, defaultRootSig, CommandBufferGenerationCS);
-        RenderDebug::SetDebugName(m_CommandBufferGenerationPSO.Get(),
-                                  L"GPUCullingRenderPass::m_CommandBufferGenerationPSO");
+        m_ObjectCullingPSO.Initialize(device, L"GPUCullingRenderPass::m_ObjectCullingPSO",
+                                      defaultRootSig, ObjectCullingCS);
+        m_CommandBufferGenerationPSO.Initialize(
+            device, L"GPUCullingRenderPass::m_CommandBufferGenerationPSO", defaultRootSig,
+            CommandBufferGenerationCS);
 
 #ifdef BLK_ENABLE_STATS
         MemoryBlock DebugReadbackCS =
             DebugFileReader::ReadFile("CullingDebugReadbackComputeShader.cso");
-        m_DebugReadbackPSO.Initialize(device, defaultRootSig, DebugReadbackCS);
+        m_DebugReadbackPSO.Initialize(device, L"GPUCullingRenderPass::m_DebugReadbackPSO",
+                                      defaultRootSig, DebugReadbackCS);
 
         for (size_t i = 0; i < BLK_IN_FLIGHT_FRAMES; i++)
             m_CulledCountBuffer[i].Initialize(device, sizeof(FrameStats::visiblePerFrustum));

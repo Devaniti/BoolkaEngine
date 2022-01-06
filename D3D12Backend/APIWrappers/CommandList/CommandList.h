@@ -3,7 +3,7 @@
 namespace Boolka
 {
 
-    class CommandList
+    class [[nodiscard]] CommandList
     {
     protected:
         CommandList();
@@ -15,8 +15,8 @@ namespace Boolka
         CommandList& operator=(CommandList&&) = delete;
 
     public:
-        ID3D12GraphicsCommandList6* Get();
-        ID3D12GraphicsCommandList6* operator->();
+        [[nodiscard]] ID3D12GraphicsCommandList6* Get();
+        [[nodiscard]] ID3D12GraphicsCommandList6* operator->();
 
         void Unload();
 

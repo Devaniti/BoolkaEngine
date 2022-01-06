@@ -5,7 +5,7 @@
 namespace Boolka
 {
 
-    class ComputeCommandAllocator : public CommandAllocator
+    class [[nodiscard]] ComputeCommandAllocator : public CommandAllocator
     {
     public:
         ComputeCommandAllocator() = default;

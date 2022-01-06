@@ -15,6 +15,7 @@
 #include <functional>
 #include <initializer_list>
 #include <map>
+#include <numeric>
 #include <stdexcept>
 #include <string>
 #include <thread>
@@ -42,10 +43,10 @@
 
 // Own common code
 #include "BoolkaCommon/SolutionHelpers.h"
+#include "Structures/AABB.h"
 #include "Structures/Frustum.h"
 #include "Structures/Matrix.h"
 #include "Structures/Vector.h"
-#include "Structures/AABB.h"
 
 #ifdef BLK_DEBUG
 #include "DebugHelpers/DebugOutputStream.h"

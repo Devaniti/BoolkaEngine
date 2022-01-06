@@ -18,7 +18,7 @@ namespace Boolka
     class ResourceTracker;
     class RenderEngineContext;
 
-    class ResourceContainer
+    class [[nodiscard]] ResourceContainer
     {
     public:
         enum class Tex
@@ -156,23 +156,23 @@ namespace Boolka
                         DisplayController& displayController, ResourceTracker& resourceTracker);
         void Unload();
 
-        Texture2D& GetTexture(Tex id);
-        Buffer& GetBuffer(Buf id);
-        DescriptorHeap& GetDescriptorHeap(DescHeap id);
-        RenderTargetView& GetRTV(RTV id);
-        DepthStencilView& GetDSV(DSV id);
-        RootSignature& GetRootSignature(RootSig id);
+        [[nodiscard]] Texture2D& GetTexture(Tex id);
+        [[nodiscard]] Buffer& GetBuffer(Buf id);
+        [[nodiscard]] DescriptorHeap& GetDescriptorHeap(DescHeap id);
+        [[nodiscard]] RenderTargetView& GetRTV(RTV id);
+        [[nodiscard]] DepthStencilView& GetDSV(DSV id);
+        [[nodiscard]] RootSignature& GetRootSignature(RootSig id);
 
-        Texture2D& GetBackBuffer(UINT frameIndex);
-        RenderTargetView& GetBackBufferRTV(UINT frameIndex);
-        UploadBuffer& GetFlippableUploadBuffer(UINT frameIndex, FlipUploadBuf id);
+        [[nodiscard]] Texture2D& GetBackBuffer(UINT frameIndex);
+        [[nodiscard]] RenderTargetView& GetBackBufferRTV(UINT frameIndex);
+        [[nodiscard]] UploadBuffer& GetFlippableUploadBuffer(UINT frameIndex, FlipUploadBuf id);
 
-        D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptor(Buf id);
-        D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptor(Buf id);
-        D3D12_CPU_DESCRIPTOR_HANDLE GetCPUVisibleCPUDescriptor(Buf id);
+        [[nodiscard]] D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptor(Buf id);
+        [[nodiscard]] D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptor(Buf id);
+        [[nodiscard]] D3D12_CPU_DESCRIPTOR_HANDLE GetCPUVisibleCPUDescriptor(Buf id);
 
     private:
-        UINT GetDescriptorHeapOffset(Buf id);
+        [[nodiscard]] UINT GetDescriptorHeapOffset(Buf id);
 
         Texture2D m_textures[static_cast<size_t>(Tex::Count)];
         Buffer m_buffers[static_cast<size_t>(Buf::Count)];

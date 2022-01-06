@@ -7,7 +7,7 @@ namespace Boolka
     class Device;
     class GraphicCommandListImpl;
 
-    class GraphicQueue : public CommandQueue
+    class [[nodiscard]] GraphicQueue : public CommandQueue
     {
     public:
         GraphicQueue() = default;

@@ -62,7 +62,7 @@ namespace Boolka
 
         commandList->SetPipelineState(m_PSO.Get());
 
-        //engineContext.GetScene().GetBatchManager().Render(commandList, renderContext,
+        // engineContext.GetScene().GetBatchManager().Render(commandList, renderContext,
         //                                                  BatchManager::BatchType::Transparent);
 
         return true;
@@ -83,12 +83,11 @@ namespace Boolka
         MemoryBlock MS = DebugFileReader::ReadFile("MeshShader.cso");
 
         bool res = m_PSO.Initialize(
-            device, resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default),
-            ASParam{AS}, MSParam{MS}, PSParam{PS},
-            RenderTargetParam{1, DXGI_FORMAT_R16G16B16A16_FLOAT}, BlendParam{true},
-            DepthFormatParam{});
+            device, L"TransparentRenderPass::m_PSO",
+            resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default), ASParam{AS},
+            MSParam{MS}, PSParam{PS}, RenderTargetParam{1, DXGI_FORMAT_R16G16B16A16_FLOAT},
+            BlendParam{true}, DepthFormatParam{});
         BLK_ASSERT_VAR(res);
-        RenderDebug::SetDebugName(m_PSO.Get(), L"TransparentRenderPass::m_PSO");
 
         return true;
     }

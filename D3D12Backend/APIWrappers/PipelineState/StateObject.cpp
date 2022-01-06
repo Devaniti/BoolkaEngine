@@ -36,12 +36,15 @@ namespace Boolka
         m_StateObject = nullptr;
     }
 
-    bool StateObject::InitializeInternal(Device& device, const D3D12_STATE_OBJECT_DESC& desc)
+    bool StateObject::InitializeInternal(Device& device, const wchar_t* name,
+                                         const D3D12_STATE_OBJECT_DESC& desc)
     {
         HRESULT hr = device->CreateStateObject(&desc, IID_PPV_ARGS(&m_StateObject));
         BLK_ASSERT(SUCCEEDED(hr));
         if (FAILED(hr))
             return false;
+
+        RenderDebug::SetDebugName(m_StateObject, L"%ls", name);
 
         return true;
     }

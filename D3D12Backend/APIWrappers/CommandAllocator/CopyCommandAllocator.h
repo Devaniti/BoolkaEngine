@@ -6,7 +6,7 @@ namespace Boolka
 {
     class Device;
 
-    class CopyCommandAllocator : public CommandAllocator
+    class [[nodiscard]] CopyCommandAllocator : public CommandAllocator
     {
     public:
         CopyCommandAllocator() = default;

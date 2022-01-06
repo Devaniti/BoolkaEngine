@@ -3,13 +3,13 @@
 namespace Boolka
 {
 
-    class CommandAllocator
+    class [[nodiscard]] CommandAllocator
     {
     public:
         bool Reset();
 
-        ID3D12CommandAllocator* Get();
-        ID3D12CommandAllocator* operator->();
+        [[nodiscard]] ID3D12CommandAllocator* Get();
+        [[nodiscard]] ID3D12CommandAllocator* operator->();
 
     protected:
         CommandAllocator();

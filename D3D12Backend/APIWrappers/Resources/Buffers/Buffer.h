@@ -6,7 +6,7 @@ namespace Boolka
 
     class Device;
 
-    class Buffer : public Resource
+    class [[nodiscard]] Buffer : public Resource
     {
     public:
         Buffer() = default;

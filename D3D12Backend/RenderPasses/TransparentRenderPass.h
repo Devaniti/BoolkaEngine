@@ -5,7 +5,7 @@
 namespace Boolka
 {
 
-    class TransparentRenderPass : public RenderPass
+    class [[nodiscard]] TransparentRenderPass : public RenderPass
     {
     public:
         TransparentRenderPass() = default;

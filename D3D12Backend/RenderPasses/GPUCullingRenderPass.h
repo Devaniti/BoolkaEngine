@@ -5,7 +5,7 @@
 namespace Boolka
 {
 
-    class GPUCullingRenderPass : public RenderPass
+    class [[nodiscard]] GPUCullingRenderPass : public RenderPass
     {
     public:
         GPUCullingRenderPass() = default;

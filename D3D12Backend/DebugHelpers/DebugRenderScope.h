@@ -5,7 +5,7 @@
 namespace Boolka
 {
 
-    class DebugRenderScope
+    class [[nodiscard]] DebugRenderScope
     {
     public:
         DebugRenderScope(CommandList& commandList, const char* name);

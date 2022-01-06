@@ -5,7 +5,7 @@
 namespace Boolka
 {
 
-    class DeferredLightingPass : public RenderPass
+    class [[nodiscard]] DeferredLightingPass : public RenderPass
     {
     public:
         DeferredLightingPass() = default;

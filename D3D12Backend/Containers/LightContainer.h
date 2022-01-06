@@ -3,12 +3,12 @@
 namespace Boolka
 {
     // Temp container for lights
-    class LightContainer
+    class [[nodiscard]] LightContainer
     {
     public:
         LightContainer();
 
-        struct Light
+        struct [[nodiscard]] Light
         {
             Vector3 worldPos;
             float nearZ;
@@ -16,23 +16,25 @@ namespace Boolka
             float farZ;
         };
 
-        struct Sun
+        struct [[nodiscard]] Sun
         {
             Vector4 lightDir;
             Vector4 worldPos;
             Vector4 color;
         };
 
-        const std::vector<Light>& GetLights() const;
-        const std::vector<std::array<Matrix4x4, BLK_TEXCUBE_FACE_COUNT>>& GetViewProjMatrices()
-            const;
-        const std::vector<std::array<Matrix4x4, BLK_TEXCUBE_FACE_COUNT>>& GetViewMatrices() const;
-        const std::vector<std::array<Matrix4x4, BLK_TEXCUBE_FACE_COUNT>>& GetProjMatrices() const;
+        [[nodiscard]] const std::vector<Light>& GetLights() const;
+        [[nodiscard]] const std::vector<std::array<Matrix4x4, BLK_TEXCUBE_FACE_COUNT>>&
+        GetViewProjMatrices() const;
+        [[nodiscard]] const std::vector<std::array<Matrix4x4, BLK_TEXCUBE_FACE_COUNT>>&
+        GetViewMatrices() const;
+        [[nodiscard]] const std::vector<std::array<Matrix4x4, BLK_TEXCUBE_FACE_COUNT>>&
+        GetProjMatrices() const;
 
-        const Sun& GetSun() const;
-        const Matrix4x4& GetSunView() const;
-        const Matrix4x4& GetSunProj() const;
-        const Matrix4x4& GetSunViewProj() const;
+        [[nodiscard]] const Sun& GetSun() const;
+        [[nodiscard]] const Matrix4x4& GetSunView() const;
+        [[nodiscard]] const Matrix4x4& GetSunProj() const;
+        [[nodiscard]] const Matrix4x4& GetSunViewProj() const;
 
         void Update(float deltaTime);
 

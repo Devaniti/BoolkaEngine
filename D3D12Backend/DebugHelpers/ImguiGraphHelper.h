@@ -5,7 +5,7 @@
 namespace Boolka
 {
 
-    class ImguiGraphHelper
+    class [[nodiscard]] ImguiGraphHelper
     {
     public:
         ImguiGraphHelper();

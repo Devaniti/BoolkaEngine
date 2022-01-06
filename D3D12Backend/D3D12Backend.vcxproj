@@ -150,6 +150,7 @@
     <ClInclude Include="APIWrappers\PipelineState\ComputePipelineState.h" />
     <ClInclude Include="APIWrappers\PipelineState\GraphicPipelineState.h" />
     <ClInclude Include="APIWrappers\PipelineState\PipelineState.h" />
+    <ClInclude Include="APIWrappers\PipelineState\PipelineStateLibrary.h" />
     <ClInclude Include="APIWrappers\PipelineState\PipelineStateParameters.h" />
     <ClInclude Include="APIWrappers\PipelineState\StateObject.h" />
     <ClInclude Include="APIWrappers\PipelineState\StateObjectParameters.h" />
@@ -178,10 +179,10 @@
     <ClInclude Include="APIWrappers\Resources\Textures\Views\UnorderedAccessView.h" />
     <ClInclude Include="APIWrappers\Resources\UAVBarrier.h" />
     <ClInclude Include="APIWrappers\RootSignature.h" />
-    <ClInclude Include="APIWrappers\StateManager.h" />
     <ClInclude Include="APIWrappers\Swapchain.h" />
     <ClInclude Include="BatchManager.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Containers\RenderCacheContainer.h" />
     <ClInclude Include="Containers\LightContainer.h" />
     <ClInclude Include="Containers\ResourceContainer.h" />
     <ClInclude Include="Containers\Scene.h" />
@@ -246,6 +247,7 @@
     <ClCompile Include="APIWrappers\PipelineState\ComputePipelineState.cpp" />
     <ClCompile Include="APIWrappers\PipelineState\GraphicPipelineState.cpp" />
     <ClCompile Include="APIWrappers\PipelineState\PipelineState.cpp" />
+    <ClCompile Include="APIWrappers\PipelineState\PipelineStateLibrary.cpp" />
     <ClCompile Include="APIWrappers\PipelineState\StateObject.cpp" />
     <ClCompile Include="APIWrappers\Queries\QueryHeap.cpp" />
     <ClCompile Include="APIWrappers\Raytracing\AccelerationStructure\BottomLevelAS.cpp" />
@@ -272,11 +274,11 @@
     <ClCompile Include="APIWrappers\Resources\Textures\Views\UnorderedAccessView.cpp" />
     <ClCompile Include="APIWrappers\Resources\UAVBarrier.cpp" />
     <ClCompile Include="APIWrappers\RootSignature.cpp" />
-    <ClCompile Include="APIWrappers\StateManager.cpp" />
     <ClCompile Include="APIWrappers\Swapchain.cpp" />
     <ClCompile Include="BatchManager.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Containers\LightContainer.cpp" />
+    <ClCompile Include="Containers\RenderCacheContainer.cpp" />
     <ClCompile Include="Containers\ResourceContainer.cpp" />
     <ClCompile Include="Containers\Scene.cpp" />
     <ClCompile Include="Containers\ShaderTable.cpp" />

@@ -4,7 +4,7 @@
 namespace Boolka
 {
 
-    class DebugFileWriter
+    class [[nodiscard]] DebugFileWriter
     {
     public:
         DebugFileWriter();
@@ -19,8 +19,11 @@ namespace Boolka
 
         // Compact way of writing file from single MemoryBlock
         static bool WriteFile(const char* filename, MemoryBlock data, size_t alignment = 0);
+        static bool WriteFile(const wchar_t* filename, MemoryBlock data, size_t alignment = 0);
 
     private:
+        static bool WriteFile(DebugFileWriter& fileWriter, MemoryBlock data, size_t alignment);
+
         std::ofstream m_File;
         size_t m_BytesWritten;
     };

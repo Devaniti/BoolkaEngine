@@ -4,7 +4,9 @@
 #include <thread>
 
 #include "BoolkaCommon/DebugHelpers/DebugProfileTimer.h"
+#include "D3D12Backend/Containers/RenderCacheContainer.h"
 #include "D3D12Backend/Containers/Streaming/SceneData.h"
+#include "D3D12Backend/ProjectConfig.h"
 #include "D3D12Backend/RenderBackend.h"
 #include "FileReader/FileReader.h"
 
@@ -15,22 +17,36 @@ int RealMain(int argc, wchar_t* argv[])
     Boolka::DebugProfileTimer loadTimer;
     loadTimer.Start();
 
-    Boolka::FileReader fileReader;
+    Boolka::RenderCacheContainer renderCache;
+#ifdef BLK_ENABLE_PIPELINE_LIBRARY_LOAD_FROM_DISK
+    if (renderCache.PSOCacheReader.OpenFile(BLK_PSO_CACHE_FILENAME, true))
+    {
+        renderCache.PSOCacheReader.StartStreaming(renderCache.PSOCache);
+    }
+#endif
+    // TODO implement RTAS caching
+    // currently that file is never written/used
+    if (renderCache.RTCacheReader.OpenFile(BLK_RT_CACHE_FILENAME, true))
+    {
+        renderCache.RTCacheReader.StartStreaming(renderCache.RTCache);
+    }
+
+    Boolka::FileReader sceneFileReader;
     std::wstring scenePath;
     CombinePath(argv[0], BLK_SCENE_REQUIRED_SCENE_DATA_FILENAME, scenePath);
 
-    if (!fileReader.OpenFile(scenePath.c_str()))
+    if (!sceneFileReader.OpenFile(scenePath.c_str()))
         return -1;
 
-    Boolka::SceneData sceneData(fileReader);
+    Boolka::SceneData sceneData(sceneFileReader);
 
-    if (!fileReader.StartStreaming(sceneData.GetMemory()))
+    if (!sceneFileReader.StartStreaming(sceneData.GetMemory()))
         return -1;
 
     Boolka::DebugProfileTimer renderInitTimer;
     renderInitTimer.Start();
     Boolka::RenderBackend* renderer = Boolka::RenderBackend::CreateRenderBackend();
-    bool res = renderer->Initialize();
+    bool res = renderer->Initialize(renderCache);
     BLK_CRITICAL_ASSERT(res);
     renderInitTimer.Stop(L"Render initialization");
 
@@ -40,8 +56,8 @@ int RealMain(int argc, wchar_t* argv[])
         return -1;
     sceneCreationTimer.Stop(L"Scene creation");
 
-    fileReader.CloseFile();
-    fileReader.FreeData(sceneData.GetMemory());
+    sceneFileReader.CloseFile();
+    sceneFileReader.FreeData(sceneData.GetMemory());
 
     loadTimer.Stop(L"Load");
 

@@ -109,6 +109,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Algorithms\Hashing.h" />
     <ClInclude Include="DebugHelpers\DebugClipboardManager.h" />
     <ClInclude Include="DebugHelpers\DebugFileReader.h" />
     <ClInclude Include="DebugHelpers\DebugFileWriter.h" />
@@ -127,6 +128,7 @@
     <ClInclude Include="Structures\VectorSSE.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Algorithms\Hashing.cpp" />
     <ClCompile Include="DebugHelpers\DebugClipboardManager.cpp" />
     <ClCompile Include="DebugHelpers\DebugFileReader.cpp" />
     <ClCompile Include="DebugHelpers\DebugFileWriter.cpp" />

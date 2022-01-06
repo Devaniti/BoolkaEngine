@@ -4,7 +4,7 @@
 namespace Boolka
 {
 
-    class WindowManager
+    class [[nodiscard]] WindowManager
     {
     public:
         WindowManager();
@@ -15,7 +15,7 @@ namespace Boolka
 
         bool Update(WindowState& stateToUpdate);
 
-        HWND GetHWND() const;
+        [[nodiscard]] HWND GetHWND() const;
 
         void ShowWindow(bool show);
 
@@ -25,12 +25,13 @@ namespace Boolka
         void InitializeThread();
         void InitializeWindow(const WindowState& windowState);
         void MessageLoop();
-        static LRESULT CALLBACK WindowProcDetour(HWND hwnd, UINT message, WPARAM wParam,
-                                                 LPARAM lParam);
-        LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+        [[nodiscard]] static LRESULT CALLBACK WindowProcDetour(HWND hwnd, UINT message,
+                                                               WPARAM wParam, LPARAM lParam);
+        [[nodiscard]] LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wParam,
+                                                  LPARAM lParam);
 
         // Helper functions
-        static DWORD CalculateWindowStyle(WindowState::WindowMode windowMode);
+        [[nodiscard]] static DWORD CalculateWindowStyle(WindowState::WindowMode windowMode);
 
         HWND m_HWND;
         std::thread m_WindowThread;

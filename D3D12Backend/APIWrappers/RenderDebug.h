@@ -4,7 +4,7 @@ namespace Boolka
 
 {
 
-    class RenderDebug
+    class [[nodiscard]] RenderDebug
     {
     public:
         RenderDebug() = default;
@@ -20,6 +20,7 @@ namespace Boolka
 #endif
 
     private:
+        // Nothing yet
     };
 
 } // namespace Boolka

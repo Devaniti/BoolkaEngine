@@ -6,7 +6,7 @@ namespace Boolka
 
     class AABB;
 
-    class Sphere
+    class [[nodiscard]] Sphere
     {
     public:
         Sphere() = default;
@@ -15,9 +15,11 @@ namespace Boolka
         Sphere(const Vector3& center, float radiusSqr);
         Sphere(const Vector4& sphere);
 
-        static Sphere BuildBoundingSphere(const Vector4* verticies, size_t vertexCount);
+        [[nodiscard]] static Sphere BuildBoundingSphere(const Vector4* verticies,
+                                                        size_t vertexCount);
 
-        const Vector4& GetData();
+        [[nodiscard]] const Vector4& GetData();
+
     private:
         // xyz - center, w - radius squared
         Vector4 m_Sphere;

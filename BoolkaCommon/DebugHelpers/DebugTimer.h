@@ -3,7 +3,7 @@
 namespace Boolka
 {
 
-    class DebugTimer
+    class [[nodiscard]] DebugTimer
     {
     public:
         DebugTimer();

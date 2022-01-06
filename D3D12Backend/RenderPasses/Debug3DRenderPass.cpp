@@ -17,7 +17,7 @@ namespace Boolka
 
     bool Debug3DRenderPass::Render(RenderContext& renderContext, ResourceTracker& resourceTracker)
     {
-        //BLK_RENDER_PASS_START(Debug3DRenderPass);
+        // BLK_RENDER_PASS_START(Debug3DRenderPass);
         float deltaTime = renderContext.GetRenderFrameContext().GetDeltaTime();
 
         auto& resourceContainer = renderContext.GetRenderEngineContext().GetResourceContainer();
@@ -218,11 +218,10 @@ namespace Boolka
         auto& resourceContainer = renderContext.GetRenderEngineContext().GetResourceContainer();
 
         res = m_PSO.Initialize(
-            device, resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default),
-            inputLayout, VSParam{VS}, PSParam{PS}, DepthStencilParam{true, true},
-            DepthFormatParam{});
+            device, L"Debug3DRenderPass::m_PSO",
+            resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default), inputLayout,
+            VSParam{VS}, PSParam{PS}, DepthStencilParam{true, true}, DepthFormatParam{});
         BLK_ASSERT_VAR(res);
-        RenderDebug::SetDebugName(m_PSO.Get(), L"Debug3DRenderPass::m_PSO");
 
         inputLayout.Unload();
 

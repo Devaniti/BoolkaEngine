@@ -5,7 +5,7 @@ namespace Boolka
 {
 
     class Device;
-    class CopyCommandListImpl : public CopyCommandList
+    class [[nodiscard]] CopyCommandListImpl : public CopyCommandList
     {
     public:
         CopyCommandListImpl() = default;

@@ -15,12 +15,10 @@ namespace Boolka
         BLK_ASSERT(m_PipelineState == nullptr);
     }
 
-    bool PipelineState::Initialize(ID3D12PipelineState* pipelineState)
+    void PipelineState::Initialize(ID3D12PipelineState* pipelineState)
     {
         BLK_ASSERT(m_PipelineState == nullptr);
-
         m_PipelineState = pipelineState;
-        return true;
     }
 
     ID3D12PipelineState* PipelineState::Get()

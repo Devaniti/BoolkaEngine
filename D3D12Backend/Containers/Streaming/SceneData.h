@@ -4,9 +4,6 @@
 
 // Data that always needed to be loaded for rendering
 #define BLK_SCENE_REQUIRED_SCENE_DATA_FILENAME L"RequiredSceneData.blkeng"
-// TODO
-// Serialize built acceleration structures, invalidated on source geometry/hardware/driver version change
-#define BLK_SCENE_RAYTRACING_CACHE_FILENAME L"RaytracingCache.blktmp"
 #define BLK_SCENE_VERSION 1
 
 namespace Boolka
@@ -14,20 +11,20 @@ namespace Boolka
 
     class FileReader;
 
-    class SceneData
+    class [[nodiscard]] SceneData
     {
     public:
         SceneData(FileReader& fileReader);
         ~SceneData();
 
-        struct TextureHeader
+        struct [[nodiscard]] TextureHeader
         {
             UINT width;
             UINT height;
             UINT mipCount;
         };
 
-        struct CPUObjectHeader
+        struct [[nodiscard]] CPUObjectHeader
         {
             uint32_t rtIndexOffset;
             uint32_t rtIndexCount;
@@ -35,7 +32,7 @@ namespace Boolka
         };
 
         static const UINT ms_SceneVersion = 0;
-        struct FormatHeader
+        struct [[nodiscard]] FormatHeader
         {
             const char signature[24] = "BoolkaEngineSceneFormat";
             const UINT formatVersion = BLK_SCENE_VERSION;
@@ -43,7 +40,7 @@ namespace Boolka
             bool operator==(const FormatHeader& other) const;
         };
 
-        struct SceneHeader
+        struct [[nodiscard]] SceneHeader
         {
             UINT vertex1Size;
             UINT vertex2Size;
@@ -62,7 +59,7 @@ namespace Boolka
             UINT textureCount;
         };
 
-        struct DataWrapper
+        struct [[nodiscard]] DataWrapper
         {
             SceneHeader header;
             const TextureHeader* textureHeaders;
@@ -70,12 +67,12 @@ namespace Boolka
             const void* binaryData;
         };
 
-        DataWrapper GetSceneWrapper();
+        [[nodiscard]] DataWrapper GetSceneWrapper();
         void PrepareTextureHeaders();
         void PrepareCPUObjectHeaders();
         void PrepareBinaryData();
-        MemoryBlock& GetMemory();
-        const MemoryBlock& GetMemory() const;
+        [[nodiscard]] MemoryBlock& GetMemory();
+        [[nodiscard]] const MemoryBlock& GetMemory() const;
 
     private:
         MemoryBlock m_MemoryBlock;

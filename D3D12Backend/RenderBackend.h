@@ -4,18 +4,19 @@ namespace Boolka
 {
 
     class SceneData;
+    struct RenderCacheContainer;
 
-    class RenderBackend
+    class [[nodiscard]] RenderBackend
     {
     public:
         virtual ~RenderBackend() = default;
 
-        virtual bool Initialize() = 0;
+        virtual bool Initialize(RenderCacheContainer& renderCache) = 0;
         virtual void Unload() = 0;
         virtual bool Present() = 0;
         virtual bool RenderFrame() = 0;
 
-        static RenderBackend* CreateRenderBackend();
+        [[nodiscard]] static RenderBackend* CreateRenderBackend();
         static void DeleteRenderBackend(RenderBackend* object);
         virtual bool LoadScene(SceneData& sceneData) = 0;
         virtual void UnloadScene() = 0;

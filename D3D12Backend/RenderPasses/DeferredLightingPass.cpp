@@ -103,13 +103,12 @@ namespace Boolka
         BLK_RENDER_DEBUG_ONLY(
             device.FilterMessage(D3D12_MESSAGE_ID_CREATEINPUTLAYOUT_EMPTY_LAYOUT));
         bool res = m_PSO.Initialize(
-            device, resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default),
-            inputLayout, VSParam{VS}, PSParam{PS},
-            RenderTargetParam{1, DXGI_FORMAT_R16G16B16A16_FLOAT},
+            device, L"DeferredLightingPass::m_PSO",
+            resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default), inputLayout,
+            VSParam{VS}, PSParam{PS}, RenderTargetParam{1, DXGI_FORMAT_R16G16B16A16_FLOAT},
             DepthStencilParam{false, false, D3D12_COMPARISON_FUNC_ALWAYS}, DepthFormatParam{});
         BLK_RENDER_DEBUG_ONLY(device.RemoveLastMessageFilter());
         BLK_ASSERT_VAR(res);
-        RenderDebug::SetDebugName(m_PSO.Get(), L"DeferredLightingPass::m_PSO");
 
         inputLayout.Unload();
 

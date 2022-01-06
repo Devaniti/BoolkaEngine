@@ -87,19 +87,32 @@ namespace Boolka
             return false;
         }
 
-        res = fileWriter.Write(data);
+        return WriteFile(fileWriter, data, alignment);
+    }
+
+    bool DebugFileWriter::WriteFile(const wchar_t* filename, MemoryBlock data,
+                                    size_t alignment /*= 0*/)
+    {
+        DebugFileWriter fileWriter;
+        bool res = fileWriter.OpenFile(filename);
+        if (!res)
+        {
+            return false;
+        }
+
+        return WriteFile(fileWriter, data, alignment);
+    }
+
+    bool DebugFileWriter::WriteFile(DebugFileWriter& fileWriter, MemoryBlock data, size_t alignment)
+    {
+        bool res = fileWriter.Write(data);
         if (!res)
         {
             return false;
         }
 
         res = fileWriter.Close(alignment);
-        if (!res)
-        {
-            return false;
-        }
-
-        return true;
+        return res;
     }
 
 } // namespace Boolka

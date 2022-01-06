@@ -4,7 +4,7 @@ namespace Boolka
 {
 
     template <size_t componentCount, typename elementType = float>
-    class Vector
+    class [[nodiscard]] Vector
     {
     public:
         using thisType = Vector<componentCount, elementType>;
@@ -38,87 +38,87 @@ namespace Boolka
         template <typename... Args>
         Vector(elementType first, Args... args);
 
-        elementType x() const;
-        elementType y() const;
-        elementType z() const;
-        elementType w() const;
+        [[nodiscard]] elementType x() const;
+        [[nodiscard]] elementType y() const;
+        [[nodiscard]] elementType z() const;
+        [[nodiscard]] elementType w() const;
 
-        elementType& x();
-        elementType& y();
-        elementType& z();
-        elementType& w();
+        [[nodiscard]] elementType& x();
+        [[nodiscard]] elementType& y();
+        [[nodiscard]] elementType& z();
+        [[nodiscard]] elementType& w();
 
-        elementType r() const;
-        elementType g() const;
-        elementType b() const;
-        elementType a() const;
+        [[nodiscard]] elementType r() const;
+        [[nodiscard]] elementType g() const;
+        [[nodiscard]] elementType b() const;
+        [[nodiscard]] elementType a() const;
 
-        elementType& r();
-        elementType& g();
-        elementType& b();
-        elementType& a();
+        [[nodiscard]] elementType& r();
+        [[nodiscard]] elementType& g();
+        [[nodiscard]] elementType& b();
+        [[nodiscard]] elementType& a();
 
-        elementType& operator[](size_t i);
-        const elementType& operator[](size_t i) const;
+        [[nodiscard]] elementType& operator[](size_t i);
+        [[nodiscard]] const elementType& operator[](size_t i) const;
 
-        elementType* GetBuffer();
-        const elementType* GetBuffer() const;
+        [[nodiscard]] elementType* GetBuffer();
+        [[nodiscard]] const elementType* GetBuffer() const;
 
-        elementType* begin();
-        elementType* end();
-        const elementType* begin() const;
-        const elementType* end() const;
+        [[nodiscard]] elementType* begin();
+        [[nodiscard]] elementType* end();
+        [[nodiscard]] const elementType* begin() const;
+        [[nodiscard]] const elementType* end() const;
 
-        size_t size() const;
+        [[nodiscard]] size_t size() const;
 
-        elementType Dot(const thisType& other) const;
-        thisType Cross(const thisType& other) const;
+        [[nodiscard]] elementType Dot(const thisType& other) const;
+        [[nodiscard]] thisType Cross(const thisType& other) const;
 
-        elementType LengthSlow() const;
-        elementType LengthSqr() const;
-        thisType Normalize() const;
+        [[nodiscard]] elementType LengthSlow() const;
+        [[nodiscard]] elementType LengthSqr() const;
+        [[nodiscard]] thisType Normalize() const;
 
         // Calculates Length of first 3 components
-        elementType Length3Slow() const;
-        elementType Length3Sqr() const;
+        [[nodiscard]] elementType Length3Slow() const;
+        [[nodiscard]] elementType Length3Sqr() const;
         // Scales all 4 components so vector of first 3 ends up normalized
-        thisType Normalize3() const;
+        [[nodiscard]] thisType Normalize3() const;
 
-        thisType Min(const thisType& other) const;
-        thisType Max(const thisType& other) const;
+        [[nodiscard]] thisType Min(const thisType& other) const;
+        [[nodiscard]] thisType Max(const thisType& other) const;
 
         // Selects elements from this or other vector based on mask
         // false in mask represent this vector, otherwise other
-        thisType Select(const thisType& other, const thisType& mask) const;
+        [[nodiscard]] thisType Select(const thisType& other, const thisType& mask) const;
 
-        thisType operator-() const;
+        [[nodiscard]] thisType operator-() const;
 
         thisType& operator*=(elementType other);
         thisType& operator/=(elementType other);
-        thisType operator*(elementType other) const;
-        thisType operator/(elementType other) const;
+        [[nodiscard]] thisType operator*(elementType other) const;
+        [[nodiscard]] thisType operator/(elementType other) const;
 
         thisType& operator*=(const thisType& other);
         thisType& operator/=(const thisType& other);
         thisType& operator+=(const thisType& other);
         thisType& operator-=(const thisType& other);
-        thisType operator*(const thisType& other) const;
-        thisType operator/(const thisType& other) const;
-        thisType operator+(const thisType& other) const;
-        thisType operator-(const thisType& other) const;
+        [[nodiscard]] thisType operator*(const thisType& other) const;
+        [[nodiscard]] thisType operator/(const thisType& other) const;
+        [[nodiscard]] thisType operator+(const thisType& other) const;
+        [[nodiscard]] thisType operator-(const thisType& other) const;
 
-        bool operator==(const thisType& other) const;
-        bool operator!=(const thisType& other) const;
+        [[nodiscard]] bool operator==(const thisType& other) const;
+        [[nodiscard]] bool operator!=(const thisType& other) const;
 
         // Returns mask which elements satisfy comparison
         // 0 - false, anything else - true
 
-        thisType operator>(const thisType& other) const;
-        thisType operator<(const thisType& other) const;
-        thisType operator>=(const thisType& other) const;
-        thisType operator<=(const thisType& other) const;
-        thisType EqualMask(const thisType& other) const;
-        thisType NotEqualMask(const thisType& other) const;
+        [[nodiscard]] thisType operator>(const thisType& other) const;
+        [[nodiscard]] thisType operator<(const thisType& other) const;
+        [[nodiscard]] thisType operator>=(const thisType& other) const;
+        [[nodiscard]] thisType operator<=(const thisType& other) const;
+        [[nodiscard]] thisType EqualMask(const thisType& other) const;
+        [[nodiscard]] thisType NotEqualMask(const thisType& other) const;
 
     protected:
         elementType m_data[componentCount];

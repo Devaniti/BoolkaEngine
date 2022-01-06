@@ -41,7 +41,8 @@ namespace Boolka
     }
 
     bool Camera::Update(float deltaTime, float aspectRatio, Matrix4x4& outViewMatrix,
-                        Matrix4x4& outProjMatrix, Vector4& outCameraPos, Vector4* outEyeRayCoeficients)
+                        Matrix4x4& outProjMatrix, Vector4& outCameraPos,
+                        Vector4* outEyeRayCoeficients)
     {
         static const Vector4 upDirection{0, 0, 1};
         Vector4 forward{cos(m_RotationYaw) * cos(m_RotationPitch),

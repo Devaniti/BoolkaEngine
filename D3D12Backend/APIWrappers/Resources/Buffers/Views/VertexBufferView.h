@@ -6,7 +6,7 @@ namespace Boolka
 
     class VertexBuffer;
 
-    class VertexBufferView
+    class [[nodiscard]] VertexBufferView
     {
     public:
         VertexBufferView();
@@ -15,7 +15,7 @@ namespace Boolka
         bool Initialize(Buffer& vertexBuffer, UINT size, UINT stride, UINT64 bufferOffset = 0);
         void Unload();
 
-        const D3D12_VERTEX_BUFFER_VIEW* GetView();
+        [[nodiscard]] const D3D12_VERTEX_BUFFER_VIEW* GetView();
 
     private:
         D3D12_VERTEX_BUFFER_VIEW m_View;

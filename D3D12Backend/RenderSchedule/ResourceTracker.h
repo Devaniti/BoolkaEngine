@@ -10,7 +10,7 @@ namespace Boolka
     class CommandList;
     class RenderTargetView;
 
-    class ResourceTracker
+    class [[nodiscard]] ResourceTracker
     {
     public:
         ResourceTracker() = default;

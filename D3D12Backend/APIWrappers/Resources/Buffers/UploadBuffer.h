@@ -6,7 +6,7 @@ namespace Boolka
 
     class Device;
 
-    class UploadBuffer : public Buffer
+    class [[nodiscard]] UploadBuffer : public Buffer
     {
     public:
         UploadBuffer() = default;
@@ -15,7 +15,7 @@ namespace Boolka
         bool Initialize(Device& device, UINT64 size);
         void Unload();
 
-        void* Map();
+        [[nodiscard]] void* Map();
         void Unmap();
 
         void Upload(const void* data, UINT64 size);

@@ -7,7 +7,7 @@ namespace Boolka
     class Device;
     class ResourceHeap;
 
-    class Texture2D : public Texture
+    class [[nodiscard]] Texture2D : public Texture
     {
     public:
         Texture2D() = default;
@@ -26,9 +26,11 @@ namespace Boolka
         static void GetRequiredSize(size_t& outAlignment, size_t& outSize, Device& device,
                                     UINT64 width, UINT height, UINT16 mipCount, DXGI_FORMAT format,
                                     D3D12_RESOURCE_FLAGS resourceFlags, UINT16 arraySize = 1);
-        static size_t GetUploadSize(UINT width, UINT height, UINT16 mipCount, DXGI_FORMAT format,
-                                    D3D12_RESOURCE_FLAGS resourceFlags, UINT16 arraySize = 1);
-        static UINT GetBPP(DXGI_FORMAT format);
+        [[nodiscard]] static size_t GetUploadSize(UINT width, UINT height, UINT16 mipCount,
+                                                  DXGI_FORMAT format,
+                                                  D3D12_RESOURCE_FLAGS resourceFlags,
+                                                  UINT16 arraySize = 1);
+        [[nodiscard]] static UINT GetBPP(DXGI_FORMAT format);
 
         // This method don't increment resource's reference count
         // You should do it yourself if needed

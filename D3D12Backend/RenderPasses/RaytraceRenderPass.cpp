@@ -19,8 +19,7 @@
 namespace Boolka
 {
 
-    bool RaytraceRenderPass::Render(RenderContext& renderContext,
-                                      ResourceTracker& resourceTracker)
+    bool RaytraceRenderPass::Render(RenderContext& renderContext, ResourceTracker& resourceTracker)
     {
         BLK_RENDER_PASS_START(RaytraceRenderPass);
 
@@ -43,7 +42,8 @@ namespace Boolka
 
         GraphicCommandListImpl& commandList = threadContext.GetGraphicCommandList();
 
-        resourceTracker.Transition(raytraceResults, commandList, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        resourceTracker.Transition(raytraceResults, commandList,
+                                   D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         resourceTracker.Transition(normal, commandList,
                                    D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE |
                                        D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
@@ -103,20 +103,19 @@ namespace Boolka
         const wchar_t* hitGroupExport = L"HitGroup";
 
         bool res = m_PSO.Initialize(
-            device, GlobalRootSignatureParam{defaultRootSig},
+            device, L"RaytraceRenderPass::m_PSO", GlobalRootSignatureParam{defaultRootSig},
             DXILLibraryParam<ARRAYSIZE(libExports)>{shaderLib, libExports},
             HitGroupParam{hitGroupExport, closestHitExport},
             RaytracingShaderConfigParam{sizeof(HLSLShared::RaytracePayload), sizeof(Vector2)},
             RaytracingPipelineConfigParam{BLK_RT_MAX_RECURSION_DEPTH});
-        RenderDebug::SetDebugName(m_PSO.Get(), L"RaytraceRenderPass::m_PSO");
         BLK_ASSERT_VAR(res);
 
         UINT64 shaderTableSize = ShaderTable::CalculateRequiredBufferSize(1, 1, 1);
 
         m_ShaderTableBuffer.Initialize(device, shaderTableSize, D3D12_HEAP_TYPE_DEFAULT,
                                        D3D12_RESOURCE_FLAG_NONE, D3D12_RESOURCE_STATE_COPY_DEST);
-        BLK_RENDER_DEBUG_ONLY(RenderDebug::SetDebugName(
-            m_ShaderTableBuffer.Get(), L"RaytraceRenderPass::m_ShaderTableBuffer"));
+        RenderDebug::SetDebugName(m_ShaderTableBuffer.Get(),
+                                  L"RaytraceRenderPass::m_ShaderTableBuffer");
 
         UploadBuffer shaderTableUploadBuffer;
         shaderTableUploadBuffer.Initialize(device, shaderTableSize);

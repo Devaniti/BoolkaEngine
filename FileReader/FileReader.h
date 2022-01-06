@@ -4,19 +4,19 @@
 namespace Boolka
 {
 
-    class FileReader
+    class [[nodiscard]] FileReader
     {
     public:
         FileReader();
         ~FileReader();
 
-        bool OpenFile(const wchar_t* filename);
+        bool OpenFile(const wchar_t* filename, bool enableOSBuffering = false);
         void CloseFile();
 
-        // Returns size of file on success
-        // Or 0 otherwise
-        size_t StartStreaming(MemoryBlock& m_data);
-        bool IsStreamed();
+        [[nodiscard]] bool IsOpen();
+
+        bool StartStreaming(MemoryBlock& data);
+        [[nodiscard]] bool IsStreamed();
         // Waits for first dataToWait bytes to be read
         bool WaitData(size_t dataToWait);
         // Waits for whole file to read
@@ -24,8 +24,8 @@ namespace Boolka
         void FreeData(MemoryBlock& data);
 
     private:
-        ::HANDLE m_file;
-        ::OVERLAPPED m_async;
+        ::HANDLE m_File;
+        ::OVERLAPPED m_Async;
     };
 
 } // namespace Boolka

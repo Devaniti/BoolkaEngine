@@ -4,7 +4,7 @@
 namespace Boolka
 {
 
-    class UpdateRenderPass : public RenderPass
+    class [[nodiscard]] UpdateRenderPass : public RenderPass
     {
     public:
         UpdateRenderPass() = default;

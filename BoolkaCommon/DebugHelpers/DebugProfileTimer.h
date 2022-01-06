@@ -4,7 +4,7 @@
 namespace Boolka
 {
 
-    class DebugProfileTimer
+    class [[nodiscard]] DebugProfileTimer
     {
     public:
         void Start();

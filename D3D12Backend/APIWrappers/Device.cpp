@@ -2,6 +2,8 @@
 
 #include "Device.h"
 
+#include "Containers/RenderCacheContainer.h"
+
 // D3D12 Agility SDK parameters
 extern "C"
 {
@@ -50,28 +52,45 @@ namespace Boolka
         return m_CopyQueue;
     }
 
-    bool Device::Initialize(Factory& factory)
+#ifdef BLK_ENABLE_PIPELINE_LIBRARY
+    PipelineStateLibrary& Device::GetPSOLibrary()
+    {
+        return m_PSOLibrary;
+    }
+#endif
+
+    bool Device::Initialize(Factory& factory, RenderCacheContainer& renderCache)
     {
         BLK_ASSERT(m_Device == nullptr);
 
         HRESULT hr = ::D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_12_0, IID_PPV_ARGS(&m_Device));
         if (FAILED(hr))
+        {
+            ::MessageBoxW(0, L"DirectX 12.0 Feature Level 12_0 required",
+                          L"GPU and/or driver unsupported", MB_OK | MB_ICONERROR);
+            BLK_CRITICAL_DEBUG_BREAK();
             return false;
+        }
 
         BLK_RENDER_PROFILING_ONLY(InitializeProfiling());
         BLK_RENDER_DEBUG_ONLY(InitializeDebug());
 
         if (!m_FeatureSupportHelper.Initialize(*this))
             return false;
-
+#ifdef BLK_ENABLE_PIPELINE_LIBRARY
+#ifdef BLK_ENABLE_PIPELINE_LIBRARY_LOAD_FROM_DISK
+        if (!m_PSOLibrary.Initialize(*this, renderCache))
+            return false;
+#else
+        if (!m_PSOLibrary.Initialize(*this))
+            return false;
+#endif
+#endif
         if (!m_GraphicQueue.Initialize(*this))
             return false;
         if (!m_ComputeQueue.Initialize(*this))
             return false;
         if (!m_CopyQueue.Initialize(*this))
-            return false;
-
-        if (!m_StateManager.Initialize(*this))
             return false;
 
         return true;
@@ -81,12 +100,16 @@ namespace Boolka
     {
         BLK_ASSERT(m_Device != nullptr);
 
-        m_StateManager.Unload();
+#ifdef BLK_ENABLE_PIPELINE_LIBRARY_WRITE_TO_DISK
+        m_PSOLibrary.SaveToDisk(BLK_PSO_CACHE_FILENAME);
+#endif
 
         m_CopyQueue.Unload();
         m_ComputeQueue.Unload();
         m_GraphicQueue.Unload();
-
+#ifdef BLK_ENABLE_PIPELINE_LIBRARY
+        m_PSOLibrary.Unload();
+#endif
         m_FeatureSupportHelper.Unload();
 
         BLK_RENDER_DEBUG_ONLY(ReportObjectLeaks());
@@ -118,12 +141,12 @@ namespace Boolka
             if (res == 0)
             {
                 g_WDebugOutput << L"Encountered error while processing error: 0x" << std::hex << hr
-                               << L" GetLastError() == 0x" << std::hex << GetLastError()
+                               << L" GetLastError() == 0x" << GetLastError() << std::dec
                                << std::endl;
                 BLK_CRITICAL_ASSERT(0);
             }
-            g_WDebugOutput << L"Device Removed. Error code: 0x" << std::hex << hr << L". " << errorMessage
-                           << std::endl;
+            g_WDebugOutput << L"Device Removed. Error code: 0x" << std::hex << hr << std::dec
+                           << L". " << errorMessage << std::endl;
             BLK_CRITICAL_ASSERT(0);
         }
     }
@@ -168,13 +191,10 @@ namespace Boolka
             return;
         }
 
-        D3D12_MESSAGE_ID filterList[] = {D3D12_MESSAGE_ID_LIVE_OBJECT_SUMMARY,
-                                         D3D12_MESSAGE_ID_LIVE_DEVICE};
-        FilterMessage(filterList, ARRAYSIZE(filterList));
+        FilterMessage(D3D12_MESSAGE_ID_LIVE_DEVICE);
         // debugDevice->ReportLiveDeviceObjects always report reference to
         // device, since debugDevice itself is reference to device
-        debugDevice->ReportLiveDeviceObjects(D3D12_RLDO_SUMMARY | D3D12_RLDO_DETAIL |
-                                             D3D12_RLDO_IGNORE_INTERNAL);
+        debugDevice->ReportLiveDeviceObjects(D3D12_RLDO_DETAIL | D3D12_RLDO_IGNORE_INTERNAL);
         RemoveLastMessageFilter();
         ULONG refCount = debugDevice->Release();
         // Instead of relying on debug layer warnings we check ref count

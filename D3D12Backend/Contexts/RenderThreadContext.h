@@ -7,7 +7,7 @@ namespace Boolka
 
     class Device;
 
-    class RenderThreadContext
+    class [[nodiscard]] RenderThreadContext
     {
     public:
         RenderThreadContext();
@@ -16,12 +16,11 @@ namespace Boolka
         bool Initialize(Device& device);
         void Unload();
 
-        GraphicCommandListImpl& GetGraphicCommandList();
+        [[nodiscard]] GraphicCommandListImpl& GetGraphicCommandList();
 
         void FlipFrame(UINT frameIndex);
 
-        //TODO revert
-    //private:
+    private:
         GraphicCommandAllocator* m_CurrentGraphicCommandAllocator;
         GraphicCommandListImpl* m_CurrentGraphicCommandList;
         GraphicCommandAllocator m_GraphicCommandAllocator[BLK_IN_FLIGHT_FRAMES];

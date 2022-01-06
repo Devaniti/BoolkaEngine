@@ -7,7 +7,7 @@ namespace Boolka
 {
 
     // Used for Reflection and Refraction
-    class RaytraceRenderPass : public RenderPass
+    class [[nodiscard]] RaytraceRenderPass : public RenderPass
     {
     public:
         RaytraceRenderPass() = default;

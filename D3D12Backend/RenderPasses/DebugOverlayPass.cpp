@@ -75,7 +75,7 @@ namespace Boolka
             }
         }
         else
-        {        
+        {
             isF1Pressed = false;
         }
 

@@ -3,7 +3,7 @@
 namespace Boolka
 {
 
-    class InputLayout
+    class [[nodiscard]] InputLayout
     {
     public:
         InputLayout();
@@ -14,18 +14,17 @@ namespace Boolka
 
         void SetEntry(size_t index, const D3D12_INPUT_ELEMENT_DESC& desc);
 
-        struct InputLayoutHeader
+        struct [[nodiscard]] InputLayoutHeader
         {
             UINT m_NumEntries;
         };
 
-        BLK_IS_PLAIN_DATA_ASSERT(InputLayoutHeader);
-
-        struct InputLayoutEntry
+        struct [[nodiscard]] InputLayoutEntry
         {
             char SemanticName[BLK_D3D12_SEMANTIC_MAX_LENGTH];
         };
 
+        BLK_IS_PLAIN_DATA_ASSERT(InputLayoutHeader);
         BLK_IS_PLAIN_DATA_ASSERT(InputLayoutEntry);
         BLK_IS_PLAIN_DATA_ASSERT(D3D12_INPUT_ELEMENT_DESC);
 

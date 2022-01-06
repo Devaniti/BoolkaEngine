@@ -172,7 +172,6 @@ namespace Boolka
         cullingCbufferData
             .viewProjMatrix[static_cast<size_t>(BatchManager::ViewType::ShadowMapSun)] =
             lightContainer.GetSunViewProj().Transpose();
-        frameContext.GetCameraPos() - lightContainer.GetSun().lightDir * 1000000.0f;
 
         size_t lightCount = lightContainer.GetLights().size();
         const auto& lightViewProjMatricies = lightContainer.GetViewProjMatrices();

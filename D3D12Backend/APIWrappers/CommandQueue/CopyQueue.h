@@ -7,7 +7,7 @@ namespace Boolka
     class Device;
     class CopyCommandListImpl;
 
-    class CopyQueue : public CommandQueue
+    class [[nodiscard]] CopyQueue : public CommandQueue
     {
     public:
         CopyQueue() = default;

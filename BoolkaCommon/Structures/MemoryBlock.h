@@ -3,7 +3,7 @@
 namespace Boolka
 {
 
-    struct MemoryBlock
+    struct [[nodiscard]] MemoryBlock
     {
         void* m_Data;
         size_t m_Size;

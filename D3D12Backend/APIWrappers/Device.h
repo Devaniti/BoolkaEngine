@@ -4,25 +4,31 @@
 #include "CommandQueue/GraphicQueue.h"
 #include "Factory.h"
 #include "FeatureSupportHelper.h"
-#include "StateManager.h"
+#include "PipelineState/PipelineStateLibrary.h"
 
 namespace Boolka
 {
 
-    class Device
+    struct RenderCacheContainer;
+
+    class [[nodiscard]] Device
     {
     public:
         Device();
         ~Device();
 
-        ID3D12Device6* Get();
-        ID3D12Device6* operator->();
+        [[nodiscard]] ID3D12Device6* Get();
+        [[nodiscard]] ID3D12Device6* operator->();
 
-        GraphicQueue& GetGraphicQueue();
-        ComputeQueue& GetComputeQueue();
-        CopyQueue& GetCopyQueue();
+        [[nodiscard]] GraphicQueue& GetGraphicQueue();
+        [[nodiscard]] ComputeQueue& GetComputeQueue();
+        [[nodiscard]] CopyQueue& GetCopyQueue();
 
-        bool Initialize(Factory& factory);
+#ifdef BLK_ENABLE_PIPELINE_LIBRARY
+        [[nodiscard]] PipelineStateLibrary& GetPSOLibrary();
+#endif
+
+        bool Initialize(Factory& factory, RenderCacheContainer& renderCache);
         void Unload();
 
         void Flush();
@@ -43,13 +49,17 @@ namespace Boolka
         void SetDebugBreakSeverity(D3D12_MESSAGE_SEVERITY severity);
         void ReportObjectLeaks();
 #endif
+
         ID3D12Device6* m_Device;
 
         GraphicQueue m_GraphicQueue;
         ComputeQueue m_ComputeQueue;
         CopyQueue m_CopyQueue;
-        StateManager m_StateManager;
         FeatureSupportHelper m_FeatureSupportHelper;
+
+#ifdef BLK_ENABLE_PIPELINE_LIBRARY
+        PipelineStateLibrary m_PSOLibrary;
+#endif
     };
 
 } // namespace Boolka
