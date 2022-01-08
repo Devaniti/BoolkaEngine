@@ -80,7 +80,7 @@ namespace Boolka
         m_resourceContainer.Unload();
         m_timestampContainer.Unload();
 
-        UnloadScene();
+        //UnloadScene();
 
         m_backbufferWidth = 0;
         m_backbufferHeight = 0;

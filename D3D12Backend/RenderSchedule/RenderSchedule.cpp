@@ -58,8 +58,8 @@ namespace Boolka
     {
         bool res = InitializeRenderPasses(device);
         BLK_ASSERT_VAR(res);
-        res = m_EngineContext.LoadScene(device, sceneData);
-        BLK_ASSERT_VAR(res);
+        //res = m_EngineContext.LoadScene(device, sceneData);
+        //BLK_ASSERT_VAR(res);
 
         return true;
     }

@@ -33,15 +33,15 @@ int RealMain(int argc, wchar_t* argv[])
 
     Boolka::FileReader sceneFileReader;
     std::wstring scenePath;
-    CombinePath(argv[0], BLK_SCENE_REQUIRED_SCENE_DATA_FILENAME, scenePath);
+    //CombinePath(argv[0], BLK_SCENE_REQUIRED_SCENE_DATA_FILENAME, scenePath);
 
-    if (!sceneFileReader.OpenFile(scenePath.c_str()))
-        return -1;
+    //if (!sceneFileReader.OpenFile(scenePath.c_str()))
+    //    return -1;
 
     Boolka::SceneData sceneData(sceneFileReader);
 
-    if (!sceneFileReader.StartStreaming(sceneData.GetMemory()))
-        return -1;
+    //if (!sceneFileReader.StartStreaming(sceneData.GetMemory()))
+    //    return -1;
 
     Boolka::DebugProfileTimer renderInitTimer;
     renderInitTimer.Start();
@@ -56,20 +56,20 @@ int RealMain(int argc, wchar_t* argv[])
         return -1;
     sceneCreationTimer.Stop(L"Scene creation");
 
-    sceneFileReader.CloseFile();
-    sceneFileReader.FreeData(sceneData.GetMemory());
+    //sceneFileReader.CloseFile();
+    //sceneFileReader.FreeData(sceneData.GetMemory());
 
     loadTimer.Stop(L"Load");
 
-    ::GetAsyncKeyState(VK_ESCAPE);
-    while (true)
-    {
-        renderer->RenderFrame();
-        renderer->Present();
+    //::GetAsyncKeyState(VK_ESCAPE);
+    //while (true)
+    //{
+    //    renderer->RenderFrame();
+    //    renderer->Present();
 
-        if (::GetAsyncKeyState(VK_ESCAPE))
-            break;
-    }
+    //    if (::GetAsyncKeyState(VK_ESCAPE))
+    //        break;
+    //}
     renderer->UnloadScene();
     renderer->Unload();
 
