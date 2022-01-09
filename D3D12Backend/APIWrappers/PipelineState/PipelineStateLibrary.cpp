@@ -121,7 +121,7 @@ namespace Boolka
     void PipelineStateLibrary::SaveToDisk(const wchar_t* filename)
     {
         MemoryBlock PSOLibraryCache{};
-        if (Serialize(PSOLibraryCache))
+        if (!Serialize(PSOLibraryCache))
         {
             return;
         }
