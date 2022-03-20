@@ -5,6 +5,7 @@ namespace Boolka
 
     class Device;
     class CommandQueue;
+    class DStorageQueue;
 
     class [[nodiscard]] Fence
     {
@@ -15,11 +16,16 @@ namespace Boolka
         bool Initialize(Device& device);
         void Unload();
 
+        [[nodiscard]] ID3D12Fence1* Get();
+        [[nodiscard]] ID3D12Fence1* operator->();
+
         [[nodiscard]] UINT64 SignalCPU();
         [[nodiscard]] UINT64 SignalGPU(CommandQueue& commandQueue);
+        [[nodiscard]] UINT64 SignalDStorage(DStorageQueue& dstorageQueue);
 
         void SignalCPUWithValue(UINT64 value);
         void SignalGPUWithValue(UINT64 value, CommandQueue& commandQueue);
+        void SignalDStorageWithValue(UINT64 value, DStorageQueue& dstorageQueue);
 
         void WaitCPU(UINT64 value);
         void WaitGPU(UINT64 value, CommandQueue& commandQueue);

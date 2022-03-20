@@ -60,7 +60,8 @@ namespace Boolka
             static_cast<UINT>(ResourceContainer::DefaultRootSigBindPoints::FrameConstantBuffer),
             frameConstantBuffer->GetGPUVirtualAddress());
 
-        commandList->SetPipelineState(m_PSO.Get());
+        commandList->SetPipelineState(
+            engineContext.GetPSOContainer().GetPSO(PSOContainer::GraphicPSO::GBuffer).Get());
 
         engineContext.GetScene().GetBatchManager().Render(commandList, renderContext,
                                                           BatchManager::BatchType::Opaque);
@@ -75,26 +76,11 @@ namespace Boolka
 
     bool GBufferRenderPass::Initialize(Device& device, RenderContext& renderContext)
     {
-        auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
-        auto& resourceContainer = engineContext.GetResourceContainer();
-
-        MemoryBlock PS = DebugFileReader::ReadFile("GBufferPassPixelShader.cso");
-        MemoryBlock AS = DebugFileReader::ReadFile("AmplificationShader.cso");
-        MemoryBlock MS = DebugFileReader::ReadFile("MeshShader.cso");
-
-        bool res = m_PSO.Initialize(
-            device, L"GBufferRenderPass::m_PSO",
-            resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default), ASParam(AS),
-            MSParam(MS), PSParam(PS), RenderTargetParam{2, DXGI_FORMAT_R16G16B16A16_FLOAT},
-            DepthStencilParam{true, false, D3D12_COMPARISON_FUNC_LESS_EQUAL}, DepthFormatParam{});
-        BLK_ASSERT_VAR(res);
-
         return true;
     }
 
     void GBufferRenderPass::Unload()
     {
-        m_PSO.Unload();
     }
 
 } // namespace Boolka

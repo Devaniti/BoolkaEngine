@@ -15,7 +15,7 @@ namespace Boolka
         void StartEvent(const char* name);
         void EndEvent();
 
-        ID3D12GraphicsCommandList* m_commandList;
+        ID3D12GraphicsCommandList* m_CommandList;
     };
 
 } // namespace Boolka

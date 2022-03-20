@@ -19,7 +19,6 @@ namespace Boolka
         bool PrepareRendering() final;
 
     private:
-        GraphicPipelineState m_PSO;
     };
 
 } // namespace Boolka

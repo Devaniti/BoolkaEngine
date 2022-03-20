@@ -1,5 +1,6 @@
 #pragma once
 #include "APIWrappers/Device.h"
+#include "APIWrappers/DirectStorage/DStorageFactory.h"
 #include "APIWrappers/Factory.h"
 #include "APIWrappers/RenderDebug.h"
 #include "RenderBackend.h"
@@ -15,11 +16,10 @@ namespace Boolka
         RenderBackendImpl();
         ~RenderBackendImpl();
 
-        bool Initialize(RenderCacheContainer& renderCache) final;
+        bool Initialize(const wchar_t* folderPath) final;
         void Unload() final;
         bool Present() final;
         bool RenderFrame() final;
-        bool LoadScene(SceneData& sceneData) final;
         void UnloadScene() final;
 
     private:

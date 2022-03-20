@@ -9,5 +9,5 @@
 #include <shlwapi.h>
 
 // 3rd party libraries
-#include "stb/stb_image.h"
-#include "tinyobjloader/tiny_obj_loader.h"
+#include "ThirdParty/stb/stb_image.h"
+#include "ThirdParty/tinyobjloader/tiny_obj_loader.h"

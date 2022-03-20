@@ -3,6 +3,7 @@
 #include "Fence.h"
 
 #include "Device.h"
+#include "DirectStorage/DStorageQueue.h"
 
 namespace Boolka
 {
@@ -46,32 +47,65 @@ namespace Boolka
         m_CPUEvent = NULL;
     }
 
+    ID3D12Fence1* Fence::Get()
+    {
+        BLK_ASSERT(m_Fence != nullptr);
+        return m_Fence;
+    }
+
+    ID3D12Fence1* Fence::operator->()
+    {
+        return Get();
+    }
+
     UINT64 Fence::SignalCPU()
     {
+        BLK_ASSERT(m_Fence != nullptr);
         m_Fence->Signal(++m_ExpactedValue);
         return m_ExpactedValue;
     }
 
     UINT64 Fence::SignalGPU(CommandQueue& commandQueue)
     {
+        BLK_ASSERT(m_Fence != nullptr);
         commandQueue->Signal(m_Fence, ++m_ExpactedValue);
+        return m_ExpactedValue;
+    }
+
+    UINT64 Fence::SignalDStorage(DStorageQueue& dstorageQueue)
+    {
+        BLK_ASSERT(m_Fence != nullptr);
+        dstorageQueue->EnqueueSignal(m_Fence, ++m_ExpactedValue);
         return m_ExpactedValue;
     }
 
     void Fence::SignalCPUWithValue(UINT64 value)
     {
+        BLK_ASSERT(m_Fence != nullptr);
         m_ExpactedValue = value;
         m_Fence->Signal(value);
     }
 
     void Fence::SignalGPUWithValue(UINT64 value, CommandQueue& commandQueue)
     {
+        BLK_ASSERT(m_Fence != nullptr);
         m_ExpactedValue = value;
         commandQueue->Signal(m_Fence, value);
     }
 
+    void Fence::SignalDStorageWithValue(UINT64 value, DStorageQueue& dstorageQueue)
+    {
+        BLK_ASSERT(m_Fence != nullptr);
+        m_ExpactedValue = value;
+        dstorageQueue->EnqueueSignal(m_Fence, value);
+    }
+
     void Fence::WaitCPU(UINT64 value)
     {
+        BLK_ASSERT(m_Fence != nullptr);
+
+        BLK_CPU_SCOPE("Fence::WaitCPU");
+
         HRESULT hr = m_Fence->SetEventOnCompletion(value, m_CPUEvent);
         BLK_ASSERT_VAR(SUCCEEDED(hr));
         ::WaitForSingleObject(m_CPUEvent, INFINITE);
@@ -80,12 +114,16 @@ namespace Boolka
 
     void Fence::WaitGPU(UINT64 value, CommandQueue& commandQueue)
     {
+        BLK_ASSERT(m_Fence != nullptr);
         commandQueue->Wait(m_Fence, value);
     }
 
     void Fence::WaitCPUMultiple(size_t count, Fence** fences, UINT64* values)
     {
         BLK_ASSERT(count <= 16);
+
+        BLK_CPU_SCOPE("Fence::WaitCPUMultiple");
+
         HANDLE cpuEvents[16];
 
         for (size_t i = 0; i < count; i++)

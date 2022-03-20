@@ -3,6 +3,7 @@
 #include "StateObject.h"
 
 #include "APIWrappers/Device.h"
+#include "BoolkaCommon/DebugHelpers/DebugProfileTimer.h"
 
 namespace Boolka
 {
@@ -39,6 +40,8 @@ namespace Boolka
     bool StateObject::InitializeInternal(Device& device, const wchar_t* name,
                                          const D3D12_STATE_OBJECT_DESC& desc)
     {
+        BLK_CPU_SCOPE("StateObject::InitializeInternal");
+
         HRESULT hr = device->CreateStateObject(&desc, IID_PPV_ARGS(&m_StateObject));
         BLK_ASSERT(SUCCEEDED(hr));
         if (FAILED(hr))

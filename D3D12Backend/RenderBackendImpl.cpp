@@ -19,9 +19,11 @@ namespace Boolka
         BLK_ASSERT(m_FrameID == 0);
     }
 
-    bool RenderBackendImpl::Initialize(RenderCacheContainer& renderCache)
+    bool RenderBackendImpl::Initialize(const wchar_t* folderPath)
     {
         BLK_ASSERT(m_FrameID == 0);
+
+        BLK_CPU_SCOPE("RenderBackendImpl::Initialize");
 
         m_FrameID = BLK_IN_FLIGHT_FRAMES;
 
@@ -30,13 +32,13 @@ namespace Boolka
         BLK_CRITICAL_ASSERT(res);
         res = m_Factory.Initialize();
         BLK_CRITICAL_ASSERT(res);
-        res = m_Device.Initialize(m_Factory, renderCache);
+        res = m_Device.Initialize(m_Factory);
         BLK_CRITICAL_ASSERT(res);
         res = m_DisplayController.Initialize(m_Device, m_Factory);
         BLK_CRITICAL_ASSERT(res);
         res = m_FrameFence.Initialize(m_Device);
         BLK_CRITICAL_ASSERT(res);
-        res = m_RenderSchedule.Initialize(m_Device, m_DisplayController);
+        res = m_RenderSchedule.Initialize(m_Device, folderPath, m_DisplayController);
         BLK_CRITICAL_ASSERT(res);
 
         return true;
@@ -79,14 +81,6 @@ namespace Boolka
         m_RenderSchedule.Render(m_Device, currentFrameIndex);
 
         m_FrameFence.SignalGPUWithValue(m_FrameID, m_Device.GetGraphicQueue());
-
-        return true;
-    }
-
-    bool RenderBackendImpl::LoadScene(SceneData& sceneData)
-    {
-        bool res = m_RenderSchedule.InitializeResources(m_Device, sceneData);
-        BLK_CRITICAL_ASSERT(res);
 
         return true;
     }

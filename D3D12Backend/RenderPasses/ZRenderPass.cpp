@@ -58,7 +58,8 @@ namespace Boolka
 
         engineContext.BindSceneResourcesGraphic(commandList);
 
-        commandList->SetPipelineState(m_PSO.Get());
+        commandList->SetPipelineState(
+            engineContext.GetPSOContainer().GetPSO(PSOContainer::GraphicPSO::ZBuffer).Get());
 
         engineContext.GetScene().GetBatchManager().Render(commandList, renderContext,
                                                           BatchManager::BatchType::Opaque);
@@ -73,24 +74,11 @@ namespace Boolka
 
     bool ZRenderPass::Initialize(Device& device, RenderContext& renderContext)
     {
-        auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
-        auto& resourceContainer = engineContext.GetResourceContainer();
-
-        MemoryBlock AS = DebugFileReader::ReadFile("AmplificationShader.cso");
-        MemoryBlock MS = DebugFileReader::ReadFile("MeshShader.cso");
-
-        bool res = m_PSO.Initialize(
-            device, L"ZRenderPass::m_PSO",
-            resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default), ASParam{AS},
-            MSParam{MS}, RenderTargetParam{0}, DepthStencilParam{true, true}, DepthFormatParam{});
-        BLK_ASSERT_VAR(res);
-
         return true;
     }
 
     void ZRenderPass::Unload()
     {
-        m_PSO.Unload();
     }
 
 } // namespace Boolka

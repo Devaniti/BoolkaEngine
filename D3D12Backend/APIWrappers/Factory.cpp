@@ -35,6 +35,7 @@ namespace Boolka
         flags |= DXGI_CREATE_FACTORY_DEBUG;
 #endif
         HRESULT hr = ::CreateDXGIFactory2(flags, IID_PPV_ARGS(&m_Factory));
+
         return SUCCEEDED(hr);
     }
 

@@ -60,7 +60,7 @@ namespace Boolka
 
         engineContext.BindSceneResourcesGraphic(commandList);
 
-        commandList->SetPipelineState(m_PSO.Get());
+        // commandList->SetPipelineState(TODO);
 
         // engineContext.GetScene().GetBatchManager().Render(commandList, renderContext,
         //                                                  BatchManager::BatchType::Transparent);
@@ -75,26 +75,11 @@ namespace Boolka
 
     bool TransparentRenderPass::Initialize(Device& device, RenderContext& renderContext)
     {
-        auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
-        auto& resourceContainer = engineContext.GetResourceContainer();
-
-        MemoryBlock PS = DebugFileReader::ReadFile("TransparentPassPixelShader.cso");
-        MemoryBlock AS = DebugFileReader::ReadFile("AmplificationShader.cso");
-        MemoryBlock MS = DebugFileReader::ReadFile("MeshShader.cso");
-
-        bool res = m_PSO.Initialize(
-            device, L"TransparentRenderPass::m_PSO",
-            resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default), ASParam{AS},
-            MSParam{MS}, PSParam{PS}, RenderTargetParam{1, DXGI_FORMAT_R16G16B16A16_FLOAT},
-            BlendParam{true}, DepthFormatParam{});
-        BLK_ASSERT_VAR(res);
-
         return true;
     }
 
     void TransparentRenderPass::Unload()
     {
-        m_PSO.Unload();
     }
 
 } // namespace Boolka

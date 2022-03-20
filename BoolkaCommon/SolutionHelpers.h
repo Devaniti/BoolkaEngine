@@ -149,8 +149,20 @@
 #define BLK_DEG_TO_RAD(deg) (deg * BLK_FLOAT_PI / 180.0f)
 #define BLK_RAD_TO_DEG(rad) (rad * 180.0f / BLK_FLOAT_PI)
 
+#define BLK_KB(kb) (kb * 1024)
+#define BLK_MB(mb) (BLK_KB(mb * 1024))
+#define BLK_GB(gb) (BLK_MB(mb * 1024))
+
 using uint = uint32_t;
 using byte = uint8_t;
+
+template <typename T>
+size_t NestedVectorSize(const std::vector<std::vector<T>>& nestedVector)
+{
+    return std::transform_reduce(
+        std::execution::seq, std::begin(nestedVector), std::end(nestedVector), size_t(0),
+        std::plus<size_t>(), [](const std::vector<T>& inner) -> size_t { return inner.size(); });
+}
 
 template <typename TypeToFind, typename... List>
 struct has_type : std::disjunction<std::is_same<TypeToFind, List>...>
@@ -206,12 +218,9 @@ inline void MemcpyStrided(void* dst, size_t dstStride, const void* src, size_t s
     }
 }
 
-template <typename T>
-size_t NestedVectorSize(const std::vector<std::vector<T>>& nestedVector)
+inline void* OffsetPtr(void* ptr, size_t offset)
 {
-    return std::transform_reduce(
-        std::execution::seq, std::begin(nestedVector), std::end(nestedVector), size_t(0),
-        std::plus<size_t>(), [](const std::vector<T>& inner) -> size_t { return inner.size(); });
+    return static_cast<void*>(static_cast<char*>(ptr) + offset);
 }
 
 // TODO move everything below to platform specific header

@@ -63,7 +63,8 @@ namespace Boolka
             frameConstantBuffer->GetGPUVirtualAddress());
 
         commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-        commandList->SetPipelineState(m_PSO.Get());
+        commandList->SetPipelineState(
+            engineContext.GetPSOContainer().GetPSO(PSOContainer::GraphicPSO::ToneMapping).Get());
 
         commandList->DrawInstanced(3, 1, 0, 2);
 
@@ -77,35 +78,11 @@ namespace Boolka
 
     bool ToneMappingPass::Initialize(Device& device, RenderContext& renderContext)
     {
-        auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
-        auto& resourceContainer = engineContext.GetResourceContainer();
-        auto& defaultRootSig =
-            resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default);
-
-        MemoryBlock PS = DebugFileReader::ReadFile("ToneMappingPassPS.cso");
-        MemoryBlock VS = DebugFileReader::ReadFile("FullScreenVS.cso");
-        InputLayout inputLayout;
-        inputLayout.Initialize(0);
-
-        // We are intentionally using empty input layout here to draw fullscreen
-        // quad without Vertex/Index buffers
-        BLK_RENDER_DEBUG_ONLY(
-            device.FilterMessage(D3D12_MESSAGE_ID_CREATEINPUTLAYOUT_EMPTY_LAYOUT));
-        bool res = m_PSO.Initialize(device, L"ToneMappingPass::m_PSO", defaultRootSig, inputLayout,
-                                    VSParam{VS}, PSParam{PS},
-                                    DepthStencilParam{false, false, D3D12_COMPARISON_FUNC_ALWAYS},
-                                    DepthFormatParam{});
-        BLK_RENDER_DEBUG_ONLY(device.RemoveLastMessageFilter());
-        BLK_ASSERT_VAR(res);
-
-        inputLayout.Unload();
-
         return true;
     }
 
     void ToneMappingPass::Unload()
     {
-        m_PSO.Unload();
     }
 
 } // namespace Boolka

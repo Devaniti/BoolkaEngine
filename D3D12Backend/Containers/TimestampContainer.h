@@ -37,9 +37,9 @@ namespace Boolka
                          UINT frameIndex);
 
     private:
-        QueryHeap m_queryHeap;
-        ReadbackBuffer m_readbackBuffer[BLK_IN_FLIGHT_FRAMES];
-        UINT64 m_timestampFrequency;
+        QueryHeap m_QueryHeap;
+        ReadbackBuffer m_ReadbackBuffer[BLK_IN_FLIGHT_FRAMES];
+        UINT64 m_TimestampFrequency;
     };
 
 } // namespace Boolka

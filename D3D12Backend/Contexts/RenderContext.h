@@ -32,9 +32,9 @@ namespace Boolka
         GetContexts() const;
 
     private:
-        RenderEngineContext* m_engineContext;
-        RenderFrameContext* m_frameContext;
-        RenderThreadContext* m_threadContext;
+        RenderEngineContext* m_EngineContext;
+        RenderFrameContext* m_FrameContext;
+        RenderThreadContext* m_ThreadContext;
     };
 
 } // namespace Boolka

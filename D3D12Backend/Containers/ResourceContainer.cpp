@@ -8,6 +8,7 @@
 #include "BoolkaCommon/Structures/Frustum.h"
 #include "Containers/Scene.h"
 #include "RenderSchedule/ResourceTracker.h"
+#include "ShaderTable.h"
 #include "WindowManagement/DisplayController.h"
 
 namespace Boolka
@@ -28,6 +29,8 @@ namespace Boolka
                                        DisplayController& displayController,
                                        ResourceTracker& resourceTracker)
     {
+        BLK_CPU_SCOPE("ResourceContainer::Initialize");
+
         const WindowState& windowState = displayController.GetWindowState();
 
         UINT width = windowState.width;
@@ -129,6 +132,8 @@ namespace Boolka
             Scene::MaxMeshlets * BLK_RENDER_VIEW_COUNT;
         static const UINT gpuCullingMeshletIndicesBufSize =
             BLK_CEIL_TO_POWER_OF_TWO(gpuCullingMeshletIndicesBufElements * sizeof(uint), 256);
+        static const UINT64 rtShaderTableBufSize =
+            ShaderTable::CalculateRequiredBufferSize(1, 1, 1);
         static const UINT debugMarkersBufElements = 256;
         static const UINT debugMarkersBufSize =
             BLK_CEIL_TO_POWER_OF_TWO(debugMarkersBufElements * sizeof(uint), 256);
@@ -168,6 +173,9 @@ namespace Boolka
             .Initialize(device, gpuCullingMeshletIndicesBufSize, D3D12_HEAP_TYPE_DEFAULT,
                         D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
                         D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        GetBuffer(Buf::RTShaderTable)
+            .Initialize(device, rtShaderTableBufSize, D3D12_HEAP_TYPE_DEFAULT,
+                        D3D12_RESOURCE_FLAG_NONE, D3D12_RESOURCE_STATE_COMMON);
         GetBuffer(Buf::DebugMarkers)
             .Initialize(device, debugMarkersBufSize, D3D12_HEAP_TYPE_DEFAULT,
                         D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
@@ -372,6 +380,7 @@ namespace Boolka
         RenderDebug::SetDebugName(GetBuffer(Buf::GPUCullingCommand).Get(), L"GPUCullingCommand");
         RenderDebug::SetDebugName(GetBuffer(Buf::GPUCullingMeshletIndices).Get(),
                                   L"GPUCullingMeshletIndices");
+        RenderDebug::SetDebugName(GetBuffer(Buf::RTShaderTable).Get(), L"RTShaderTable");
         for (UINT i = 0; i < BLK_IN_FLIGHT_FRAMES; ++i)
             RenderDebug::SetDebugName(GetFlippableUploadBuffer(i, FlipUploadBuf::Frame).Get(),
                                       L"FrameConstantUploadBuffer%d", i);
@@ -389,9 +398,9 @@ namespace Boolka
 
     void ResourceContainer::Unload()
     {
-        BLK_UNLOAD_ARRAY(m_textures);
-        BLK_UNLOAD_ARRAY(m_buffers);
-        BLK_UNLOAD_ARRAY(m_descriptorHeaps);
+        BLK_UNLOAD_ARRAY(m_Textures);
+        BLK_UNLOAD_ARRAY(m_Buffers);
+        BLK_UNLOAD_ARRAY(m_DescriptorHeaps);
         BLK_UNLOAD_ARRAY(m_RTVs);
         BLK_UNLOAD_ARRAY(m_DSVs);
         BLK_UNLOAD_ARRAY(m_RootSigs);
@@ -407,17 +416,17 @@ namespace Boolka
 
     Texture2D& ResourceContainer::GetTexture(Tex id)
     {
-        return m_textures[static_cast<size_t>(id)];
+        return m_Textures[static_cast<size_t>(id)];
     }
 
     Buffer& ResourceContainer::GetBuffer(Buf id)
     {
-        return m_buffers[static_cast<size_t>(id)];
+        return m_Buffers[static_cast<size_t>(id)];
     }
 
     DescriptorHeap& ResourceContainer::GetDescriptorHeap(DescHeap id)
     {
-        return m_descriptorHeaps[static_cast<size_t>(id)];
+        return m_DescriptorHeaps[static_cast<size_t>(id)];
     }
 
     RenderTargetView& ResourceContainer::GetRTV(RTV id)

@@ -20,9 +20,6 @@ namespace Boolka
         bool PrepareRendering() final;
 
     private:
-        StateObject m_PSO;
-        ShaderTable m_ShaderTable;
-        Buffer m_ShaderTableBuffer;
     };
 
 } // namespace Boolka

@@ -29,6 +29,8 @@ namespace Boolka
 
     bool RenderFrameContext::Initialize(Device& device)
     {
+        BLK_CPU_SCOPE("RenderFrameContext::Initialize");
+
         BOOL res = ::QueryPerformanceFrequency(&m_Frequency);
         BLK_CRITICAL_ASSERT(res);
         res = ::QueryPerformanceCounter(&m_LastTimestamp);

@@ -3,22 +3,22 @@
   <ItemGroup>
     <ClCompile Include="OBJConverter.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="tinyobjloader\tiny_obj_loader.cpp">
-      <Filter>tinyobjloader</Filter>
-    </ClCompile>
     <ClCompile Include="stdafx.cpp" />
-    <ClCompile Include="stb\stb_image.cpp">
+    <ClCompile Include="..\ThirdParty\stb\stb_image.cpp">
       <Filter>stb</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\tinyobjloader\tiny_obj_loader.cpp">
+      <Filter>tinyobjloader</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="OBJConverter.h" />
-    <ClInclude Include="tinyobjloader\tiny_obj_loader.h">
-      <Filter>tinyobjloader</Filter>
-    </ClInclude>
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="stb\stb_image.h">
+    <ClInclude Include="..\ThirdParty\stb\stb_image.h">
       <Filter>stb</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\tinyobjloader\tiny_obj_loader.h">
+      <Filter>tinyobjloader</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

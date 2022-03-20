@@ -6,71 +6,71 @@ namespace Boolka
 {
 
     RenderContext::RenderContext()
-        : m_engineContext(nullptr)
-        , m_frameContext(nullptr)
-        , m_threadContext(nullptr)
+        : m_EngineContext(nullptr)
+        , m_FrameContext(nullptr)
+        , m_ThreadContext(nullptr)
     {
     }
 
     RenderContext::~RenderContext()
     {
-        BLK_ASSERT(m_engineContext == nullptr);
-        BLK_ASSERT(m_frameContext == nullptr);
-        BLK_ASSERT(m_threadContext == nullptr);
+        BLK_ASSERT(m_EngineContext == nullptr);
+        BLK_ASSERT(m_FrameContext == nullptr);
+        BLK_ASSERT(m_ThreadContext == nullptr);
     }
 
     bool RenderContext::Initialize(RenderEngineContext& engineContext,
                                    RenderFrameContext& frameContext,
                                    RenderThreadContext& threadContext)
     {
-        m_engineContext = &engineContext;
-        m_frameContext = &frameContext;
-        m_threadContext = &threadContext;
+        m_EngineContext = &engineContext;
+        m_FrameContext = &frameContext;
+        m_ThreadContext = &threadContext;
 
         return true;
     }
 
     void RenderContext::Unload()
     {
-        m_engineContext = nullptr;
-        m_frameContext = nullptr;
-        m_threadContext = nullptr;
+        m_EngineContext = nullptr;
+        m_FrameContext = nullptr;
+        m_ThreadContext = nullptr;
     }
 
     const RenderFrameContext& RenderContext::GetRenderFrameContext() const
     {
-        BLK_ASSERT(m_frameContext != nullptr);
-        return *m_frameContext;
+        BLK_ASSERT(m_FrameContext != nullptr);
+        return *m_FrameContext;
     }
 
     RenderFrameContext& RenderContext::GetRenderFrameContext()
     {
-        BLK_ASSERT(m_frameContext != nullptr);
-        return *m_frameContext;
+        BLK_ASSERT(m_FrameContext != nullptr);
+        return *m_FrameContext;
     }
 
     const RenderThreadContext& RenderContext::GetRenderThreadContext() const
     {
-        BLK_ASSERT(m_threadContext != nullptr);
-        return *m_threadContext;
+        BLK_ASSERT(m_ThreadContext != nullptr);
+        return *m_ThreadContext;
     }
 
     RenderThreadContext& RenderContext::GetRenderThreadContext()
     {
-        BLK_ASSERT(m_threadContext != nullptr);
-        return *m_threadContext;
+        BLK_ASSERT(m_ThreadContext != nullptr);
+        return *m_ThreadContext;
     }
 
     const RenderEngineContext& RenderContext::GetRenderEngineContext() const
     {
-        BLK_ASSERT(m_engineContext != nullptr);
-        return *m_engineContext;
+        BLK_ASSERT(m_EngineContext != nullptr);
+        return *m_EngineContext;
     }
 
     RenderEngineContext& RenderContext::GetRenderEngineContext()
     {
-        BLK_ASSERT(m_engineContext != nullptr);
-        return *m_engineContext;
+        BLK_ASSERT(m_EngineContext != nullptr);
+        return *m_EngineContext;
     }
 
     std::tuple<const RenderEngineContext&, const RenderFrameContext&, const RenderThreadContext&>

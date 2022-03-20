@@ -22,6 +22,8 @@ namespace Boolka
         BLK_ASSERT(m_CurrentGraphicCommandList == nullptr);
         BLK_ASSERT(m_CurrentGraphicCommandAllocator == nullptr);
 
+        BLK_CPU_SCOPE("RenderThreadContext::Initialize");
+
         for (size_t i = 0; i < BLK_IN_FLIGHT_FRAMES; ++i)
         {
             bool res = m_GraphicCommandAllocator[i].Initialize(device);

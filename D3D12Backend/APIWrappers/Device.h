@@ -2,9 +2,10 @@
 #include "CommandQueue/ComputeQueue.h"
 #include "CommandQueue/CopyQueue.h"
 #include "CommandQueue/GraphicQueue.h"
+#include "DirectStorage/DStorageFactory.h"
+#include "DirectStorage/DStorageQueue.h"
 #include "Factory.h"
 #include "FeatureSupportHelper.h"
-#include "PipelineState/PipelineStateLibrary.h"
 
 namespace Boolka
 {
@@ -23,12 +24,11 @@ namespace Boolka
         [[nodiscard]] GraphicQueue& GetGraphicQueue();
         [[nodiscard]] ComputeQueue& GetComputeQueue();
         [[nodiscard]] CopyQueue& GetCopyQueue();
+        [[nodiscard]] DStorageQueue& GetDStorageQueue();
 
-#ifdef BLK_ENABLE_PIPELINE_LIBRARY
-        [[nodiscard]] PipelineStateLibrary& GetPSOLibrary();
-#endif
+        [[nodiscard]] DStorageFactory& GetDStorageFactory();
 
-        bool Initialize(Factory& factory, RenderCacheContainer& renderCache);
+        bool Initialize(Factory& factory);
         void Unload();
 
         void Flush();
@@ -52,14 +52,13 @@ namespace Boolka
 
         ID3D12Device6* m_Device;
 
+        DStorageFactory m_DStorageFactory;
+
         GraphicQueue m_GraphicQueue;
         ComputeQueue m_ComputeQueue;
         CopyQueue m_CopyQueue;
+        DStorageQueue m_DStorageQueue;
         FeatureSupportHelper m_FeatureSupportHelper;
-
-#ifdef BLK_ENABLE_PIPELINE_LIBRARY
-        PipelineStateLibrary m_PSOLibrary;
-#endif
     };
 
 } // namespace Boolka

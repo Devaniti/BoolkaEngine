@@ -42,6 +42,7 @@ namespace Boolka
             GPUCullingDebugReadback,
             GPUCullingCommand,
             GPUCullingMeshletIndices,
+            RTShaderTable,
             DebugMarkers,
             Count
         };
@@ -174,9 +175,9 @@ namespace Boolka
     private:
         [[nodiscard]] UINT GetDescriptorHeapOffset(Buf id);
 
-        Texture2D m_textures[static_cast<size_t>(Tex::Count)];
-        Buffer m_buffers[static_cast<size_t>(Buf::Count)];
-        DescriptorHeap m_descriptorHeaps[static_cast<size_t>(DescHeap::Count)];
+        Texture2D m_Textures[static_cast<size_t>(Tex::Count)];
+        Buffer m_Buffers[static_cast<size_t>(Buf::Count)];
+        DescriptorHeap m_DescriptorHeaps[static_cast<size_t>(DescHeap::Count)];
         RenderTargetView m_RTVs[static_cast<size_t>(RTV::Count)];
         DepthStencilView m_DSVs[static_cast<size_t>(DSV::Count)];
         RootSignature m_RootSigs[static_cast<size_t>(RootSig::Count)];

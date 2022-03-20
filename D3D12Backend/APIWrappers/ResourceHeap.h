@@ -19,7 +19,7 @@ namespace Boolka
         void Unload();
 
     private:
-        ID3D12Heap* m_heap;
+        ID3D12Heap* m_Heap;
     };
 
 } // namespace Boolka

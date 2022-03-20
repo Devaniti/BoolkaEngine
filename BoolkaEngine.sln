@@ -13,8 +13,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BoolkaCommonUnitTests", "Bo
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OBJConverter", "OBJConverter\OBJConverter.vcxproj", "{4096A9BB-1875-4054-9ADD-02A0EB4333BE}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FileReader", "FileReader\FileReader.vcxproj", "{1E2CE09B-23B4-4C24-87DC-2FFAC1E1E68B}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ThirdParty", "ThirdParty", "{FEBDEC00-2EC3-48B7-B053-2DDA010EDD21}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "imgui", "ThirdParty\imgui\imgui.vcxproj", "{B1E24752-26E8-49DB-8604-62AFB2866251}"
@@ -58,12 +56,6 @@ Global
 		{4096A9BB-1875-4054-9ADD-02A0EB4333BE}.Development|x64.Build.0 = Development|x64
 		{4096A9BB-1875-4054-9ADD-02A0EB4333BE}.Release|x64.ActiveCfg = Release|x64
 		{4096A9BB-1875-4054-9ADD-02A0EB4333BE}.Release|x64.Build.0 = Release|x64
-		{1E2CE09B-23B4-4C24-87DC-2FFAC1E1E68B}.Debug|x64.ActiveCfg = Debug|x64
-		{1E2CE09B-23B4-4C24-87DC-2FFAC1E1E68B}.Debug|x64.Build.0 = Debug|x64
-		{1E2CE09B-23B4-4C24-87DC-2FFAC1E1E68B}.Development|x64.ActiveCfg = Development|x64
-		{1E2CE09B-23B4-4C24-87DC-2FFAC1E1E68B}.Development|x64.Build.0 = Development|x64
-		{1E2CE09B-23B4-4C24-87DC-2FFAC1E1E68B}.Release|x64.ActiveCfg = Release|x64
-		{1E2CE09B-23B4-4C24-87DC-2FFAC1E1E68B}.Release|x64.Build.0 = Release|x64
 		{B1E24752-26E8-49DB-8604-62AFB2866251}.Debug|x64.ActiveCfg = Debug|x64
 		{B1E24752-26E8-49DB-8604-62AFB2866251}.Debug|x64.Build.0 = Debug|x64
 		{B1E24752-26E8-49DB-8604-62AFB2866251}.Development|x64.ActiveCfg = Development|x64

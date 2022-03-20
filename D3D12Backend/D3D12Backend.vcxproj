@@ -145,12 +145,14 @@
     <ClInclude Include="APIWrappers\CommandQueue\ComputeQueue.h" />
     <ClInclude Include="APIWrappers\CommandQueue\CopyQueue.h" />
     <ClInclude Include="APIWrappers\CommandQueue\GraphicQueue.h" />
+    <ClInclude Include="APIWrappers\DirectStorage\DStorageFactory.h" />
+    <ClInclude Include="APIWrappers\DirectStorage\DStorageFile.h" />
+    <ClInclude Include="APIWrappers\DirectStorage\DStorageQueue.h" />
     <ClInclude Include="APIWrappers\Fence.h" />
     <ClInclude Include="APIWrappers\InputLayout.h" />
     <ClInclude Include="APIWrappers\PipelineState\ComputePipelineState.h" />
     <ClInclude Include="APIWrappers\PipelineState\GraphicPipelineState.h" />
     <ClInclude Include="APIWrappers\PipelineState\PipelineState.h" />
-    <ClInclude Include="APIWrappers\PipelineState\PipelineStateLibrary.h" />
     <ClInclude Include="APIWrappers\PipelineState\PipelineStateParameters.h" />
     <ClInclude Include="APIWrappers\PipelineState\StateObject.h" />
     <ClInclude Include="APIWrappers\PipelineState\StateObjectParameters.h" />
@@ -182,18 +184,21 @@
     <ClInclude Include="APIWrappers\Swapchain.h" />
     <ClInclude Include="BatchManager.h" />
     <ClInclude Include="Camera.h" />
-    <ClInclude Include="Containers\RenderCacheContainer.h" />
+    <ClInclude Include="Containers\PSOContainer.h" />
     <ClInclude Include="Containers\LightContainer.h" />
     <ClInclude Include="Containers\ResourceContainer.h" />
+    <ClInclude Include="Containers\RTASContainer.h" />
     <ClInclude Include="Containers\Scene.h" />
     <ClInclude Include="Containers\ShaderTable.h" />
     <ClInclude Include="Containers\Streaming\SceneData.h" />
+    <ClInclude Include="Containers\Streaming\SceneDataReader.h" />
     <ClInclude Include="Containers\TimestampContainer.h" />
     <ClInclude Include="Contexts\FrameStats.h" />
     <ClInclude Include="Contexts\RenderContext.h" />
     <ClInclude Include="Contexts\RenderEngineContext.h" />
     <ClInclude Include="Contexts\RenderFrameContext.h" />
     <ClInclude Include="Contexts\RenderThreadContext.h" />
+    <ClInclude Include="DebugHelpers\DebugCPUScope.h" />
     <ClInclude Include="DebugHelpers\DebugRenderScope.h" />
     <ClInclude Include="DebugHelpers\ImguiGraphHelper.h" />
     <ClInclude Include="FeatureSupportHelper.h" />
@@ -203,10 +208,7 @@
     <ClInclude Include="RenderBackend.h" />
     <ClInclude Include="RenderBackendImpl.h" />
     <ClInclude Include="RenderPass.h" />
-    <ClInclude Include="RenderPasses\Debug3DRenderPass.h" />
-    <ClInclude Include="RenderPasses\DebugMeshRenderPass.h" />
     <ClInclude Include="RenderPasses\DebugOverlayPass.h" />
-    <ClInclude Include="RenderPasses\DebugRenderPass.h" />
     <ClInclude Include="RenderPasses\DeferredLightingPass.h" />
     <ClInclude Include="RenderPasses\GBufferRenderPass.h" />
     <ClInclude Include="RenderPasses\GPUCullingRenderPass.h" />
@@ -242,12 +244,14 @@
     <ClCompile Include="APIWrappers\CommandQueue\ComputeQueue.cpp" />
     <ClCompile Include="APIWrappers\CommandQueue\CopyQueue.cpp" />
     <ClCompile Include="APIWrappers\CommandQueue\GraphicQueue.cpp" />
+    <ClCompile Include="APIWrappers\DirectStorage\DStorageFactory.cpp" />
+    <ClCompile Include="APIWrappers\DirectStorage\DStorageFile.cpp" />
+    <ClCompile Include="APIWrappers\DirectStorage\DStorageQueue.cpp" />
     <ClCompile Include="APIWrappers\Fence.cpp" />
     <ClCompile Include="APIWrappers\InputLayout.cpp" />
     <ClCompile Include="APIWrappers\PipelineState\ComputePipelineState.cpp" />
     <ClCompile Include="APIWrappers\PipelineState\GraphicPipelineState.cpp" />
     <ClCompile Include="APIWrappers\PipelineState\PipelineState.cpp" />
-    <ClCompile Include="APIWrappers\PipelineState\PipelineStateLibrary.cpp" />
     <ClCompile Include="APIWrappers\PipelineState\StateObject.cpp" />
     <ClCompile Include="APIWrappers\Queries\QueryHeap.cpp" />
     <ClCompile Include="APIWrappers\Raytracing\AccelerationStructure\BottomLevelAS.cpp" />
@@ -278,26 +282,26 @@
     <ClCompile Include="BatchManager.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Containers\LightContainer.cpp" />
-    <ClCompile Include="Containers\RenderCacheContainer.cpp" />
+    <ClCompile Include="Containers\PSOContainer.cpp" />
     <ClCompile Include="Containers\ResourceContainer.cpp" />
+    <ClCompile Include="Containers\RTASContainer.cpp" />
     <ClCompile Include="Containers\Scene.cpp" />
     <ClCompile Include="Containers\ShaderTable.cpp" />
     <ClCompile Include="Containers\Streaming\SceneData.cpp" />
+    <ClCompile Include="Containers\Streaming\SceneDataReader.cpp" />
     <ClCompile Include="Containers\TimestampContainer.cpp" />
     <ClCompile Include="Contexts\FrameStats.cpp" />
     <ClCompile Include="Contexts\RenderContext.cpp" />
     <ClCompile Include="Contexts\RenderEngineContext.cpp" />
     <ClCompile Include="Contexts\RenderFrameContext.cpp" />
     <ClCompile Include="Contexts\RenderThreadContext.cpp" />
+    <ClCompile Include="DebugHelpers\DebugCPUScope.cpp" />
     <ClCompile Include="DebugHelpers\DebugRenderScope.cpp" />
     <ClCompile Include="DebugHelpers\ImguiGraphHelper.cpp" />
     <ClCompile Include="FeatureSupportHelper.cpp" />
     <ClCompile Include="RenderBackend.cpp" />
     <ClCompile Include="RenderBackendImpl.cpp" />
-    <ClCompile Include="RenderPasses\Debug3DRenderPass.cpp" />
-    <ClCompile Include="RenderPasses\DebugMeshRenderPass.cpp" />
     <ClCompile Include="RenderPasses\DebugOverlayPass.cpp" />
-    <ClCompile Include="RenderPasses\DebugRenderPass.cpp" />
     <ClCompile Include="RenderPasses\DeferredLightingPass.cpp" />
     <ClCompile Include="RenderPasses\GBufferRenderPass.cpp" />
     <ClCompile Include="RenderPasses\GPUCullingRenderPass.cpp" />
@@ -470,6 +474,7 @@
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\packages\WinPixEventRuntime.1.0.210209001\build\WinPixEventRuntime.targets" Condition="Exists('..\packages\WinPixEventRuntime.1.0.210209001\build\WinPixEventRuntime.targets')" />
     <Import Project="..\packages\Microsoft.Direct3D.D3D12.1.4.10\build\native\Microsoft.Direct3D.D3D12.targets" Condition="Exists('..\packages\Microsoft.Direct3D.D3D12.1.4.10\build\native\Microsoft.Direct3D.D3D12.targets')" />
+    <Import Project="..\packages\Microsoft.Direct3D.DirectStorage.1.0.0\build\Microsoft.Direct3D.DirectStorage.targets" Condition="Exists('..\packages\Microsoft.Direct3D.DirectStorage.1.0.0\build\Microsoft.Direct3D.DirectStorage.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -478,5 +483,6 @@
     <Error Condition="!Exists('..\packages\WinPixEventRuntime.1.0.210209001\build\WinPixEventRuntime.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\WinPixEventRuntime.1.0.210209001\build\WinPixEventRuntime.targets'))" />
     <Error Condition="!Exists('..\packages\Microsoft.Direct3D.D3D12.1.4.10\build\native\Microsoft.Direct3D.D3D12.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Direct3D.D3D12.1.4.10\build\native\Microsoft.Direct3D.D3D12.props'))" />
     <Error Condition="!Exists('..\packages\Microsoft.Direct3D.D3D12.1.4.10\build\native\Microsoft.Direct3D.D3D12.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Direct3D.D3D12.1.4.10\build\native\Microsoft.Direct3D.D3D12.targets'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.Direct3D.DirectStorage.1.0.0\build\Microsoft.Direct3D.DirectStorage.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Direct3D.DirectStorage.1.0.0\build\Microsoft.Direct3D.DirectStorage.targets'))" />
   </Target>
 </Project>

@@ -8,8 +8,11 @@
 namespace Boolka
 {
 
-    bool RenderSchedule::Initialize(Device& device, DisplayController& displayController)
+    bool RenderSchedule::Initialize(Device& device, const wchar_t* folderPath,
+                                    DisplayController& displayController)
     {
+        BLK_CPU_SCOPE("RenderSchedule::Initialize");
+
         m_ResourceTracker.Initialize(device, 20);
 
         bool res = m_EngineContext.Initialize(device, displayController, m_ResourceTracker);
@@ -20,6 +23,17 @@ namespace Boolka
         BLK_ASSERT_VAR(res);
 
         m_RenderContext.Initialize(m_EngineContext, m_FrameContext, m_ThreadContext);
+
+        m_EngineContext.StartSceneLoading(device, folderPath);
+        m_EngineContext.BuildPSOs(device);
+
+        res = InitializeRenderPasses(device);
+        BLK_ASSERT_VAR(res);
+
+        m_EngineContext.FinishSceneLoading(device, folderPath);
+        m_EngineContext.FlushInitializationCommandList(device);
+        device.GetDStorageQueue().SyncGPU(device.GetGraphicQueue());
+        m_EngineContext.FinishInitialization();
 
         return true;
     }
@@ -35,6 +49,7 @@ namespace Boolka
 
         m_ResourceTracker.Unload();
     }
+
     bool RenderSchedule::Render(Device& device, UINT frameIndex)
     {
         m_FrameContext.FlipFrame(m_EngineContext, frameIndex);
@@ -54,18 +69,10 @@ namespace Boolka
         return m_ResourceTracker;
     }
 
-    bool RenderSchedule::InitializeResources(Device& device, SceneData& sceneData)
-    {
-        bool res = InitializeRenderPasses(device);
-        BLK_ASSERT_VAR(res);
-        res = m_EngineContext.LoadScene(device, sceneData);
-        BLK_ASSERT_VAR(res);
-
-        return true;
-    }
-
     bool RenderSchedule::InitializeRenderPasses(Device& device)
     {
+        BLK_CPU_SCOPE("RenderSchedule::InitializeRenderPasses");
+
         bool res = m_UpdatePass.Initialize(device, m_RenderContext);
         BLK_ASSERT_VAR(res);
         res = m_GPUCullingPass.Initialize(device, m_RenderContext);

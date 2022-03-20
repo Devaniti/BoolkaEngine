@@ -8,7 +8,7 @@ namespace Boolka
 {
 
     DebugRenderScope::DebugRenderScope(CommandList& commandList, const char* name)
-        : m_commandList(commandList.Get())
+        : m_CommandList(commandList.Get())
     {
         StartEvent(name);
     }
@@ -20,12 +20,12 @@ namespace Boolka
 
     void DebugRenderScope::StartEvent(const char* name)
     {
-        PIXBeginEvent(m_commandList, BLK_PIX_SCOPE_COLOR, name);
+        PIXBeginEvent(m_CommandList, BLK_PIX_SCOPE_COLOR, name);
     }
 
     void DebugRenderScope::EndEvent()
     {
-        PIXEndEvent(m_commandList);
+        PIXEndEvent(m_CommandList);
     }
 
 } // namespace Boolka

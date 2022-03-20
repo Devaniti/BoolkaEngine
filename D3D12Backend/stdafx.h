@@ -8,6 +8,7 @@
 // DirectX
 #include <d3d12.h>
 #include <d3dcompiler.h>
+#include <dstorage.h>
 #include <dxgi1_6.h>
 #include <dxgidebug.h>
 #include <pix3.h>
@@ -29,6 +30,7 @@
 #include "Contexts/RenderEngineContext.h"
 #include "Contexts/RenderFrameContext.h"
 #include "Contexts/RenderThreadContext.h"
+#include "DebugHelpers/DebugCPUScope.h"
 #include "DebugHelpers/DebugRenderScope.h"
 #include "HLSLShared.h"
 #include "RenderPass.h"

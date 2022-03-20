@@ -2,7 +2,7 @@
 
 #include "Device.h"
 
-#include "Containers/RenderCacheContainer.h"
+#include "BoolkaCommon/DebugHelpers/DebugProfileTimer.h"
 
 // D3D12 Agility SDK parameters
 extern "C"
@@ -52,18 +52,27 @@ namespace Boolka
         return m_CopyQueue;
     }
 
-#ifdef BLK_ENABLE_PIPELINE_LIBRARY
-    PipelineStateLibrary& Device::GetPSOLibrary()
+    DStorageQueue& Device::GetDStorageQueue()
     {
-        return m_PSOLibrary;
+        return m_DStorageQueue;
     }
-#endif
 
-    bool Device::Initialize(Factory& factory, RenderCacheContainer& renderCache)
+    DStorageFactory& Device::GetDStorageFactory()
+    {
+        return m_DStorageFactory;
+    }
+
+    bool Device::Initialize(Factory& factory)
     {
         BLK_ASSERT(m_Device == nullptr);
 
+        BLK_CPU_SCOPE("Device::Initialize");
+
+        DebugProfileTimer timer;
+        timer.Start();
         HRESULT hr = ::D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_12_0, IID_PPV_ARGS(&m_Device));
+        timer.Stop(L"D3D12CreateDevice");
+
         if (FAILED(hr))
         {
             ::MessageBoxW(0, L"DirectX 12.0 Feature Level 12_0 required",
@@ -77,20 +86,15 @@ namespace Boolka
 
         if (!m_FeatureSupportHelper.Initialize(*this))
             return false;
-#ifdef BLK_ENABLE_PIPELINE_LIBRARY
-#ifdef BLK_ENABLE_PIPELINE_LIBRARY_LOAD_FROM_DISK
-        if (!m_PSOLibrary.Initialize(*this, renderCache))
+        if (!m_DStorageFactory.Initialize())
             return false;
-#else
-        if (!m_PSOLibrary.Initialize(*this))
-            return false;
-#endif
-#endif
         if (!m_GraphicQueue.Initialize(*this))
             return false;
         if (!m_ComputeQueue.Initialize(*this))
             return false;
         if (!m_CopyQueue.Initialize(*this))
+            return false;
+        if (!m_DStorageQueue.Initialize(*this))
             return false;
 
         return true;
@@ -100,16 +104,11 @@ namespace Boolka
     {
         BLK_ASSERT(m_Device != nullptr);
 
-#ifdef BLK_ENABLE_PIPELINE_LIBRARY_WRITE_TO_DISK
-        m_PSOLibrary.SaveToDisk(BLK_PSO_CACHE_FILENAME);
-#endif
-
+        m_DStorageQueue.Unload();
         m_CopyQueue.Unload();
         m_ComputeQueue.Unload();
         m_GraphicQueue.Unload();
-#ifdef BLK_ENABLE_PIPELINE_LIBRARY
-        m_PSOLibrary.Unload();
-#endif
+        m_DStorageFactory.Unload();
         m_FeatureSupportHelper.Unload();
 
         BLK_RENDER_DEBUG_ONLY(ReportObjectLeaks());

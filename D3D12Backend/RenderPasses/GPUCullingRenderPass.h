@@ -18,11 +18,7 @@ namespace Boolka
         bool PrepareRendering() final;
 
     private:
-        ComputePipelineState m_ObjectCullingPSO;
-        ComputePipelineState m_CommandBufferGenerationPSO;
-
 #ifdef BLK_ENABLE_STATS
-        ComputePipelineState m_DebugReadbackPSO;
         ReadbackBuffer m_CulledCountBuffer[BLK_IN_FLIGHT_FRAMES];
 #endif
     };

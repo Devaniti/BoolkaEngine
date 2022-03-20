@@ -23,7 +23,6 @@ namespace Boolka
 
     class Device;
     class DisplayController;
-    class SceneData;
 
     class [[nodiscard]] RenderSchedule
     {
@@ -31,10 +30,9 @@ namespace Boolka
         RenderSchedule() = default;
         ~RenderSchedule() = default;
 
-        bool Initialize(Device& device, DisplayController& displayController);
+        bool Initialize(Device& device, const wchar_t* folderPath,
+                        DisplayController& displayController);
         void Unload();
-
-        bool InitializeResources(Device& device, SceneData& sceneData);
 
         bool Render(Device& device, UINT frameIndex);
 

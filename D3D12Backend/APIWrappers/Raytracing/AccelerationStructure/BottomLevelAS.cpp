@@ -11,10 +11,10 @@ namespace Boolka
     {
         // ID3D12Device5::GetRaytracingAccelerationStructurePrebuildInfo may check which pointers
         // are NULL when calculating required size, but it's not allowed to actually use that
-        // pointers. Using dummy not NULL pointer we can specify that there will be valid non NULL
+        // pointers. Using dummy non-NULL pointer we can specify that there will be valid non-NULL
         // pointer during build.
         // https://docs.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12device5-getraytracingaccelerationstructureprebuildinfo
-        D3D12_GPU_VIRTUAL_ADDRESS dummyNotNullPointer = 0x1;
+        const D3D12_GPU_VIRTUAL_ADDRESS dummyNotNullPointer = 0x1;
 
         D3D12_RAYTRACING_GEOMETRY_DESC geometryDesc = {};
         geometryDesc.Type = D3D12_RAYTRACING_GEOMETRY_TYPE_TRIANGLES;

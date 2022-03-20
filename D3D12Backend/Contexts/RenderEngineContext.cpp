@@ -4,7 +4,6 @@
 
 #include "APIWrappers/Device.h"
 #include "APIWrappers/Resources/Textures/Views/RenderTargetView.h"
-#include "BoolkaCommon/DebugHelpers/DebugProfileTimer.h"
 #include "Contexts/RenderFrameContext.h"
 #include "WindowManagement/DisplayController.h"
 
@@ -12,8 +11,8 @@ namespace Boolka
 {
 
     RenderEngineContext::RenderEngineContext()
-        : m_backbufferWidth(0)
-        , m_backbufferHeight(0)
+        : m_BackbufferWidth(0)
+        , m_BackbufferHeight(0)
         , m_HWND(0)
 #ifdef BLK_RENDER_DEBUG
         , m_Device(nullptr)
@@ -23,27 +22,30 @@ namespace Boolka
 
     RenderEngineContext::~RenderEngineContext()
     {
-        BLK_ASSERT(m_backbufferWidth == 0);
-        BLK_ASSERT(m_backbufferHeight == 0);
+        BLK_ASSERT(m_BackbufferWidth == 0);
+        BLK_ASSERT(m_BackbufferHeight == 0);
         BLK_ASSERT(m_HWND == 0);
     }
 
     bool RenderEngineContext::Initialize(Device& device, DisplayController& displayController,
                                          ResourceTracker& resourceTracker)
     {
+        BLK_CPU_SCOPE("RenderEngineContext::Initialize");
+
         const WindowState& windowState = displayController.GetWindowState();
 
-        m_backbufferWidth = windowState.width;
-        m_backbufferHeight = windowState.height;
+        m_BackbufferWidth = windowState.width;
+        m_BackbufferHeight = windowState.height;
 
         bool res = m_InitializationCommandAllocator.Initialize(device);
         BLK_ASSERT_VAR(res);
 
-        res = m_InitializationCommandList.Initialize(device, m_InitializationCommandAllocator.Get(),
-                                                     nullptr);
-        BLK_ASSERT_VAR(res);
-
-        m_InitializationCommandList->Close();
+        for (auto& cmdList : m_InitializationCommandList)
+        {
+            res = cmdList.Initialize(device, m_InitializationCommandAllocator.Get(), nullptr);
+            BLK_ASSERT_VAR(res);
+            cmdList->Close();
+        }
 
         res = m_InitializationFence.Initialize(device);
         BLK_ASSERT_VAR(res);
@@ -56,13 +58,13 @@ namespace Boolka
 
         m_HWND = displayController.GetHWND();
 
-        res = m_resourceContainer.Initialize(device, *this, displayController, resourceTracker);
+        res = m_ResourceContainer.Initialize(device, *this, displayController, resourceTracker);
         BLK_ASSERT_VAR(res);
 
         ResetInitializationCommandList();
-        res = m_timestampContainer.Initialize(device, m_InitializationCommandList);
+
+        res = m_TimestampContainer.Initialize(device, GetInitializationCommandList());
         BLK_ASSERT_VAR(res);
-        ExecuteInitializationCommandList(device);
 
 #ifdef BLK_RENDER_DEBUG
         m_Device = &device;
@@ -74,29 +76,50 @@ namespace Boolka
     void RenderEngineContext::Unload()
     {
         m_InitializationCommandAllocator.Unload();
-        m_InitializationCommandList.Unload();
+        for (auto& cmdList : m_InitializationCommandList)
+        {
+            cmdList.Unload();
+        }
         m_InitializationFence.Unload();
 
-        m_resourceContainer.Unload();
-        m_timestampContainer.Unload();
+        m_PSOContainer.Unload();
+        m_ResourceContainer.Unload();
+        m_TimestampContainer.Unload();
 
         UnloadScene();
 
-        m_backbufferWidth = 0;
-        m_backbufferHeight = 0;
+        m_BackbufferWidth = 0;
+        m_BackbufferHeight = 0;
 
         m_Camera.Unload();
         m_HWND = 0;
     }
 
-    bool RenderEngineContext::LoadScene(Device& device, SceneData& sceneData)
+    bool RenderEngineContext::StartSceneLoading(Device& device, const wchar_t* folderPath)
     {
-        return m_Scene.Initialize(device, sceneData, *this);
+        return m_Scene.Initialize(device, folderPath, *this);
+    }
+
+    void RenderEngineContext::FinishSceneLoading(Device& device, const wchar_t* folderPath)
+    {
+        m_Scene.FinishLoading(device, *this);
+    }
+
+    void RenderEngineContext::FinishInitialization()
+    {
+        m_PSOContainer.FinishInitialization();
+        m_Scene.FinishInitialization();
     }
 
     void RenderEngineContext::UnloadScene()
     {
         m_Scene.Unload();
+    }
+
+    void RenderEngineContext::BuildPSOs(Device& device)
+    {
+        bool res = m_PSOContainer.Initialize(device, *this);
+        BLK_ASSERT_VAR(res);
     }
 
     const Scene& RenderEngineContext::GetScene() const
@@ -112,7 +135,7 @@ namespace Boolka
     void RenderEngineContext::BindSceneResourcesGraphic(CommandList& commandList)
     {
         DescriptorHeap& mainDescriptorHeap =
-            m_resourceContainer.GetDescriptorHeap(ResourceContainer::DescHeap::MainHeap);
+            m_ResourceContainer.GetDescriptorHeap(ResourceContainer::DescHeap::MainHeap);
         ID3D12DescriptorHeap* descriptorHeaps[] = {mainDescriptorHeap.Get()};
         commandList->SetDescriptorHeaps(ARRAYSIZE(descriptorHeaps), descriptorHeaps);
         commandList->SetGraphicsRootDescriptorTable(
@@ -123,7 +146,7 @@ namespace Boolka
     void RenderEngineContext::BindSceneResourcesCompute(CommandList& commandList)
     {
         DescriptorHeap& mainDescriptorHeap =
-            m_resourceContainer.GetDescriptorHeap(ResourceContainer::DescHeap::MainHeap);
+            m_ResourceContainer.GetDescriptorHeap(ResourceContainer::DescHeap::MainHeap);
         ID3D12DescriptorHeap* descriptorHeaps[] = {mainDescriptorHeap.Get()};
         commandList->SetDescriptorHeaps(ARRAYSIZE(descriptorHeaps), descriptorHeaps);
         commandList->SetComputeRootDescriptorTable(
@@ -133,44 +156,52 @@ namespace Boolka
 
     UINT RenderEngineContext::GetBackbufferWidth() const
     {
-        return m_backbufferWidth;
+        return m_BackbufferWidth;
     }
 
     UINT RenderEngineContext::GetBackbufferHeight() const
     {
-        return m_backbufferHeight;
+        return m_BackbufferHeight;
     }
 
     ResourceContainer& RenderEngineContext::GetResourceContainer()
     {
-        return m_resourceContainer;
+        return m_ResourceContainer;
     }
 
     TimestampContainer& RenderEngineContext::GetTimestampContainer()
     {
-        return m_timestampContainer;
+        return m_TimestampContainer;
+    }
+
+    PSOContainer& RenderEngineContext::GetPSOContainer()
+    {
+        return m_PSOContainer;
     }
 
     GraphicCommandListImpl& RenderEngineContext::GetInitializationCommandList()
     {
-        return m_InitializationCommandList;
+        return m_InitializationCommandList[0];
     }
 
     void RenderEngineContext::ResetInitializationCommandList()
     {
-        m_InitializationCommandAllocator.Reset();
-        m_InitializationCommandAllocator.ResetCommandList(m_InitializationCommandList, nullptr);
+        m_InitializationCommandAllocator.ResetCommandList(m_InitializationCommandList[0], nullptr);
     }
 
     void RenderEngineContext::ExecuteInitializationCommandList(Device& device)
     {
-        DebugProfileTimer commandListFlushWait;
-        commandListFlushWait.Start();
-        m_InitializationCommandList->Close();
+        m_InitializationCommandList[0]->Close();
         auto& commandQueue = device.GetGraphicQueue();
-        commandQueue.ExecuteCommandList(m_InitializationCommandList);
-        commandQueue.Flush();
-        commandListFlushWait.Stop(L"Initialization command list execute");
+        commandQueue.ExecuteCommandList(m_InitializationCommandList[0]);
+        //++m_CurrentCommandListIndex;
+    }
+
+    void RenderEngineContext::FlushInitializationCommandList(Device& device)
+    {
+        ExecuteInitializationCommandList(device);
+        device.GetGraphicQueue().Flush();
+        ResetInitializationCommandList();
     }
 
     Camera& RenderEngineContext::GetCamera()
@@ -189,7 +220,6 @@ namespace Boolka
         BLK_ASSERT(m_Device);
         return *m_Device;
     }
-
 #endif
 
 } // namespace Boolka

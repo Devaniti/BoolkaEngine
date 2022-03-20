@@ -9,6 +9,7 @@
 #include "APIWrappers/Resources/Textures/Views/RenderTargetView.h"
 #include "APIWrappers/RootSignature.h"
 #include "Camera.h"
+#include "Containers/PSOContainer.h"
 #include "Containers/Scene.h"
 #include "Containers/TimestampContainer.h"
 
@@ -30,8 +31,13 @@ namespace Boolka
                         ResourceTracker& resourceTracker);
         void Unload();
 
-        bool LoadScene(Device& device, SceneData& sceneData);
+        bool StartSceneLoading(Device& device, const wchar_t* folderPath);
+        void FinishSceneLoading(Device& device, const wchar_t* folderPath);
+        void FinishInitialization();
         void UnloadScene();
+
+        void BuildPSOs(Device& device);
+
         [[nodiscard]] Scene& GetScene();
         [[nodiscard]] const Scene& GetScene() const;
         void BindSceneResourcesGraphic(CommandList& commandList);
@@ -42,10 +48,12 @@ namespace Boolka
 
         [[nodiscard]] ResourceContainer& GetResourceContainer();
         [[nodiscard]] TimestampContainer& GetTimestampContainer();
+        [[nodiscard]] PSOContainer& GetPSOContainer();
 
         [[nodiscard]] GraphicCommandListImpl& GetInitializationCommandList();
         void ResetInitializationCommandList();
         void ExecuteInitializationCommandList(Device& device);
+        void FlushInitializationCommandList(Device& device);
 
         [[nodiscard]] Camera& GetCamera();
 
@@ -55,12 +63,14 @@ namespace Boolka
         [[nodiscard]] Device& GetDevice();
 #endif
     private:
-        ResourceContainer m_resourceContainer;
-        TimestampContainer m_timestampContainer;
-        UINT m_backbufferWidth;
-        UINT m_backbufferHeight;
+        ResourceContainer m_ResourceContainer;
+        TimestampContainer m_TimestampContainer;
+        PSOContainer m_PSOContainer;
+        UINT m_BackbufferWidth;
+        UINT m_BackbufferHeight;
         GraphicCommandAllocator m_InitializationCommandAllocator;
-        GraphicCommandListImpl m_InitializationCommandList;
+        int m_CurrentCommandListIndex = 0;
+        GraphicCommandListImpl m_InitializationCommandList[5];
         Fence m_InitializationFence;
         Camera m_Camera;
         Scene m_Scene;

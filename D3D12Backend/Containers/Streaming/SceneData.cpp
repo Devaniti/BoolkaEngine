@@ -1,9 +1,5 @@
 #include "stdafx.h"
 
-#include "SceneData.h"
-
-#include "FileReader/FileReader.h"
-
 namespace Boolka
 {
 
@@ -23,115 +19,15 @@ namespace Boolka
                   "This struct is used in structured buffer, so for performance reasons its "
                   "size should be multiple of float4");
 
-    SceneData::SceneData(FileReader& fileReader)
-        : m_MemoryBlock{}
-        , m_FileReader(fileReader)
+    namespace SceneData
     {
-    }
 
-    SceneData::~SceneData()
-    {
-        BLK_ASSERT(m_MemoryBlock.m_Size == 0);
-        BLK_ASSERT(m_MemoryBlock.m_Data == nullptr);
-    }
+        bool FormatHeader::IsValid() const
+        {
+            FormatHeader valid{};
+            return (memcmp(signature, valid.signature, sizeof(signature)) == 0) &&
+                   (formatVersion == valid.formatVersion);
+        }
 
-    SceneData::DataWrapper SceneData::GetSceneWrapper()
-    {
-        DataWrapper result;
-
-        m_FileReader.WaitData(sizeof(FormatHeader) + sizeof(SceneHeader));
-
-        unsigned char* data = static_cast<unsigned char*>(m_MemoryBlock.m_Data);
-
-        const FormatHeader* formatHeader = ptr_static_cast<const FormatHeader*>(data);
-        const FormatHeader correctHeader{};
-        BLK_CRITICAL_ASSERT(*formatHeader == correctHeader);
-        data += sizeof(FormatHeader);
-
-        SceneHeader* sceneHeader = ptr_static_cast<SceneHeader*>(data);
-
-        BLK_CRITICAL_ASSERT(sceneHeader->vertex1Size != 0);
-        BLK_CRITICAL_ASSERT(sceneHeader->vertex2Size != 0);
-        BLK_CRITICAL_ASSERT(sceneHeader->vertexIndirectionSize != 0);
-        BLK_CRITICAL_ASSERT(sceneHeader->indexSize != 0);
-        BLK_CRITICAL_ASSERT(sceneHeader->meshletsSize != 0);
-        BLK_CRITICAL_ASSERT(sceneHeader->meshletsCullSize != 0);
-        BLK_CRITICAL_ASSERT(sceneHeader->objectsSize != 0);
-        BLK_CRITICAL_ASSERT(sceneHeader->materialsSize != 0);
-        BLK_CRITICAL_ASSERT(sceneHeader->rtIndiciesSize != 0);
-        BLK_CRITICAL_ASSERT(sceneHeader->rtObjectIndexOffsetSize != 0);
-        BLK_CRITICAL_ASSERT(sceneHeader->objectCount != 0);
-        BLK_CRITICAL_ASSERT(sceneHeader->opaqueCount != 0);
-        BLK_CRITICAL_ASSERT(sceneHeader->skyBoxResolution != 0);
-        BLK_CRITICAL_ASSERT(sceneHeader->skyBoxMipCount != 0);
-        BLK_CRITICAL_ASSERT(sceneHeader->textureCount != 0);
-
-        BLK_CRITICAL_ASSERT(sceneHeader->objectCount < Scene::MaxObjectCount);
-
-        result.header = *sceneHeader;
-
-        data += sizeof(SceneHeader);
-
-        result.textureHeaders = ptr_static_cast<const TextureHeader*>(data);
-
-        data += sizeof(TextureHeader) * result.header.textureCount;
-
-        result.cpuObjectHeaders = ptr_static_cast<const CPUObjectHeader*>(data);
-
-        data += sizeof(CPUObjectHeader) * result.header.objectCount;
-
-        result.binaryData = static_cast<const void*>(data);
-
-        return result;
-    }
-
-    void SceneData::PrepareTextureHeaders()
-    {
-        size_t neededSize = sizeof(SceneHeader) + sizeof(FormatHeader);
-        const unsigned char* data = static_cast<const unsigned char*>(m_MemoryBlock.m_Data);
-        const SceneHeader* sceneHeader =
-            ptr_static_cast<const SceneHeader*>(data + sizeof(FormatHeader));
-
-        neededSize += sceneHeader->textureCount * sizeof(TextureHeader);
-
-        bool res = m_FileReader.WaitData(neededSize);
-        BLK_ASSERT_VAR(res);
-    }
-
-    void SceneData::PrepareCPUObjectHeaders()
-    {
-        size_t neededSize = sizeof(SceneHeader) + sizeof(FormatHeader);
-        const unsigned char* data = static_cast<const unsigned char*>(m_MemoryBlock.m_Data);
-        const SceneHeader* sceneHeader =
-            ptr_static_cast<const SceneHeader*>(data + sizeof(FormatHeader));
-
-        neededSize += sceneHeader->textureCount * sizeof(TextureHeader);
-        neededSize += sceneHeader->objectCount * sizeof(CPUObjectHeader);
-
-        bool res = m_FileReader.WaitData(neededSize);
-        BLK_ASSERT_VAR(res);
-    }
-
-    void SceneData::PrepareBinaryData()
-    {
-        bool res = m_FileReader.WaitData();
-        BLK_ASSERT_VAR(res);
-    }
-
-    const MemoryBlock& SceneData::GetMemory() const
-    {
-        return m_MemoryBlock;
-    }
-
-    MemoryBlock& SceneData::GetMemory()
-    {
-        return m_MemoryBlock;
-    }
-
-    bool SceneData::FormatHeader::operator==(const FormatHeader& other) const
-    {
-        return (memcmp(signature, other.signature, sizeof(signature)) == 0) &&
-               (formatVersion == other.formatVersion);
-    }
-
+    } // namespace SceneData
 } // namespace Boolka

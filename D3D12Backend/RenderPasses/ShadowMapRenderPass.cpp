@@ -52,7 +52,8 @@ namespace Boolka
         commandList->RSSetScissorRects(1, &scissorRect);
 
         engineContext.BindSceneResourcesGraphic(commandList);
-        commandList->SetPipelineState(m_PSO.Get());
+        commandList->SetPipelineState(
+            engineContext.GetPSOContainer().GetPSO(PSOContainer::GraphicPSO::ShadowMap).Get());
 
         // Transition all shadowmaps to DEPTH_WRITE
         for (size_t lightIndex = 0; lightIndex < lights.size(); ++lightIndex)
@@ -140,26 +141,11 @@ namespace Boolka
 
     bool ShadowMapRenderPass::Initialize(Device& device, RenderContext& renderContext)
     {
-        auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
-        auto& resourceContainer = engineContext.GetResourceContainer();
-        auto& defaultRootSig =
-            resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default);
-
-        MemoryBlock AS = DebugFileReader::ReadFile("ShadowMapAmplificationShader.cso");
-        MemoryBlock MS = DebugFileReader::ReadFile("ShadowMapPassMeshShader.cso");
-
-        bool res = m_PSO.Initialize(device, L"ShadowMapRenderPass::m_PSO", defaultRootSig,
-                                    ASParam{AS}, MSParam{MS}, RenderTargetParam{0},
-                                    DepthStencilParam{true, true, D3D12_COMPARISON_FUNC_LESS},
-                                    DepthFormatParam{}, RasterizerParam{0.001f, 0.0f});
-        BLK_ASSERT_VAR(res);
-
         return true;
     }
 
     void ShadowMapRenderPass::Unload()
     {
-        m_PSO.Unload();
     }
 
 } // namespace Boolka

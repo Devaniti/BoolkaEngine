@@ -76,7 +76,9 @@ namespace Boolka
             passConstantBuffer->GetGPUVirtualAddress());
 
         commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-        commandList->SetPipelineState(m_PSO.Get());
+        commandList->SetPipelineState(engineContext.GetPSOContainer()
+                                          .GetPSO(PSOContainer::GraphicPSO::DeferredLighting)
+                                          .Get());
 
         commandList->DrawInstanced(3, 1, 0, 0);
 
@@ -90,34 +92,11 @@ namespace Boolka
 
     bool DeferredLightingPass::Initialize(Device& device, RenderContext& renderContext)
     {
-        auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
-        auto& resourceContainer = engineContext.GetResourceContainer();
-
-        MemoryBlock PS = DebugFileReader::ReadFile("DeferredLightingPassPS.cso");
-        MemoryBlock VS = DebugFileReader::ReadFile("FullScreenVS.cso");
-        InputLayout inputLayout;
-        inputLayout.Initialize(0);
-
-        // We are intentionally using empty input layout here to draw fullscreen
-        // quad without Vertex/Index buffers
-        BLK_RENDER_DEBUG_ONLY(
-            device.FilterMessage(D3D12_MESSAGE_ID_CREATEINPUTLAYOUT_EMPTY_LAYOUT));
-        bool res = m_PSO.Initialize(
-            device, L"DeferredLightingPass::m_PSO",
-            resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default), inputLayout,
-            VSParam{VS}, PSParam{PS}, RenderTargetParam{1, DXGI_FORMAT_R16G16B16A16_FLOAT},
-            DepthStencilParam{false, false, D3D12_COMPARISON_FUNC_ALWAYS}, DepthFormatParam{});
-        BLK_RENDER_DEBUG_ONLY(device.RemoveLastMessageFilter());
-        BLK_ASSERT_VAR(res);
-
-        inputLayout.Unload();
-
         return true;
     }
 
     void DeferredLightingPass::Unload()
     {
-        m_PSO.Unload();
     }
 
 } // namespace Boolka
