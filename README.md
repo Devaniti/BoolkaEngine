@@ -11,7 +11,7 @@ Features
 * Point lights with shadows
 * Sun light with shadows
 * GPU Frustum culling using mesh shaders
-* Fast loading using custom binary format (including converter from obj format)
+* Fast loading via DirectStorage
 * Skybox
 * ImGui debug output
 
