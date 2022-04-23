@@ -218,10 +218,10 @@ void ReflectionRayGeneration(in const GBufferData gbufferData,
     ray.TMax = BLK_REFLECTION_TMAX;
 
     RaytracePayload payload = {float3(0, 0, 0), 0, float3(1, 1, 1), matData.indexOfRefraction, ray.Origin, 0, rayDifferential};
-    payload.color = attenuation;
+    payload.attenuation = attenuation;
 
     TraceRay(sceneAS, RAY_FLAG_NONE, 1, 0, 0, 0, ray, payload);
-    light += payload.light*payload.color;
+    light += payload.light;
 }
 
 // No real support for refraction yet
@@ -245,10 +245,10 @@ void RefractionRayGeneration(in const GBufferData gbufferData, in const Material
     ray.TMax = BLK_REFRACTION_TMAX;
 
     RaytracePayload payload = {float3(0, 0, 0), 0, float3(1, 1, 1), 1.0/matData.indexOfRefraction, ray.Origin, 0, rayDifferential};
-    payload.color = attenuation;
+    payload.attenuation = attenuation;
 
     TraceRay(sceneAS, RAY_FLAG_NONE, 1, 0, 0, 0, ray, payload);
-    light += payload.light*payload.color;
+    light += payload.light;
 }
 
 [shader("raygeneration")] 
@@ -424,33 +424,30 @@ void ClosestHit(inout RaytracePayload payload, in BuiltInTriangleIntersectionAtt
     float2 ddxRes, ddyRes;
     float3 dndx, dndy;
     CalculateRTHit(attr, payload.rayDifferential, interpolatedVertex, ddxRes,
-                   ddyRes, dndx, dndy);
+        ddyRes, dndx, dndy);
 
     const float3 worldPos = interpolatedVertex.position;
-    
+
     float3 albedoVal = SRGBToLinear(sceneTextures[materialID].SampleGrad(anisoSampler, interpolatedVertex.UV, ddxRes, ddyRes).rgb);
     float3 normalVal = normalize(mul(normalize(interpolatedVertex.normal), (float3x3)Frame.viewMatrix));
     float3 viewPos = mul(float4(worldPos, 1.0f), Frame.viewMatrix).xyz;
     float3 viewDir = mul(float4(WorldRayDirection(), 0.0f), Frame.viewMatrix).xyz;
 
-    if(payload.previousIOR < 1.0)//meaning ray is moving inside
+    if (payload.previousIOR < 1.0)//meaning ray is moving inside
     {
         //TODO add this to material
-        float depth = distance(worldPos, payload.previousPos)/10.0;
+        float depth = distance(worldPos, payload.previousPos) / 10.0;
         //absorption
-        payload.color *= exp(-depth * (1.0 - float3(0.1, 0.3, 0.9)));
+        payload.attenuation *= exp(-depth * (1.0 - float3(0.1, 0.3, 0.9)));
     }
 
     MaterialData matData = materialsData[materialID];
-    payload.light += CalculateLighting(matData, albedoVal, albedoVal, normalVal, viewPos, viewDir) *
-                     payload.color;
+    payload.light += CalculateLighting(matData, albedoVal, albedoVal, normalVal, viewPos, viewDir) * payload.attenuation;
 
-    float3 originalColor = payload.color;
+  
     float3 originaldDdx = payload.rayDifferential.dx.dD;
     float3 originaldDdy = payload.rayDifferential.dy.dD;
     uint originalRecursionDepth = payload.recursionDepth;
-
-
 
     if (payload.recursionDepth < BLK_RT_MAX_RECURSION_DEPTH - 1)
     {
@@ -460,45 +457,45 @@ void ClosestHit(inout RaytracePayload payload, in BuiltInTriangleIntersectionAtt
         bool isUnderwater = dot(normal, rayDir) > 0.0;
 
         // Refraction
-      
+
         payload.recursionDepth = originalRecursionDepth + 1;
         payload.previousPos = worldPos;
 
         RayDesc ray;
         ray.Origin = worldPos;
 
-        if(isUnderwater)
+        if (isUnderwater)
         {
             float3 fresnel = Fresnel(rayDir, -normal, matData.specular);
-            payload.color = originalColor;// *fresnel;
+           
             payload.previousIOR = matData.indexOfRefraction;
             ray.Direction = refract(rayDir, -normal, matData.indexOfRefraction);
-            if(length(ray.Direction) < 0.5) //full internal reflection
+            if (length(ray.Direction) < 0.5) //full internal reflection
             {
-                payload.previousIOR = 1.0/matData.indexOfRefraction;
+                payload.previousIOR = 1.0 / matData.indexOfRefraction;
                 ray.Direction = reflect(rayDir, -normal);
-                payload.color = originalColor;
+               
             }
         }
         else
         {
             float3 fresnel = Fresnel(rayDir, normal, matData.specular);
-            payload.color = originalColor;// * fresnel;
-            payload.previousIOR = 1.0/matData.indexOfRefraction;
-            ray.Direction = refract(rayDir, normal, 1.0/matData.indexOfRefraction);
+           
+            payload.previousIOR = 1.0 / matData.indexOfRefraction;
+            ray.Direction = refract(rayDir, normal, 1.0 / matData.indexOfRefraction);
         }
 
         ray.TMin = BLK_REFRACTION_TMIN;
         ray.TMax = BLK_REFRACTION_TMAX;
 
         TraceRay(sceneAS, RAY_FLAG_NONE, 1, 0, 0, 0, ray, payload);
-        
+
         //TODO figure out this for all cases
         /*// Reflection
         if (IsPerfectMirror(matData))
         {
             payload.recursionDepth = originalRecursionDepth + 1;
-            payload.color = originalColor * matData.transparency;
+            payload.attenuation = originalColor * matData.transparency;
             payload.rayDifferential.dx.dD = originaldDdx;
             payload.rayDifferential.dy.dD = originaldDdy;
             UpdateRayDifferentialsReflection(payload.rayDifferential, normalVal, dndx, dndy);
@@ -512,6 +509,11 @@ void ClosestHit(inout RaytracePayload payload, in BuiltInTriangleIntersectionAtt
             TraceRay(sceneAS, RAY_FLAG_NONE, 1, 0, 0, 0, ray, payload);
         }*/
     }
+    else
+    {
+        float3 skyboxVal = skyBox.SampleLevel(anisoSampler, WorldRayDirection(), 0).xyz;
+        payload.light += 3.0*skyboxVal*payload.attenuation;
+    }
 }
 
 [shader("miss")]
@@ -519,5 +521,5 @@ void MissShader(inout RaytracePayload payload)
 {
     float3 skyboxVal = skyBox.SampleLevel(anisoSampler, WorldRayDirection(), 0).xyz;
     //TODO Implement post process shader with exposure
-    payload.light += 3.0*skyboxVal;
+    payload.light += 3.0*skyboxVal*payload.attenuation;
 }

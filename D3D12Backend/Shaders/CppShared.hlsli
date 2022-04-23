@@ -32,7 +32,7 @@ struct AABB
 #define BLK_MAX_OBJECT_COUNT 2048
 #define BLK_MAX_MESHLETS 262144
 
-#define BLK_RT_MAX_RECURSION_DEPTH 6
+#define BLK_RT_MAX_RECURSION_DEPTH 4
 
 struct FrameConstantBuffer
 {
@@ -108,7 +108,7 @@ struct RaytracePayload
 {
     float3 light;
     uint recursionDepth;
-    float3 color;
+    float3 attenuation;
     float previousIOR;
     float3 previousPos;
     uint unused;
