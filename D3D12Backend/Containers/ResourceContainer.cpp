@@ -148,38 +148,31 @@ namespace Boolka
                                            GetDescriptorHeap(DescHeap::RTVHeap)
                                                .GetCPUHandle(static_cast<size_t>(RTV::Count) + i));
         GetBuffer(Buf::Frame)
-            .Initialize(device, frameCbSize, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_FLAG_NONE,
-                        D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+            .Initialize(device, frameCbSize, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_FLAG_NONE);
         GetBuffer(Buf::DeferredLighting)
             .Initialize(device, deferredLightingCbSize, D3D12_HEAP_TYPE_DEFAULT,
-                        D3D12_RESOURCE_FLAG_NONE, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+                        D3D12_RESOURCE_FLAG_NONE);
         GetBuffer(Buf::GPUCullingCB)
             .Initialize(device, gpuCullingCBSize, D3D12_HEAP_TYPE_DEFAULT,
-                        D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
-                        D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+                        D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
         GetBuffer(Buf::GPUCulling)
             .Initialize(device, gpuCullingBufSize, D3D12_HEAP_TYPE_DEFAULT,
-                        D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
-                        D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+                        D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
         GetBuffer(Buf::GPUCullingDebugReadback)
             .Initialize(device, gpuCullingDebugReadbackBufSize, D3D12_HEAP_TYPE_DEFAULT,
-                        D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
-                        D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+                        D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
         GetBuffer(Buf::GPUCullingCommand)
             .Initialize(device, gpuCullingCommandBufSize, D3D12_HEAP_TYPE_DEFAULT,
-                        D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
-                        D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+                        D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
         GetBuffer(Buf::GPUCullingMeshletIndices)
             .Initialize(device, gpuCullingMeshletIndicesBufSize, D3D12_HEAP_TYPE_DEFAULT,
-                        D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
-                        D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+                        D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
         GetBuffer(Buf::RTShaderTable)
             .Initialize(device, rtShaderTableBufSize, D3D12_HEAP_TYPE_DEFAULT,
-                        D3D12_RESOURCE_FLAG_NONE, D3D12_RESOURCE_STATE_COMMON);
+                        D3D12_RESOURCE_FLAG_NONE);
         GetBuffer(Buf::DebugMarkers)
             .Initialize(device, debugMarkersBufSize, D3D12_HEAP_TYPE_DEFAULT,
-                        D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
-                        D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+                        D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
 
         const UINT uavOffset = static_cast<UINT>(MainSRVDescriptorHeapOffsets::UAVHeapOffset);
 

@@ -393,11 +393,9 @@ namespace Boolka
                               D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
                               D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE);
         m_ASBuildScratchBuffer.Initialize(device, scratchSize, D3D12_HEAP_TYPE_DEFAULT,
-                                          D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
-                                          D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+                                          D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
         m_RTASSerializedDataBuffer.Initialize(device, rtCacheHeader->serializedSize,
-                                              D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_FLAG_NONE,
-                                              D3D12_RESOURCE_STATE_COPY_DEST);
+                                              D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_FLAG_NONE);
 
         RenderDebug::SetDebugName(m_ASBuffer.Get(), L"%ls", L"RTASContainer::m_ASBuffer");
         RenderDebug::SetDebugName(m_ASBuildScratchBuffer.Get(), L"%ls",
@@ -433,7 +431,7 @@ namespace Boolka
 
         m_TLASParametersUploadBuffer.Initialize(device, tlasParametersSize);
         m_TLASParametersBuffer.Initialize(device, tlasParametersSize, D3D12_HEAP_TYPE_DEFAULT,
-                                          D3D12_RESOURCE_FLAG_NONE, D3D12_RESOURCE_STATE_COPY_DEST);
+                                          D3D12_RESOURCE_FLAG_NONE);
 
         RenderDebug::SetDebugName(m_TLASParametersUploadBuffer.Get(), L"%ls",
                                   L"RTASContainer::m_TLASParametersUploadBuffer");

@@ -7,8 +7,7 @@ namespace Boolka
 
     bool UploadBuffer::Initialize(Device& device, UINT64 size)
     {
-        if (!Buffer::Initialize(device, size, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_FLAG_NONE,
-                                D3D12_RESOURCE_STATE_GENERIC_READ))
+        if (!Buffer::Initialize(device, size, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_FLAG_NONE))
             return false;
 
         return true;

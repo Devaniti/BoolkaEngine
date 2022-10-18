@@ -11,6 +11,8 @@ namespace Boolka
                             D3D12_RESOURCE_FLAGS resourceFlags, D3D12_RESOURCE_STATES initialState)
     {
         BLK_ASSERT(m_Resource == nullptr);
+        BLK_ASSERT(initialState == D3D12_RESOURCE_STATE_COMMON ||
+                   initialState == D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE);
 
         D3D12_HEAP_PROPERTIES heapProperties = {};
         heapProperties.Type = heapType;
