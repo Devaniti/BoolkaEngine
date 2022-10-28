@@ -130,10 +130,9 @@ namespace Boolka
 
         m_TLASParametersUploadBuffer.Initialize(device, tlasParametersSize);
         m_TLASParametersBuffer.Initialize(device, tlasParametersSize, D3D12_HEAP_TYPE_DEFAULT,
-                                          D3D12_RESOURCE_FLAG_NONE, D3D12_RESOURCE_STATE_COPY_DEST);
+                                          D3D12_RESOURCE_FLAG_NONE);
         m_ASBuildScratchBuffer.Initialize(device, scratchSize, D3D12_HEAP_TYPE_DEFAULT,
-                                          D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
-                                          D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+                                          D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
         m_BuildBuffer.Initialize(device, asSize, D3D12_HEAP_TYPE_DEFAULT,
                                  D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
                                  D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE);
@@ -160,8 +159,7 @@ namespace Boolka
 
         static const size_t postBuildInfoSize = postBuildInfoElementSize * objectCount;
         m_PostBuildDataBuffer.Initialize(device, postBuildInfoSize, D3D12_HEAP_TYPE_DEFAULT,
-                                         D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
-                                         D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+                                         D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
         m_PostBuildDataReadbackBuffer.Initialize(device, postBuildInfoSize);
         RenderDebug::SetDebugName(m_PostBuildDataBuffer.Get(), L"%ls",
                                   L"RTASContainer::m_PostBuildDataBuffer");
@@ -526,8 +524,7 @@ namespace Boolka
         }
 
         m_SerializedBLASes.Initialize(device, serializedSize, D3D12_HEAP_TYPE_DEFAULT,
-                                      D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
-                                      D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+                                      D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
         m_SerialezedBLASesReadback.Initialize(device, serializedSize);
 
         RenderDebug::SetDebugName(m_SerializedBLASes.Get(), L"%ls",
