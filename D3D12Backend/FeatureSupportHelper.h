@@ -8,11 +8,7 @@ namespace Boolka
     class FeatureSupportHelper
     {
     public:
-        FeatureSupportHelper();
-        ~FeatureSupportHelper();
-
-        bool Initialize(Device& device);
-        void Unload();
+        [[nodiscard]] static bool IsSupported(ID3D12Device* device);
     };
 
 } // namespace Boolka

@@ -41,6 +41,7 @@ namespace Boolka
         void RemoveLastMessageFilter();
 #endif
     private:
+        bool SelectAndCreateDevice(Factory& factory);
 #ifdef BLK_RENDER_PROFILING
         void InitializeProfiling();
 #endif
@@ -50,6 +51,7 @@ namespace Boolka
         void ReportObjectLeaks();
 #endif
 
+        IDXGIAdapter4* m_Adapter;
         ID3D12Device6* m_Device;
 
         DStorageFactory m_DStorageFactory;
@@ -58,7 +60,6 @@ namespace Boolka
         ComputeQueue m_ComputeQueue;
         CopyQueue m_CopyQueue;
         DStorageQueue m_DStorageQueue;
-        FeatureSupportHelper m_FeatureSupportHelper;
     };
 
 } // namespace Boolka

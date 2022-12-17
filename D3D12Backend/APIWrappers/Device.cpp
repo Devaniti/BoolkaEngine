@@ -18,6 +18,7 @@ namespace Boolka
 
     Device::Device()
         : m_Device(nullptr)
+        , m_Adapter(nullptr)
     {
     }
 
@@ -68,24 +69,12 @@ namespace Boolka
 
         BLK_CPU_SCOPE("Device::Initialize");
 
-        DebugProfileTimer timer;
-        timer.Start();
-        HRESULT hr = ::D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_12_0, IID_PPV_ARGS(&m_Device));
-        timer.Stop(L"D3D12CreateDevice");
-
-        if (FAILED(hr))
-        {
-            ::MessageBoxW(0, L"DirectX 12.0 Feature Level 12_0 required",
-                          L"GPU and/or driver unsupported", MB_OK | MB_ICONERROR);
-            BLK_CRITICAL_DEBUG_BREAK();
+        if (!SelectAndCreateDevice(factory))
             return false;
-        }
 
         BLK_RENDER_PROFILING_ONLY(InitializeProfiling());
         BLK_RENDER_DEBUG_ONLY(InitializeDebug());
 
-        if (!m_FeatureSupportHelper.Initialize(*this))
-            return false;
         if (!m_DStorageFactory.Initialize())
             return false;
         if (!m_GraphicQueue.Initialize(*this))
@@ -109,7 +98,6 @@ namespace Boolka
         m_ComputeQueue.Unload();
         m_GraphicQueue.Unload();
         m_DStorageFactory.Unload();
-        m_FeatureSupportHelper.Unload();
 
         BLK_RENDER_DEBUG_ONLY(ReportObjectLeaks());
 
@@ -148,6 +136,53 @@ namespace Boolka
                            << L". " << errorMessage << std::endl;
             BLK_CRITICAL_ASSERT(0);
         }
+    }
+
+    bool Device::SelectAndCreateDevice(Factory& factory)
+    {
+        UINT i = 0;
+        while (true)
+        {
+            IDXGIAdapter4* adapter = nullptr;
+            HRESULT hr = factory->EnumAdapterByGpuPreference(
+                i, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(&adapter));
+
+            if (hr == DXGI_ERROR_NOT_FOUND)
+                break;
+
+            BLK_ASSERT(SUCCEEDED(hr));
+
+            ID3D12Device6* device = nullptr;
+
+            DebugProfileTimer timer;
+            timer.Start();
+            hr = ::D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_12_0, IID_PPV_ARGS(&device));
+            timer.Stop(L"D3D12CreateDevice");
+
+            if (FAILED(hr))
+            {
+                adapter->Release();
+                continue;
+            }
+
+            if (!FeatureSupportHelper::IsSupported(device))
+            {
+                adapter->Release();
+                device->Release();
+                continue;
+            }
+
+            m_Adapter = adapter;
+            m_Device = device;
+            return true;
+        }
+
+        ::MessageBoxW(0,
+                      L"No supported GPUs found.\nRequired features are:\nResource Binding Tier 3\n"
+                      L"Shader Model 6.5\nRaytracing Tier 1.0\nMesh Shaders",
+                      L"GPU and/or driver unsupported", MB_OK | MB_ICONERROR);
+        BLK_CRITICAL_DEBUG_BREAK();
+        return false;
     }
 
 #ifdef BLK_RENDER_PROFILING
