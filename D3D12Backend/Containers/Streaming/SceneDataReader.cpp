@@ -25,6 +25,7 @@ namespace Boolka
         CombinePath(folderPath, BLK_SCENE_HEADER_FILENAME, headerFile);
 
         m_Header = DebugFileReader::ReadFile(headerFile.c_str());
+        BLK_CRITICAL_ASSERT(m_Header.m_Data);
 
         unsigned char* data = static_cast<unsigned char*>(m_Header.m_Data);
 
