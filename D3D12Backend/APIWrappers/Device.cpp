@@ -162,6 +162,7 @@ namespace Boolka
             if (FAILED(hr))
             {
                 adapter->Release();
+                ++i;
                 continue;
             }
 
@@ -169,6 +170,7 @@ namespace Boolka
             {
                 adapter->Release();
                 device->Release();
+                ++i;
                 continue;
             }
 
