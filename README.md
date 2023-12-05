@@ -18,7 +18,8 @@ Features
 Requirements
 --------
 * Windows 10 version 2004 or newer
-* GPU with mesh shader and DXR 1.0 support (NVIDIA GTX 16xx or higher, AMD RX 6xxx or higher)
+* GPU with mesh shader (NVIDIA GTX 16xx or higher, AMD RX 6xxx or higher)
+* GPU with DXR 1.0 support recommended
 * SSD Recommended
 
 To build BoolkaEngine you'll also need:

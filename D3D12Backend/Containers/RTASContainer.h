@@ -18,6 +18,7 @@ namespace Boolka
         bool Initialize(Device& device, RenderEngineContext& engineContext,
                         const SceneDataReader::HeaderWrapper& headerWrapper, Buffer& vertexBuffer,
                         Buffer& indexBuffer);
+        void SafeUnload();
         void Unload();
 
         void FinishLoading(Device& device, RenderEngineContext& engineContext,

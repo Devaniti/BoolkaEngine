@@ -24,8 +24,11 @@ namespace Boolka
 
         auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
         auto& resourceContainer = engineContext.GetResourceContainer();
-
-        UINT frameIndex = frameContext.GetFrameIndex();
+                
+        if (!m_Enabled)
+        {
+			return true;
+		}
 
         RootSignature& rootSig =
             resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default);
@@ -88,6 +91,7 @@ namespace Boolka
 
     bool RaytraceRenderPass::Initialize(Device& device, RenderContext& renderContext)
     {
+        m_Enabled = device.SupportsRaytracing();
         return true;
     }
 

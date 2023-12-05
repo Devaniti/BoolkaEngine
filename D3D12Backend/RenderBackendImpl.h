@@ -30,6 +30,10 @@ namespace Boolka
         RenderSchedule m_RenderSchedule;
         Fence m_FrameFence;
         UINT64 m_FrameID;
+
+#ifdef BLK_RENDER_DEBUG
+        void ReportD3DObjectLeaks();
+#endif
     };
 
 } // namespace Boolka

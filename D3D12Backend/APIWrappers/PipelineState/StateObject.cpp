@@ -37,6 +37,11 @@ namespace Boolka
         m_StateObject = nullptr;
     }
 
+    void StateObject::SafeUnload()
+    {
+        BLK_SAFE_RELEASE(m_StateObject);
+    }
+
     bool StateObject::InitializeInternal(Device& device, const wchar_t* name,
                                          const D3D12_STATE_OBJECT_DESC& desc)
     {

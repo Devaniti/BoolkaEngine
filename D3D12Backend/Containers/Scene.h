@@ -57,7 +57,7 @@ namespace Boolka
 
         void FinishLoading(Device& device, RenderEngineContext& engineContext);
 
-        void FinishInitialization();
+        void FinishInitialization(Device& device);
 
         // All opaque objects placed before all transparent objects
         // So objects in range [0, m_OpaqueObjectCount) - are opaque

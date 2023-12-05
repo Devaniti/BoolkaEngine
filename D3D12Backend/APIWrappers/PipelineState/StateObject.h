@@ -30,6 +30,7 @@ namespace Boolka
         };
 
         void Unload();
+        void SafeUnload();
 
     private:
         bool InitializeInternal(Device& device, const wchar_t* name,

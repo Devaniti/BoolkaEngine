@@ -42,6 +42,11 @@ namespace Boolka
         return true;
     }
 
+    void Buffer::SafeUnload()
+    {
+        BLK_SAFE_RELEASE(m_Resource);
+    }
+
     void Buffer::Unload()
     {
         BLK_ASSERT(m_Resource != nullptr);

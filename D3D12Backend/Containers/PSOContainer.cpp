@@ -41,6 +41,7 @@ namespace Boolka
         BLK_ASSERT_VAR(res);
         DebugFileReader::FreeMemory(PS);
         DebugFileReader::FreeMemory(VS);
+        emptyInputLayout.Unload();
 
         PS = DebugFileReader::ReadFile("GBufferPassPixelShader.cso");
         AS = DebugFileReader::ReadFile("AmplificationShader.cso");
@@ -121,48 +122,50 @@ namespace Boolka
         DebugFileReader::FreeMemory(CS);
 #endif
 
-        DebugProfileTimer rtpsoTimer;
-        rtpsoTimer.Start();
+        if (device.SupportsRaytracing())
+        {
+            DebugProfileTimer rtpsoTimer;
+            rtpsoTimer.Start();
 
-        MemoryBlock shaderLib = DebugFileReader::ReadFile("RaytracePassLib.cso");
-        const wchar_t* rayGenExport = L"RayGeneration";
-        const wchar_t* missExport = L"MissShader";
-        const wchar_t* closestHitExport = L"ClosestHit";
-        const wchar_t* libExports[] = {rayGenExport, missExport, closestHitExport};
-        const wchar_t* hitGroupExport = L"HitGroup";
-        res = GetPSO(RTPSO::RaytracePass)
-                  .Initialize(device, L"RTPSO::RaytracePass",
-                              GlobalRootSignatureParam{defaultRootSig},
-                              DXILLibraryParam<ARRAYSIZE(libExports)>{shaderLib, libExports},
-                              HitGroupParam{hitGroupExport, closestHitExport},
-                              RaytracingShaderConfigParam{sizeof(HLSLShared::RaytracePayload),
-                                                          sizeof(Vector2)},
-                              RaytracingPipelineConfigParam{BLK_RT_MAX_RECURSION_DEPTH});
-        BLK_ASSERT_VAR(res);
-        DebugFileReader::FreeMemory(shaderLib);
+            MemoryBlock shaderLib = DebugFileReader::ReadFile("RaytracePassLib.cso");
+            const wchar_t* rayGenExport = L"RayGeneration";
+            const wchar_t* missExport = L"MissShader";
+            const wchar_t* closestHitExport = L"ClosestHit";
+            const wchar_t* libExports[] = {rayGenExport, missExport, closestHitExport};
+            const wchar_t* hitGroupExport = L"HitGroup";
+            res = GetPSO(RTPSO::RaytracePass)
+                      .Initialize(device, L"RTPSO::RaytracePass",
+                                  GlobalRootSignatureParam{defaultRootSig},
+                                  DXILLibraryParam<ARRAYSIZE(libExports)>{shaderLib, libExports},
+                                  HitGroupParam{hitGroupExport, closestHitExport},
+                                  RaytracingShaderConfigParam{sizeof(HLSLShared::RaytracePayload),
+                                                              sizeof(Vector2)},
+                                  RaytracingPipelineConfigParam{BLK_RT_MAX_RECURSION_DEPTH});
+            BLK_ASSERT_VAR(res);
+            DebugFileReader::FreeMemory(shaderLib);
 
-        rtpsoTimer.Stop(L"RTPSO compile");
+            rtpsoTimer.Stop(L"RTPSO compile");
 
-        UINT64 shaderTableSize = ShaderTable::CalculateRequiredBufferSize(1, 1, 1);
+            UINT64 shaderTableSize = ShaderTable::CalculateRequiredBufferSize(1, 1, 1);
 
-        Buffer& shaderTableBuffer =
-            engineContext.GetResourceContainer().GetBuffer(ResourceContainer::Buf::RTShaderTable);
-        m_ShaderTablesUploadBuffer.Initialize(device, shaderTableSize);
-        void* uploadBuffer = m_ShaderTablesUploadBuffer.Map();
-        GetShaderTable(RTShaderTable::Default)
-            .Build(shaderTableBuffer->GetGPUVirtualAddress(), uploadBuffer,
-                   GetPSO(RTPSO::RaytracePass), 1, &rayGenExport, 1, &missExport, 1,
-                   &hitGroupExport);
+            Buffer& shaderTableBuffer = engineContext.GetResourceContainer().GetBuffer(
+                ResourceContainer::Buf::RTShaderTable);
+            m_ShaderTablesUploadBuffer.Initialize(device, shaderTableSize);
+            void* uploadBuffer = m_ShaderTablesUploadBuffer.Map();
+            GetShaderTable(RTShaderTable::Default)
+                .Build(shaderTableBuffer->GetGPUVirtualAddress(), uploadBuffer,
+                       GetPSO(RTPSO::RaytracePass), 1, &rayGenExport, 1, &missExport, 1,
+                       &hitGroupExport);
 
-        GraphicCommandListImpl& initializationCommandList =
-            engineContext.GetInitializationCommandList();
-        initializationCommandList->CopyResource(shaderTableBuffer.Get(),
-                                                m_ShaderTablesUploadBuffer.Get());
+            GraphicCommandListImpl& initializationCommandList =
+                engineContext.GetInitializationCommandList();
+            initializationCommandList->CopyResource(shaderTableBuffer.Get(),
+                                                    m_ShaderTablesUploadBuffer.Get());
 
-        BLK_RENDER_DEBUG_ONLY(device.RemoveLastMessageFilter());
-        emptyInputLayout.Unload();
+            BLK_RENDER_DEBUG_ONLY(device.RemoveLastMessageFilter());
 
-        timer.Stop(L"All PSOs compile");
+            timer.Stop(L"All PSOs compile");
+        }
 
         return true;
     }
@@ -171,12 +174,15 @@ namespace Boolka
     {
         BLK_UNLOAD_ARRAY(m_GraphicPSOs);
         BLK_UNLOAD_ARRAY(m_ComputePSOs);
-        BLK_UNLOAD_ARRAY(m_RTPSOs);
+        BLK_SAFE_UNLOAD_ARRAY(m_RTPSOs);
     }
 
-    void PSOContainer::FinishInitialization()
+    void PSOContainer::FinishInitialization(Device& device)
     {
-        m_ShaderTablesUploadBuffer.Unload();
+        if (device.SupportsRaytracing())
+        {
+			m_ShaderTablesUploadBuffer.Unload();
+		}
     }
 
     GraphicPipelineState& PSOContainer::GetPSO(GraphicPSO id)

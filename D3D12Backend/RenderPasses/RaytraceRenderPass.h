@@ -20,6 +20,7 @@ namespace Boolka
         bool PrepareRendering() final;
 
     private:
+        bool m_Enabled;
     };
 
 } // namespace Boolka

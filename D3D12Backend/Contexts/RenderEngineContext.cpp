@@ -105,10 +105,10 @@ namespace Boolka
         m_Scene.FinishLoading(device, *this);
     }
 
-    void RenderEngineContext::FinishInitialization()
+    void RenderEngineContext::FinishInitialization(Device& device)
     {
-        m_PSOContainer.FinishInitialization();
-        m_Scene.FinishInitialization();
+        m_PSOContainer.FinishInitialization(device);
+        m_Scene.FinishInitialization(device);
     }
 
     void RenderEngineContext::UnloadScene()

@@ -7,6 +7,16 @@
 namespace Boolka
 {
 
+    bool FeatureSupportHelper::HasPreferredFeatures(ID3D12Device* device)
+    {
+        if (!SupportRaytracing(device))
+        {
+			return false;
+		}
+
+        return true;
+    }
+
     bool FeatureSupportHelper::IsSupported(ID3D12Device* device)
     {
         D3D12_FEATURE_DATA_D3D12_OPTIONS options{};
@@ -25,13 +35,6 @@ namespace Boolka
             return false;
         }
 
-        D3D12_FEATURE_DATA_D3D12_OPTIONS5 options5{};
-        hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS5, &options5, sizeof(options5));
-        if (FAILED(hr) || options5.RaytracingTier < D3D12_RAYTRACING_TIER_1_0)
-        {
-            return false;
-        }
-
         D3D12_FEATURE_DATA_D3D12_OPTIONS7 options7{};
         hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS7, &options7, sizeof(options7));
         if (FAILED(hr) || options7.MeshShaderTier < D3D12_MESH_SHADER_TIER_1)
@@ -39,6 +42,23 @@ namespace Boolka
             return false;
         }
 
+        D3D12_FEATURE_DATA_D3D12_OPTIONS1 options1{};
+        hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS1, &options1, sizeof(options1));
+        if (FAILED(hr) || options1.WaveLaneCountMax < 32 || options1.WaveLaneCountMin > 32)
+        {
+            return false;
+        }
+
         return true;
     }
+
+    bool FeatureSupportHelper::SupportRaytracing(ID3D12Device* device)
+    {
+        D3D12_FEATURE_DATA_D3D12_OPTIONS5 options5{};
+        HRESULT hr =
+            device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS5, &options5, sizeof(options5));
+
+        return SUCCEEDED(hr) && options5.RaytracingTier >= D3D12_RAYTRACING_TIER_1_0;
+    }
+
 } // namespace Boolka

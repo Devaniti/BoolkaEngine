@@ -28,6 +28,8 @@ namespace Boolka
 
         [[nodiscard]] DStorageFactory& GetDStorageFactory();
 
+        [[nodiscard]] bool SupportsRaytracing() const;
+
         bool Initialize(Factory& factory);
         void Unload();
 
@@ -42,13 +44,14 @@ namespace Boolka
 #endif
     private:
         bool SelectAndCreateDevice(Factory& factory);
+        void InitializeFeatureSupport();
 #ifdef BLK_RENDER_PROFILING
         void InitializeProfiling();
 #endif
 #ifdef BLK_RENDER_DEBUG
         void InitializeDebug();
         void SetDebugBreakSeverity(D3D12_MESSAGE_SEVERITY severity);
-        void ReportObjectLeaks();
+        void ReportDeviceObjectLeaks();
 #endif
 
         IDXGIAdapter4* m_Adapter;
@@ -60,6 +63,8 @@ namespace Boolka
         ComputeQueue m_ComputeQueue;
         CopyQueue m_CopyQueue;
         DStorageQueue m_DStorageQueue;
+
+        bool m_SupportsRaytracing;
     };
 
 } // namespace Boolka

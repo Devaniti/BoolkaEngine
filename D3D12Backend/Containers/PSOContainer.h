@@ -52,7 +52,7 @@ namespace Boolka
         bool Initialize(Device& device, RenderEngineContext& engineContext);
         void Unload();
 
-        void FinishInitialization();
+        void FinishInitialization(Device& device);
 
         [[nodiscard]] GraphicPipelineState& GetPSO(GraphicPSO id);
         [[nodiscard]] ComputePipelineState& GetPSO(ComputePSO id);

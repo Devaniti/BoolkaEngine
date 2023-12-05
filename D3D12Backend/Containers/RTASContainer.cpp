@@ -50,6 +50,11 @@ namespace Boolka
         return true;
     }
 
+    void RTASContainer::SafeUnload()
+    {
+        m_ASBuffer.SafeUnload();
+    }
+
     void RTASContainer::Unload()
     {
         m_ASBuffer.Unload();

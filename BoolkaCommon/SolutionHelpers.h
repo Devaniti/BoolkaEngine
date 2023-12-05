@@ -143,6 +143,11 @@
         for (auto& elem : arr) \
             elem.Unload();     \
     }
+#define BLK_SAFE_UNLOAD_ARRAY(arr)  \
+    {                          \
+        for (auto& elem : arr) \
+            elem.SafeUnload();     \
+    }
 
 #define BLK_FLOAT_PI 3.141592f
 

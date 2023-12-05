@@ -63,6 +63,11 @@ namespace Boolka
         return m_DStorageFactory;
     }
 
+    bool Device::SupportsRaytracing() const
+    {
+        return m_SupportsRaytracing;
+    }
+
     bool Device::Initialize(Factory& factory)
     {
         BLK_ASSERT(m_Device == nullptr);
@@ -71,6 +76,7 @@ namespace Boolka
 
         if (!SelectAndCreateDevice(factory))
             return false;
+        InitializeFeatureSupport();
 
         BLK_RENDER_PROFILING_ONLY(InitializeProfiling());
         BLK_RENDER_DEBUG_ONLY(InitializeDebug());
@@ -99,10 +105,12 @@ namespace Boolka
         m_GraphicQueue.Unload();
         m_DStorageFactory.Unload();
 
-        BLK_RENDER_DEBUG_ONLY(ReportObjectLeaks());
+        BLK_RENDER_DEBUG_ONLY(ReportDeviceObjectLeaks());
 
         m_Device->Release();
         m_Device = nullptr;
+        m_Adapter->Release();
+        m_Adapter = nullptr;
     }
 
     void Device::Flush()
@@ -174,17 +182,46 @@ namespace Boolka
                 continue;
             }
 
-            m_Adapter = adapter;
-            m_Device = device;
-            return true;
+            if (FeatureSupportHelper::HasPreferredFeatures(device))
+            {
+                BLK_SAFE_RELEASE(m_Adapter);
+                BLK_SAFE_RELEASE(m_Device);
+                m_Adapter = adapter;
+                m_Device = device;
+                return true;
+            }
+
+            if (m_Adapter == nullptr)
+            {
+				m_Adapter = adapter;
+				m_Device = device;
+			}
+			else
+            {
+                adapter->Release();
+                device->Release();
+            }
+
+            ++i;
+            continue;
         }
+
+        if (m_Adapter != nullptr)
+        {
+			return true;
+		}
 
         ::MessageBoxW(0,
                       L"No supported GPUs found.\nRequired features are:\nResource Binding Tier 3\n"
-                      L"Shader Model 6.5\nRaytracing Tier 1.0\nMesh Shaders",
+                      L"Shader Model 6.5\nRaytracing Tier 1.0\nMesh Shaders\n32 Wave width",
                       L"GPU and/or driver unsupported", MB_OK | MB_ICONERROR);
         BLK_CRITICAL_DEBUG_BREAK();
         return false;
+    }
+
+    void Device::InitializeFeatureSupport()
+    {
+        m_SupportsRaytracing = FeatureSupportHelper::SupportRaytracing(m_Device);
     }
 
 #ifdef BLK_RENDER_PROFILING
@@ -218,7 +255,7 @@ namespace Boolka
         debugInfoQueue->Release();
     }
 
-    void Device::ReportObjectLeaks()
+    void Device::ReportDeviceObjectLeaks()
     {
         ID3D12DebugDevice2* debugDevice = nullptr;
         HRESULT hr = m_Device->QueryInterface(IID_PPV_ARGS(&debugDevice));

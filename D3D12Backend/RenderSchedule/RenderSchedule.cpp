@@ -33,7 +33,7 @@ namespace Boolka
         m_EngineContext.FinishSceneLoading(device, folderPath);
         m_EngineContext.FlushInitializationCommandList(device);
         device.GetDStorageQueue().SyncGPU(device.GetGraphicQueue());
-        m_EngineContext.FinishInitialization();
+        m_EngineContext.FinishInitialization(device);
 
         return true;
     }

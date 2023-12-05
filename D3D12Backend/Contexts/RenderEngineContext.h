@@ -33,7 +33,7 @@ namespace Boolka
 
         bool StartSceneLoading(Device& device, const wchar_t* folderPath);
         void FinishSceneLoading(Device& device, const wchar_t* folderPath);
-        void FinishInitialization();
+        void FinishInitialization(Device& device);
         void UnloadScene();
 
         void BuildPSOs(Device& device);

@@ -68,14 +68,15 @@ namespace Boolka
         InitializeTextures(device, sceneHeader, headerWrapper, textureOffsets, mainSRVHeap,
                            mainSRVHeapOffset);
 
-        MemoryBlock rtCacheheaderWrapper{};
-
         UINT64 sourceOffset = 0;
 
         UploadBuffers(device, sceneHeader, sourceOffset);
 
-        m_RTASContainer.Initialize(device, engineContext, headerWrapper, m_VertexBuffer1,
-                                   m_RTIndexBuffer);
+        if (device.SupportsRaytracing())
+        {
+            m_RTASContainer.Initialize(device, engineContext, headerWrapper, m_VertexBuffer1,
+                                       m_RTIndexBuffer);
+        }
 
         UploadSkyBox(device, sceneHeader, sourceOffset);
         UploadTextures(device, sceneHeader, headerWrapper, sourceOffset);
@@ -87,7 +88,7 @@ namespace Boolka
     {
         m_DataReader.CloseReader();
 
-        m_RTASContainer.Unload();
+        m_RTASContainer.SafeUnload();
 
         BLK_UNLOAD_ARRAY(m_SceneTextures);
         m_SceneTextures.clear();
@@ -116,12 +117,18 @@ namespace Boolka
     {
         const SceneDataReader::HeaderWrapper headerWrapper = m_DataReader.GetHeaderWrapper();
 
-        m_RTASContainer.FinishLoading(device, engineContext, headerWrapper);
+        if (device.SupportsRaytracing())
+        {
+            m_RTASContainer.FinishLoading(device, engineContext, headerWrapper);
+        }
     }
 
-    void Scene::FinishInitialization()
+    void Scene::FinishInitialization(Device& device)
     {
-        m_RTASContainer.FinishInitialization();
+        if (device.SupportsRaytracing())
+        {
+            m_RTASContainer.FinishInitialization();
+        }
     }
 
     UINT Scene::GetObjectCount() const

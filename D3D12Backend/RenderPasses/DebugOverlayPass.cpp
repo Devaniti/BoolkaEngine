@@ -46,6 +46,8 @@ namespace Boolka
                             m_ImguiDescriptorHeap.Get(),
                             m_ImguiDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
                             m_ImguiDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+
+        m_GPUSupportsRaytracing = device.SupportsRaytracing();
         return true;
     }
 
@@ -143,10 +145,34 @@ namespace Boolka
     {
         auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
 
-        ImGui::Begin("Stats");
-        const auto& debugStats = frameContext.GetFrameStats();
-        const float fps = 1.0f / debugStats.frameTime;
-        const float fpsStable = 1.0f / debugStats.frameTimeStable;
+        ImguiStatsWindow(renderContext);
+        ImguiDebugWindow(renderContext);
+        ImguiHelpWindow();
+        ImguiHardwareWindow();
+
+        ImGui::Render();
+    }
+
+    void DebugOverlayPass::ImguiHelpWindow()
+    {
+        ImGui::Begin("Help");
+        if (ImGui::CollapsingHeader("Controls", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            ImGui::Text("WASD - Camera movement");
+            ImGui::Text("Arrows - Camera rotation");
+            ImGui::Text("T - Increase FOV");
+            ImGui::Text("R - Decrease FOV");
+            ImGui::Text("F1 - Hide/Show UI");
+            ImGui::Text("O - Output camera position to clipboard");
+            ImGui::Text("L - Load camera position from clipboard");
+            ImGui::Text("Esc - Exit");
+        }
+        ImGui::End();
+    }
+
+    void DebugOverlayPass::ImguiDebugWindow(const RenderContext& renderContext)
+    {
+        auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
         const auto& cameraPos = frameContext.GetCameraPos();
         const auto& viewMatrix = frameContext.GetViewMatrix();
         const auto& projMatrix = frameContext.GetProjMatrix();
@@ -154,6 +180,29 @@ namespace Boolka
         const Vector3 viewDir{viewMatrix[0][2], viewMatrix[1][2], viewMatrix[2][2]};
         // FOV along Y axis
         const float fov = BLK_RAD_TO_DEG(2.0f * std::atan(1.0f / projMatrix[1][1]));
+
+        ImGui::Begin("Debug");
+        if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            ImGui::Text("Pos X:%.2f Y:%.2f Z:%.2f", cameraPos.x(), cameraPos.y(), cameraPos.z());
+            ImGui::Text("Dir X:%.2f Y:%.2f Z:%.2f", viewDir.x(), viewDir.y(), viewDir.z());
+            ImGui::Text("FOV %.2f degrees", fov);
+        }
+        if (ImGui::CollapsingHeader("GPU Debug Markers", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            ImguiGPUDebugMarkers(renderContext);
+        }
+        ImGui::End();
+    }
+
+    void DebugOverlayPass::ImguiStatsWindow(const RenderContext& renderContext)
+    {
+        auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
+
+        ImGui::Begin("Stats");
+        const auto& debugStats = frameContext.GetFrameStats();
+        const float fps = 1.0f / debugStats.frameTime;
+        const float fpsStable = 1.0f / debugStats.frameTimeStable;
 
         ImGui::Text("%5.1f FPS (avg %5.1f FPS)", fps, fpsStable);
         ImGui::Text("%5.2f ms (avg %5.2f ms)", debugStats.frameTime * 1000.0f,
@@ -173,22 +222,15 @@ namespace Boolka
             ImguiGraphs(renderContext);
         }
         ImGui::End();
-        ImGui::Begin("Debug");
-        if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen))
-        {
-            ImGui::Text("Pos X:%.2f Y:%.2f Z:%.2f", cameraPos.x(), cameraPos.y(), cameraPos.z());
-            ImGui::Text("Dir X:%.2f Y:%.2f Z:%.2f", viewDir.x(), viewDir.y(), viewDir.z());
-            ImGui::Text("FOV %.2f degrees", fov);
-        }
-        if (ImGui::CollapsingHeader("GPU Debug Markers", ImGuiTreeNodeFlags_DefaultOpen))
-        {
-            ImguiGPUDebugMarkers(renderContext);
-        }
+    }
+
+    void DebugOverlayPass::ImguiHardwareWindow()
+{
+        ImGui::Begin("Hardware");
+
+        ImGui::Text("GPU");
+        ImGui::Text("Supports Raytracing - %s", m_GPUSupportsRaytracing ? "true" : "false");
         ImGui::End();
-        ImGui::Begin("Help");
-        ImguiHelpWindow(renderContext);
-        ImGui::End();
-        ImGui::Render();
     }
 
     const char* GetMarkerName(size_t i)
@@ -347,21 +389,6 @@ namespace Boolka
         m_FrameTimeGraph.PushValueAndRender(currentFrameTime, "Frame time", graphWidth,
                                             graphHeight);
         m_GPUTime.PushValueAndRender(currentGPUTime, "GPU Time", graphWidth, graphHeight);
-    }
-
-    void DebugOverlayPass::ImguiHelpWindow(const RenderContext& renderContext)
-    {
-        if (ImGui::CollapsingHeader("Controls", ImGuiTreeNodeFlags_DefaultOpen))
-        {
-            ImGui::Text("WASD - Camera movement");
-            ImGui::Text("Arrows - Camera rotation");
-            ImGui::Text("T - Increase FOV");
-            ImGui::Text("R - Decrease FOV");
-            ImGui::Text("F1 - Hide/Show UI");
-            ImGui::Text("O - Output camera position to clipboard");
-            ImGui::Text("L - Load camera position from clipboard");
-            ImGui::Text("Esc - Exit");
-        }
     }
 
     template <size_t tupleIndex, typename TupleType>
