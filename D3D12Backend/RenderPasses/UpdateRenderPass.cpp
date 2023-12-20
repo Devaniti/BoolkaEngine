@@ -15,7 +15,9 @@ namespace Boolka
 
     bool UpdateRenderPass::Initialize(Device& device, RenderContext& renderContext)
     {
-        BLK_INITIALIZE_ARRAY(m_ReadbackBuffers, device, 256 * sizeof(uint));
+        BLK_INITIALIZE_ARRAY(m_ReadbackBuffers, device,
+                             BLK_DEBUG_DATA_ELEMENT_COUNT * sizeof(uint) +
+                                 BLK_PROFILING_DATA_ELEMENT_COUNT * sizeof(uint));
         return true;
     }
 
@@ -37,7 +39,7 @@ namespace Boolka
         UploadFrameConstantBuffer(renderContext, resourceTracker);
         UploadLightingConstantBuffer(renderContext, resourceTracker);
         UploadCullingConstantBuffer(renderContext, resourceTracker);
-        ReadbackDebugMarkersBuffer(renderContext, resourceTracker);
+        ReadbackHelperBuffers(renderContext, resourceTracker);
 
         return true;
     }
@@ -206,22 +208,33 @@ namespace Boolka
                                    D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
     }
 
-    void UpdateRenderPass::ReadbackDebugMarkersBuffer(RenderContext& renderContext,
-                                                      ResourceTracker& resourceTracker)
+    void UpdateRenderPass::ReadbackHelperBuffers(RenderContext& renderContext,
+                                                        ResourceTracker& resourceTracker)
     {
         auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
         auto& resourceContainer = engineContext.GetResourceContainer();
         GraphicCommandListImpl& commandList = threadContext.GetGraphicCommandList();
         UINT frameIndex = frameContext.GetFrameIndex();
 
+        Buffer& metricsBuf = resourceContainer.GetBuffer(ResourceContainer::Buf::ProfileMetrics);
         Buffer& markersBuf = resourceContainer.GetBuffer(ResourceContainer::Buf::DebugMarkers);
+        resourceTracker.Transition(metricsBuf, commandList, D3D12_RESOURCE_STATE_COPY_SOURCE);
         resourceTracker.Transition(markersBuf, commandList, D3D12_RESOURCE_STATE_COPY_SOURCE);
 
         FrameStats& frameStats = frameContext.GetFrameStats();
         m_ReadbackBuffers[frameIndex].Readback(frameStats.gpuDebugMarkers,
                                                sizeof(frameStats.gpuDebugMarkers));
-        commandList->CopyResource(m_ReadbackBuffers[frameIndex].Get(), markersBuf.Get());
+        m_ReadbackBuffers[frameIndex].Readback(frameStats.visiblePerFrustum,
+                                               sizeof(frameStats.visiblePerFrustum),
+                                               BLK_DEBUG_DATA_ELEMENT_COUNT * sizeof(uint));
+        commandList->CopyBufferRegion(m_ReadbackBuffers[frameIndex].Get(), 0, markersBuf.Get(), 0,
+                                      BLK_DEBUG_DATA_ELEMENT_COUNT * sizeof(uint));
+        commandList->CopyBufferRegion(m_ReadbackBuffers[frameIndex].Get(),
+                                      BLK_DEBUG_DATA_ELEMENT_COUNT * sizeof(uint), metricsBuf.Get(),
+                                      0,
+                                      BLK_PROFILING_DATA_ELEMENT_COUNT * sizeof(uint));
 
+        resourceTracker.Transition(metricsBuf, commandList, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         resourceTracker.Transition(markersBuf, commandList, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
         ID3D12DescriptorHeap* descriptorHeap =
@@ -229,6 +242,10 @@ namespace Boolka
         commandList->SetDescriptorHeaps(1, &descriptorHeap);
 
         const UINT clearValues[4] = {};
+        commandList->ClearUnorderedAccessViewUint(
+            resourceContainer.GetGPUDescriptor(ResourceContainer::Buf::ProfileMetrics),
+            resourceContainer.GetCPUVisibleCPUDescriptor(ResourceContainer::Buf::ProfileMetrics),
+            markersBuf.Get(), clearValues, 0, nullptr);
         commandList->ClearUnorderedAccessViewUint(
             resourceContainer.GetGPUDescriptor(ResourceContainer::Buf::DebugMarkers),
             resourceContainer.GetCPUVisibleCPUDescriptor(ResourceContainer::Buf::DebugMarkers),

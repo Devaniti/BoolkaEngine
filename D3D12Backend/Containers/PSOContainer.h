@@ -26,11 +26,7 @@ namespace Boolka
 
         enum class ComputePSO
         {
-            ObjectCulling,
-            CullingCommandBufferGeneration,
-#ifdef BLK_ENABLE_STATS
-            CullingDebugReadback,
-#endif
+            GPUCulling,
             Count
         };
 

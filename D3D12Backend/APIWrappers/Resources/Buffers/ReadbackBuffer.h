@@ -18,7 +18,7 @@ namespace Boolka
         [[nodiscard]] void* Map(UINT64 readRangeBegin, UINT64 readRangeEnd);
         void Unmap();
 
-        void Readback(void* data, UINT64 size);
+        void Readback(void* data, UINT64 size, UINT64 offset = 0);
     };
 
 } // namespace Boolka

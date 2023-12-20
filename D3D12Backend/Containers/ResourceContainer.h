@@ -38,11 +38,10 @@ namespace Boolka
             Frame,
             DeferredLighting,
             GPUCullingCB,
-            GPUCulling,
-            GPUCullingDebugReadback,
             GPUCullingCommand,
             GPUCullingMeshletIndices,
             RTShaderTable,
+            ProfileMetrics,
             DebugMarkers,
             Count
         };
@@ -54,7 +53,7 @@ namespace Boolka
             GBufferRaytraceResults,
             GbufferDepth,
             LightBuffer,
-            GPUCulling,
+            GPUCullingMeshletIndices,
             ShadowMapCube0,
             ShadowMapSun = ShadowMapCube0 + BLK_MAX_LIGHT_COUNT,
             Count
@@ -79,11 +78,9 @@ namespace Boolka
         enum class UAV
         {
             GBufferRaytraceResults,
-            GPUCulling,
-            GPUCullingDebugReadback,
             GPUCullingCommand,
-            GPUCullingCommandUINT,
             GPUCullingMeshletIndices,
+            ProfileMetrics,
             DebugMarkers,
             Count
         };
@@ -144,8 +141,7 @@ namespace Boolka
 
         enum class CPUVisibleDescriptorHeap
         {
-            GPUCulling,
-            GPUCullingCommandUINT,
+            ProfileMetrics,
             DebugMarkers,
             Count
         };

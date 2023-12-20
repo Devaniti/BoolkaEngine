@@ -8,7 +8,7 @@
     "RootConstants(num32BitConstants=1, b2), " /* CPU constant */ \
     "RootConstants(num32BitConstants=1, b3), " /* GPU indirect constant */ \
     "DescriptorTable(CBV(b0, space=1, numDescriptors = 3, flags = DATA_VOLATILE)," /* CBVs */ \
-                    "UAV(u0, numDescriptors = 7, flags = DESCRIPTORS_VOLATILE | DATA_VOLATILE), " /* UAVs */  \
+                    "UAV(u0, numDescriptors = 5, flags = DESCRIPTORS_VOLATILE | DATA_VOLATILE), " /* UAVs */  \
                     "SRV(t0, space=0, numDescriptors = 11, flags = DATA_VOLATILE), " /* Dynamic resources */ \
                     "SRV(t0, space=1, numDescriptors = 8, flags = DATA_STATIC), " /* Meshlet data */ \
                     "SRV(t0, space=2, numDescriptors = 3, flags = DATA_STATIC), " /* RT data */  \

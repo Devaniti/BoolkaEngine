@@ -38,23 +38,12 @@ namespace Boolka
             //}
         }
 
-        D3D12_INDIRECT_ARGUMENT_DESC arguments[2]{};
+        D3D12_INDIRECT_ARGUMENT_DESC arguments[1]{};
 
-        arguments[0].Type = D3D12_INDIRECT_ARGUMENT_TYPE_CONSTANT;
-        arguments[0].Constant.RootParameterIndex =
-            static_cast<UINT>(ResourceContainer::DefaultRootSigBindPoints::IndirectRootConstant);
-        arguments[0].Constant.DestOffsetIn32BitValues = 0;
-        arguments[0].Constant.Num32BitValuesToSet = 1;
+        arguments[0].Type = D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH_MESH;
 
-        arguments[1].Type = D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH_MESH;
-
-        ID3D12RootSignature* mainRootSig =
-            engineContext.GetResourceContainer()
-                .GetRootSignature(ResourceContainer::RootSig::Default)
-                .Get();
-
-        bool result =
-            m_CommandSignature.Initialize(device, mainRootSig, 16, ARRAYSIZE(arguments), arguments);
+        bool result = m_CommandSignature.Initialize(device, nullptr, sizeof(HLSLShared::CullingCommandSignature),
+                                                    ARRAYSIZE(arguments), arguments);
         BLK_ASSERT(result);
 
         return true;
@@ -83,12 +72,9 @@ namespace Boolka
         auto& commandBuffer =
             resourceContainer.GetBuffer(ResourceContainer::Buf::GPUCullingCommand);
         UINT64 viewIndex = static_cast<UINT64>(batch);
-        UINT64 commandBufferOffset = (((Scene::Limits::MaxObjectCount + 31) / 32) * viewIndex) *
-                                     sizeof(HLSLShared::CullingCommandSignature);
-        UINT objectCount = engineContext.GetScene().GetOpaqueObjectCount();
-        UINT callCount = BLK_INT_DIVIDE_CEIL(objectCount, 32);
+        UINT64 commandBufferOffset = viewIndex * sizeof(HLSLShared::CullingCommandSignature);
 
-        commandList->ExecuteIndirect(m_CommandSignature.Get(), callCount, commandBuffer.Get(),
+        commandList->ExecuteIndirect(m_CommandSignature.Get(), 1, commandBuffer.Get(),
                                      commandBufferOffset, nullptr, 0);
 
         return true;

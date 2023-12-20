@@ -481,7 +481,7 @@ namespace Boolka
         static bool interpretAsFloat = false;
         ImGui::Checkbox("Interpret values as float", &interpretAsFloat);
 
-        for (size_t i = 0; i < 256; ++i)
+        for (size_t i = 0; i < BLK_DEBUG_DATA_ELEMENT_COUNT; ++i)
         {
             uint markerValue = debugStats.gpuDebugMarkers[i];
             if (markerValue)

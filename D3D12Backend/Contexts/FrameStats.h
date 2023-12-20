@@ -27,7 +27,7 @@ namespace Boolka
             uint visibleMeshletCount;
         } visiblePerFrustum[BLK_RENDER_VIEW_COUNT];
 
-        uint gpuDebugMarkers[256];
+        uint gpuDebugMarkers[BLK_DEBUG_DATA_ELEMENT_COUNT];
     };
 
 } // namespace Boolka

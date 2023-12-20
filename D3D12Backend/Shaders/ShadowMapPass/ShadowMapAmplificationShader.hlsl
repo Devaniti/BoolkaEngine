@@ -1,23 +1,35 @@
 #include "../MeshCommon.hlsli"
 
 groupshared Payload payload;
+groupshared uint visibleCount;
 
-[numthreads(32, 1, 1)] 
-void main(uint DTiD : SV_DispatchThreadID, uint GTiD : SV_GroupThreadID)
+[numthreads(BLK_AS_GROUP_SIZE, 1, 1)]
+void main(uint GTiD : SV_GroupThreadID, uint GiD : SV_GroupID) 
 {
-    uint meshletOffset = DTiD;
-    uint groupOffset = GTiD;
+    if (GTiD == 0)
+    {
+        visibleCount = 0;
+    }
+    GroupMemoryBarrierWithGroupSync();
     uint viewIndex = viewIndexParam;
-    uint mehsletIndex = gpuCullingMeshletIndiciesUAV[meshletIndirectionOffset + meshletOffset];
 
+    uint mehsletIndex = gpuCullingMeshletIndicesUAV[BLM_MAX_AS_GROUPS * viewIndex + GiD] + GTiD;
     bool isMeshletVisible = IsMeshletVisible(mehsletIndex, viewIndex);
+    uint waveVisibleIndex = WavePrefixCountBits(isMeshletVisible);
+    uint waveVisibleCount = WaveActiveCountBits(isMeshletVisible);
+    uint waveOffset;
+    if (WaveIsFirstLane())
+    {
+        InterlockedAdd(visibleCount, waveVisibleCount, waveOffset);
+    }
+    waveOffset = WaveReadLaneFirst(waveOffset);
+    uint threadIndex = waveOffset + waveVisibleIndex;
 
     if (isMeshletVisible)
     {
-        uint groupVisibleIndex = WavePrefixCountBits(isMeshletVisible);
-        payload.meshletIndicies[groupVisibleIndex] = mehsletIndex;
+        payload.meshletIndicies[threadIndex] = mehsletIndex;
     }
 
-    uint visibleCount = WaveActiveCountBits(isMeshletVisible);
+    GroupMemoryBarrierWithGroupSync();
     DispatchMesh(visibleCount, 1, 1, payload);
 }

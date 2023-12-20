@@ -114,27 +114,23 @@ namespace Boolka
             BLK_CEIL_TO_POWER_OF_TWO(sizeof(HLSLShared::FrameConstantBuffer), 256);
         static const UINT64 deferredLightingCbSize = BLK_CEIL_TO_POWER_OF_TWO(
             sizeof(Vector4) * BLK_TEXCUBE_FACE_COUNT * 2 + sizeof(Vector4u), 256);
-        static const UINT gpuCullingBufElements =
-            BLK_RENDER_VIEW_COUNT * (Scene::MaxObjectCount + 1) *
-            2; // One for each object and additional one for counter
-        static const UINT64 gpuCullingBufSize =
-            BLK_CEIL_TO_POWER_OF_TWO(sizeof(uint) * gpuCullingBufElements, 256);
-        static const UINT gpuCullingDebugReadbackBufElements = BLK_RENDER_VIEW_COUNT * 2;
-        static const UINT64 gpuCullingDebugReadbackBufSize =
-            BLK_CEIL_TO_POWER_OF_TWO(sizeof(uint) * gpuCullingDebugReadbackBufElements, 256);
         static const UINT64 gpuCullingCBSize =
             BLK_CEIL_TO_POWER_OF_TWO(sizeof(HLSLShared::CullingDataConstantBuffer), 256);
-        static const UINT gpuCullingCommandBufElements =
-            BLK_RENDER_VIEW_COUNT * BLK_INT_DIVIDE_CEIL(Scene::MaxObjectCount, 32);
-        static const UINT gpuCullingCommandBufSize =
-            BLK_CEIL_TO_POWER_OF_TWO(gpuCullingCommandBufElements * 32, 256);
+        static const UINT gpuCullingCommandBufElements = BLK_RENDER_VIEW_COUNT;
+        static const UINT gpuCullingCommandBufElementSize =
+            sizeof(HLSLShared::CullingCommandSignature);
+        static const UINT gpuCullingCommandBufSize = BLK_CEIL_TO_POWER_OF_TWO(
+            gpuCullingCommandBufElements * gpuCullingCommandBufElementSize, 256);
         static const UINT gpuCullingMeshletIndicesBufElements =
-            Scene::MaxMeshlets * BLK_RENDER_VIEW_COUNT;
+            BLM_MAX_AS_GROUPS * BLK_RENDER_VIEW_COUNT;
         static const UINT gpuCullingMeshletIndicesBufSize =
             BLK_CEIL_TO_POWER_OF_TWO(gpuCullingMeshletIndicesBufElements * sizeof(uint), 256);
         static const UINT64 rtShaderTableBufSize =
             ShaderTable::CalculateRequiredBufferSize(1, 1, 1);
-        static const UINT debugMarkersBufElements = 256;
+        static const UINT profileMetricsBufElements = BLK_PROFILING_DATA_ELEMENT_COUNT;
+        static const UINT profileMetricsBufSize =
+            BLK_CEIL_TO_POWER_OF_TWO(profileMetricsBufElements * sizeof(uint), 256);
+        static const UINT debugMarkersBufElements = BLK_DEBUG_DATA_ELEMENT_COUNT;
         static const UINT debugMarkersBufSize =
             BLK_CEIL_TO_POWER_OF_TWO(debugMarkersBufElements * sizeof(uint), 256);
 
@@ -155,12 +151,6 @@ namespace Boolka
         GetBuffer(Buf::GPUCullingCB)
             .Initialize(device, gpuCullingCBSize, D3D12_HEAP_TYPE_DEFAULT,
                         D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
-        GetBuffer(Buf::GPUCulling)
-            .Initialize(device, gpuCullingBufSize, D3D12_HEAP_TYPE_DEFAULT,
-                        D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
-        GetBuffer(Buf::GPUCullingDebugReadback)
-            .Initialize(device, gpuCullingDebugReadbackBufSize, D3D12_HEAP_TYPE_DEFAULT,
-                        D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
         GetBuffer(Buf::GPUCullingCommand)
             .Initialize(device, gpuCullingCommandBufSize, D3D12_HEAP_TYPE_DEFAULT,
                         D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
@@ -170,6 +160,9 @@ namespace Boolka
         GetBuffer(Buf::RTShaderTable)
             .Initialize(device, rtShaderTableBufSize, D3D12_HEAP_TYPE_DEFAULT,
                         D3D12_RESOURCE_FLAG_NONE);
+        GetBuffer(Buf::ProfileMetrics)
+            .Initialize(device, profileMetricsBufSize, D3D12_HEAP_TYPE_DEFAULT,
+                        D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
         GetBuffer(Buf::DebugMarkers)
             .Initialize(device, debugMarkersBufSize, D3D12_HEAP_TYPE_DEFAULT,
                         D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
@@ -205,9 +198,10 @@ namespace Boolka
             GetDescriptorHeap(DescHeap::MainHeap)
                 .GetCPUHandle(srvOffset + static_cast<UINT>(SRV::LightBuffer)));
         ShaderResourceView::Initialize(
-            device, GetBuffer(Buf::GPUCulling), gpuCullingBufElements, DXGI_FORMAT_R32_UINT,
+            device, GetBuffer(Buf::GPUCullingMeshletIndices), gpuCullingMeshletIndicesBufElements,
+            DXGI_FORMAT_R32_UINT,
             GetDescriptorHeap(DescHeap::MainHeap)
-                .GetCPUHandle(srvOffset + static_cast<UINT>(SRV::GPUCulling)));
+                .GetCPUHandle(srvOffset + static_cast<UINT>(SRV::GPUCullingMeshletIndices)));
         for (UINT i = 0; i < BLK_MAX_LIGHT_COUNT; i++)
         {
             ShaderResourceView::InitializeCube(
@@ -269,21 +263,15 @@ namespace Boolka
                 .GetCPUHandle(static_cast<size_t>(MainSRVDescriptorHeapOffsets::CBVHeapOffset) +
                               static_cast<size_t>(CBV::DeferredLighting)),
             deferredLightingCbSize);
-        UnorderedAccessView::Initialize(device, GetBuffer(Buf::GPUCulling), DXGI_FORMAT_R32_UINT,
-                                        gpuCullingBufElements,
-                                        GetCPUVisibleCPUDescriptor(Buf::GPUCulling));
-        UnorderedAccessView::Initialize(device, GetBuffer(Buf::GPUCullingDebugReadback),
-                                        DXGI_FORMAT_R32_UINT, gpuCullingDebugReadbackBufElements,
-                                        GetCPUDescriptor(Buf::GPUCullingDebugReadback));
-        UnorderedAccessView::Initialize(device, GetBuffer(Buf::GPUCullingCommand), 32,
-                                        gpuCullingCommandBufElements,
-                                        GetCPUDescriptor(Buf::GPUCullingCommand));
-        UnorderedAccessView::Initialize(device, GetBuffer(Buf::GPUCullingCommand),
-                                        DXGI_FORMAT_R32_UINT, gpuCullingCommandBufElements,
-                                        GetCPUVisibleCPUDescriptor(Buf::GPUCullingCommand));
+        UnorderedAccessView::Initialize(
+            device, GetBuffer(Buf::GPUCullingCommand), gpuCullingCommandBufElementSize,
+            gpuCullingCommandBufElements, GetCPUDescriptor(Buf::GPUCullingCommand));
         UnorderedAccessView::Initialize(device, GetBuffer(Buf::GPUCullingMeshletIndices),
                                         DXGI_FORMAT_R32_UINT, gpuCullingMeshletIndicesBufElements,
                                         GetCPUDescriptor(Buf::GPUCullingMeshletIndices));
+        UnorderedAccessView::Initialize(device, GetBuffer(Buf::ProfileMetrics),
+                                        DXGI_FORMAT_R32_UINT, profileMetricsBufElements,
+                                        GetCPUVisibleCPUDescriptor(Buf::ProfileMetrics));
         UnorderedAccessView::Initialize(device, GetBuffer(Buf::DebugMarkers), DXGI_FORMAT_R32_UINT,
                                         debugMarkersBufElements,
                                         GetCPUVisibleCPUDescriptor(Buf::DebugMarkers));
@@ -293,17 +281,10 @@ namespace Boolka
                 .GetCPUHandle(static_cast<size_t>(MainSRVDescriptorHeapOffsets::CBVHeapOffset) +
                               static_cast<size_t>(CBV::GPUCulling)),
             gpuCullingCBSize);
-        device->CopyDescriptorsSimple(1, GetCPUDescriptor(Buf::GPUCulling),
-                                      GetCPUVisibleCPUDescriptor(Buf::GPUCulling),
-                                      D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-        device->CopyDescriptorsSimple(
-            1,
-            GetDescriptorHeap(DescHeap::MainHeap)
-                .GetCPUHandle(static_cast<size_t>(MainSRVDescriptorHeapOffsets::UAVHeapOffset) +
-                              static_cast<size_t>(UAV::GPUCullingCommandUINT)),
-            GetCPUVisibleCPUDescriptor(Buf::GPUCullingCommand),
-            D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
+        device->CopyDescriptorsSimple(1, GetCPUDescriptor(Buf::ProfileMetrics),
+                                      GetCPUVisibleCPUDescriptor(Buf::ProfileMetrics),
+                                      D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
         device->CopyDescriptorsSimple(1, GetCPUDescriptor(Buf::DebugMarkers),
                                       GetCPUVisibleCPUDescriptor(Buf::DebugMarkers),
                                       D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
@@ -340,13 +321,11 @@ namespace Boolka
                                          D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
         resourceTracker.RegisterResource(GetBuffer(Buf::GPUCullingCB),
                                          D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
-        resourceTracker.RegisterResource(GetBuffer(Buf::GPUCulling),
-                                         D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-        resourceTracker.RegisterResource(GetBuffer(Buf::GPUCullingDebugReadback),
-                                         D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         resourceTracker.RegisterResource(GetBuffer(Buf::GPUCullingCommand),
                                          D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         resourceTracker.RegisterResource(GetBuffer(Buf::GPUCullingMeshletIndices),
+                                         D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        resourceTracker.RegisterResource(GetBuffer(Buf::ProfileMetrics),
                                          D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         resourceTracker.RegisterResource(GetBuffer(Buf::DebugMarkers),
                                          D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
@@ -367,13 +346,12 @@ namespace Boolka
         RenderDebug::SetDebugName(GetBuffer(Buf::DeferredLighting).Get(),
                                   L"DeferredLightingConstantBuffer");
         RenderDebug::SetDebugName(GetBuffer(Buf::GPUCullingCB).Get(), L"GPUCullingCBBuffer");
-        RenderDebug::SetDebugName(GetBuffer(Buf::GPUCulling).Get(), L"GPUCullingBuffer");
-        RenderDebug::SetDebugName(GetBuffer(Buf::GPUCullingDebugReadback).Get(),
-                                  L"GPUCullingDebugReadbackBuffer");
         RenderDebug::SetDebugName(GetBuffer(Buf::GPUCullingCommand).Get(), L"GPUCullingCommand");
         RenderDebug::SetDebugName(GetBuffer(Buf::GPUCullingMeshletIndices).Get(),
                                   L"GPUCullingMeshletIndices");
         RenderDebug::SetDebugName(GetBuffer(Buf::RTShaderTable).Get(), L"RTShaderTable");
+        RenderDebug::SetDebugName(GetBuffer(Buf::ProfileMetrics).Get(), L"ProfileMetrics");
+        RenderDebug::SetDebugName(GetBuffer(Buf::DebugMarkers).Get(), L"DebugMarkers");
         for (UINT i = 0; i < BLK_IN_FLIGHT_FRAMES; ++i)
             RenderDebug::SetDebugName(GetFlippableUploadBuffer(i, FlipUploadBuf::Frame).Get(),
                                       L"FrameConstantUploadBuffer%d", i);
@@ -467,13 +445,9 @@ namespace Boolka
     {
         switch (id)
         {
-        case Buf::GPUCulling:
+        case Buf::ProfileMetrics:
             return GetDescriptorHeap(DescHeap::MainCPUVisibleHeap)
-                .GetCPUHandle(static_cast<UINT>(CPUVisibleDescriptorHeap::GPUCulling));
-            break;
-        case Buf::GPUCullingCommand:
-            return GetDescriptorHeap(DescHeap::MainCPUVisibleHeap)
-                .GetCPUHandle(static_cast<UINT>(CPUVisibleDescriptorHeap::GPUCullingCommandUINT));
+                .GetCPUHandle(static_cast<UINT>(CPUVisibleDescriptorHeap::ProfileMetrics));
             break;
         case Buf::DebugMarkers:
             return GetDescriptorHeap(DescHeap::MainCPUVisibleHeap)
@@ -501,14 +475,6 @@ namespace Boolka
             return static_cast<UINT>(MainSRVDescriptorHeapOffsets::CBVHeapOffset) +
                    static_cast<UINT>(CBV::GPUCulling);
             break;
-        case Buf::GPUCulling:
-            return static_cast<UINT>(MainSRVDescriptorHeapOffsets::UAVHeapOffset) +
-                   static_cast<UINT>(UAV::GPUCulling);
-            break;
-        case Buf::GPUCullingDebugReadback:
-            return static_cast<UINT>(MainSRVDescriptorHeapOffsets::UAVHeapOffset) +
-                   static_cast<UINT>(UAV::GPUCullingDebugReadback);
-            break;
         case Buf::GPUCullingCommand:
             return static_cast<UINT>(MainSRVDescriptorHeapOffsets::UAVHeapOffset) +
                    static_cast<UINT>(UAV::GPUCullingCommand);
@@ -516,6 +482,10 @@ namespace Boolka
         case Buf::GPUCullingMeshletIndices:
             return static_cast<UINT>(MainSRVDescriptorHeapOffsets::UAVHeapOffset) +
                    static_cast<UINT>(UAV::GPUCullingMeshletIndices);
+            break;
+        case Buf::ProfileMetrics:
+            return static_cast<UINT>(MainSRVDescriptorHeapOffsets::UAVHeapOffset) +
+                   static_cast<UINT>(UAV::ProfileMetrics);
             break;
         case Buf::DebugMarkers:
             return static_cast<UINT>(MainSRVDescriptorHeapOffsets::UAVHeapOffset) +

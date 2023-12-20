@@ -79,7 +79,7 @@ namespace Boolka
                                static_cast<double>(m_TimestampFrequency));
 
         frameStats.gpuTimes = gpuTimes;
-        frameStats.gpuTimesStable = frameStats.gpuTimesStable * 0.95f + gpuTimes * 0.05f;
+        frameStats.gpuTimesStable = frameStats.gpuTimesStable * 0.99f + gpuTimes * 0.01f;
 
         commandList->ResolveQueryData(m_QueryHeap.Get(), D3D12_QUERY_TYPE_TIMESTAMP, 0,
                                       static_cast<UINT>(Markers::Count), readbackBuffer.Get(), 0);
