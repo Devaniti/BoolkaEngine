@@ -23,8 +23,7 @@ namespace Boolka
                                           ResourceTracker& resourceTracker);
         void UploadCullingConstantBuffer(RenderContext& renderContext,
                                          ResourceTracker& resourceTracker);
-        void ReadbackDebugMarkersBuffer(RenderContext& renderContext,
-                                        ResourceTracker& resourceTracker);
+        void ReadbackHelperBuffers(RenderContext& renderContext, ResourceTracker& resourceTracker);
 
         ReadbackBuffer m_ReadbackBuffers[BLK_IN_FLIGHT_FRAMES];
     };

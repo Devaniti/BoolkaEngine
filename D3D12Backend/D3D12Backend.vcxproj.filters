@@ -702,17 +702,11 @@
     <FxCompile Include="Shaders\SkyBoxPass\SkyBoxPassPixelShader.hlsl">
       <Filter>Shaders\SkyBoxPass</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\CullingPass\ObjectCullingComputeShader.hlsl">
-      <Filter>Shaders\CullingPass</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\CullingPass\CullingDebugReadbackComputeShader.hlsl">
-      <Filter>Shaders\CullingPass</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\CullingPass\CullingCommandBufferGenerateComputeShader.hlsl">
-      <Filter>Shaders\CullingPass</Filter>
-    </FxCompile>
     <FxCompile Include="Shaders\RaytracePass\RaytracePassLib.hlsl">
       <Filter>Shaders\RaytracePass</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\CullingPass\GPUCullingComputeShader.hlsl">
+      <Filter>Shaders\CullingPass</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

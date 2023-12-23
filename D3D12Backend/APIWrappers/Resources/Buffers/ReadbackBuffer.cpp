@@ -35,10 +35,10 @@ namespace Boolka
         m_Resource->Unmap(0, &writeRange);
     }
 
-    void ReadbackBuffer::Readback(void* data, UINT64 size)
+    void ReadbackBuffer::Readback(void* data, UINT64 size, UINT64 offset /*= 0*/)
     {
-        void* result = Map(0, size);
-        memcpy(data, result, size);
+        const char* result = static_cast<const char*>(Map(0, size));
+        memcpy(data, result + offset, size);
         Unmap();
     }
 

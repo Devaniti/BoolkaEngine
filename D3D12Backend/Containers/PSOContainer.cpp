@@ -101,26 +101,11 @@ namespace Boolka
         DebugFileReader::FreeMemory(AS);
         DebugFileReader::FreeMemory(MS);
 
-        CS = DebugFileReader::ReadFile("ObjectCullingComputeShader.cso");
-        res = GetPSO(ComputePSO::ObjectCulling)
-                  .Initialize(device, L"ComputePSO::ObjectCulling", defaultRootSig, CS);
+        CS = DebugFileReader::ReadFile("GPUCullingComputeShader.cso");
+        res = GetPSO(ComputePSO::GPUCulling)
+                  .Initialize(device, L"ComputePSO::GPUCullingComputeShader", defaultRootSig, CS);
         BLK_ASSERT_VAR(res);
         DebugFileReader::FreeMemory(CS);
-
-        CS = DebugFileReader::ReadFile("CullingCommandBufferGenerateComputeShader.cso");
-        res = GetPSO(ComputePSO::CullingCommandBufferGeneration)
-                  .Initialize(device, L"ComputePSO::CullingCommandBufferGeneration", defaultRootSig,
-                              CS);
-        BLK_ASSERT_VAR(res);
-        DebugFileReader::FreeMemory(CS);
-
-#ifdef BLK_ENABLE_STATS
-        CS = DebugFileReader::ReadFile("CullingDebugReadbackComputeShader.cso");
-        res = GetPSO(ComputePSO::CullingDebugReadback)
-                  .Initialize(device, L"ComputePSO::CullingDebugReadback", defaultRootSig, CS);
-        BLK_ASSERT_VAR(res);
-        DebugFileReader::FreeMemory(CS);
-#endif
 
         if (device.SupportsRaytracing())
         {
@@ -181,8 +166,8 @@ namespace Boolka
     {
         if (device.SupportsRaytracing())
         {
-			m_ShaderTablesUploadBuffer.Unload();
-		}
+            m_ShaderTablesUploadBuffer.Unload();
+        }
     }
 
     GraphicPipelineState& PSOContainer::GetPSO(GraphicPSO id)

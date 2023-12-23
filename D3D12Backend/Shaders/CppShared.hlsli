@@ -27,12 +27,23 @@ struct AABB
 
 #endif
 
+#define BLK_MIN_WAVE_SIZE 4
+
 #define BLK_RENDER_VIEW_COUNT 26
 #define BLK_MAX_SCENE_TEXTURE_COUNT 512
 #define BLK_MAX_OBJECT_COUNT 2048
 #define BLK_MAX_MESHLETS 262144
+#define BLK_AS_GROUP_SIZE 32
+#define BLM_MAX_AS_GROUPS (BLK_MAX_MESHLETS / BLK_AS_GROUP_SIZE)
 
 #define BLK_RT_MAX_RECURSION_DEPTH 4
+
+#define BLK_DEBUG_DATA_ELEMENT_COUNT 4096
+
+#define BLK_PROFILING_DATA_GPU_CULLING_OFFSET 0
+#define BLK_PROFILING_DATA_GPU_CULLING_VALUES_PER_VIEW 2
+#define BLK_PROFILING_DATA_GPU_CULLING_SIZE (BLK_PROFILING_DATA_GPU_CULLING_VALUES_PER_VIEW * BLK_RENDER_VIEW_COUNT)
+#define BLK_PROFILING_DATA_ELEMENT_COUNT BLK_PROFILING_DATA_GPU_CULLING_SIZE
 
 struct FrameConstantBuffer
 {
@@ -76,10 +87,10 @@ struct LightingDataConstantBuffer
 
 struct CullingDataConstantBuffer
 {
-    uint4 objectCount;
     Frustum views[BLK_RENDER_VIEW_COUNT];
     float4x4 viewProjMatrix[BLK_RENDER_VIEW_COUNT];
     float4 cameraPos[BLK_RENDER_VIEW_COUNT];
+    uint4 objectCount;
 };
 
 struct MaterialData
@@ -154,7 +165,6 @@ struct ObjectData
 
 struct CullingCommandSignature
 {
-    uint meshletOffset;
     uint3 amplificationShaderGroups;
 };
 

@@ -4,6 +4,8 @@
 #include "CppShared.hlsli"
 #include "ResourceBindings.hlsli"
 
+#define FLT_MAX 3.402823466e+38F
+
 bool IntersectionFrustumAABB(const in Frustum currentFrustum, const in AABB boundingBox)
 {
     [unroll(6)] for (int i = 0; i < 6; ++i)
@@ -33,6 +35,13 @@ bool IntersectionFrustumSphere(const in Frustum currentFrustum, const in float4 
     return true;
 }
 
+// Only works for positive numbers, doesn't expect 0
+uint CeilToNextPowerOfTwo(uint value)
+{
+    uint rounded = 1l << (firstbithigh(value - 1) + 1);
+    return rounded;
+}
+
 void DebugIncrementCounter(uint marker)
 {
     uint dummy;
@@ -47,6 +56,16 @@ void DebugSetData(uint marker, uint data)
 void DebugSetData(uint marker, float data)
 {
     debugMarkers[marker] = asuint(data);
+}
+
+void ProfileSetData(uint offset, uint data)
+{
+    profileMetrics[offset] = data;
+}
+
+void ProfileSetData(uint offset, float data)
+{
+    profileMetrics[offset] = asuint(data);
 }
 
 #include "ResourceBindings.hlsli"

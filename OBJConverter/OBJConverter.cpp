@@ -18,6 +18,7 @@ namespace Boolka
     static const size_t gs_ResourceAlignment = D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT;
     static const size_t gs_PitchAlignment = D3D12_TEXTURE_DATA_PITCH_ALIGNMENT;
     static const size_t gs_CubeMapFaces = 6;
+    static const size_t gs_MaxASGroupSize = 32;
 
     struct [[nodiscard]] BoolkaMaterial
     {
@@ -619,7 +620,8 @@ namespace Boolka
                                         processedMeshletTriangles[shapeIndex].data());
                     }
 
-                    size_t roundedSize = BLK_CEIL_TO_POWER_OF_TWO(meshlets.size(), 32);
+                    size_t roundedSize =
+                        BLK_CEIL_TO_POWER_OF_TWO(meshlets.size(), gs_MaxASGroupSize);
                     meshlets.resize(roundedSize);
                     cullDataVector.resize(roundedSize);
 

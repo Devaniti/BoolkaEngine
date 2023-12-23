@@ -8,11 +8,6 @@ cbuffer PassConstData : register(b2)
     uint viewIndexParam;
 };
 
-cbuffer IndirectConstData : register(b3)
-{
-    uint meshletIndirectionOffset;
-};
-
 struct Vertex
 {
     float4 position : SV_Position;
@@ -23,7 +18,7 @@ struct Vertex
 
 struct Payload
 {
-    uint meshletIndicies[32];
+    uint meshletIndicies[BLK_AS_GROUP_SIZE];
 };
 
 bool IsConeDegenerate(MeshletCullData cullData)

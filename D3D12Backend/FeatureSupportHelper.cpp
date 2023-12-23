@@ -11,8 +11,8 @@ namespace Boolka
     {
         if (!SupportRaytracing(device))
         {
-			return false;
-		}
+            return false;
+        }
 
         return true;
     }
