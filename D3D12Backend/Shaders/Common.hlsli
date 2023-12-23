@@ -35,13 +35,10 @@ bool IntersectionFrustumSphere(const in Frustum currentFrustum, const in float4 
     return true;
 }
 
+// Only works for positive numbers, doesn't expect 0
 uint CeilToNextPowerOfTwo(uint value)
 {
     uint rounded = 1l << (firstbithigh(value - 1) + 1);
-    if (value == 0)
-    {
-        rounded = 0;
-    }
     return rounded;
 }
 

@@ -120,17 +120,25 @@ void PrefixSumFirstStep(uint threadID, uint maxCount)
 void PrefixSumReduceStep(uint threadID, uint maxCount, uint stride)
 {
     uint idx = threadID * stride + stride - 1;
-    if (idx < maxCount)
+    if (idx >= maxCount)
     {
-        uint count = GetPrefixSum(idx);
-        uint waveMeshletCountPrefix = WavePrefixSum(count) + count;
-        SetPrefixSum(idx, waveMeshletCountPrefix);
+        return;
     }
+
+    uint count = GetPrefixSum(idx);
+    uint waveMeshletCountPrefix = WavePrefixSum(count) + count;
+    SetPrefixSum(idx, waveMeshletCountPrefix);
 }
 
 void PrefixSumExpandStep(uint threadID, uint maxCount, uint stride)
 {
     uint idx = threadID * stride + stride - 1;
+
+    if (idx >= maxCount)
+    {
+        return;
+    }
+
     uint prefix = 0;
     if (WaveIsFirstLane())
     {
@@ -157,11 +165,6 @@ uint GetTotalSum(uint culledObjectCount)
 void BuildPrefixSum(uint threadID, uint culledObjectCount)
 {
     uint stride;
-
-    // TODO remove
-    SetPrefixSum(threadID, 0);
-    SetPrefixSum(threadID + BLK_GPU_CULLING_GROUP_SIZE, 0);
-    GroupMemoryBarrierWithGroupSync();
     
     {
         for (uint idx = threadID; idx < culledObjectCount; idx += BLK_GPU_CULLING_GROUP_SIZE)
@@ -193,7 +196,18 @@ void BuildPrefixSum(uint threadID, uint culledObjectCount)
     GroupMemoryBarrierWithGroupSync();
 }
 
-void WriteIndirectCommands(uint threadID, uint viewIndex, uint culledObjectCount)
+void ClearIndirectCommand(uint threadID, uint viewIndex)
+{
+    if (threadID == 0)
+    {
+        CullingCommandSignature cullingCommandSignature = (CullingCommandSignature)0;
+        cullingCommandSignature.amplificationShaderGroups = uint3(0, 1, 1);
+        gpuCullingCommandUAV[viewIndex] = cullingCommandSignature;
+        ProfileReportCullingStats(viewIndex, 0, 0);
+    }
+}
+
+void WriteIndirectCommand(uint threadID, uint viewIndex, uint culledObjectCount)
 {
     if (threadID == 0)
     {
@@ -248,12 +262,18 @@ void main(uint3 GTid : SV_GroupThreadID, uint3 Gid : SV_GroupID)
     }
     GroupMemoryBarrierWithGroupSync();
 
+    if (culledObjectCount == 0)
+    {
+        ClearIndirectCommand(threadID, viewIndex);
+        return;
+    }
+
     uint culledObjectCountRounded = CeilToNextPowerOfTwo(culledObjectCount);
     BitonicSort(threadID, culledObjectCountRounded);
 
     BuildPrefixSum(threadID, culledObjectCountRounded);
 
-    WriteIndirectCommands(threadID, viewIndex, culledObjectCount);
+    WriteIndirectCommand(threadID, viewIndex, culledObjectCount);
 
     {
         for (uint idx = threadID; idx < culledObjectCount; idx += BLK_GPU_CULLING_GROUP_SIZE)
