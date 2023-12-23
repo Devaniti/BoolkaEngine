@@ -476,29 +476,33 @@ namespace Boolka
 
         static const size_t elementsPerLine = 16;
 
-        bool anyFlagsFound = false;
-
         static bool interpretAsFloat = false;
         ImGui::Checkbox("Interpret values as float", &interpretAsFloat);
 
-        for (size_t i = 0; i < BLK_DEBUG_DATA_ELEMENT_COUNT; ++i)
+        size_t end = 0;
+        for (size_t i = BLK_DEBUG_DATA_ELEMENT_COUNT - 1; i < BLK_DEBUG_DATA_ELEMENT_COUNT; --i)
+        {
+            if (debugStats.gpuDebugMarkers[i])
+			{
+                end = i + 1;
+				break;
+			}
+        }
+
+        for (size_t i = 0; i < end; ++i)
         {
             uint markerValue = debugStats.gpuDebugMarkers[i];
-            if (markerValue)
+            if (interpretAsFloat)
             {
-                anyFlagsFound = true;
-                if (interpretAsFloat)
-                {
-                    ImGui::Text("Flag %d - data %f", i, asfloat(markerValue));
-                }
-                else
-                {
-                    ImGui::Text("Flag %d - data %d", i, markerValue);
-                }
+                ImGui::Text("Flag %d - data %f", i, asfloat(markerValue));
+            }
+            else
+            {
+                ImGui::Text("Flag %d - data %d", i, markerValue);
             }
         }
 
-        if (!anyFlagsFound)
+        if (end ==  0)
         {
             ImGui::TextUnformatted("No flags set");
         }

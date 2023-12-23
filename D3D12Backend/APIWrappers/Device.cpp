@@ -17,8 +17,9 @@ namespace Boolka
 {
 
     Device::Device()
-        : m_Device(nullptr)
-        , m_Adapter(nullptr)
+        : m_Adapter(nullptr) 
+        , m_Device(nullptr)
+        , m_SupportsRaytracing(false)
     {
     }
 
@@ -193,10 +194,10 @@ namespace Boolka
 
             if (m_Adapter == nullptr)
             {
-				m_Adapter = adapter;
-				m_Device = device;
-			}
-			else
+                m_Adapter = adapter;
+                m_Device = device;
+            }
+            else
             {
                 adapter->Release();
                 device->Release();
@@ -208,8 +209,8 @@ namespace Boolka
 
         if (m_Adapter != nullptr)
         {
-			return true;
-		}
+            return true;
+        }
 
         ::MessageBoxW(0,
                       L"No supported GPUs found.\nRequired features are:\nResource Binding Tier 3\n"
@@ -235,6 +236,8 @@ namespace Boolka
     void Device::InitializeDebug()
     {
         SetDebugBreakSeverity(D3D12_MESSAGE_SEVERITY_WARNING);
+        SetGPUBasedValidationShaderPatchMode(
+            D3D12_GPU_BASED_VALIDATION_SHADER_PATCH_MODE_GUARDED_VALIDATION);
     }
 
     void Device::SetDebugBreakSeverity(D3D12_MESSAGE_SEVERITY severity)
@@ -275,6 +278,32 @@ namespace Boolka
         // reference left that we'll release right after
         // Device::ReportObjectLeaks call
         BLK_ASSERT(refCount == 1);
+    }
+
+    void Device::SetGPUBasedValidationShaderPatchMode(
+        D3D12_GPU_BASED_VALIDATION_SHADER_PATCH_MODE patchMode)
+    {
+        ID3D12DebugDevice2* debugDevice = nullptr;
+        HRESULT hr = m_Device->QueryInterface(IID_PPV_ARGS(&debugDevice));
+        if (FAILED(hr))
+        {
+            return;
+        }
+        D3D12_DEBUG_DEVICE_GPU_BASED_VALIDATION_SETTINGS settings = {};
+        hr = debugDevice->GetDebugParameter(
+            D3D12_DEBUG_DEVICE_PARAMETER_GPU_BASED_VALIDATION_SETTINGS, &settings,
+            sizeof(settings));
+        if (FAILED(hr))
+        {
+            debugDevice->Release();
+            return;
+        }
+        settings.DefaultShaderPatchMode = patchMode;
+        hr = debugDevice->SetDebugParameter(
+            D3D12_DEBUG_DEVICE_PARAMETER_GPU_BASED_VALIDATION_SETTINGS, &settings,
+            sizeof(settings));
+        BLK_ASSERT(SUCCEEDED(hr));
+        debugDevice->Release();
     }
 
     void Device::FilterMessage(D3D12_MESSAGE_ID id)
