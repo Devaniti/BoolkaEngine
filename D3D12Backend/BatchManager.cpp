@@ -42,7 +42,8 @@ namespace Boolka
 
         arguments[0].Type = D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH_MESH;
 
-        bool result = m_CommandSignature.Initialize(device, nullptr, sizeof(HLSLShared::CullingCommandSignature),
+        bool result = m_CommandSignature.Initialize(device, nullptr,
+                                                    sizeof(HLSLShared::CullingCommandSignature),
                                                     ARRAYSIZE(arguments), arguments);
         BLK_ASSERT(result);
 

@@ -24,11 +24,11 @@ namespace Boolka
 
         auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
         auto& resourceContainer = engineContext.GetResourceContainer();
-                
+
         if (!m_Enabled)
         {
-			return true;
-		}
+            return true;
+        }
 
         RootSignature& rootSig =
             resourceContainer.GetRootSignature(ResourceContainer::RootSig::Default);

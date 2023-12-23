@@ -225,7 +225,7 @@ namespace Boolka
     }
 
     void DebugOverlayPass::ImguiHardwareWindow()
-{
+    {
         ImGui::Begin("Hardware");
 
         ImGui::Text("GPU");
@@ -483,10 +483,10 @@ namespace Boolka
         for (size_t i = BLK_DEBUG_DATA_ELEMENT_COUNT - 1; i < BLK_DEBUG_DATA_ELEMENT_COUNT; --i)
         {
             if (debugStats.gpuDebugMarkers[i])
-			{
+            {
                 end = i + 1;
-				break;
-			}
+                break;
+            }
         }
 
         for (size_t i = 0; i < end; ++i)
@@ -502,7 +502,7 @@ namespace Boolka
             }
         }
 
-        if (end ==  0)
+        if (end == 0)
         {
             ImGui::TextUnformatted("No flags set");
         }

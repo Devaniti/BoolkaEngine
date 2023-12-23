@@ -209,7 +209,7 @@ namespace Boolka
     }
 
     void UpdateRenderPass::ReadbackHelperBuffers(RenderContext& renderContext,
-                                                        ResourceTracker& resourceTracker)
+                                                 ResourceTracker& resourceTracker)
     {
         auto [engineContext, frameContext, threadContext] = renderContext.GetContexts();
         auto& resourceContainer = engineContext.GetResourceContainer();
@@ -231,8 +231,7 @@ namespace Boolka
                                       BLK_DEBUG_DATA_ELEMENT_COUNT * sizeof(uint));
         commandList->CopyBufferRegion(m_ReadbackBuffers[frameIndex].Get(),
                                       BLK_DEBUG_DATA_ELEMENT_COUNT * sizeof(uint), metricsBuf.Get(),
-                                      0,
-                                      BLK_PROFILING_DATA_ELEMENT_COUNT * sizeof(uint));
+                                      0, BLK_PROFILING_DATA_ELEMENT_COUNT * sizeof(uint));
 
         resourceTracker.Transition(metricsBuf, commandList, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         resourceTracker.Transition(markersBuf, commandList, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);

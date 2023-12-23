@@ -17,7 +17,7 @@ namespace Boolka
 {
 
     Device::Device()
-        : m_Adapter(nullptr) 
+        : m_Adapter(nullptr)
         , m_Device(nullptr)
         , m_SupportsRaytracing(false)
     {

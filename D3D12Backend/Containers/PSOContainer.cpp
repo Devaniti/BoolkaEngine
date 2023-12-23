@@ -166,8 +166,8 @@ namespace Boolka
     {
         if (device.SupportsRaytracing())
         {
-			m_ShaderTablesUploadBuffer.Unload();
-		}
+            m_ShaderTablesUploadBuffer.Unload();
+        }
     }
 
     GraphicPipelineState& PSOContainer::GetPSO(GraphicPSO id)
