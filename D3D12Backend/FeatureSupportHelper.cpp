@@ -42,13 +42,6 @@ namespace Boolka
             return false;
         }
 
-        D3D12_FEATURE_DATA_D3D12_OPTIONS1 options1{};
-        hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS1, &options1, sizeof(options1));
-        if (FAILED(hr) || options1.WaveLaneCountMax < 32 || options1.WaveLaneCountMin > 32)
-        {
-            return false;
-        }
-
         return true;
     }
 
