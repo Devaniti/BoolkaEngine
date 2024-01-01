@@ -4,6 +4,7 @@
 
 #include "APIWrappers/Raytracing/AccelerationStructure/BottomLevelAS.h"
 #include "APIWrappers/Raytracing/AccelerationStructure/TopLevelAS.h"
+#include "APIWrappers/Resources/UAVBarrier.h"
 #include "BoolkaCommon/DebugHelpers/DebugFileWriter.h"
 #include "Scene.h"
 
@@ -286,6 +287,8 @@ namespace Boolka
             }
         }
 
+        UAVBarrier::Barrier(initCommandList, m_ASBuffer);
+
         currentBlasDestAddress = blasDestAddress;
 
         {
@@ -317,6 +320,7 @@ namespace Boolka
 
         initCommandList->CopyResource(m_TLASParametersBuffer.Get(),
                                       m_TLASParametersUploadBuffer.Get());
+
         ResourceTransition::Transition(initCommandList, m_TLASParametersBuffer,
                                        D3D12_RESOURCE_STATE_COPY_DEST,
                                        D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
@@ -429,6 +433,8 @@ namespace Boolka
         }
 
         currentDeserializedData = m_ASBuffer->GetGPUVirtualAddress() + tlasSize;
+
+        UAVBarrier::Barrier(initCommandList, m_ASBuffer);
 
         UINT64 tlasParametersSize = sizeof(D3D12_RAYTRACING_INSTANCE_DESC) * objectCount;
 
