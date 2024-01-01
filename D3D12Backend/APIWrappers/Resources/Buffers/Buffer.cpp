@@ -13,6 +13,8 @@ namespace Boolka
         BLK_ASSERT(m_Resource == nullptr);
         BLK_ASSERT(initialState == D3D12_RESOURCE_STATE_COMMON ||
                    initialState == D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE);
+        BLK_ASSERT(size < 2ull * 1024ull * 1024ull * 1024ull); // 2GB
+        BLK_ASSERT(size > 0);
 
         D3D12_HEAP_PROPERTIES heapProperties = {};
         heapProperties.Type = heapType;
