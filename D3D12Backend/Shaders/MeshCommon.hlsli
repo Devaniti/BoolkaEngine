@@ -11,9 +11,9 @@ cbuffer PassConstData : register(b2)
 struct Vertex
 {
     float4 position : SV_Position;
-    nointerpolation int materialID : MATERIAL;
-    float3 normal : NORMAL;
-    float2 texcoord : TEXCOORD;
+    nointerpolation int4 materialID : MATERIAL;
+    float4 normal : NORMAL;
+    float4 texcoord : TEXCOORD;
 };
 
 struct Payload
@@ -111,8 +111,8 @@ Vertex GetVertex(in const Payload payload, in const MeshletData meshletData, in 
 
     Out.materialID = meshletData.MaterialID;
     Out.position = mul(float4(vertexData1.position, 1.0f), Frame.viewProjMatrix);
-    Out.normal = normalize(mul(normalize(vertexData2.normal), (float3x3)Frame.viewMatrix));
-    Out.texcoord = float2(vertexData1.texCoordX, vertexData2.texCoordY);
+    Out.normal = float4(normalize(mul(normalize(vertexData2.normal), (float3x3) Frame.viewMatrix)), 0.0f);
+    Out.texcoord = float4(vertexData1.texCoordX, vertexData2.texCoordY, 0.0f, 0.0f);
 
     return Out;
 }
