@@ -13,12 +13,12 @@ namespace Boolka
         auto& resourceContainer = engineContext.GetResourceContainer();
 
         UINT frameIndex = frameContext.GetFrameIndex();
-        Texture2D& albedo = resourceContainer.GetTexture(ResourceContainer::Tex::GBufferAlbedo);
-        Texture2D& normal = resourceContainer.GetTexture(ResourceContainer::Tex::GBufferNormal);
+        Texture2D& albedo = resourceContainer.GetTexture(ResourceContainer::Tex2D::GBufferAlbedo);
+        Texture2D& normal = resourceContainer.GetTexture(ResourceContainer::Tex2D::GBufferNormal);
         Texture2D& raytraceResults =
-            resourceContainer.GetTexture(ResourceContainer::Tex::GBufferRaytraceResults);
-        Texture2D& depth = resourceContainer.GetTexture(ResourceContainer::Tex::GbufferDepth);
-        Texture2D& lightBuffer = resourceContainer.GetTexture(ResourceContainer::Tex::LightBuffer);
+            resourceContainer.GetTexture(ResourceContainer::Tex2D::GBufferRaytraceResults);
+        Texture2D& depth = resourceContainer.GetTexture(ResourceContainer::Tex2D::GbufferDepth);
+        Texture2D& lightBuffer = resourceContainer.GetTexture(ResourceContainer::Tex2D::LightBuffer);
         RenderTargetView& lightBufferRTV =
             resourceContainer.GetRTV(ResourceContainer::RTV::LightBuffer);
         DescriptorHeap& mainDescriptorHeap =
@@ -44,7 +44,7 @@ namespace Boolka
         for (size_t lightIndex = 0; lightIndex < lights.size(); ++lightIndex)
         {
             auto& shadowMap =
-                resourceContainer.GetTexture(ResourceContainer::Tex::ShadowMapCube0 + lightIndex);
+                resourceContainer.GetTexture(ResourceContainer::Tex2D::ShadowMapCube0 + lightIndex);
             resourceTracker.Transition(shadowMap, commandList,
                                        D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
         }

@@ -59,11 +59,11 @@ namespace Boolka
         for (size_t lightIndex = 0; lightIndex < lights.size(); ++lightIndex)
         {
             auto& shadowMap =
-                resourceContainer.GetTexture(ResourceContainer::Tex::ShadowMapCube0 + lightIndex);
+                resourceContainer.GetTexture(ResourceContainer::Tex2D::ShadowMapCube0 + lightIndex);
             resourceTracker.Transition(shadowMap, commandList, D3D12_RESOURCE_STATE_DEPTH_WRITE);
         }
         {
-            auto& shadowMap = resourceContainer.GetTexture(ResourceContainer::Tex::ShadowMapSun);
+            auto& shadowMap = resourceContainer.GetTexture(ResourceContainer::Tex2D::ShadowMapSun);
             resourceTracker.Transition(shadowMap, commandList, D3D12_RESOURCE_STATE_DEPTH_WRITE);
         }
 

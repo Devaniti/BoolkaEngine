@@ -384,6 +384,9 @@
     <ClInclude Include="Containers\RTASContainer.h">
       <Filter>Containers</Filter>
     </ClInclude>
+    <ClInclude Include="APIWrappers\Resources\Textures\Texture1D.h">
+      <Filter>APIWrappers\Resources\Textures</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WindowManagement\WindowManager.cpp">
@@ -649,6 +652,9 @@
     <ClCompile Include="Containers\RTASContainer.cpp">
       <Filter>Containers</Filter>
     </ClCompile>
+    <ClCompile Include="APIWrappers\Resources\Textures\Texture1D.cpp">
+      <Filter>APIWrappers\Resources\Textures</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\RootSig.hlsl">
@@ -708,6 +714,9 @@
     <FxCompile Include="Shaders\CullingPass\GPUCullingComputeShader.hlsl">
       <Filter>Shaders\CullingPass</Filter>
     </FxCompile>
+    <FxCompile Include="Shaders\ToneMappingPass\ToneMappingPassCS.hlsl">
+      <Filter>Shaders\ToneMappingPass</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\DebugPass\DebugPassShadersCommon.hlsli">
@@ -743,6 +752,9 @@
     </None>
     <None Include="Shaders\LightingLibrary\Lighting.hlsli">
       <Filter>Shaders\LightingLibrary</Filter>
+    </None>
+    <None Include="Shaders\ToneMappingPass\ToneMappingPassCommon.hlsli">
+      <Filter>Shaders\ToneMappingPass</Filter>
     </None>
   </ItemGroup>
 </Project>

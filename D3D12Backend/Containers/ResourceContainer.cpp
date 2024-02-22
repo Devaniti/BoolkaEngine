@@ -14,7 +14,7 @@
 namespace Boolka
 {
 
-    BLK_DEFINE_ENUM_OPERATORS(ResourceContainer::Tex);
+    BLK_DEFINE_ENUM_OPERATORS(ResourceContainer::Tex2D);
     BLK_DEFINE_ENUM_OPERATORS(ResourceContainer::Buf);
     BLK_DEFINE_ENUM_OPERATORS(ResourceContainer::SRV);
     BLK_DEFINE_ENUM_OPERATORS(ResourceContainer::RTV);
@@ -61,39 +61,44 @@ namespace Boolka
         dsvClearValue.Format = DXGI_FORMAT_D32_FLOAT;
         dsvClearValue.DepthStencil.Depth = 1.0f;
 
-        GetTexture(Tex::GBufferAlbedo)
+        GetTexture(Tex2D::GBufferAlbedo)
             .Initialize(device, D3D12_HEAP_TYPE_DEFAULT, width, height, 1, gbufferAlbedoFormat,
                         D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET, &rtvClearValue,
                         D3D12_RESOURCE_STATE_RENDER_TARGET);
-        GetTexture(Tex::GBufferNormal)
+        GetTexture(Tex2D::GBufferNormal)
             .Initialize(device, D3D12_HEAP_TYPE_DEFAULT, width, height, 1, gbufferAlbedoFormat,
                         D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET, &rtvClearValue,
                         D3D12_RESOURCE_STATE_RENDER_TARGET);
-        GetTexture(Tex::GBufferRaytraceResults)
+        GetTexture(Tex2D::GBufferRaytraceResults)
             .Initialize(device, D3D12_HEAP_TYPE_DEFAULT, width, height, 1, gbufferAlbedoFormat,
                         D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS, nullptr,
                         D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-        GetTexture(Tex::LightBuffer)
+        GetTexture(Tex2D::LightBuffer)
             .Initialize(device, D3D12_HEAP_TYPE_DEFAULT, width, height, 1, gbufferAlbedoFormat,
                         D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET, &rtvClearValue,
                         D3D12_RESOURCE_STATE_RENDER_TARGET);
-        GetTexture(Tex::GbufferDepth)
+        GetTexture(Tex2D::GbufferDepth)
             .Initialize(device, D3D12_HEAP_TYPE_DEFAULT, width, height, 1, gbufferDepthFormat,
                         D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL, &dsvClearValue,
                         D3D12_RESOURCE_STATE_DEPTH_WRITE);
         for (size_t i = 0; i < BLK_MAX_LIGHT_COUNT; i++)
         {
-            GetTexture(Tex::ShadowMapCube0 + i)
+            GetTexture(Tex2D::ShadowMapCube0 + i)
                 .Initialize(device, D3D12_HEAP_TYPE_DEFAULT, BLK_LIGHT_SHADOWMAP_SIZE,
                             BLK_LIGHT_SHADOWMAP_SIZE, 1, shadowMapFormat,
                             D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL, &dsvClearValue,
                             D3D12_RESOURCE_STATE_DEPTH_WRITE, 6);
         }
-        GetTexture(Tex::ShadowMapSun)
+        GetTexture(Tex2D::ShadowMapSun)
             .Initialize(device, D3D12_HEAP_TYPE_DEFAULT, BLK_SUN_SHADOWMAP_SIZE,
                         BLK_SUN_SHADOWMAP_SIZE, 1, shadowMapFormat,
                         D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL, &dsvClearValue,
                         D3D12_RESOURCE_STATE_DEPTH_WRITE);
+        GetTexture(Tex1D::TonemappingLUT)
+            .Initialize(device, D3D12_HEAP_TYPE_DEFAULT, BLK_TONEMAPPING_LUT_RESOLUTION, 1,
+                        DXGI_FORMAT_R32_FLOAT,
+                        D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS, nullptr,
+                        D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
         GetDescriptorHeap(DescHeap::RTVHeap)
             .Initialize(device, rtvHeapDescriptorCount, D3D12_DESCRIPTOR_HEAP_TYPE_RTV,
@@ -140,7 +145,7 @@ namespace Boolka
             m_FlippedResources[i].m_BackBuffer = &displayController.GetBuffer(i);
         for (UINT i = 0; i < BLK_IN_FLIGHT_FRAMES; ++i)
             GetBackBufferRTV(i).Initialize(device, *m_FlippedResources[i].m_BackBuffer,
-                                           DXGI_FORMAT_R8G8B8A8_UNORM,
+                                           DXGI_FORMAT_R10G10B10A2_UNORM,
                                            GetDescriptorHeap(DescHeap::RTVHeap)
                                                .GetCPUHandle(static_cast<size_t>(RTV::Count) + i));
         GetBuffer(Buf::Frame)
@@ -170,31 +175,35 @@ namespace Boolka
         const UINT uavOffset = static_cast<UINT>(MainSRVDescriptorHeapOffsets::UAVHeapOffset);
 
         UnorderedAccessView::Initialize(
-            device, GetTexture(Tex::GBufferRaytraceResults), DXGI_FORMAT_R16G16B16A16_FLOAT,
+            device, GetTexture(Tex2D::GBufferRaytraceResults), DXGI_FORMAT_R16G16B16A16_FLOAT,
             GetDescriptorHeap(DescHeap::MainHeap)
-                .GetCPUHandle(uavOffset + static_cast<UINT>(SRV::GBufferAlbedo)));
+                .GetCPUHandle(uavOffset + static_cast<UINT>(UAV::GBufferRaytraceResults)));
+        UnorderedAccessView::Initialize(
+            device, GetTexture(Tex1D::TonemappingLUT), DXGI_FORMAT_R32_FLOAT,
+            GetDescriptorHeap(DescHeap::MainHeap)
+                .GetCPUHandle(uavOffset + static_cast<UINT>(UAV::TonemappingLUT)));
 
         const UINT srvOffset = static_cast<UINT>(MainSRVDescriptorHeapOffsets::SRVHeapOffset);
 
         ShaderResourceView::Initialize(
-            device, GetTexture(Tex::GBufferAlbedo),
+            device, GetTexture(Tex2D::GBufferAlbedo),
             GetDescriptorHeap(DescHeap::MainHeap)
                 .GetCPUHandle(srvOffset + static_cast<UINT>(SRV::GBufferAlbedo)));
         ShaderResourceView::Initialize(
-            device, GetTexture(Tex::GBufferNormal),
+            device, GetTexture(Tex2D::GBufferNormal),
             GetDescriptorHeap(DescHeap::MainHeap)
                 .GetCPUHandle(srvOffset + static_cast<UINT>(SRV::GBufferNormal)));
         ShaderResourceView::Initialize(
-            device, GetTexture(Tex::GBufferRaytraceResults),
+            device, GetTexture(Tex2D::GBufferRaytraceResults),
             GetDescriptorHeap(DescHeap::MainHeap)
                 .GetCPUHandle(srvOffset + static_cast<UINT>(SRV::GBufferRaytraceResults)));
         ShaderResourceView::Initialize(
-            device, GetTexture(Tex::GbufferDepth),
+            device, GetTexture(Tex2D::GbufferDepth),
             GetDescriptorHeap(DescHeap::MainHeap)
                 .GetCPUHandle(srvOffset + static_cast<UINT>(SRV::GbufferDepth)),
             gbufferDepthSRVFormat);
         ShaderResourceView::Initialize(
-            device, GetTexture(Tex::LightBuffer),
+            device, GetTexture(Tex2D::LightBuffer),
             GetDescriptorHeap(DescHeap::MainHeap)
                 .GetCPUHandle(srvOffset + static_cast<UINT>(SRV::LightBuffer)));
         ShaderResourceView::Initialize(
@@ -205,32 +214,37 @@ namespace Boolka
         for (UINT i = 0; i < BLK_MAX_LIGHT_COUNT; i++)
         {
             ShaderResourceView::InitializeCube(
-                device, GetTexture(Tex::ShadowMapCube0 + i),
+                device, GetTexture(Tex2D::ShadowMapCube0 + i),
                 GetDescriptorHeap(DescHeap::MainHeap)
                     .GetCPUHandle(srvOffset + static_cast<UINT>(SRV::ShadowMapCube0 + i)),
                 shadowMapSRVFormat);
         }
         ShaderResourceView::Initialize(
-            device, GetTexture(Tex::ShadowMapSun),
+            device, GetTexture(Tex2D::ShadowMapSun),
             GetDescriptorHeap(DescHeap::MainHeap)
                 .GetCPUHandle(srvOffset + static_cast<size_t>(SRV::ShadowMapSun)),
             shadowMapSRVFormat);
+        ShaderResourceView::Initialize(
+            device, GetTexture(Tex1D::TonemappingLUT),
+            GetDescriptorHeap(DescHeap::MainHeap)
+                .GetCPUHandle(srvOffset + static_cast<size_t>(SRV::TonemappingLUT)),
+            DXGI_FORMAT_R32_FLOAT);
 
         GetRTV(RTV::GBufferAlbedo)
-            .Initialize(device, GetTexture(Tex::GBufferAlbedo), gbufferAlbedoFormat,
+            .Initialize(device, GetTexture(Tex2D::GBufferAlbedo), gbufferAlbedoFormat,
                         GetDescriptorHeap(DescHeap::RTVHeap)
                             .GetCPUHandle(static_cast<size_t>(RTV::GBufferAlbedo)));
         GetRTV(RTV::GBufferNormal)
-            .Initialize(device, GetTexture(Tex::GBufferNormal), gbufferAlbedoFormat,
+            .Initialize(device, GetTexture(Tex2D::GBufferNormal), gbufferAlbedoFormat,
                         GetDescriptorHeap(DescHeap::RTVHeap)
                             .GetCPUHandle(static_cast<size_t>(RTV::GBufferNormal)));
         GetRTV(RTV::LightBuffer)
-            .Initialize(device, GetTexture(Tex::LightBuffer), gbufferAlbedoFormat,
+            .Initialize(device, GetTexture(Tex2D::LightBuffer), gbufferAlbedoFormat,
                         GetDescriptorHeap(DescHeap::RTVHeap)
                             .GetCPUHandle(static_cast<size_t>(RTV::LightBuffer)));
 
         GetDSV(DSV::GbufferDepth)
-            .Initialize(device, GetTexture(Tex::GbufferDepth), gbufferDepthFormat,
+            .Initialize(device, GetTexture(Tex2D::GbufferDepth), gbufferDepthFormat,
                         GetDescriptorHeap(DescHeap::DSVHeap)
                             .GetCPUHandle(static_cast<size_t>(DSV::GbufferDepth)));
         for (UINT textureIndex = 0; textureIndex < BLK_MAX_LIGHT_COUNT; textureIndex++)
@@ -238,7 +252,7 @@ namespace Boolka
             for (UINT16 arraySlice = 0; arraySlice < BLK_TEXCUBE_FACE_COUNT; ++arraySlice)
             {
                 GetDSV(DSV::ShadowMapLight0 + textureIndex * BLK_TEXCUBE_FACE_COUNT + arraySlice)
-                    .Initialize(device, GetTexture(Tex::ShadowMapCube0 + textureIndex),
+                    .Initialize(device, GetTexture(Tex2D::ShadowMapCube0 + textureIndex),
                                 shadowMapFormat,
                                 GetDescriptorHeap(DescHeap::DSVHeap)
                                     .GetCPUHandle(static_cast<size_t>(
@@ -247,7 +261,7 @@ namespace Boolka
             }
         }
         GetDSV(DSV::ShadowMapSun)
-            .Initialize(device, GetTexture(Tex::ShadowMapSun), gbufferDepthFormat,
+            .Initialize(device, GetTexture(Tex2D::ShadowMapSun), gbufferDepthFormat,
                         GetDescriptorHeap(DescHeap::DSVHeap)
                             .GetCPUHandle(static_cast<size_t>(DSV::ShadowMapSun)));
 
@@ -263,6 +277,7 @@ namespace Boolka
                 .GetCPUHandle(static_cast<size_t>(MainSRVDescriptorHeapOffsets::CBVHeapOffset) +
                               static_cast<size_t>(CBV::DeferredLighting)),
             deferredLightingCbSize);
+
         UnorderedAccessView::Initialize(
             device, GetBuffer(Buf::GPUCullingCommand), gpuCullingCommandBufElementSize,
             gpuCullingCommandBufElements, GetCPUDescriptor(Buf::GPUCullingCommand));
@@ -298,20 +313,22 @@ namespace Boolka
             GetFlippableUploadBuffer(i, FlipUploadBuf::GPUCulling)
                 .Initialize(device, gpuCullingCBSize);
 
-        resourceTracker.RegisterResource(GetTexture(Tex::GBufferAlbedo),
-                                         D3D12_RESOURCE_STATE_RENDER_TARGET);
-        resourceTracker.RegisterResource(GetTexture(Tex::GBufferNormal),
-                                         D3D12_RESOURCE_STATE_RENDER_TARGET);
-        resourceTracker.RegisterResource(GetTexture(Tex::GBufferRaytraceResults),
+        resourceTracker.RegisterResource(GetTexture(Tex1D::TonemappingLUT),
                                          D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-        resourceTracker.RegisterResource(GetTexture(Tex::LightBuffer),
+        resourceTracker.RegisterResource(GetTexture(Tex2D::GBufferAlbedo),
                                          D3D12_RESOURCE_STATE_RENDER_TARGET);
-        resourceTracker.RegisterResource(GetTexture(Tex::GbufferDepth),
+        resourceTracker.RegisterResource(GetTexture(Tex2D::GBufferNormal),
+                                         D3D12_RESOURCE_STATE_RENDER_TARGET);
+        resourceTracker.RegisterResource(GetTexture(Tex2D::GBufferRaytraceResults),
+                                         D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        resourceTracker.RegisterResource(GetTexture(Tex2D::LightBuffer),
+                                         D3D12_RESOURCE_STATE_RENDER_TARGET);
+        resourceTracker.RegisterResource(GetTexture(Tex2D::GbufferDepth),
                                          D3D12_RESOURCE_STATE_DEPTH_WRITE);
         for (size_t i = 0; i < BLK_MAX_LIGHT_COUNT; i++)
-            resourceTracker.RegisterResource(GetTexture(Tex::ShadowMapCube0 + i),
+            resourceTracker.RegisterResource(GetTexture(Tex2D::ShadowMapCube0 + i),
                                              D3D12_RESOURCE_STATE_DEPTH_WRITE);
-        resourceTracker.RegisterResource(GetTexture(Tex::ShadowMapSun),
+        resourceTracker.RegisterResource(GetTexture(Tex2D::ShadowMapSun),
                                          D3D12_RESOURCE_STATE_DEPTH_WRITE);
         for (UINT i = 0; i < BLK_IN_FLIGHT_FRAMES; ++i)
             resourceTracker.RegisterResource(GetBackBuffer(i), D3D12_RESOURCE_STATE_PRESENT);
@@ -331,16 +348,17 @@ namespace Boolka
                                          D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 #ifdef BLK_RENDER_DEBUG
-        RenderDebug::SetDebugName(GetTexture(Tex::GBufferAlbedo).Get(), L"GBufferAlbedo");
-        RenderDebug::SetDebugName(GetTexture(Tex::GBufferNormal).Get(), L"GBufferNormal");
-        RenderDebug::SetDebugName(GetTexture(Tex::GBufferRaytraceResults).Get(),
+        RenderDebug::SetDebugName(GetTexture(Tex1D::TonemappingLUT).Get(), L"TonemappingLUT");
+        RenderDebug::SetDebugName(GetTexture(Tex2D::GBufferAlbedo).Get(), L"GBufferAlbedo");
+        RenderDebug::SetDebugName(GetTexture(Tex2D::GBufferNormal).Get(), L"GBufferNormal");
+        RenderDebug::SetDebugName(GetTexture(Tex2D::GBufferRaytraceResults).Get(),
                                   L"GBufferRaytraceResults");
-        RenderDebug::SetDebugName(GetTexture(Tex::LightBuffer).Get(), L"LightBuffer");
-        RenderDebug::SetDebugName(GetTexture(Tex::GbufferDepth).Get(), L"GbufferDepth");
+        RenderDebug::SetDebugName(GetTexture(Tex2D::LightBuffer).Get(), L"LightBuffer");
+        RenderDebug::SetDebugName(GetTexture(Tex2D::GbufferDepth).Get(), L"GbufferDepth");
         for (size_t i = 0; i < BLK_MAX_LIGHT_COUNT; i++)
-            RenderDebug::SetDebugName(GetTexture(Tex::ShadowMapCube0 + i).Get(), L"ShadowMapCube%d",
-                                      i);
-        RenderDebug::SetDebugName(GetTexture(Tex::ShadowMapSun).Get(), L"ShadowMapSun");
+            RenderDebug::SetDebugName(GetTexture(Tex2D::ShadowMapCube0 + i).Get(),
+                                      L"ShadowMapCube%d", i);
+        RenderDebug::SetDebugName(GetTexture(Tex2D::ShadowMapSun).Get(), L"ShadowMapSun");
 
         RenderDebug::SetDebugName(GetBuffer(Buf::Frame).Get(), L"FrameConstantBuffer");
         RenderDebug::SetDebugName(GetBuffer(Buf::DeferredLighting).Get(),
@@ -369,7 +387,8 @@ namespace Boolka
 
     void ResourceContainer::Unload()
     {
-        BLK_UNLOAD_ARRAY(m_Textures);
+        BLK_UNLOAD_ARRAY(m_Textures1D);
+        BLK_UNLOAD_ARRAY(m_Textures2D);
         BLK_UNLOAD_ARRAY(m_Buffers);
         BLK_UNLOAD_ARRAY(m_DescriptorHeaps);
         BLK_UNLOAD_ARRAY(m_RTVs);
@@ -385,9 +404,14 @@ namespace Boolka
             BLK_UNLOAD_ARRAY(flippedResource.m_ConstantUploadBuffer);
     }
 
-    Texture2D& ResourceContainer::GetTexture(Tex id)
+    Texture1D& ResourceContainer::GetTexture(Tex1D id)
     {
-        return m_Textures[static_cast<size_t>(id)];
+        return m_Textures1D[static_cast<size_t>(id)];
+    }
+
+    Texture2D& ResourceContainer::GetTexture(Tex2D id)
+    {
+        return m_Textures2D[static_cast<size_t>(id)];
     }
 
     Buffer& ResourceContainer::GetBuffer(Buf id)

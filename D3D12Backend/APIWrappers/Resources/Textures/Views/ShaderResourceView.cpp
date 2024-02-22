@@ -8,10 +8,28 @@
 namespace Boolka
 {
 
+    void ShaderResourceView::Initialize(Device& device, Texture1D& texture,
+                                        D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor)
+    {
+        device->CreateShaderResourceView(texture.Get(), nullptr, destDescriptor);
+    }
+
     void ShaderResourceView::Initialize(Device& device, Texture2D& texture,
                                         D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor)
     {
         device->CreateShaderResourceView(texture.Get(), nullptr, destDescriptor);
+    }
+
+    void ShaderResourceView::Initialize(Device& device, Texture1D& texture,
+                                        D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor,
+                                        DXGI_FORMAT format)
+    {
+        D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+        srvDesc.Format = format;
+        srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+        srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE1D;
+        srvDesc.Texture2D.MipLevels = -1;
+        device->CreateShaderResourceView(texture.Get(), &srvDesc, destDescriptor);
     }
 
     void ShaderResourceView::Initialize(Device& device, Texture2D& texture,

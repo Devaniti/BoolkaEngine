@@ -9,8 +9,12 @@ namespace Boolka
     class ShaderResourceView
     {
     public:
+        static void Initialize(Device& device, Texture1D& texture,
+                               D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor);
         static void Initialize(Device& device, Texture2D& texture,
                                D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor);
+        static void Initialize(Device& device, Texture1D& texture,
+                               D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor, DXGI_FORMAT format);
         static void Initialize(Device& device, Texture2D& texture,
                                D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor, DXGI_FORMAT format);
         static void Initialize(Device& device, Buffer& buffer, UINT elementCount, UINT stride,

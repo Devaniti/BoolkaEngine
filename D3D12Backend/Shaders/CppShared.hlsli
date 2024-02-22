@@ -10,7 +10,7 @@ using float4 = Vector4;
 using uint2 = Vector2u;
 using uint3 = Vector3u;
 using uint4 = Vector4u;
-// Frustum and AABB is types in Boolka namespace
+// Frustum and AABB are types in Boolka namespace
 
 #else
 
@@ -37,6 +37,12 @@ struct AABB
 #define BLM_MAX_AS_GROUPS (BLK_MAX_MESHLETS / BLK_AS_GROUP_SIZE)
 
 #define BLK_RT_MAX_RECURSION_DEPTH 4
+
+// Only used for performance/quality testing
+// Undefining this doesn't prevent resource creation
+#define BLK_TONEMAPPING_USE_LUT
+#define BLK_TONEMAPPING_LUT_RESOLUTION 32
+#define BLK_TONEMAPPING_LUT_GENERATION_GROUP_SIZE 32
 
 #define BLK_DEBUG_DATA_ELEMENT_COUNT 4096
 

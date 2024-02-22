@@ -107,6 +107,12 @@ namespace Boolka
         BLK_ASSERT_VAR(res);
         DebugFileReader::FreeMemory(CS);
 
+        CS = DebugFileReader::ReadFile("ToneMappingPassCS.cso");
+        res = GetPSO(ComputePSO::ToneMappingLUTGeneration)
+                  .Initialize(device, L"ComputePSO::ToneMappingPassCS", defaultRootSig, CS);
+        BLK_ASSERT_VAR(res);
+        DebugFileReader::FreeMemory(CS);
+
         if (device.SupportsRaytracing())
         {
             DebugProfileTimer rtpsoTimer;

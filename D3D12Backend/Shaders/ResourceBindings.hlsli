@@ -20,8 +20,9 @@ ConstantBuffer<CullingDataConstantBuffer> GPUCulling : register(b2, space1);
 RWTexture2D<float4> raytraceUAV : register(u0);
 RWStructuredBuffer<CullingCommandSignature> gpuCullingCommandUAV : register(u1);
 RWStructuredBuffer<uint> gpuCullingMeshletIndicesUAV : register(u2);
-RWStructuredBuffer<uint> profileMetrics : register(u3);
-RWStructuredBuffer<uint> debugMarkers : register(u4);
+RWTexture1D<float4> tonemappingLUTUAV : register(u3);
+RWStructuredBuffer<uint> profileMetrics : register(u4);
+RWStructuredBuffer<uint> debugMarkers : register(u5);
 
 // Pipeline resources
 Texture2D<float4> albedo : register(t0);
@@ -32,6 +33,7 @@ Texture2D<float4> lightBuffer : register(t4);
 StructuredBuffer<uint> gpuCullingMeshletIndices : register(t5);
 TextureCube<float> shadowMapCube[4] : register(t6);
 Texture2D<float> shadowMapSun : register(t10);
+Texture1D<float> tonemappingLUT : register(t11);
 
 // Meshlet data
 StructuredBuffer<VertexData1> vertexBuffer1 : register(t0, space1);

@@ -49,7 +49,7 @@ namespace Boolka
         DXGI_SWAP_CHAIN_DESC1 desc = {};
         desc.Width = 0;
         desc.Height = 0;
-        desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        desc.Format = DXGI_FORMAT_R10G10B10A2_UNORM;
         desc.Stereo = FALSE;
         desc.SampleDesc.Count = 1;
         desc.SampleDesc.Quality = 0;
@@ -78,10 +78,11 @@ namespace Boolka
         if (windowState.windowMode == WindowState::WindowMode::Fullscreen)
         {
             m_Swapchain->SetFullscreenState(TRUE, NULL);
-            m_Swapchain->ResizeBuffers(BLK_IN_FLIGHT_FRAMES, 0, 0, DXGI_FORMAT_R8G8B8A8_UNORM,
+            m_Swapchain->ResizeBuffers(BLK_IN_FLIGHT_FRAMES, 0, 0, DXGI_FORMAT_R10G10B10A2_UNORM,
                                        DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT);
             m_IsFullscreen = true;
         }
+        m_Swapchain->SetColorSpace1(DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020);
 
         m_PresentFlags = 0;
         if (windowState.presentInterval == 0 &&

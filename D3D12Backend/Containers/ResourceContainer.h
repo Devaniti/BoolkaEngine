@@ -3,6 +3,7 @@
 #include "APIWrappers/Resources/Buffers/Buffer.h"
 #include "APIWrappers/Resources/Buffers/UploadBuffer.h"
 #include "APIWrappers/Resources/Buffers/Views/ConstantBufferView.h"
+#include "APIWrappers/Resources/Textures/Texture1D.h"
 #include "APIWrappers/Resources/Textures/Texture2D.h"
 #include "APIWrappers/Resources/Textures/Views/DepthStencilView.h"
 #include "APIWrappers/Resources/Textures/Views/RenderTargetView.h"
@@ -21,7 +22,13 @@ namespace Boolka
     class [[nodiscard]] ResourceContainer
     {
     public:
-        enum class Tex
+        enum class Tex1D
+        {
+            TonemappingLUT,
+            Count
+        };
+
+        enum class Tex2D
         {
             GBufferAlbedo,
             GBufferNormal,
@@ -56,6 +63,7 @@ namespace Boolka
             GPUCullingMeshletIndices,
             ShadowMapCube0,
             ShadowMapSun = ShadowMapCube0 + BLK_MAX_LIGHT_COUNT,
+            TonemappingLUT,
             Count
         };
 
@@ -80,6 +88,7 @@ namespace Boolka
             GBufferRaytraceResults,
             GPUCullingCommand,
             GPUCullingMeshletIndices,
+            TonemappingLUT,
             ProfileMetrics,
             DebugMarkers,
             Count
@@ -153,7 +162,8 @@ namespace Boolka
                         DisplayController& displayController, ResourceTracker& resourceTracker);
         void Unload();
 
-        [[nodiscard]] Texture2D& GetTexture(Tex id);
+        [[nodiscard]] Texture1D& GetTexture(Tex1D id);
+        [[nodiscard]] Texture2D& GetTexture(Tex2D id);
         [[nodiscard]] Buffer& GetBuffer(Buf id);
         [[nodiscard]] DescriptorHeap& GetDescriptorHeap(DescHeap id);
         [[nodiscard]] RenderTargetView& GetRTV(RTV id);
@@ -171,7 +181,8 @@ namespace Boolka
     private:
         [[nodiscard]] UINT GetDescriptorHeapOffset(Buf id);
 
-        Texture2D m_Textures[static_cast<size_t>(Tex::Count)];
+        Texture1D m_Textures1D[static_cast<size_t>(Tex1D::Count)];
+        Texture2D m_Textures2D[static_cast<size_t>(Tex2D::Count)];
         Buffer m_Buffers[static_cast<size_t>(Buf::Count)];
         DescriptorHeap m_DescriptorHeaps[static_cast<size_t>(DescHeap::Count)];
         RenderTargetView m_RTVs[static_cast<size_t>(RTV::Count)];
@@ -194,7 +205,8 @@ namespace Boolka
         FlippedResources m_FlippedResources[BLK_IN_FLIGHT_FRAMES];
     };
 
-    BLK_DECLARE_ENUM_OPERATORS(ResourceContainer::Tex);
+    BLK_DECLARE_ENUM_OPERATORS(ResourceContainer::Tex1D);
+    BLK_DECLARE_ENUM_OPERATORS(ResourceContainer::Tex2D);
     BLK_DECLARE_ENUM_OPERATORS(ResourceContainer::Buf);
     BLK_DECLARE_ENUM_OPERATORS(ResourceContainer::SRV);
     BLK_DECLARE_ENUM_OPERATORS(ResourceContainer::RTV);

@@ -26,7 +26,10 @@ namespace Boolka
         auto& resourceContainer = engineContext.GetResourceContainer();
 
         UINT frameIndex = frameContext.GetFrameIndex();
-        Texture2D& lightBuffer = resourceContainer.GetTexture(ResourceContainer::Tex::LightBuffer);
+        Texture1D& tonemappingLUT =
+            resourceContainer.GetTexture(ResourceContainer::Tex1D::TonemappingLUT);
+        Texture2D& lightBuffer =
+            resourceContainer.GetTexture(ResourceContainer::Tex2D::LightBuffer);
         Texture2D& backBuffer = resourceContainer.GetBackBuffer(frameIndex);
         RenderTargetView& backBufferRTV = resourceContainer.GetBackBufferRTV(frameIndex);
         DescriptorHeap& mainDescriptorHeap =
@@ -34,6 +37,28 @@ namespace Boolka
         Buffer& frameConstantBuffer = resourceContainer.GetBuffer(ResourceContainer::Buf::Frame);
 
         GraphicCommandListImpl& commandList = threadContext.GetGraphicCommandList();
+
+        static bool firstTime = true;
+
+#ifdef BLK_TONEMAPPING_USE_LUT
+        if (firstTime)
+        {
+            firstTime = false;
+            resourceTracker.Transition(tonemappingLUT, commandList,
+                                       D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+            engineContext.BindSceneResourcesCompute(commandList);
+            commandList->SetPipelineState(
+                engineContext.GetPSOContainer()
+                    .GetPSO(PSOContainer::ComputePSO::ToneMappingLUTGeneration)
+                    .Get());
+            static_assert(
+                BLK_TONEMAPPING_LUT_RESOLUTION % BLK_TONEMAPPING_LUT_GENERATION_GROUP_SIZE == 0);
+            commandList->Dispatch(
+                BLK_TONEMAPPING_LUT_RESOLUTION / BLK_TONEMAPPING_LUT_GENERATION_GROUP_SIZE, 1, 1);
+            resourceTracker.Transition(tonemappingLUT, commandList,
+                                       D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+        }
+#endif
 
         resourceTracker.Transition(lightBuffer, commandList,
                                    D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
@@ -66,7 +91,8 @@ namespace Boolka
         commandList->SetPipelineState(
             engineContext.GetPSOContainer().GetPSO(PSOContainer::GraphicPSO::ToneMapping).Get());
 
-        commandList->DrawInstanced(3, 1, 0, 2);
+        for (int i = 0; i < 10; i++)
+            commandList->DrawInstanced(3, 1, 0, 2);
 
         return true;
     }

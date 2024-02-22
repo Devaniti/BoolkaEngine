@@ -24,7 +24,7 @@ namespace Boolka
 
         UINT frameIndex = frameContext.GetFrameIndex();
         Texture2D& gbufferDepth =
-            resourceContainer.GetTexture(ResourceContainer::Tex::GbufferDepth);
+            resourceContainer.GetTexture(ResourceContainer::Tex2D::GbufferDepth);
         DepthStencilView& gbufferDSV =
             resourceContainer.GetDSV(ResourceContainer::DSV::GbufferDepth);
         Buffer& frameConstantBuffer = resourceContainer.GetBuffer(ResourceContainer::Buf::Frame);

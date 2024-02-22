@@ -8,6 +8,16 @@
 namespace Boolka
 {
 
+    void UnorderedAccessView::Initialize(Device& device, Texture1D& texture, DXGI_FORMAT format,
+                                         D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor)
+    {
+        D3D12_UNORDERED_ACCESS_VIEW_DESC desc{};
+        desc.Format = format;
+        desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE1D;
+
+        device->CreateUnorderedAccessView(texture.Get(), nullptr, &desc, destDescriptor);
+    }
+
     void UnorderedAccessView::Initialize(Device& device, Texture2D& texture, DXGI_FORMAT format,
                                          D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor)
     {

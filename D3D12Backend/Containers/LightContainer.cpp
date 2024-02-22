@@ -59,7 +59,7 @@ namespace Boolka
 
     void LightContainer::Update(float deltaTime)
     {
-        m_CurrentRotation += deltaTime * 0.25f;
+        //m_CurrentRotation += deltaTime * 0.25f;
         UpdateLights();
         UpdateSun();
     }

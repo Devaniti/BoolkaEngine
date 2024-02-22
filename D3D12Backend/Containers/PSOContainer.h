@@ -27,6 +27,7 @@ namespace Boolka
         enum class ComputePSO
         {
             GPUCulling,
+            ToneMappingLUTGeneration,
             Count
         };
 

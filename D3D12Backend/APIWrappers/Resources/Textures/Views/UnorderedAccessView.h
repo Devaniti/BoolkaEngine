@@ -9,6 +9,8 @@ namespace Boolka
     class UnorderedAccessView
     {
     public:
+        static void Initialize(Device& device, Texture1D& texture, DXGI_FORMAT format,
+                               D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor);
         static void Initialize(Device& device, Texture2D& texture, DXGI_FORMAT format,
                                D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor);
         static void Initialize(Device& device, Buffer& buffer, UINT stride, UINT elementCount,

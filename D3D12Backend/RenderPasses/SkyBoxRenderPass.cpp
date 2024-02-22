@@ -26,7 +26,7 @@ namespace Boolka
         auto& resourceContainer = engineContext.GetResourceContainer();
 
         UINT frameIndex = frameContext.GetFrameIndex();
-        Texture2D& depth = resourceContainer.GetTexture(ResourceContainer::Tex::GbufferDepth);
+        Texture2D& depth = resourceContainer.GetTexture(ResourceContainer::Tex2D::GbufferDepth);
         RenderTargetView& lightBufferRTV =
             resourceContainer.GetRTV(ResourceContainer::RTV::LightBuffer);
         Buffer& frameConstantBuffer = resourceContainer.GetBuffer(ResourceContainer::Buf::Frame);

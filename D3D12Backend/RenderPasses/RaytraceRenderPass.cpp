@@ -35,10 +35,10 @@ namespace Boolka
         Buffer& frameConstantBuffer = resourceContainer.GetBuffer(ResourceContainer::Buf::Frame);
         Buffer& lightingConstantBuffer =
             resourceContainer.GetBuffer(ResourceContainer::Buf::DeferredLighting);
-        Texture2D& normal = resourceContainer.GetTexture(ResourceContainer::Tex::GBufferNormal);
+        Texture2D& normal = resourceContainer.GetTexture(ResourceContainer::Tex2D::GBufferNormal);
         Texture2D& raytraceResults =
-            resourceContainer.GetTexture(ResourceContainer::Tex::GBufferRaytraceResults);
-        Texture2D& depth = resourceContainer.GetTexture(ResourceContainer::Tex::GbufferDepth);
+            resourceContainer.GetTexture(ResourceContainer::Tex2D::GBufferRaytraceResults);
+        Texture2D& depth = resourceContainer.GetTexture(ResourceContainer::Tex2D::GbufferDepth);
         DescriptorHeap& mainDescriptorHeap =
             resourceContainer.GetDescriptorHeap(ResourceContainer::DescHeap::MainHeap);
 

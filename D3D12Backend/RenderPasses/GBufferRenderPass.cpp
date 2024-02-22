@@ -13,9 +13,9 @@ namespace Boolka
         auto& resourceContainer = engineContext.GetResourceContainer();
 
         UINT frameIndex = frameContext.GetFrameIndex();
-        Texture2D& albedo = resourceContainer.GetTexture(ResourceContainer::Tex::GBufferAlbedo);
-        Texture2D& normal = resourceContainer.GetTexture(ResourceContainer::Tex::GBufferNormal);
-        Texture2D& depth = resourceContainer.GetTexture(ResourceContainer::Tex::GbufferDepth);
+        Texture2D& albedo = resourceContainer.GetTexture(ResourceContainer::Tex2D::GBufferAlbedo);
+        Texture2D& normal = resourceContainer.GetTexture(ResourceContainer::Tex2D::GBufferNormal);
+        Texture2D& depth = resourceContainer.GetTexture(ResourceContainer::Tex2D::GbufferDepth);
         RenderTargetView& albedoRTV =
             resourceContainer.GetRTV(ResourceContainer::RTV::GBufferAlbedo);
         RenderTargetView& normalRTV =
