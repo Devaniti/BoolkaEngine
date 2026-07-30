@@ -9,7 +9,7 @@ extern "C"
 {
     __declspec(dllexport) extern const UINT D3D12SDKVersion;
     __declspec(dllexport) extern const char* D3D12SDKPath;
-    const UINT D3D12SDKVersion = 4;
+    const UINT D3D12SDKVersion = D3D12_SDK_VERSION;
     const char* D3D12SDKPath = ".\\D3D12\\";
 }
 
