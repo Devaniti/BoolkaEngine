@@ -6,9 +6,9 @@
 // Configure whether we are going to do additional depth samples to select one of two neighbours along each axis
 #define BLK_HIGH_QUALITY_RAY_DIFFERENTIALS 1
 
-#define BLK_REFLECTION_TMIN 0.01f
+#define BLK_REFLECTION_TMIN 0.5f
 #define BLK_REFLECTION_TMAX 10000.0f
-#define BLK_REFRACTION_TMIN 0.001f
+#define BLK_REFRACTION_TMIN 0.5f
 #define BLK_REFRACTION_TMAX 10000.0f
 
 bool IsPerfectMirror(in const MaterialData matData)
@@ -138,10 +138,11 @@ RayDifferential CalculateRefractionRayDifferentialsGB(in const GBufferData gbuff
     return Out;
 }
 
+//TODO Unify Refraction and Reflection ray calculation, they share similar computations.
 inline void CalculateReflectionRayGB(in const GBufferData gbufferData,
                                      in const MaterialData matData, out float3 origin,
-                                     out float3 direction,
-                         out RayDifferential rayDifferential)
+                                     out float3 direction, out float3 attenuation,
+                                     out RayDifferential rayDifferential)
 {
     uint2 vpos = DispatchRaysIndex().xy;
     float2 UV = vpos * Frame.invBackBufferResolution;
@@ -153,6 +154,9 @@ inline void CalculateReflectionRayGB(in const GBufferData gbufferData,
     float3 worldSpaceNormal = CalculateWorldSpaceNormal(gbufferData.normal);
     float3 reflectionVector = reflect(cameraDirectionWorld, worldSpaceNormal);
 
+    float3 fresnel = Fresnel(cameraDirectionWorld, worldSpaceNormal, matData.specular);
+
+    attenuation = fresnel;
     origin = worldPos;
     direction = reflectionVector;
 
@@ -177,14 +181,21 @@ float3 GetCameraRay()
 
 inline void CalculateRefractionRayGB(in const GBufferData gbufferData,
                                      in const MaterialData matData, out float3 origin,
-                                     out float3 direction, out RayDifferential rayDifferential)
+                                     out float3 direction, out float3 attenuation,
+                                     out RayDifferential rayDifferential)
 {
     uint2 vpos = DispatchRaysIndex().xy;
     float2 UV = vpos * Frame.invBackBufferResolution;
     float3 viewPos = CalculateViewPos(UV, gbufferData.depth);
     float3 worldPos = CalculateWorldPos(viewPos);
+    float3 worldSpaceNormal = CalculateWorldSpaceNormal(gbufferData.normal);
+    
+    float3 fresnel = Fresnel(GetCameraRay(), worldSpaceNormal, matData.specular);
+
+    attenuation = (1.0 - fresnel);
+
     origin = worldPos;
-    direction = GetCameraRay();
+    direction = refract(GetCameraRay(), worldSpaceNormal, 1.0/matData.indexOfRefraction);
     rayDifferential = CalculateRefractionRayDifferentialsGB(gbufferData, origin, direction);
 
     return;
@@ -195,9 +206,10 @@ void ReflectionRayGeneration(in const GBufferData gbufferData,
 { 
     float3 origin;
     float3 direction;
+    float3 attenuation;
     RayDifferential rayDifferential = (RayDifferential)0;
 
-    CalculateReflectionRayGB(gbufferData, matData, origin, direction, rayDifferential);
+    CalculateReflectionRayGB(gbufferData, matData, origin, direction, attenuation, rayDifferential);
 
     RayDesc ray;
     ray.Origin = origin;
@@ -205,8 +217,8 @@ void ReflectionRayGeneration(in const GBufferData gbufferData,
     ray.TMin = BLK_REFLECTION_TMIN;
     ray.TMax = BLK_REFLECTION_TMAX;
 
-    RaytracePayload payload = {float3(0, 0, 0), 0, float3(1, 1, 1), 0, rayDifferential};
-    payload.color = matData.transparency;
+    RaytracePayload payload = {float3(0, 0, 0), 0, float3(1, 1, 1), matData.indexOfRefraction, ray.Origin, 0, rayDifferential};
+    payload.attenuation = attenuation;
 
     TraceRay(sceneAS, RAY_FLAG_NONE, 1, 0, 0, 0, ray, payload);
     light += payload.light;
@@ -221,9 +233,10 @@ void RefractionRayGeneration(in const GBufferData gbufferData, in const Material
 {
     float3 origin;
     float3 direction;
+    float3 attenuation;
     RayDifferential rayDifferential = (RayDifferential)0;
 
-    CalculateRefractionRayGB(gbufferData, matData, origin, direction, rayDifferential);
+    CalculateRefractionRayGB(gbufferData, matData, origin, direction, attenuation, rayDifferential);
 
     RayDesc ray;
     ray.Origin = origin;
@@ -231,10 +244,10 @@ void RefractionRayGeneration(in const GBufferData gbufferData, in const Material
     ray.TMin = BLK_REFRACTION_TMIN;
     ray.TMax = BLK_REFRACTION_TMAX;
 
-    RaytracePayload payload = {float3(0, 0, 0), 0, float3(1, 1, 1), 0, rayDifferential};
-    payload.color = (1.0f - matData.transparency) * matData.specular;
+    RaytracePayload payload = {float3(0, 0, 0), 0, float3(1, 1, 1), 1.0/matData.indexOfRefraction, ray.Origin, 0, rayDifferential};
+    payload.attenuation = attenuation;
 
-    TraceRay(sceneAS, RAY_FLAG_CULL_BACK_FACING_TRIANGLES, 1, 0, 0, 0, ray, payload);
+    TraceRay(sceneAS, RAY_FLAG_NONE, 1, 0, 0, 0, ray, payload);
     light += payload.light;
 }
 
@@ -411,46 +424,78 @@ void ClosestHit(inout RaytracePayload payload, in BuiltInTriangleIntersectionAtt
     float2 ddxRes, ddyRes;
     float3 dndx, dndy;
     CalculateRTHit(attr, payload.rayDifferential, interpolatedVertex, ddxRes,
-                   ddyRes, dndx, dndy);
+        ddyRes, dndx, dndy);
 
     const float3 worldPos = interpolatedVertex.position;
-    
+
     float3 albedoVal = SRGBToLinear(sceneTextures[materialID].SampleGrad(anisoSampler, interpolatedVertex.UV, ddxRes, ddyRes).rgb);
     float3 normalVal = normalize(mul(normalize(interpolatedVertex.normal), (float3x3)Frame.viewMatrix));
     float3 viewPos = mul(float4(worldPos, 1.0f), Frame.viewMatrix).xyz;
     float3 viewDir = mul(float4(WorldRayDirection(), 0.0f), Frame.viewMatrix).xyz;
 
-    MaterialData matData = materialsData[materialID];
-    payload.light += CalculateLighting(matData, albedoVal, albedoVal, normalVal, viewPos, viewDir) *
-                     payload.color;
+    if (payload.previousIOR < 1.0)//meaning ray is moving inside
+    {
+        //TODO add this to material
+        float depth = distance(worldPos, payload.previousPos) / 10.0;
+        //absorption
+        payload.attenuation *= exp(-depth * (1.0 - float3(0.1, 0.3, 0.9)));
+    }
 
-    float3 originalColor = payload.color;
+    MaterialData matData = materialsData[materialID];
+    payload.light += CalculateLighting(matData, albedoVal, albedoVal, normalVal, viewPos, viewDir) * payload.attenuation;
+
+  
     float3 originaldDdx = payload.rayDifferential.dx.dD;
     float3 originaldDdy = payload.rayDifferential.dy.dD;
     uint originalRecursionDepth = payload.recursionDepth;
 
     if (payload.recursionDepth < BLK_RT_MAX_RECURSION_DEPTH - 1)
     {
+        float3 rayDir = WorldRayDirection();
+        float3 normal = normalize(interpolatedVertex.normal);
+
+        bool isUnderwater = dot(normal, rayDir) > 0.0;
+
         // Refraction
-        if (IsTransparent(matData))
+
+        payload.recursionDepth = originalRecursionDepth + 1;
+        payload.previousPos = worldPos;
+
+        RayDesc ray;
+        ray.Origin = worldPos;
+
+        if (isUnderwater)
         {
-            payload.recursionDepth = originalRecursionDepth + 1;
-            payload.color = originalColor * (1.0f - matData.transparency);
-
-            RayDesc ray;
-            ray.Origin = worldPos;
-            ray.Direction = WorldRayDirection();
-            ray.TMin = BLK_REFLECTION_TMIN;
-            ray.TMax = BLK_REFLECTION_TMAX;
-
-            TraceRay(sceneAS, RAY_FLAG_CULL_BACK_FACING_TRIANGLES, 1, 0, 0, 0, ray, payload);
+            float3 fresnel = Fresnel(rayDir, -normal, matData.specular);
+           
+            payload.previousIOR = matData.indexOfRefraction;
+            ray.Direction = refract(rayDir, -normal, matData.indexOfRefraction);
+            if (length(ray.Direction) < 0.5) //full internal reflection
+            {
+                payload.previousIOR = 1.0 / matData.indexOfRefraction;
+                ray.Direction = reflect(rayDir, -normal);
+               
+            }
+        }
+        else
+        {
+            float3 fresnel = Fresnel(rayDir, normal, matData.specular);
+           
+            payload.previousIOR = 1.0 / matData.indexOfRefraction;
+            ray.Direction = refract(rayDir, normal, 1.0 / matData.indexOfRefraction);
         }
 
-        // Reflection
+        ray.TMin = BLK_REFRACTION_TMIN;
+        ray.TMax = BLK_REFRACTION_TMAX;
+
+        TraceRay(sceneAS, RAY_FLAG_NONE, 1, 0, 0, 0, ray, payload);
+
+        //TODO figure out this for all cases
+        /*// Reflection
         if (IsPerfectMirror(matData))
         {
             payload.recursionDepth = originalRecursionDepth + 1;
-            payload.color = originalColor * matData.transparency;
+            payload.attenuation = originalColor * matData.transparency;
             payload.rayDifferential.dx.dD = originaldDdx;
             payload.rayDifferential.dy.dD = originaldDdy;
             UpdateRayDifferentialsReflection(payload.rayDifferential, normalVal, dndx, dndy);
@@ -461,8 +506,13 @@ void ClosestHit(inout RaytracePayload payload, in BuiltInTriangleIntersectionAtt
             ray.TMin = BLK_REFRACTION_TMIN;
             ray.TMax = BLK_REFRACTION_TMAX;
 
-            TraceRay(sceneAS, RAY_FLAG_CULL_BACK_FACING_TRIANGLES, 1, 0, 0, 0, ray, payload);
-        }
+            TraceRay(sceneAS, RAY_FLAG_NONE, 1, 0, 0, 0, ray, payload);
+        }*/
+    }
+    else
+    {
+        float3 skyboxVal = skyBox.SampleLevel(anisoSampler, WorldRayDirection(), 0).xyz;
+        payload.light += 3.0*skyboxVal*payload.attenuation;
     }
 }
 
@@ -470,5 +520,6 @@ void ClosestHit(inout RaytracePayload payload, in BuiltInTriangleIntersectionAtt
 void MissShader(inout RaytracePayload payload)
 {
     float3 skyboxVal = skyBox.SampleLevel(anisoSampler, WorldRayDirection(), 0).xyz;
-    payload.light += skyboxVal;
+    //TODO Implement post process shader with exposure
+    payload.light += 3.0*skyboxVal*payload.attenuation;
 }

@@ -70,7 +70,8 @@ namespace Boolka
     void Camera::UpdateInput(float deltaTime, const Vector4& right, const Vector4& up,
                              const Vector4& forward)
     {
-        static const float defaultMoveSpeed = 15.0f;
+        //TODO move into separate confing maybe?
+        static const float defaultMoveSpeed = 35.0f;
         const float defaultRotationSpeed = m_FieldOfView * 2.0f;
 
         float speedMult = 1.0f;

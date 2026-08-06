@@ -13,6 +13,7 @@ PSOut main(VSOut In)
     float2 UV = In.texcoord;
     float3 viewPos = CalculateViewPos(UV, 1.0f);
     float3 viewDirWorld = mul(float4(viewPos, 0.0f), Frame.invViewMatrix).xyz;
-    Out.color = skyBox.Sample(anisoSampler, viewDirWorld);
+    //TODO Implement post process shader with exposure
+    Out.color = 3.0*skyBox.Sample(anisoSampler, viewDirWorld);
     return Out;
 }

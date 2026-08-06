@@ -119,7 +119,9 @@ struct RaytracePayload
 {
     float3 light;
     uint recursionDepth;
-    float3 color;
+    float3 attenuation;
+    float previousIOR;
+    float3 previousPos;
     uint unused;
     RayDifferential rayDifferential;
 };

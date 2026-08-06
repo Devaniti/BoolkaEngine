@@ -8,6 +8,11 @@ ConstantBuffer<LightingDataConstantBuffer> LightingData : register(b1);
 
 static const float ambientLight = 0.1f;
 
+float3 Fresnel(float3 view, float3 normal, float3 F0)
+{
+    return F0 + (1.0 - F0)*pow(1.0 - max(dot(-view,normal), 0.0), 5.0);
+}
+
 float3 CalculateAmbient(MaterialData matData, float3 albedoVal)
 {
     return albedoVal * ambientLight * matData.diffuse * matData.transparency;
