@@ -244,7 +244,7 @@ namespace Boolka
         commandList->ClearUnorderedAccessViewUint(
             resourceContainer.GetGPUDescriptor(ResourceContainer::Buf::ProfileMetrics),
             resourceContainer.GetCPUVisibleCPUDescriptor(ResourceContainer::Buf::ProfileMetrics),
-            markersBuf.Get(), clearValues, 0, nullptr);
+            metricsBuf.Get(), clearValues, 0, nullptr);
         commandList->ClearUnorderedAccessViewUint(
             resourceContainer.GetGPUDescriptor(ResourceContainer::Buf::DebugMarkers),
             resourceContainer.GetCPUVisibleCPUDescriptor(ResourceContainer::Buf::DebugMarkers),
